@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.app;
 
+import com.codahale.metrics.health.HealthCheck;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
@@ -39,6 +40,12 @@ public class LedgerApp extends Application<LedgerConfig> {
         final Injector injector = Guice.createInjector(new LedgerModule(config, environment, createJdbi(config.getDataSourceFactory())));
 
         environment.jersey().register(injector.getInstance(EventResource.class));
+        environment.healthChecks().register("default", new HealthCheck() {
+            @Override
+            protected Result check() {
+                return Result.healthy();
+            }
+        });
     }
 
     private Jdbi createJdbi(DataSourceFactory dataSourceFactory) {
