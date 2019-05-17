@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.event;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.inject.Inject;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -15,8 +16,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("/event")
 @Produces(APPLICATION_JSON)
 public class EventResource {
+
     private final EventDao eventDao;
 
+    @Inject
     public EventResource(EventDao eventDao) {
         this.eventDao = eventDao;
     }

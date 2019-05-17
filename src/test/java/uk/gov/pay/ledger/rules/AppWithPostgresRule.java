@@ -7,7 +7,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.testcontainers.containers.PostgreSQLContainer;
 import uk.gov.pay.ledger.app.LedgerApp;
-import uk.gov.pay.ledger.app.LedgerConfiguration;
+import uk.gov.pay.ledger.app.LedgerConfig;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
@@ -15,7 +15,7 @@ import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 public class AppWithPostgresRule extends ExternalResource {
     private static String CONFIG_PATH = resourceFilePath("config/test-config.yaml");
     private PostgreSQLContainer postgres;
-    private DropwizardAppRule<LedgerConfiguration> appRule;
+    private DropwizardAppRule<LedgerConfig> appRule;
 
     public AppWithPostgresRule() {
         postgres = new PostgreSQLContainer();
@@ -42,8 +42,7 @@ public class AppWithPostgresRule extends ExternalResource {
                 }, description);
     }
 
-
-    public DropwizardAppRule<LedgerConfiguration> getAppRule() {
+    public DropwizardAppRule<LedgerConfig> getAppRule() {
         return appRule;
     }
 }

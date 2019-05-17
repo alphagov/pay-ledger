@@ -7,7 +7,7 @@ import io.dropwizard.db.DataSourceFactory;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class LedgerConfiguration extends Configuration {
+public class LedgerConfig extends Configuration {
     @Valid
     @NotNull
     private DataSourceFactory database = new DataSourceFactory();

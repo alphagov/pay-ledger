@@ -1,11 +1,13 @@
 package uk.gov.pay.ledger.event;
 
-import org.apache.commons.lang3.NotImplementedException;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
 
 import java.util.Optional;
 
-public class EventDao {
-    public Optional<Event> getById(String eventId) {
-        throw new NotImplementedException("Event dao not yet implemented");
-    }
+@RegisterRowMapper(EventMapper.class)
+public interface EventDao {
+    @SqlQuery("SELECT id FROM event WHERE id = :eventId")
+    Optional<Event> getById(@Bind("eventId") String eventId);
 }

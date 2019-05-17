@@ -5,6 +5,10 @@ import org.junit.Test;
 import uk.gov.pay.ledger.rules.AppWithPostgresRule;
 
 import javax.ws.rs.client.Client;
+import javax.ws.rs.core.Response;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 public class EventIntegrationTest {
     @ClassRule
@@ -15,10 +19,11 @@ public class EventIntegrationTest {
 
     @Test
     public void shouldGetEventFromDB() {
-        String response = client.target("http://localhost:" + port + "/event/myevent")
+        Response response = client.target("http://localhost:" + port + "/event/myevent")
                 .request()
-                .get(String.class);
+                .get();
 
-        System.out.println(response);
+        // Asserting 404 as haven't decided how to do db fixtures yet. Getting a 404 is a good start
+        assertThat(response.getStatus(), is(404));
     }
 }
