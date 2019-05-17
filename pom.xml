@@ -8,12 +8,26 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mainClass>uk.gov.pay.ledger.app.LedgerApp</mainClass>
+
         <dropwizard.version>1.3.11</dropwizard.version>
         <jackson.version>2.9.8</jackson.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <postgresql.version>42.2.5</postgresql.version>
-        <guice.version>4.2.0</guice.version>
+        <pay-java-commons.version>1.0.20190513162632</pay-java-commons.version>
+        <guice.version>4.2.2</guice.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-govuk-pay-pay-java-commons</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/govuk-pay/pay-java-commons</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -50,6 +64,11 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.pay</groupId>
+            <artifactId>utils</artifactId>
+            <version>${pay-java-commons.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -193,7 +212,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.6.0</version>
                 <configuration>
-                    <mainClass>uk.gov.pay.api.ledger.app.LedgerApp</mainClass>
+                    <mainClass>${mainClass}</mainClass>
                     <arguments>
                         <argument>server</argument>
                         <argument>src/main/resources/config/config.yaml</argument>

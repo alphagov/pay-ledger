@@ -2,6 +2,8 @@ package uk.gov.pay.ledger.event;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -13,10 +15,11 @@ import javax.ws.rs.core.Response;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 
-@Path("/event")
+@Path("/v1/event")
 @Produces(APPLICATION_JSON)
 public class EventResource {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventResource.class);
     private final EventDao eventDao;
 
     @Inject
@@ -28,6 +31,7 @@ public class EventResource {
     @GET
     @Timed
     public Event getEvent(@PathParam("eventId") String eventId) {
+        LOGGER.info("Get event request: {}", eventId);
         return eventDao.getById(eventId)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
