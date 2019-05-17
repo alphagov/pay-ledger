@@ -19,7 +19,7 @@ public class EventIntegrationTest {
 
     @Test
     public void shouldGetEventFromDB() {
-        Response response = client.target("http://localhost:" + port + "/event/myevent")
+        Response response = client.target("http://localhost:" + port + "/v1/event/myevent")
                 .request()
                 .get();
 

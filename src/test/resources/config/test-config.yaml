@@ -28,4 +28,13 @@ database:
   # the minimum amount of time an connection must sit idle in the pool before it is eligible for eviction
   minIdleTime: 1 minute
 
+logging:
+  level: WARN
+  appenders:
+    - type: console
+      threshold: ALL
+      timeZone: UTC
+      target: stdout
+      logFormat: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [thread=%thread] [level=%-5level] [logger=%logger{15}] [requestID=%X{X-Request-Id:-(none)}] - %msg%n"
+
 

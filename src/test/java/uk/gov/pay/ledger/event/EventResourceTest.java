@@ -35,13 +35,13 @@ public class EventResourceTest {
 
     @Test
     public void shouldReturnEventIfItExists() {
-        Event returnedEvent = resources.target("/event/" + eventId).request().get(Event.class);
+        Event returnedEvent = resources.target("/v1/event/" + eventId).request().get(Event.class);
         assertThat(returnedEvent.getId(), is(event.getId()));
     }
 
     @Test
     public void shouldReturn404IfEventDoesNotExist() {
-        Response response = resources.target("/event/" + nonExistentId).request().get();
+        Response response = resources.target("/v1/event/" + nonExistentId).request().get();
         assertThat(response.getStatus(), is(404));
     }
 }

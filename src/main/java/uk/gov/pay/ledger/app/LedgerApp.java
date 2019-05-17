@@ -12,7 +12,11 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
+import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.ledger.event.EventResource;
+
+import static java.util.EnumSet.of;
+import static javax.servlet.DispatcherType.REQUEST;
 
 public class LedgerApp extends Application<LedgerConfig> {
 
@@ -46,6 +50,8 @@ public class LedgerApp extends Application<LedgerConfig> {
                 return Result.healthy();
             }
         });
+        environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
+                .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
     }
 
     private Jdbi createJdbi(DataSourceFactory dataSourceFactory) {
