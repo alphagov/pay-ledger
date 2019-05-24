@@ -54,7 +54,7 @@ pipeline {
         }
       }
     }
-    stage('Tests') {
+    /*stage('Tests') {
       failFast true
       parallel {
         stage('Card Payment End-to-End Tests') {
@@ -69,7 +69,7 @@ pipeline {
             }
         }
       }
-    }
+    }*/
     stage('Docker Tag') {
       steps {
         script {
@@ -84,7 +84,7 @@ pipeline {
         }
       }
     }
-    stage('Deploy') {
+    /*stage('Deploy') {
       when {
         branch 'master'
       }
@@ -92,8 +92,8 @@ pipeline {
         checkPactCompatibility("ledger", gitCommit(), "test")
         deployEcs("ledger")
       }
-    }
-    stage('Pact Tag') {
+    }*/
+    /*stage('Pact Tag') {
       when {
         branch 'master'
       }
@@ -101,15 +101,15 @@ pipeline {
         echo 'Tagging provider pact with "test"'
         tagPact("ledger", gitCommit(), "test")
       }
-    }
-    stage('Smoke Tests') {
+    }*/
+    /*stage('Smoke Tests') {
       when {
         branch 'master'
       }
       steps {
         runDirectDebitSmokeTest()
       }
-    }
+    }*/
     stage('Complete') {
       failFast true
       parallel {
@@ -118,15 +118,15 @@ pipeline {
             branch 'master'
           }
           steps {
-            tagDeployment("ledger")
+            //tagDeployment("ledger")
           }
         }
         stage('Trigger Deploy Notification') {
           when {
-            branch 'ledger'
+            branch 'master'
           }
           steps {
-            triggerGraphiteDeployEvent("ledger")
+            //triggerGraphiteDeployEvent("ledger")
           }
         }
       }
