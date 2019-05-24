@@ -15,7 +15,7 @@ if [ -n "${CERTS_PATH:-}" ]; then
   done
 fi
 
-java $JAVA_OPTS -jar *-allinone.jar waitOnDependencies *.yaml
+#java $JAVA_OPTS -jar *-allinone.jar waitOnDependencies *.yaml
 
 if [ "$RUN_MIGRATION" == "true" ]; then
   java $JAVA_OPTS -jar *-allinone.jar migrateToInitialDbState *.yaml
