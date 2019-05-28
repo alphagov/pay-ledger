@@ -110,7 +110,7 @@ pipeline {
         runDirectDebitSmokeTest()
       }
     }*/
-    stage('Complete') {
+    /*stage('Complete') {
       failFast true
       parallel {
         stage('Tag Build') {
@@ -118,7 +118,7 @@ pipeline {
             branch 'master'
           }
           steps {
-            //tagDeployment("ledger")
+            tagDeployment("ledger")
           }
         }
         stage('Trigger Deploy Notification') {
@@ -126,11 +126,11 @@ pipeline {
             branch 'master'
           }
           steps {
-            //triggerGraphiteDeployEvent("ledger")
+            triggerGraphiteDeployEvent("ledger")
           }
         }
       }
-    }
+    }*/
   }
   post {
     failure {
