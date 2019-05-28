@@ -10,7 +10,7 @@ import javax.ws.rs.core.Response;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class EventIntegrationTest {
+public class EventIT {
     @ClassRule
     public static AppWithPostgresRule rule = new AppWithPostgresRule();
 
