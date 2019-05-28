@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.event;
 
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.pay.ledger.rules.AppWithPostgresRule;
 
@@ -10,7 +11,8 @@ import javax.ws.rs.core.Response;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class EventIT {
+@Ignore
+public class EventIntegrationTest {
     @ClassRule
     public static AppWithPostgresRule rule = new AppWithPostgresRule();
 
