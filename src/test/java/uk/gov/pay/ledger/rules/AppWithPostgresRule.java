@@ -18,7 +18,7 @@ public class AppWithPostgresRule extends ExternalResource {
     private DropwizardAppRule<LedgerConfig> appRule;
 
     public AppWithPostgresRule() {
-        postgres = new PostgreSQLContainer();
+        postgres = new PostgreSQLContainer("postgres:11.1");
         postgres.start();
         appRule = new DropwizardAppRule<>(
                 LedgerApp.class,
