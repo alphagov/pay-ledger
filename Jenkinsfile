@@ -84,7 +84,7 @@ pipeline {
         }
       }
     }
-    /*stage('Deploy') {
+    stage('Deploy') {
       when {
         branch 'master'
       }
@@ -92,7 +92,7 @@ pipeline {
         checkPactCompatibility("ledger", gitCommit(), "test")
         deployEcs("ledger")
       }
-    }*/
+    }
     /*stage('Pact Tag') {
       when {
         branch 'master'
@@ -110,7 +110,7 @@ pipeline {
         runDirectDebitSmokeTest()
       }
     }*/
-    /*stage('Complete') {
+    stage('Complete') {
       failFast true
       parallel {
         stage('Tag Build') {
@@ -130,7 +130,7 @@ pipeline {
           }
         }
       }
-    }*/
+    }
   }
   post {
     failure {
