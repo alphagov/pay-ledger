@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.rules;
 
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import org.jdbi.v3.core.Jdbi;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.RuleChain;
 import org.junit.runner.Description;
@@ -14,6 +15,7 @@ import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
 public class AppWithPostgresRule extends ExternalResource {
     private static String CONFIG_PATH = resourceFilePath("config/test-config.yaml");
+    private final Jdbi jdbi;
     private PostgreSQLContainer postgres;
     private DropwizardAppRule<LedgerConfig> appRule;
 
@@ -27,6 +29,10 @@ public class AppWithPostgresRule extends ExternalResource {
                 config("database.user", postgres.getUsername()),
                 config("database.password", postgres.getPassword())
         );
+
+        jdbi = Jdbi.create(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+
+
     }
 
     @Override
@@ -44,5 +50,8 @@ public class AppWithPostgresRule extends ExternalResource {
 
     public DropwizardAppRule<LedgerConfig> getAppRule() {
         return appRule;
+    }
+    public Jdbi getJdbi() {
+        return jdbi;
     }
 }

@@ -1,9 +1,11 @@
-package uk.gov.pay.ledger.event;
+package uk.gov.pay.ledger.event.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.event.dao.EventDao;
+import uk.gov.pay.ledger.event.model.Event;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
