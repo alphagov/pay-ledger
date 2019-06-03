@@ -1,8 +1,8 @@
 database:
   driverClass: org.postgresql.Driver
-  user: postgres
-  password: mysecretpassword
-  url: whatever.url:8080
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+  url: jdbc:postgresql://${DB_HOST}:5432/ledger?sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory&${DB_SSL_OPTION}
 
   # the maximum amount of time to wait on an empty pool before throwing an exception
   maxWaitForConnection: 1s
