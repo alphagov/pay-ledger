@@ -11,7 +11,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import java.util.List;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -27,11 +28,12 @@ public class TransactionResource {
         this.transactionDao = transactionDao;
     }
 
-    @Path("/{gatewayAccountId}")
+    @Path("/{transactionId}")
     @GET
     @Timed
-    public List<Transaction> getByGatewayAccountId(@PathParam("gatewayAccountId") String gatewayAccountId) {
-        LOGGER.info("Get transaction request: {}", gatewayAccountId);
-        return transactionDao.getByGatewayAccountId(gatewayAccountId);
+    public Transaction getById(@PathParam("transactionId") String transactionId) {
+        LOGGER.info("Get transaction request: {}", transactionId);
+        return transactionDao.getById(transactionId)
+                .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
 }
