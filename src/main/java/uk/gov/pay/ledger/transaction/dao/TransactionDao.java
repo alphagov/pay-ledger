@@ -6,11 +6,11 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import uk.gov.pay.ledger.transaction.dao.mapper.TransactionMapper;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 
-import java.util.List;
+import java.util.Optional;
 
 @RegisterRowMapper(TransactionMapper.class)
 public interface TransactionDao {
 
-    @SqlQuery("SELECT * FROM transaction WHERE gateway_account_id = :gatewayAccountId")
-    List<Transaction> getByGatewayAccountId(@Bind("gatewayAccountId") String gatewayAccountId);
+    @SqlQuery("SELECT * FROM transaction WHERE external_id = :transaction_id")
+    Optional<Transaction> getById(@Bind("transaction_id") String transactionId);
 }

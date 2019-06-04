@@ -25,7 +25,7 @@ public class TransactionResourceTest {
 
     @Test
     public void shouldReturn404IfTransactionDoesNotExist() {
-        Response response = resources.target("/v1/event/non-existent-id").request().get();
+        Response response = resources.target("/v1/transaction/non-existent-id").request().get();
         assertThat(response.getStatus(), is(404));
     }
 }

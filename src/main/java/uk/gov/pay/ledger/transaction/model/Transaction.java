@@ -2,43 +2,32 @@ package uk.gov.pay.ledger.transaction.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 
 import java.time.ZonedDateTime;
 
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Transaction {
 
     @JsonIgnore
     private Long id;
-    @JsonIgnore
     private String gatewayAccountId;
-    @JsonProperty
     private Long amount;
-    @JsonProperty
     private String reference;
-    @JsonProperty
     private String description;
-    @JsonProperty("state")
-    private String status;
-    @JsonProperty
+    private String state;
     private String language;
-    @JsonProperty("charge_id")
     private String externalId;
-    @JsonProperty("return_url")
     private String returnUrl;
-    @JsonProperty
     private String email;
-    @JsonProperty("payment_provider")
     private String paymentProvider;
-    @JsonProperty("created_date")
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private ZonedDateTime createdAt;
-    @JsonProperty("card_details")
     private CardDetails cardDetails;
-    @JsonProperty("delayed_capture")
     private Boolean delayedCapture;
-    @JsonProperty("external_metadata")
     private String externalMetaData;
 
     public Transaction(){
@@ -55,7 +44,7 @@ public class Transaction {
         this.amount = amount;
         this.reference = reference;
         this.description = description;
-        this.status = status;
+        this.state = status;
         this.language = language;
         this.externalId = externalId;
         this.returnUrl = returnUrl;
@@ -88,8 +77,8 @@ public class Transaction {
         return description;
     }
 
-    public String getStatus() {
-        return status;
+    public String getState() {
+        return state;
     }
 
     public String getLanguage() {
