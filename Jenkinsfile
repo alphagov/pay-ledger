@@ -89,7 +89,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        checkPactCompatibility("ledger", gitCommit(), "test")
+        //checkPactCompatibility("ledger", gitCommit(), "test")
         deployEcs("ledger")
       }
     }
