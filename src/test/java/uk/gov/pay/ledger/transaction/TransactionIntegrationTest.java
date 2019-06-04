@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.transaction;
 
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.pay.ledger.rules.AppWithPostgresRule;
 import uk.gov.pay.ledger.utils.fixtures.TransactionFixture;
@@ -13,6 +14,7 @@ import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.pay.ledger.utils.fixtures.TransactionFixture.aTransactionFixture;
 
+@Ignore
 public class TransactionIntegrationTest {
 
     @ClassRule
