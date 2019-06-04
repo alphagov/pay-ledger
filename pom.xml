@@ -14,8 +14,9 @@
         <jackson.version>2.9.8</jackson.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <postgresql.version>42.2.5</postgresql.version>
-        <pay-java-commons.version>1.0.20190513162632</pay-java-commons.version>
+        <pay-java-commons.version>1.0.20190603150514</pay-java-commons.version>
         <guice.version>4.2.2</guice.version>
+        <rest-assured.version>4.0.0</rest-assured.version>
     </properties>
 
     <repositories>
@@ -72,6 +73,11 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.pay</groupId>
+            <artifactId>model</artifactId>
+            <version>${pay-java-commons.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.pay</groupId>
             <artifactId>utils</artifactId>
             <version>${pay-java-commons.version}</version>
         </dependency>
@@ -109,6 +115,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>2.27.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${rest-assured.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.event;
+package uk.gov.pay.ledger.event.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

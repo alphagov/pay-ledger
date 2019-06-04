@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.app;
 
-import com.codahale.metrics.health.HealthCheck;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
@@ -13,8 +12,9 @@ import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import uk.gov.pay.commons.utils.logging.LoggingFilter;
-import uk.gov.pay.ledger.event.EventResource;
+import uk.gov.pay.ledger.event.resources.EventResource;
 import uk.gov.pay.ledger.healthcheck.HealthCheckResource;
+import uk.gov.pay.ledger.transaction.resources.TransactionResource;
 
 import static java.util.EnumSet.of;
 import static javax.servlet.DispatcherType.REQUEST;
@@ -45,6 +45,7 @@ public class LedgerApp extends Application<LedgerConfig> {
         final Injector injector = Guice.createInjector(new LedgerModule(config, environment, createJdbi(config.getDataSourceFactory())));
 
         environment.jersey().register(injector.getInstance(EventResource.class));
+        environment.jersey().register(injector.getInstance(TransactionResource.class));
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
