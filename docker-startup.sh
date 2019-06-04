@@ -18,7 +18,6 @@ fi
 #java $JAVA_OPTS -jar *-allinone.jar waitOnDependencies *.yaml
 
 if [ "$RUN_MIGRATION" == "true" ]; then
-  java $JAVA_OPTS -jar *-allinone.jar migrateToInitialDbState *.yaml
   java $JAVA_OPTS -jar *-allinone.jar db migrate *.yaml
 fi
 

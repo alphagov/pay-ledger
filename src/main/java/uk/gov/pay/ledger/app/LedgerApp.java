@@ -14,6 +14,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.ledger.event.EventResource;
+import uk.gov.pay.ledger.healthcheck.HealthCheckResource;
 
 import static java.util.EnumSet.of;
 import static javax.servlet.DispatcherType.REQUEST;
@@ -44,12 +45,7 @@ public class LedgerApp extends Application<LedgerConfig> {
         final Injector injector = Guice.createInjector(new LedgerModule(config, environment, createJdbi(config.getDataSourceFactory())));
 
         environment.jersey().register(injector.getInstance(EventResource.class));
-        environment.healthChecks().register("default", new HealthCheck() {
-            @Override
-            protected Result check() {
-                return Result.healthy();
-            }
-        });
+        environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
     }
