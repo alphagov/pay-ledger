@@ -32,7 +32,7 @@ public class EventResource {
     @Path("/{eventId}")
     @GET
     @Timed
-    public Event getEvent(@PathParam("eventId") String eventId) {
+    public Event getEvent(@PathParam("eventId") Long eventId) {
         LOGGER.info("Get event request: {}", eventId);
         return eventDao.getById(eventId)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));

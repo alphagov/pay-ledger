@@ -18,7 +18,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String reference = RandomStringUtils.randomAlphanumeric(10);
     private String description = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
-    private String status = "created";
+    private String state = "created";
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private String language = "en";
     private String returnUrl = "https://example.org";
@@ -60,8 +60,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withStatus(String status) {
-        this.status = status;
+    public TransactionFixture withState(String state) {
+        this.state = state;
         return this;
     }
 
@@ -151,7 +151,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         reference,
                         description,
                         returnUrl,
-                        status,
+                        state,
                         paymentProvider,
                         language,
                         delayedCapture,
@@ -173,7 +173,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     @Override
     public Transaction toEntity() {
         return new Transaction(id, gatewayAccountId, amount,
-                reference, description, status,
+                reference, description, state,
                 language, externalId, returnUrl,
                 email, paymentProvider, createdAt,
                 cardDetails, delayedCapture, externalMetadata);
@@ -199,8 +199,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return createdAt;
     }
 
-    public String getStatus() {
-        return status;
+    public String getState() {
+        return state;
     }
 
     public String getGatewayAccountId() {

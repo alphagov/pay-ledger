@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.rules;
 
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.RuleChain;
 import org.junit.runner.Description;
@@ -31,8 +32,7 @@ public class AppWithPostgresRule extends ExternalResource {
         );
 
         jdbi = Jdbi.create(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
-
-
+        jdbi.installPlugin(new SqlObjectPlugin());
     }
 
     @Override

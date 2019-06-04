@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.event.dao.EventDao;
+import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 
 public class LedgerModule extends AbstractModule {
@@ -33,6 +34,12 @@ public class LedgerModule extends AbstractModule {
     @Singleton
     public EventDao provideEventDao() {
         return jdbi.onDemand(EventDao.class);
+    }
+
+    @Provides
+    @Singleton
+    public ResourceTypeDao provideResourceTypeDao() {
+        return jdbi.onDemand(ResourceTypeDao.class);
     }
 
     @Provides

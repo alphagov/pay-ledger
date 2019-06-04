@@ -3,29 +3,39 @@ package uk.gov.pay.ledger.event;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
+import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rules.AppWithPostgresRule;
 
-import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
 
+import static io.restassured.RestAssured.given;
+import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static uk.gov.pay.ledger.utils.fixtures.EventFixture.anEventFixture;
 
 @Ignore
 public class EventIntegrationTest {
     @ClassRule
     public static AppWithPostgresRule rule = new AppWithPostgresRule();
 
-    private Client client = rule.getAppRule().client();
     private Integer port = rule.getAppRule().getLocalPort();
 
     @Test
     public void shouldGetEventFromDB() {
-        Response response = client.target("http://localhost:" + port + "/v1/event/myevent")
-                .request()
-                .get();
+        Event event = anEventFixture()
+                .insert(rule.getJdbi())
+                .toEntity();
 
-        // Asserting 404 as haven't decided how to do db fixtures yet. Getting a 404 is a good start
-        assertThat(response.getStatus(), is(404));
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/event/" + event.getId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("resource_external_id", is(event.getResourceExternalId()))
+                .body("resource_type", is(event.getResourceType().name().toLowerCase()))
+                .body("sqs_message_id", is(event.getSqsMessageId()))
+                .body("event_type", is(event.getEventType()))
+                .body("event_data", is(event.getEventData()));
     }
 }
