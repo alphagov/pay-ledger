@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-@Ignore
 public class EventIntegrationTest {
     @ClassRule
     public static AppWithPostgresRule rule = new AppWithPostgresRule();
