@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.queue.QueueException;
+import uk.gov.pay.ledger.queue.QueueMessage;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.List;
 
 public class SqsQueueService {
@@ -28,7 +28,7 @@ public class SqsQueueService {
         this.messageMaximumWaitTimeInSeconds = ledgerConfig.getSqsConfig().getMessageMaximumWaitTimeInSeconds();
     }
 
-    public List<Object> receiveMessages(String queueUrl, String messageAttributeName) throws QueueException {
+    public List<QueueMessage> receiveMessages(String queueUrl, String messageAttributeName) throws QueueException {
         try {
             ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl);
             receiveMessageRequest
@@ -38,10 +38,9 @@ public class SqsQueueService {
 
             ReceiveMessageResult receiveMessageResult = sqsClient.receiveMessage(receiveMessageRequest);
 
-//            return QueueMessage.of(receiveMessageResult);
-            return Collections.emptyList();
+            return QueueMessage.of(receiveMessageResult);
         } catch (AmazonSQSException | UnsupportedOperationException e) {
-            logger.error("Failed to receive messages from SQS queue - {}", e.getMessage());
+            logger.error("Failed to receive messages from SQS queue - [{}] {}", e.getClass().getCanonicalName(), e.getMessage());
             throw new QueueException(e.getMessage());
         }
     }
