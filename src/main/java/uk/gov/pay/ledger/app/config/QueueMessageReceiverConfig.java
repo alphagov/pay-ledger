@@ -15,11 +15,19 @@ public class QueueMessageReceiverConfig extends Configuration {
     @NotNull
     private int numberOfThreads;
 
+    @Valid
+    @NotNull
+    private int messageRetryDelayInSeconds;
+
     public int getThreadDelayInSeconds() {
         return threadDelayInSeconds;
     }
 
     public int getNumberOfThreads() {
         return numberOfThreads;
+    }
+
+    public int getMessageRetryDelayInSeconds() {
+        return messageRetryDelayInSeconds;
     }
 }

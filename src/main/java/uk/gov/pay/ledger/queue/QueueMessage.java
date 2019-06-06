@@ -32,6 +32,10 @@ public class QueueMessage {
         return queueMessage;
     }
 
+    public static QueueMessage of(SendMessageResult messageResult, String validJsonMessage) {
+        return new QueueMessage(messageResult.getMessageId(), validJsonMessage);
+    }
+
     public String getMessageId() {
         return messageId;
     }

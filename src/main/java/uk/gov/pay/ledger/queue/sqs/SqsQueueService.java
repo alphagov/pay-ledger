@@ -1,7 +1,11 @@
 package uk.gov.pay.ledger.queue.sqs;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.AmazonSQSException;
+import com.amazonaws.services.sqs.model.ChangeMessageVisibilityRequest;
+import com.amazonaws.services.sqs.model.DeleteMessageRequest;
+import com.amazonaws.services.sqs.model.DeleteMessageResult;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
 import org.slf4j.Logger;
@@ -41,6 +45,34 @@ public class SqsQueueService {
             return QueueMessage.of(receiveMessageResult);
         } catch (AmazonSQSException | UnsupportedOperationException e) {
             logger.error("Failed to receive messages from SQS queue - [{}] {}", e.getClass().getCanonicalName(), e.getMessage());
+            throw new QueueException(e.getMessage());
+        }
+    }
+
+    public void deleteMessage(String queueUrl, String messageReceiptHandle) throws QueueException {
+        try {
+            sqsClient.deleteMessage(new DeleteMessageRequest(queueUrl, messageReceiptHandle));
+        } catch (AmazonSQSException | UnsupportedOperationException e) {
+            logger.error("Failed to delete message from SQS queue - {}", e.getMessage());
+            throw new QueueException(e.getMessage());
+        } catch (AmazonServiceException e) {
+            logger.error("Failed to delete message from SQS queue - [errorMessage={}] [awsErrorCode={}]", e.getMessage(), e.getErrorCode());
+            String errorMessage = String.format("%s [%s]", e.getMessage(), e.getErrorCode());
+            throw new QueueException(errorMessage);
+        }
+    }
+
+    public void deferMessage(String queueUrl, String messageReceiptHandle, int retryDelayInSeconds) throws QueueException {
+        try {
+            ChangeMessageVisibilityRequest changeMessageVisibilityRequest = new ChangeMessageVisibilityRequest(
+                    queueUrl,
+                    messageReceiptHandle,
+                    retryDelayInSeconds
+            );
+
+            sqsClient.changeMessageVisibility(changeMessageVisibilityRequest);
+        } catch (AmazonSQSException | UnsupportedOperationException e) {
+            logger.error("Failed to defer message from SQS queue - {}", e.getMessage());
             throw new QueueException(e.getMessage());
         }
     }
