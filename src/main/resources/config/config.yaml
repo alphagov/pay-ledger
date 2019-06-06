@@ -56,4 +56,15 @@ logging:
         additionalFields:
           service-name: "ledger-service"
         includesMdcKeys: [X-Request-Id]
-        
+
+sqsConfig:
+  region: ${AWS_SQS_REGION}
+  secretKey: ${AWS_SECRET_KEY}
+  accessKey: ${AWS_ACCESS_KEY}
+  eventQueueUrl: ${AWS_SQS_EVENT_QUEUE_URL}
+  messageMaximumWaitTimeInSeconds: ${AWS_SQS_MESSAGE_MAXIMUM_WAIT_TIME_IN_SECONDS:-20}
+  messageMaximumBatchSize: ${AWS_SQS_MESSAGE_MAXIMUM_BATCH_SIZE:-10}
+
+queueMessageReceiverConfig:
+  threadDelayInSeconds: ${QUEUE_MESSAGE_RECEIVER_THREAD_DELAY_IN_SECONDS:-1}
+  numberOfThreads: ${QUEUE_MESSAGE_RECEIVER_NUMBER_OF_THREADS:-1}

@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
 import uk.gov.pay.ledger.rules.AppWithPostgresRule;
 import uk.gov.pay.ledger.transaction.model.Transaction;
-import uk.gov.pay.ledger.utils.DatabaseTestHelper;
 import uk.gov.pay.ledger.utils.fixtures.TransactionFixture;
 
 import javax.ws.rs.core.Response;
