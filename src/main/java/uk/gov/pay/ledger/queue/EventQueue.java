@@ -60,7 +60,6 @@ public class EventQueue {
                     queueMessage.getMessageBody(),
                     EventMessage.class);
 
-            //todo: should we retry or remove from the queue?
             return null;
         }
     }

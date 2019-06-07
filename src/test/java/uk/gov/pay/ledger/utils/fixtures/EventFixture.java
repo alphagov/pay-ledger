@@ -1,15 +1,17 @@
 package uk.gov.pay.ledger.utils.fixtures;
 
+import com.amazonaws.services.sqs.AmazonSQS;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
+import uk.gov.pay.ledger.rules.SqsTestDocker;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-public class EventFixture implements DbFixture<EventFixture, Event> {
+public class EventFixture implements DbFixture<EventFixture, Event>, QueueFixture<EventFixture> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private String sqsMessageId = RandomStringUtils.randomAlphanumeric(50);
     private ResourceType resourceType = ResourceType.CHARGE;
@@ -118,5 +120,38 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
 
     public String getEventData() {
         return eventData;
+    }
+
+    public EventFixture from(Event event) {
+        id = event.getId();
+        sqsMessageId = event.getSqsMessageId();
+        resourceType = event.getResourceType();
+        resourceExternalId = event.getResourceExternalId();
+        eventDate = event.getEventDate();
+        eventType = event.getEventType();
+        eventData = event.getEventData();
+        return this;
+    }
+
+    @Override
+    public EventFixture insert(AmazonSQS sqsClient) {
+        String messageBody = String.format("{" +
+                        "\"id\": \"%s\"," +
+                        "\"timestamp\": \"%s\"," +
+                        "\"resource_external_id\": \"%s\"," +
+                        "\"event_type\":\"%s\"," +
+                        "\"resource_type\": \"%s\"," +
+                        "\"event_details\": %s" +
+                        "}",
+                id,
+                eventDate.toString(),
+                resourceExternalId,
+                eventType,
+                resourceType.toString().toLowerCase(),
+                eventData
+                );
+        var result = sqsClient.sendMessage(SqsTestDocker.getQueueUrl("event-queue"), messageBody);
+        this.sqsMessageId = result.getMessageId();
+        return this;
     }
 }

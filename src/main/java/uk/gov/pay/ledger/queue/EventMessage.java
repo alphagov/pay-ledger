@@ -1,5 +1,7 @@
 package uk.gov.pay.ledger.queue;
 
+import uk.gov.pay.ledger.event.model.Event;
+
 public class EventMessage {
     private EventMessageDto eventDto;
     private QueueMessage queueMessage;
@@ -14,16 +16,22 @@ public class EventMessage {
     }
 
     public String getId() {
-        return eventDto.getId();
+        return eventDto.getExternalId();
     }
 
     public String getQueueMessageId() {
         return queueMessage.getMessageId();
     }
 
-    //todo: not sure about it
-    public EventMessageDto getEvent() {
-        return eventDto;
+    public Event getEvent() {
+        return new Event(
+                getQueueMessageId(),
+                eventDto.getResourceType(),
+                eventDto.getExternalId(),
+                eventDto.getEventDate(),
+                eventDto.getEventType(),
+                eventDto.getEventData()
+        );
     }
 
     public String getQueueMessageReceiptHandle() {

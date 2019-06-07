@@ -21,6 +21,9 @@ public class SqsConfig extends Configuration {
     private int messageMaximumBatchSize;
 
 
+    private boolean nonStandardServiceEndpoint;
+    private String endpoint;
+
     public String getEventQueueUrl() {
         return eventQueueUrl;
     }
@@ -43,5 +46,13 @@ public class SqsConfig extends Configuration {
 
     public String getRegion() {
         return region;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public boolean isNonStandardServiceEndpoint() {
+        return nonStandardServiceEndpoint;
     }
 }

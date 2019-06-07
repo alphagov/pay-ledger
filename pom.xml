@@ -80,6 +80,12 @@
             <groupId>uk.gov.pay</groupId>
             <artifactId>utils</artifactId>
             <version>${pay-java-commons.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.amazonaws</groupId>
+                    <artifactId>aws-xray-recorder-sdk-aws-sdk-instrumentor</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>

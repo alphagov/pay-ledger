@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.queue;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,20 +36,20 @@ public class EventMessageHandler {
         }
     }
 
-    private void processSingleMessage(EventMessage message) throws QueueException {
+    private void processSingleMessage(EventMessage message) throws QueueException, JsonProcessingException {
         var response = eventService.createIfDoesNotExist(message.getEvent());
 
-        //todo; maybe reverse condition?
         if(response.isSuccessful()) {
             eventQueue.markMessageAsProcessed(message);
-            LOGGER.info("The event message has been processed. [id={}] [message={}]",
+            LOGGER.info("The event message has been processed. [id={}] [state={}]",
                     message.getId(),
                     response.getState());
         } else {
             eventQueue.scheduleMessageForRetry(message);
-            LOGGER.info("The event message has been scheduled for retry. [id={}] [message={}]",
+            LOGGER.info("The event message has been scheduled for retry. [id={}] [state={}] [error={}]",
                     message.getId(),
-                    response.getState());
+                    response.getState(),
+                    response.getErrorMessage());
         }
     }
 }

@@ -30,9 +30,28 @@ public interface EventDao {
     @GetGeneratedKeys
     Long insert(@BindBean Event event, @Bind("resourceTypeId") int resourceTypeId);
 
+    @SqlUpdate("INSERT INTO event(sqs_message_id, resource_type_id, resource_external_id, " +
+            "event_date, event_type, event_data) " +
+            "SELECT :sqsMessageId, :resourceTypeId, :resourceExternalId, " +
+            "       :eventDate, :eventType, CAST(:eventData as jsonb) " +
+            "WHERE NOT EXISTS ( " +
+            "    SELECT 1 " +
+            "    FROM event " +
+            "    WHERE resource_type_id = :resourceTypeId AND " +
+            "          resource_external_id = :resourceExternalId AND  " +
+            "          event_type = :eventType) ")
+    @GetGeneratedKeys
+    Optional<Long> insertIfDoesNotExist(@BindBean Event event, @Bind("resourceTypeId") int resourceTypeId);
+
     @Transaction
     default Long insertEventWithResourceTypeId(Event event) {
         int resourceTypeId = getResourceTypeDao().getResourceTypeIdByName(event.getResourceType().name());
         return insert(event, resourceTypeId);
+    }
+
+    @Transaction
+    default Optional<Long> insertEventIfDoesNotExistWithResourceTypeId(Event event) {
+        int resourceTypeId = getResourceTypeDao().getResourceTypeIdByName(event.getResourceType().name());
+        return insertIfDoesNotExist(event, resourceTypeId);
     }
 }

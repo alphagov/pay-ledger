@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
-import uk.gov.pay.ledger.rules.AppWithPostgresRule;
+import uk.gov.pay.ledger.rules.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
@@ -27,7 +27,7 @@ import static uk.gov.pay.ledger.utils.fixtures.TransactionFixture.aTransactionFi
 public class TransactionDaoSearchITest {
 
     @ClassRule
-    public static AppWithPostgresRule rule = new AppWithPostgresRule();
+    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
 
     private TransactionFixture transactionFixture;
     private TransactionDao transactionDao;

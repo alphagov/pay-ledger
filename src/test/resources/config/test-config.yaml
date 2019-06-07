@@ -57,9 +57,11 @@ logging:
         includesMdcKeys: [X-Request-Id]
 
 sqsConfig:
-  region: ${AWS_SQS_REGION}
-  secretKey: ${AWS_SECRET_KEY}
-  accessKey: ${AWS_ACCESS_KEY}
+  nonStandardServiceEndpoint: ${AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT:-true}
+  endpoint: ${AWS_SQS_ENDPOINT:-}
+  region: ${AWS_SQS_REGION:-region-1}
+  secretKey: ${AWS_SECRET_KEY:-x}
+  accessKey: ${AWS_ACCESS_KEY:-x}
   eventQueueUrl: ${AWS_SQS_EVENT_QUEUE_URL}
   messageMaximumWaitTimeInSeconds: ${AWS_SQS_MESSAGE_MAXIMUM_WAIT_TIME_IN_SECONDS:-20}
   messageMaximumBatchSize: ${AWS_SQS_MESSAGE_MAXIMUM_BATCH_SIZE:-10}

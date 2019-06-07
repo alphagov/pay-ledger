@@ -5,7 +5,7 @@ import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
-import uk.gov.pay.ledger.rules.AppWithPostgresRule;
+import uk.gov.pay.ledger.rules.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.utils.fixtures.TransactionFixture;
 
@@ -24,7 +24,7 @@ import static uk.gov.pay.ledger.utils.fixtures.TransactionFixture.aTransactionFi
 public class TransactionResourceIT {
 
     @ClassRule
-    public static AppWithPostgresRule rule = new AppWithPostgresRule();
+    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
 
     private Integer port = rule.getAppRule().getLocalPort();
 

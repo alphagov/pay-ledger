@@ -58,6 +58,8 @@ logging:
         includesMdcKeys: [X-Request-Id]
 
 sqsConfig:
+  nonStandardServiceEndpoint: ${AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT:-false}
+  endpoint: ${AWS_SQS_ENDPOINT:-}
   region: ${AWS_SQS_REGION}
   secretKey: ${AWS_SECRET_KEY}
   accessKey: ${AWS_ACCESS_KEY}

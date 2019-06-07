@@ -55,27 +55,26 @@ public class LedgerModule extends AbstractModule {
 
     @Provides
     public AmazonSQS sqsClient(LedgerConfig ledgerConfig) {
-
         AmazonSQSClientBuilder clientBuilder = AmazonSQSClientBuilder
                 .standard();
-        clientBuilder.withRegion(ledgerConfig.getSqsConfig().getRegion());
 
-//        if (ledgerConfig.getSqsConfig().isNonStandardServiceEndpoint()) {
-//
-//            BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(
-//                    ledgerConfig.getSqsConfig().getAccessKey(),
-//                    ledgerConfig.getSqsConfig().getSecretKey());
-//
-//            clientBuilder
-//                    .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials))
-//                    .withEndpointConfiguration(
-//                            new AwsClientBuilder.EndpointConfiguration(
-//                                    ledgerConfig.getSqsConfig().getEndpoint(),
-//                                    ledgerConfig.getSqsConfig().getRegion())
-//                    );
-//        } else {
+        if (ledgerConfig.getSqsConfig().isNonStandardServiceEndpoint()) {
+
+            BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(
+                    ledgerConfig.getSqsConfig().getAccessKey(),
+                    ledgerConfig.getSqsConfig().getSecretKey());
+
+            clientBuilder
+                    .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials))
+                    .withEndpointConfiguration(
+                            new AwsClientBuilder.EndpointConfiguration(
+                                    ledgerConfig.getSqsConfig().getEndpoint(),
+                                    ledgerConfig.getSqsConfig().getRegion())
+                    );
+        } else {
             // uses AWS SDK's DefaultAWSCredentialsProviderChain to obtain credentials
-//        }
+            clientBuilder.withRegion(ledgerConfig.getSqsConfig().getRegion());
+        }
 
         return clientBuilder.build();
     }
