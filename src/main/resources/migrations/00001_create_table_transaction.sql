@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset uk.gov.pay:add_table-transaction
+--changeset uk.gov.pay:create_table_transaction
 CREATE TABLE transaction (
     id BIGSERIAL PRIMARY KEY,
     gateway_account_id VARCHAR(255) NOT NULL,
@@ -26,6 +26,6 @@ CREATE TABLE transaction (
 );
 --rollback drop table transaction;
 
---changeset uk.gov.pay:add_payment_requests_external_id_idx
-CREATE UNIQUE INDEX transaction_gateway_account_id_idx ON transaction(gateway_account_id)
---rollback drop index transaction_external_id_idx;
+--changeset uk.gov.pay:add_transaction_gateway_account_id_idx
+CREATE INDEX transaction_gateway_account_id_idx ON transaction(gateway_account_id)
+--rollback drop index transaction_gateway_account_id_idx;

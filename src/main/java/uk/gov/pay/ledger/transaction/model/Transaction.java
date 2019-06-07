@@ -1,7 +1,6 @@
 package uk.gov.pay.ledger.transaction.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -35,7 +34,7 @@ public class Transaction {
     }
 
     public Transaction(Long id, String gatewayAccountId, Long amount,
-                       String reference, String description, String status,
+                       String reference, String description, String state,
                        String language, String externalId, String returnUrl,
                        String email, String paymentProvider, ZonedDateTime createdAt,
                        CardDetails cardDetails, Boolean delayedCapture, String externalMetaData) {
@@ -44,7 +43,7 @@ public class Transaction {
         this.amount = amount;
         this.reference = reference;
         this.description = description;
-        this.state = status;
+        this.state = state;
         this.language = language;
         this.externalId = externalId;
         this.returnUrl = returnUrl;
