@@ -4,7 +4,6 @@ package uk.gov.pay.ledger.it.transaction.search.dao;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.pay.ledger.rules.AppWithPostgresRule;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
@@ -76,6 +75,9 @@ public class TransactionSearchDaoITest {
         assertThat(transactionView.getCardDetails().getBillingAddress().getAddressCity(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressCity()));
         assertThat(transactionView.getCardDetails().getBillingAddress().getAddressPostCode(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressPostCode()));
         assertThat(transactionView.getCardDetails().getBillingAddress().getAddressCountry(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressCountry()));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
     }
 
     @Test
@@ -98,6 +100,9 @@ public class TransactionSearchDaoITest {
         assertThat(viewList.size(), Matchers.is(2));
         assertThat(viewList.get(0).getGatewayAccountId(), is(gatewayAccountId));
         assertThat(viewList.get(1).getGatewayAccountId(), is(gatewayAccountId));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(2L));
     }
 
     @Test
@@ -119,6 +124,9 @@ public class TransactionSearchDaoITest {
 
         assertThat(viewList.size(), Matchers.is(1));
         assertThat(viewList.get(0).getEmail(), is("testemail1@example.org"));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
     }
 
     @Test
@@ -144,6 +152,9 @@ public class TransactionSearchDaoITest {
 
         assertThat(viewList.size(), Matchers.is(1));
         assertThat(viewList.get(0).getReference(), is("reference 1"));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
     }
 
     @Test
@@ -170,6 +181,9 @@ public class TransactionSearchDaoITest {
 
         assertThat(viewList.size(), Matchers.is(1));
         assertThat(viewList.get(0).getCardDetails().getCardHolderName(), is("name1"));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
     }
 
     @Test
@@ -191,6 +205,9 @@ public class TransactionSearchDaoITest {
         List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(1));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
     }
 
     @Test
@@ -211,6 +228,9 @@ public class TransactionSearchDaoITest {
         List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(2));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(2L));
     }
 
     @Test
@@ -230,6 +250,9 @@ public class TransactionSearchDaoITest {
         List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(10));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(19L));
     }
 
     @Test
@@ -248,7 +271,7 @@ public class TransactionSearchDaoITest {
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setDisplaySize(2l);
-        searchParams.setPageNumber(3l);
+        searchParams.setPageNumber(3);
 
 
         List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
@@ -256,6 +279,9 @@ public class TransactionSearchDaoITest {
         assertThat(viewList.size(), Matchers.is(2));
         assertThat(viewList.get(0).getReference(), is("reference15"));
         assertThat(viewList.get(1).getReference(), is("reference14"));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(19L));
     }
 
     @Test
@@ -279,6 +305,9 @@ public class TransactionSearchDaoITest {
         List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(2));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(2L));
     }
 
     @Test
@@ -298,6 +327,9 @@ public class TransactionSearchDaoITest {
         List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(0));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(0L));
     }
 
     @Test
@@ -317,6 +349,9 @@ public class TransactionSearchDaoITest {
         List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(0));
+
+        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        assertThat(total, is(0L));
     }
 
     //todo: modify test to return results when last digits card number is available in DB
