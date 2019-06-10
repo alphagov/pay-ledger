@@ -29,6 +29,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Boolean delayedCapture = false;
 
     private String externalMetadata = null;
+
     private TransactionFixture() {
     }
 
@@ -156,13 +157,13 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         language,
                         delayedCapture,
                         email,
-                        cardDetails.getCardHolderName(),
-                        cardDetails.getBillingAddress().getAddressLine1(),
-                        cardDetails.getBillingAddress().getAddressLine2(),
-                        cardDetails.getBillingAddress().getAddressPostCode(),
-                        cardDetails.getBillingAddress().getAddressCity(),
-                        cardDetails.getBillingAddress().getAddressCounty(),
-                        cardDetails.getBillingAddress().getAddressCountry(),
+                        cardDetails == null ? null : cardDetails.getCardHolderName(),
+                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressLine1() : null,
+                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressLine2() : null,
+                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressPostCode() : null,
+                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressCity() : null,
+                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressCounty() : null,
+                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressCountry() : null,
                         externalMetadata,
                         createdAt
                 )
