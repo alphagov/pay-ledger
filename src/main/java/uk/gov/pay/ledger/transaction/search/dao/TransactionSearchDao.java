@@ -18,6 +18,11 @@ public class TransactionSearchDao {
             ":searchExtraFields " +
             "ORDER BY t.id DESC OFFSET :offset LIMIT :limit";
 
+    private static final String COUNT_QUERY_STRING = "SELECT count(t.id) " +
+            "FROM transaction t " +
+            "WHERE t.gateway_account_id = :gatewayAccountExternalId " +
+            ":searchExtraFields ";
+
     @Inject
     public TransactionSearchDao(Jdbi jdbi) {
         this.jdbi = jdbi;
@@ -34,4 +39,14 @@ public class TransactionSearchDao {
         });
     }
 
+    public Long getTotalForSearch(TransactionSearchParams searchParams) {
+        String searchExtraFields = searchParams.generateQuery();
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(COUNT_QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
+            searchParams.getQueryMap().forEach(query::bind);
+            return query
+                    .mapTo(Long.class)
+                    .findOnly();
+        });
+    }
 }

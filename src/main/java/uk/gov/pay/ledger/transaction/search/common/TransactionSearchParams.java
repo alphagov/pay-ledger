@@ -36,8 +36,8 @@ public class TransactionSearchParams {
     private List<String> cardBrands;
     private ZonedDateTime fromDate;
     private ZonedDateTime toDate;
-    private Long pageNumber;
-    private Long displaySize;
+    private Long pageNumber = 1L;
+    private Long displaySize = MAX_DISPLAY_SIZE;
 
     private Map<String, Object> queryMap;
 
@@ -85,12 +85,12 @@ public class TransactionSearchParams {
         this.toDate = toDate;
     }
 
-    public void setPageNumber(Long pageNumber) {
+    public void setPageNumber(long pageNumber) {
         this.pageNumber = pageNumber;
     }
 
-    public void setDisplaySize(Long displaySize) {
-        if (displaySize == null || displaySize > MAX_DISPLAY_SIZE) {
+    public void setDisplaySize(long displaySize) {
+        if (displaySize > MAX_DISPLAY_SIZE) {
             LOGGER.info("Invalid display_size [{}] for transaction search params. Setting display_size to default [{}]",
                     displaySize, MAX_DISPLAY_SIZE);
             this.displaySize = MAX_DISPLAY_SIZE;
@@ -167,6 +167,14 @@ public class TransactionSearchParams {
             }
         }
         return queryMap;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public Long getPageNumber() {
+        return pageNumber;
     }
 
     private Long getDisplaySize() {
