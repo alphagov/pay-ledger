@@ -9,6 +9,8 @@ import uk.gov.pay.ledger.transaction.model.Transaction;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TransactionFixture implements DbFixture<TransactionFixture, Transaction> {
 
@@ -35,6 +37,16 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public static TransactionFixture aTransactionFixture() {
         return new TransactionFixture();
+    }
+
+    public static List<Transaction> aTransactionList(String gatewayAccountId, int noOfViews) {
+        List<Transaction> transactionList = new ArrayList<>();
+        for (int i = 0; i < noOfViews; i++) {
+            transactionList.add(aTransactionFixture()
+                    .withGatewayAccountId(gatewayAccountId)
+                    .toEntity());
+        }
+        return transactionList;
     }
 
     public Long getId() {
