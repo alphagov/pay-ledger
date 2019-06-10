@@ -1,4 +1,8 @@
-package uk.gov.pay.ledger.transaction;
+package uk.gov.pay.ledger.transaction.search.common;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.event.resources.EventResource;
 
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -8,6 +12,9 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionSearchParams {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionSearchParams.class);
+
     private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "gatewayAccountExternalId";
     private static final String OFFSET_FIELD = "offset";
     private static final String PAGE_SIZE_FIELD = "limit";
@@ -83,14 +90,20 @@ public class TransactionSearchParams {
     }
 
     public void setDisplaySize(Long displaySize) {
-        this.displaySize = displaySize;
+        if (displaySize == null || displaySize > MAX_DISPLAY_SIZE) {
+            LOGGER.info("Invalid display_size [{}] for transaction search params. Setting display_size to default [{}]",
+                    displaySize, MAX_DISPLAY_SIZE);
+            this.displaySize = MAX_DISPLAY_SIZE;
+        } else {
+            this.displaySize = displaySize;
+        }
     }
 
     public String generateQuery() {
         StringBuilder sb = new StringBuilder();
 
         if (isNotBlank(email)) {
-            sb.append(" AND email ILIKE :" + EMAIL_FIELD);
+            sb.append(" AND t.email ILIKE :" + EMAIL_FIELD);
         }
         if (isNotBlank(reference)) {
             sb.append(" AND t.reference ILIKE :" + REFERENCE_FIELD);
@@ -135,7 +148,7 @@ public class TransactionSearchParams {
             queryMap = new HashMap<>();
             queryMap.put(GATEWAY_ACCOUNT_EXTERNAL_FIELD, accountId);
             queryMap.put(OFFSET_FIELD, getOffset());
-            queryMap.put(PAGE_SIZE_FIELD, getDisplaySize());
+            queryMap.put(PAGE_SIZE_FIELD, displaySize);
 
             if (isNotBlank(email)) {
                 queryMap.put(EMAIL_FIELD, likeClause(email));
@@ -157,9 +170,6 @@ public class TransactionSearchParams {
     }
 
     private Long getDisplaySize() {
-        if (displaySize == null || displaySize > MAX_DISPLAY_SIZE)
-            return MAX_DISPLAY_SIZE;
-
         return displaySize;
     }
 

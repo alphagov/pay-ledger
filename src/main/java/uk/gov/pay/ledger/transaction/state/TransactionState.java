@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.common;
+package uk.gov.pay.ledger.transaction.state;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;

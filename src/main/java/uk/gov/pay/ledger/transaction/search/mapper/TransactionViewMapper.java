@@ -1,9 +1,9 @@
-package uk.gov.pay.ledger.transaction.dao.mapper;
+package uk.gov.pay.ledger.transaction.search.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.ledger.common.TransactionState;
-import uk.gov.pay.ledger.transaction.TransactionView;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 

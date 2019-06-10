@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.transaction;
+package uk.gov.pay.ledger.transaction.search.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
-import uk.gov.pay.ledger.common.TransactionState;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 
 import java.time.ZonedDateTime;

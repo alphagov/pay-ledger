@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.transaction;
+package uk.gov.pay.ledger.transaction.search.common;
 
 import com.google.common.collect.Sets;
 

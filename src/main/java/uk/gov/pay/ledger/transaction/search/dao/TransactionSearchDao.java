@@ -1,15 +1,15 @@
-package uk.gov.pay.ledger.transaction.dao;
+package uk.gov.pay.ledger.transaction.search.dao;
 
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
-import uk.gov.pay.ledger.transaction.TransactionSearchParams;
-import uk.gov.pay.ledger.transaction.TransactionView;
-import uk.gov.pay.ledger.transaction.dao.mapper.TransactionViewMapper;
+import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
+import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.transaction.search.mapper.TransactionViewMapper;
 
 import javax.inject.Inject;
 import java.util.List;
 
-public class TransactionViewDao {
+public class TransactionSearchDao {
     private final Jdbi jdbi;
 
     //todo: order results by transaction date
@@ -19,7 +19,7 @@ public class TransactionViewDao {
             "ORDER BY t.id DESC OFFSET :offset LIMIT :limit";
 
     @Inject
-    public TransactionViewDao(Jdbi jdbi) {
+    public TransactionSearchDao(Jdbi jdbi) {
         this.jdbi = jdbi;
     }
 

@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.transaction;
+package uk.gov.pay.ledger.it.transaction.search.dao;
 
 
 import org.hamcrest.Matchers;
@@ -6,10 +6,13 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
-import uk.gov.pay.ledger.common.TransactionState;
 import uk.gov.pay.ledger.rules.AppWithPostgresRule;
-import uk.gov.pay.ledger.transaction.dao.TransactionViewDao;
+import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
+import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
+import uk.gov.pay.ledger.transaction.search.dao.TransactionSearchDao;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
+import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.utils.fixtures.TransactionFixture;
 
 import java.time.ZonedDateTime;
@@ -21,19 +24,19 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.ledger.utils.fixtures.TransactionFixture.aTransactionFixture;
 
-@Ignore
-public class TransactionViewDaoITest {
+
+public class TransactionSearchDaoITest {
 
     @ClassRule
     public static AppWithPostgresRule rule = new AppWithPostgresRule();
 
     private TransactionFixture transactionFixture;
-    private TransactionViewDao transactionViewDao;
+    private TransactionSearchDao transactionSearchDao;
     private TransactionSearchParams searchParams;
 
     @Before
     public void setUp() {
-        transactionViewDao = new TransactionViewDao(rule.getJdbi());
+        transactionSearchDao = new TransactionSearchDao(rule.getJdbi());
         searchParams = new TransactionSearchParams();
     }
 
@@ -45,7 +48,7 @@ public class TransactionViewDaoITest {
 
         searchParams.setAccountId(transactionFixture.getGatewayAccountId());
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(1));
         TransactionView transactionView = viewList.get(0);
@@ -82,8 +85,6 @@ public class TransactionViewDaoITest {
         for (int i = 0; i < 2; i++) {
             aTransactionFixture()
                     .withGatewayAccountId(gatewayAccountId)
-                    .withAmount(100l + i)
-                    .withCardDetails(null)
                     .insert(rule.getJdbi());
         }
         aTransactionFixture()
@@ -92,7 +93,7 @@ public class TransactionViewDaoITest {
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(2));
         assertThat(viewList.get(0).getGatewayAccountId(), is(gatewayAccountId));
@@ -114,7 +115,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setEmail("testemail1");
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(1));
         assertThat(viewList.get(0).getEmail(), is("testemail1@example.org"));
@@ -139,7 +140,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setReference("reference 1");
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(1));
         assertThat(viewList.get(0).getReference(), is("reference 1"));
@@ -165,7 +166,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setCardHolderName("name1");
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(1));
         assertThat(viewList.get(0).getCardDetails().getCardHolderName(), is("name1"));
@@ -187,7 +188,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setFromDate(ZonedDateTime.now().minusDays(1).minusMinutes(10));
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(1));
     }
@@ -207,7 +208,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setToDate(ZonedDateTime.now().minusDays(2).plusMinutes(10));
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(2));
     }
@@ -226,7 +227,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setDisplaySize(10l);
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(10));
     }
@@ -250,7 +251,7 @@ public class TransactionViewDaoITest {
         searchParams.setPageNumber(3l);
 
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(2));
         assertThat(viewList.get(0).getReference(), is("reference15"));
@@ -275,7 +276,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setPaymentStates(new CommaDelimitedSetParameter("created"));
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(2));
     }
@@ -294,7 +295,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setPaymentStates(new CommaDelimitedSetParameter("random-state"));
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(0));
     }
@@ -313,7 +314,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setRefundStates(new CommaDelimitedSetParameter("random-refund-state"));
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(0));
     }
@@ -332,7 +333,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setLastDigitsCardNumber("1234");
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(0));
     }
@@ -351,7 +352,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setFirstDigitsCardNumber("1234");
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(0));
     }
@@ -370,7 +371,7 @@ public class TransactionViewDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setCardBrands(Arrays.asList("random-card-brand"));
 
-        List<TransactionView> viewList = transactionViewDao.searchTransactionView(searchParams);
+        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
 
         assertThat(viewList.size(), Matchers.is(0));
     }
