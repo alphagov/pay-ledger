@@ -10,8 +10,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class CommaDelimitedSetParameter {
     private Set<String> elements;
+    private String queryString;
 
     public CommaDelimitedSetParameter(String queryString) {
+        this.queryString = queryString;
         elements = isBlank(queryString)
                 ? new HashSet<>()
                 : Sets.newHashSet(queryString.split(","));
@@ -27,5 +29,9 @@ public class CommaDelimitedSetParameter {
 
     public boolean isEmpty() {
         return elements.isEmpty();
+    }
+
+    public String getRawString() {
+        return queryString;
     }
 }

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionSearchParams {
@@ -17,11 +18,16 @@ public class TransactionSearchParams {
     private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "gatewayAccountExternalId";
     private static final String OFFSET_FIELD = "offset";
     private static final String PAGE_SIZE_FIELD = "limit";
-    private static final String CARDHOLDER_NAME_FIELD = "cardholderName";
-    private static final String FROM_DATE_FIELD = "fromDate";
-    private static final String TO_DATE_FIELD = "toDate";
+    private static final String CARDHOLDER_NAME_FIELD = "cardholder_name";
+    private static final String FROM_DATE_FIELD = "from_date";
+    private static final String TO_DATE_FIELD = "to_date";
     private static final String EMAIL_FIELD = "email";
     private static final String REFERENCE_FIELD = "reference";
+    private static final String LAST_DIGITS_CARD_NUMBER_KEY = "last_digits_card_number";
+    private static final String FIRST_DIGITS_CARD_NUMBER_KEY = "first_digits_card_number";
+    private static final String PAYMENT_STATES_KEY = "payment_states";
+    private static final String REFUND_STATES_KEY = "refund_states";
+    private static final String CARD_BRAND_KEY = "card_brand";
     private static final long MAX_DISPLAY_SIZE = 500;
 
     private String accountId;
@@ -176,7 +182,7 @@ public class TransactionSearchParams {
         return pageNumber;
     }
 
-    private Long getDisplaySize() {
+    public Long getDisplaySize() {
         return displaySize;
     }
 
@@ -193,5 +199,51 @@ public class TransactionSearchParams {
 
     private String likeClause(String rawUserInputText) {
         return "%" + rawUserInputText + "%";
+    }
+
+    public String buildQueryParamString(Long forPage) {
+        String query = "";
+
+        if (fromDate != null) {
+            query += "&" + FROM_DATE_FIELD + "=" + fromDate;
+        }
+        if (toDate != null) {
+            query += "&" + TO_DATE_FIELD + "=" + toDate;
+        }
+
+        if (isNotBlank(email)) {
+            query += "&" + EMAIL_FIELD + "=" + email;
+        }
+        if (isNotBlank(reference)) {
+            query += "&" + REFERENCE_FIELD + "=" + reference;
+        }
+        if (isNotBlank(cardHolderName)) {
+            query += "&" + CARDHOLDER_NAME_FIELD + "=" + cardHolderName;
+        }
+        if (isNotBlank(firstDigitsCardNumber)) {
+            query += "&" + FIRST_DIGITS_CARD_NUMBER_KEY + "=" + firstDigitsCardNumber;
+        }
+        if (isNotBlank(lastDigitsCardNumber)) {
+            query += "&" + LAST_DIGITS_CARD_NUMBER_KEY + "=" + lastDigitsCardNumber;
+        }
+
+        if (paymentStates != null && !paymentStates.isEmpty()) {
+            query += "&" + PAYMENT_STATES_KEY + "=" + String.join(",", this.paymentStates.getRawString());
+        }
+        if (refundStates != null && !refundStates.isEmpty()) {
+            query += "&" + REFUND_STATES_KEY + "=" + String.join(",", this.refundStates.getRawString());
+        }
+        if (paymentStates != null && !paymentStates.isEmpty()) {
+            query += "&" + CARD_BRAND_KEY + "=" + String.join(",", this.cardBrands);
+        }
+
+        query += addPaginationParams(forPage);
+        return query.substring(1);
+    }
+
+    private String addPaginationParams(Long forPage) {
+        String queryParams = format("&page=%s", forPage);
+        queryParams += format("&display_size=%s", displaySize);
+        return queryParams;
     }
 }
