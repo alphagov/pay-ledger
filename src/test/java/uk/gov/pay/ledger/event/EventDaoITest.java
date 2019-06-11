@@ -7,18 +7,14 @@ import org.junit.Test;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rules.AppWithPostgresRule;
 import uk.gov.pay.ledger.utils.DatabaseTestHelper;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

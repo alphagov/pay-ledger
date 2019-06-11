@@ -1,16 +1,63 @@
 package uk.gov.pay.ledger.transaction.dao;
 
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
-import org.jdbi.v3.sqlobject.customizer.Bind;
-import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import com.google.inject.Inject;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.transaction.dao.mapper.TransactionMapper;
 import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
+import java.util.List;
 import java.util.Optional;
 
-@RegisterRowMapper(TransactionMapper.class)
-public interface TransactionDao {
+public class TransactionDao {
 
-    @SqlQuery("SELECT * FROM transaction WHERE external_id = :transaction_id")
-    Optional<Transaction> getById(@Bind("transaction_id") String transactionId);
+    private static final String FIND_TRANSACTION_BY_EXTERNAL_ID = "SELECT * FROM transaction " +
+            "WHERE external_id = :externalId";
+    private static final String SEARCH_QUERY_STRING = "SELECT * FROM transaction t " +
+            "WHERE t.gateway_account_id = :gatewayAccountExternalId " +
+            ":searchExtraFields " +
+            "ORDER BY t.id DESC OFFSET :offset LIMIT :limit";
+
+    private static final String SEARCH_COUNT_QUERY_STRING = "SELECT count(t.id) " +
+            "FROM transaction t " +
+            "WHERE t.gateway_account_id = :gatewayAccountExternalId " +
+            ":searchExtraFields ";
+    private final Jdbi jdbi;
+
+    @Inject
+    public TransactionDao(Jdbi jdbi) {
+        this.jdbi = jdbi;
+    }
+
+    public Optional<Transaction> findTransactionByExternalId(String externalId) {
+        return jdbi.withHandle(handle ->
+           handle.createQuery(FIND_TRANSACTION_BY_EXTERNAL_ID)
+                   .bind("externalId", externalId)
+                   .map(new TransactionMapper())
+                   .findFirst());
+    }
+
+    //todo: order results by transaction date
+    public List<Transaction> searchTransactions(TransactionSearchParams searchParams) {
+        String searchExtraFields = searchParams.generateQuery();
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(SEARCH_QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
+            searchParams.getQueryMap().forEach(query::bind);
+            return query
+                    .map(new TransactionMapper())
+                    .list();
+        });
+    }
+
+    public Long getTotalForSearch(TransactionSearchParams searchParams) {
+        String searchExtraFields = searchParams.generateQuery();
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(SEARCH_COUNT_QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
+            searchParams.getQueryMap().forEach(query::bind);
+            return query
+                    .mapTo(Long.class)
+                    .findOnly();
+        });
+    }
 }

@@ -1,7 +1,6 @@
 package uk.gov.pay.ledger.utils;
 
 import org.jdbi.v3.core.Jdbi;
-import uk.gov.pay.ledger.event.model.ResourceType;
 
 import java.util.Map;
 

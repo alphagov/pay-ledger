@@ -28,12 +28,12 @@ public class TransactionResource {
         this.transactionDao = transactionDao;
     }
 
-    @Path("/{transactionId}")
+    @Path("/{transactionExternalId}")
     @GET
     @Timed
-    public Transaction getById(@PathParam("transactionId") String transactionId) {
-        LOGGER.info("Get transaction request: {}", transactionId);
-        return transactionDao.getById(transactionId)
+    public Transaction getById(@PathParam("transactionExternalId") String transactionExternalId) {
+        LOGGER.info("Get transaction request: {}", transactionExternalId);
+        return transactionDao.findTransactionByExternalId(transactionExternalId)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
 }

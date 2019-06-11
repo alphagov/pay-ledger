@@ -6,8 +6,9 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
-import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
+import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -55,6 +56,15 @@ public class TransactionView {
     }
 
     public TransactionView() {
+    }
+
+    public static TransactionView from(Transaction transaction) {
+        return new TransactionView(transaction.getId(), transaction.getGatewayAccountId(),
+                transaction.getAmount(), TransactionState.valueOf(transaction.getState().toUpperCase()),
+                transaction.getDescription(), transaction.getReference(), transaction.getLanguage(),
+                transaction.getExternalId(), transaction.getReturnUrl(), transaction.getEmail(),
+                transaction.getPaymentProvider(), transaction.getCreatedAt(), transaction.getCardDetails(),
+                transaction.getDelayedCapture());
     }
 
     public Long getId() {

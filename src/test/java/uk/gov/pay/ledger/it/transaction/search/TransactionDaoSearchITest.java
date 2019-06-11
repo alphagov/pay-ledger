@@ -1,17 +1,17 @@
-package uk.gov.pay.ledger.it.transaction.search.dao;
+package uk.gov.pay.ledger.it.transaction.search;
 
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.pay.ledger.rules.AppWithPostgresRule;
+import uk.gov.pay.ledger.transaction.dao.TransactionDao;
+import uk.gov.pay.ledger.transaction.model.CardDetails;
+import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
-import uk.gov.pay.ledger.transaction.search.dao.TransactionSearchDao;
-import uk.gov.pay.ledger.transaction.model.CardDetails;
-import uk.gov.pay.ledger.transaction.search.model.TransactionView;
-import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.utils.fixtures.TransactionFixture;
 
 import java.time.ZonedDateTime;
@@ -23,60 +23,60 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.ledger.utils.fixtures.TransactionFixture.aTransactionFixture;
 
-
-public class TransactionSearchDaoITest {
+@Ignore
+public class TransactionDaoSearchITest {
 
     @ClassRule
     public static AppWithPostgresRule rule = new AppWithPostgresRule();
 
     private TransactionFixture transactionFixture;
-    private TransactionSearchDao transactionSearchDao;
+    private TransactionDao transactionDao;
     private TransactionSearchParams searchParams;
 
     @Before
     public void setUp() {
-        transactionSearchDao = new TransactionSearchDao(rule.getJdbi());
+        transactionDao = new TransactionDao(rule.getJdbi());
         searchParams = new TransactionSearchParams();
     }
 
     @Test
-    public void shouldGetAndMapTransactionViewCorrectly() {
+    public void shouldGetAndMapTransactionCorrectly() {
 
         transactionFixture = aTransactionFixture()
                 .insert(rule.getJdbi());
 
         searchParams.setAccountId(transactionFixture.getGatewayAccountId());
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(1));
-        TransactionView transactionView = viewList.get(0);
+        assertThat(transactionList.size(), Matchers.is(1));
+        Transaction transaction = transactionList.get(0);
 
-        assertThat(transactionView.getId(), is(transactionFixture.getId()));
-        assertThat(transactionView.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
-        assertThat(transactionView.getAmount(), is(transactionFixture.getAmount()));
-        assertThat(transactionView.getState(), is(TransactionState.valueOf(transactionFixture.getState().toUpperCase())));
-        assertThat(transactionView.getReference(), is(transactionFixture.getReference()));
-        assertThat(transactionView.getDescription(), is(transactionFixture.getDescription()));
-        assertThat(transactionView.getLanguage(), is(transactionFixture.getLanguage()));
-        assertThat(transactionView.getReturnUrl(), is(transactionFixture.getReturnUrl()));
-        assertThat(transactionView.getExternalId(), is(transactionFixture.getExternalId()));
-        assertThat(transactionView.getEmail(), is(transactionFixture.getEmail()));
-        assertThat(transactionView.getPaymentProvider(), is(transactionFixture.getPaymentProvider()));
-        assertThat(transactionView.getCreatedDate(), is(transactionFixture.getCreatedAt()));
-        assertThat(transactionView.getDelayedCapture(), is(transactionFixture.getDelayedCapture()));
+        assertThat(transaction.getId(), is(transactionFixture.getId()));
+        assertThat(transaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
+        assertThat(transaction.getAmount(), is(transactionFixture.getAmount()));
+        assertThat(transaction.getState(), is(transactionFixture.getState()));
+        assertThat(transaction.getReference(), is(transactionFixture.getReference()));
+        assertThat(transaction.getDescription(), is(transactionFixture.getDescription()));
+        assertThat(transaction.getLanguage(), is(transactionFixture.getLanguage()));
+        assertThat(transaction.getReturnUrl(), is(transactionFixture.getReturnUrl()));
+        assertThat(transaction.getExternalId(), is(transactionFixture.getExternalId()));
+        assertThat(transaction.getEmail(), is(transactionFixture.getEmail()));
+        assertThat(transaction.getPaymentProvider(), is(transactionFixture.getPaymentProvider()));
+        assertThat(transaction.getCreatedAt(), is(transactionFixture.getCreatedAt()));
+        assertThat(transaction.getDelayedCapture(), is(transactionFixture.getDelayedCapture()));
 
-        assertThat(transactionView.getCardDetails().getCardHolderName(), is(transactionFixture.getCardDetails().getCardHolderName()));
-        assertThat(transactionView.getCardDetails().getCardBrand(), is(transactionFixture.getCardDetails().getCardBrand()));
+        assertThat(transaction.getCardDetails().getCardHolderName(), is(transactionFixture.getCardDetails().getCardHolderName()));
+        assertThat(transaction.getCardDetails().getCardBrand(), is(transactionFixture.getCardDetails().getCardBrand()));
 
-        assertThat(transactionView.getCardDetails().getBillingAddress().getAddressLine1(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()));
-        assertThat(transactionView.getCardDetails().getBillingAddress().getAddressLine2(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine2()));
-        assertThat(transactionView.getCardDetails().getBillingAddress().getAddressCounty(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressCounty()));
-        assertThat(transactionView.getCardDetails().getBillingAddress().getAddressCity(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressCity()));
-        assertThat(transactionView.getCardDetails().getBillingAddress().getAddressPostCode(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressPostCode()));
-        assertThat(transactionView.getCardDetails().getBillingAddress().getAddressCountry(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressCountry()));
+        assertThat(transaction.getCardDetails().getBillingAddress().getAddressLine1(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()));
+        assertThat(transaction.getCardDetails().getBillingAddress().getAddressLine2(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine2()));
+        assertThat(transaction.getCardDetails().getBillingAddress().getAddressCounty(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressCounty()));
+        assertThat(transaction.getCardDetails().getBillingAddress().getAddressCity(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressCity()));
+        assertThat(transaction.getCardDetails().getBillingAddress().getAddressPostCode(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressPostCode()));
+        assertThat(transaction.getCardDetails().getBillingAddress().getAddressCountry(), is(transactionFixture.getCardDetails().getBillingAddress().getAddressCountry()));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(1L));
     }
 
@@ -95,13 +95,13 @@ public class TransactionSearchDaoITest {
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(2));
-        assertThat(viewList.get(0).getGatewayAccountId(), is(gatewayAccountId));
-        assertThat(viewList.get(1).getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(transactionList.size(), Matchers.is(2));
+        assertThat(transactionList.get(0).getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(transactionList.get(1).getGatewayAccountId(), is(gatewayAccountId));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(2L));
     }
 
@@ -120,12 +120,12 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setEmail("testemail1");
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(1));
-        assertThat(viewList.get(0).getEmail(), is("testemail1@example.org"));
+        assertThat(transactionList.size(), Matchers.is(1));
+        assertThat(transactionList.get(0).getEmail(), is("testemail1@example.org"));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(1L));
     }
 
@@ -148,12 +148,12 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setReference("reference 1");
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(1));
-        assertThat(viewList.get(0).getReference(), is("reference 1"));
+        assertThat(transactionList.size(), Matchers.is(1));
+        assertThat(transactionList.get(0).getReference(), is("reference 1"));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(1L));
     }
 
@@ -177,12 +177,12 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setCardHolderName("name1");
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(1));
-        assertThat(viewList.get(0).getCardDetails().getCardHolderName(), is("name1"));
+        assertThat(transactionList.size(), Matchers.is(1));
+        assertThat(transactionList.get(0).getCardDetails().getCardHolderName(), is("name1"));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(1L));
     }
 
@@ -202,11 +202,11 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setFromDate(ZonedDateTime.now().minusDays(1).minusMinutes(10));
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(1));
+        assertThat(transactionList.size(), Matchers.is(1));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(1L));
     }
 
@@ -225,11 +225,11 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setToDate(ZonedDateTime.now().minusDays(2).plusMinutes(10));
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(2));
+        assertThat(transactionList.size(), Matchers.is(2));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(2L));
     }
 
@@ -247,11 +247,11 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setDisplaySize(10l);
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(10));
+        assertThat(transactionList.size(), Matchers.is(10));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(19L));
     }
 
@@ -274,13 +274,13 @@ public class TransactionSearchDaoITest {
         searchParams.setPageNumber(3);
 
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(2));
-        assertThat(viewList.get(0).getReference(), is("reference15"));
-        assertThat(viewList.get(1).getReference(), is("reference14"));
+        assertThat(transactionList.size(), Matchers.is(2));
+        assertThat(transactionList.get(0).getReference(), is("reference15"));
+        assertThat(transactionList.get(1).getReference(), is("reference14"));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(19L));
     }
 
@@ -302,11 +302,11 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setPaymentStates(new CommaDelimitedSetParameter("created"));
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(2));
+        assertThat(transactionList.size(), Matchers.is(2));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(2L));
     }
 
@@ -324,11 +324,11 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setPaymentStates(new CommaDelimitedSetParameter("random-state"));
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(0));
+        assertThat(transactionList.size(), Matchers.is(0));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(0L));
     }
 
@@ -346,11 +346,11 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setRefundStates(new CommaDelimitedSetParameter("random-refund-state"));
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(0));
+        assertThat(transactionList.size(), Matchers.is(0));
 
-        Long total = transactionSearchDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(0L));
     }
 
@@ -368,9 +368,9 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setLastDigitsCardNumber("1234");
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(0));
+        assertThat(transactionList.size(), Matchers.is(0));
     }
 
     //todo: modify test to return results when first digits card number is available in DB
@@ -387,9 +387,9 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setFirstDigitsCardNumber("1234");
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(0));
+        assertThat(transactionList.size(), Matchers.is(0));
     }
 
     //todo: modify test to return results when card_brand is available in DB
@@ -406,8 +406,8 @@ public class TransactionSearchDaoITest {
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setCardBrands(Arrays.asList("random-card-brand"));
 
-        List<TransactionView> viewList = transactionSearchDao.searchTransactionView(searchParams);
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(viewList.size(), Matchers.is(0));
+        assertThat(transactionList.size(), Matchers.is(0));
     }
 }
