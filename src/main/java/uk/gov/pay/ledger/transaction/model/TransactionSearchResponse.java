@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.transaction.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
 import java.util.List;
@@ -18,6 +19,8 @@ public class TransactionSearchResponse {
     private long page;
     @JsonProperty("results")
     List<TransactionView> transactionViewList;
+    @JsonProperty("_links")
+    private PaginationBuilder paginationBuilder;
 
     public TransactionSearchResponse(String gatewayExternalId, Long total, Long count, Long page,
                                      List<TransactionView> transactionViewList) {
@@ -26,6 +29,11 @@ public class TransactionSearchResponse {
         this.count = count;
         this.page = page;
         this.transactionViewList = transactionViewList;
+    }
+
+    public TransactionSearchResponse withPaginationBuilder(PaginationBuilder paginationBuilder) {
+        this.paginationBuilder = paginationBuilder;
+        return this;
     }
 
     public String getGatewayExternalId() {
@@ -46,5 +54,9 @@ public class TransactionSearchResponse {
 
     public List<TransactionView> getTransactionViewList() {
         return transactionViewList;
+    }
+
+    public PaginationBuilder getPaginationBuilder() {
+        return paginationBuilder;
     }
 }

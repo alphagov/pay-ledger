@@ -11,6 +11,8 @@ import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -33,6 +35,7 @@ public class TransactionView {
     private ZonedDateTime createdDate;
     private CardDetails cardDetails;
     private Boolean delayedCapture;
+    protected List<Link> links = new ArrayList<>();
 
     //todo: replace with builder
     public TransactionView(Long id, String gatewayAccountId, Long amount, TransactionState state,
@@ -65,6 +68,11 @@ public class TransactionView {
                 transaction.getExternalId(), transaction.getReturnUrl(), transaction.getEmail(),
                 transaction.getPaymentProvider(), transaction.getCreatedAt(), transaction.getCardDetails(),
                 transaction.getDelayedCapture());
+    }
+
+    public TransactionView addLink(Link link) {
+        links.add(link);
+        return this;
     }
 
     public Long getId() {
@@ -121,6 +129,10 @@ public class TransactionView {
 
     public Boolean getDelayedCapture() {
         return delayedCapture;
+    }
+
+    public List<Link> getLinks() {
+        return links;
     }
 
     @Override
