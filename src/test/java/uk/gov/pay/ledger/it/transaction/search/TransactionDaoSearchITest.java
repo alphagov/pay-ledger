@@ -271,7 +271,7 @@ public class TransactionDaoSearchITest {
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
         searchParams.setDisplaySize(2l);
-        searchParams.setPageNumber(3);
+        searchParams.setPageNumber(3l);
 
 
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);

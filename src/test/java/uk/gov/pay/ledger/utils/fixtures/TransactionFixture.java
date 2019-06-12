@@ -49,6 +49,21 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return transactionList;
     }
 
+    public static List<Transaction> aPersistedTransactionList(String gatewayAccountId, int noOfViews, Jdbi jdbi) {
+        List<Transaction> transactionList = new ArrayList<>();
+        long preId = RandomUtils.nextLong();
+        for (int i = 0; i < noOfViews; i++) {
+            transactionList.add(aTransactionFixture()
+                    .withGatewayAccountId(gatewayAccountId)
+                    .withId(preId + i)
+                    .withAmount(100l + i)
+                    .withReference("reference " + i)
+                    .insert(jdbi)
+                    .toEntity());
+        }
+        return transactionList;
+    }
+
     public Long getId() {
         return id;
     }

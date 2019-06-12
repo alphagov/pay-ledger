@@ -13,7 +13,7 @@ import java.util.Optional;
 public class TransactionDao {
 
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID = "SELECT * FROM transaction " +
-            "WHERE external_id = :externalId";
+            "WHERE external_id = :externalId and gateway_account_id= :gatewayAccountId ";
     private static final String SEARCH_QUERY_STRING = "SELECT * FROM transaction t " +
             "WHERE t.gateway_account_id = :gatewayAccountExternalId " +
             ":searchExtraFields " +
@@ -30,12 +30,13 @@ public class TransactionDao {
         this.jdbi = jdbi;
     }
 
-    public Optional<Transaction> findTransactionByExternalId(String externalId) {
+    public Optional<Transaction> findTransactionByExternalId(String gatewayAccountId, String externalId) {
         return jdbi.withHandle(handle ->
-           handle.createQuery(FIND_TRANSACTION_BY_EXTERNAL_ID)
-                   .bind("externalId", externalId)
-                   .map(new TransactionMapper())
-                   .findFirst());
+                handle.createQuery(FIND_TRANSACTION_BY_EXTERNAL_ID)
+                        .bind("gatewayAccountId", gatewayAccountId)
+                        .bind("externalId", externalId)
+                        .map(new TransactionMapper())
+                        .findFirst());
     }
 
     //todo: order results by transaction date

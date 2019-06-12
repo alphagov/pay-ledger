@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.resources.TransactionResource;
+import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import javax.ws.rs.core.Response;
 
@@ -16,11 +17,12 @@ import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionResourceTest {
-    private static final TransactionDao dao = mock(TransactionDao.class);
+    private static final TransactionDao mockTransactionDao = mock(TransactionDao.class);
+    private static final TransactionService mockTransactionService = mock(TransactionService.class);
 
     @ClassRule
     public static final ResourceTestRule resources = ResourceTestRule.builder()
-            .addResource(new TransactionResource(dao))
+            .addResource(new TransactionResource(mockTransactionService, mockTransactionDao))
             .build();
 
     @Test
