@@ -27,6 +27,7 @@ public enum TransactionState {
         return value;
     }
 
+    @JsonProperty("finished")
     public boolean isFinished() {
         return finished;
     }

@@ -17,7 +17,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static uk.gov.pay.ledger.utils.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.ledger.utils.fixtures.TransactionFixture.aPersistedTransactionList;
 import static uk.gov.pay.ledger.utils.fixtures.TransactionFixture.aTransactionFixture;
 
@@ -54,14 +54,25 @@ public class TransactionResourceIT {
     }
 
     @Test
-    public void shouldSearchAndReturnAllFieldsCorrectly() {
+    public void shouldSearchUsingAllFieldsAndReturnAllFieldsCorrectly() {
         // until we use the date from the event we're sorting by id, that's why the list is inverted
         String gatewayAccountId = RandomStringUtils.randomAlphanumeric(20);
         List<Transaction> transactionList = aPersistedTransactionList(gatewayAccountId, 10, rule.getJdbi());
         Transaction transactionToVerify = transactionList.get(7);
         given().port(port)
                 .contentType(JSON)
-                .get("/v1/api/accounts/" + gatewayAccountId + "/transactions?page=2&display_size=2")
+                //todo: add more query params (card_brands, refund_states...) when search functionality is available
+                .get("/v1/api/accounts/" + gatewayAccountId
+                        + "/transactions?" +
+                        "page=2" +
+                        "&display_size=2" +
+                        "&email=example.org" +
+                        "&reference=reference" +
+                        "&card_holder_name=Smith" +
+                        "&from_date=2000-01-01T10:15:30Z" +
+                        "&to_date=2100-01-01T10:15:30Z" +
+                        "&state=created"
+                )
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
@@ -74,6 +85,7 @@ public class TransactionResourceIT {
                 .body("results[0].language", is(transactionToVerify.getLanguage()))
                 .body("results[0].return_url", is(transactionToVerify.getReturnUrl()))
                 .body("results[0].email", is(transactionToVerify.getEmail()))
+                .body("results[0].created_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(transactionToVerify.getCreatedAt())))
                 .body("results[0].payment_provider", is(transactionToVerify.getPaymentProvider()))
                 .body("results[0].card_details.cardholder_name", is(transactionToVerify.getCardDetails().getCardHolderName()))
                 .body("results[0].card_details.billing_address.line1", is(transactionToVerify.getCardDetails().getBillingAddress().getAddressLine1()))
@@ -95,10 +107,10 @@ public class TransactionResourceIT {
                 .body("page", is(2))
                 .body("total", is(10))
 
-                .body("_links.self.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?page=2&display_size=2"))
-                .body("_links.first_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?page=1&display_size=2"))
-                .body("_links.last_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?page=5&display_size=2"))
-                .body("_links.prev_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?page=1&display_size=2"))
-                .body("_links.next_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?page=3&display_size=2"));
+                .body("_links.self.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=2&display_size=2"))
+                .body("_links.first_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=1&display_size=2"))
+                .body("_links.last_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=5&display_size=2"))
+                .body("_links.prev_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=1&display_size=2"))
+                .body("_links.next_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=3&display_size=2"));
     }
 }

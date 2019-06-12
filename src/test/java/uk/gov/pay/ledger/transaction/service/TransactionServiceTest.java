@@ -107,8 +107,8 @@ public class TransactionServiceTest {
 
         searchParams.setEmail("test@email.com");
         searchParams.setCardHolderName("test");
-        searchParams.setFromDate(ZonedDateTime.parse("2019-05-01T10:15:30+00:00"));
-        searchParams.setToDate(ZonedDateTime.parse("2019-06-01T10:15:30+00:00"));
+        searchParams.setFromDate("2019-05-01T10:15:30Z");
+        searchParams.setToDate("2019-06-01T10:15:30Z");
         searchParams.setReference("ref");
         searchParams.setFirstDigitsCardNumber("4242");
         searchParams.setLastDigitsCardNumber("1234");

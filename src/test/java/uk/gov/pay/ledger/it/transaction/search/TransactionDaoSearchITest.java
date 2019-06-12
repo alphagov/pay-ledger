@@ -200,7 +200,7 @@ public class TransactionDaoSearchITest {
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
-        searchParams.setFromDate(ZonedDateTime.now().minusDays(1).minusMinutes(10));
+        searchParams.setFromDate(ZonedDateTime.now().minusDays(1).minusMinutes(10).toString());
 
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -223,7 +223,7 @@ public class TransactionDaoSearchITest {
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
-        searchParams.setToDate(ZonedDateTime.now().minusDays(2).plusMinutes(10));
+        searchParams.setToDate(ZonedDateTime.now().minusDays(2).plusMinutes(10).toString());
 
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 

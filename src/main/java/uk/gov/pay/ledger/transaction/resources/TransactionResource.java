@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParamsValidator.validateSearchParams;
 
 @Path("/v1/api")
 @Produces(APPLICATION_JSON)
@@ -57,7 +58,7 @@ public class TransactionResource {
         if (searchParams == null) {
             searchParams = new TransactionSearchParams();
         }
-
+        validateSearchParams(searchParams);
         searchParams.setAccountId(accountId);
         return transactionService.searchTransactions(searchParams, uriInfo);
     }

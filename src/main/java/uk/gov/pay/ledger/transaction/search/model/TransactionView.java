@@ -140,11 +140,11 @@ public class TransactionView {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TransactionView that = (TransactionView) o;
-        return id.equals(that.id);
+        return Objects.equals(externalId, that.externalId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(externalId);
     }
 }
