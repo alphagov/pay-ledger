@@ -1,10 +1,10 @@
 package uk.gov.pay.ledger.queue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.services.EventService;
+import uk.gov.pay.ledger.event.services.model.response.CreateEventResponse;
 
 import java.util.List;
 
@@ -36,8 +36,8 @@ public class EventMessageHandler {
         }
     }
 
-    private void processSingleMessage(EventMessage message) throws QueueException, JsonProcessingException {
-        var response = eventService.createIfDoesNotExist(message.getEvent());
+    private void processSingleMessage(EventMessage message) throws QueueException {
+        CreateEventResponse response = eventService.createIfDoesNotExist(message.getEvent());
 
         if(response.isSuccessful()) {
             eventQueue.markMessageAsProcessed(message);
@@ -46,7 +46,7 @@ public class EventMessageHandler {
                     response.getState());
         } else {
             eventQueue.scheduleMessageForRetry(message);
-            LOGGER.info("The event message has been scheduled for retry. [id={}] [state={}] [error={}]",
+            LOGGER.warn("The event message has been scheduled for retry. [id={}] [state={}] [error={}]",
                     message.getId(),
                     response.getState(),
                     response.getErrorMessage());

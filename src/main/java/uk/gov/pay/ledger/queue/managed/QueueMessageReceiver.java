@@ -8,14 +8,13 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.queue.EventMessageHandler;
-import uk.gov.pay.ledger.queue.QueueException;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class QueueMessageReceiver implements Managed {
 
-    private static final String QUEUE_MESSAGE_RECEIVER_THREAD_NAME = "queue-message-receiver";
+    private static final String QUEUE_MESSAGE_RECEIVER_THREAD_NAME = "queue-message-receiver-%d";
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueMessageReceiver.class);
     private final QueueMessageReceiverConfig config;
 
@@ -41,14 +40,14 @@ public class QueueMessageReceiver implements Managed {
 
     @Override
     public void start() {
-        long initialDelay = config.getThreadDelayInSeconds();
-        long delay = config.getThreadDelayInSeconds();
+        long initialDelay = config.getThreadDelayInMilliseconds();
+        long delay = config.getThreadDelayInMilliseconds();
 
         scheduledExecutorService.scheduleWithFixedDelay(
                 this::receive,
                 initialDelay,
                 delay,
-                TimeUnit.SECONDS
+                TimeUnit.MILLISECONDS
         );
     }
 
@@ -56,7 +55,7 @@ public class QueueMessageReceiver implements Managed {
         LOGGER.info("Queue message receiver thread polling queue");
         try {
             eventMessageHandler.handle();
-        } catch (QueueException e) {
+        } catch (Exception e) {
             LOGGER.error("Queue message receiver thread exception [{}]", e);
         }
     }

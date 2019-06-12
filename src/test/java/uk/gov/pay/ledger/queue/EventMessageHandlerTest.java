@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.event.services.EventService;
+import uk.gov.pay.ledger.event.services.model.response.CreateEventResponse;
 
 import java.util.List;
 
@@ -24,13 +25,13 @@ public class EventMessageHandlerTest {
     private EventService eventService;
 
     @Mock
-    private EventService.CreateEventResponse createEventResponse;
+    private CreateEventResponse createEventResponse;
 
     private EventMessageHandler eventMessageHandler;
 
     @Before
     public void setUp() throws QueueException {
-        var message = mock(EventMessage.class);
+        EventMessage message = mock(EventMessage.class);
 
         when(eventQueue.retrieveEvents()).thenReturn(List.of(message));
         when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);

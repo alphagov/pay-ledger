@@ -51,7 +51,7 @@ public class EventQueue {
 
     private EventMessage getMessage(QueueMessage queueMessage) {
         try {
-            var eventDto = objectMapper.readValue(queueMessage.getMessageBody(), EventMessageDto.class);
+            EventMessageDto eventDto = objectMapper.readValue(queueMessage.getMessageBody(), EventMessageDto.class);
 
             return EventMessage.of(eventDto, queueMessage);
         } catch (IOException e) {

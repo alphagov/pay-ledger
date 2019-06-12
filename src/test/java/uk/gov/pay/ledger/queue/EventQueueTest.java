@@ -66,7 +66,7 @@ public class EventQueueTest {
 
     @Test
     public void retrieveEvents() throws QueueException, JsonProcessingException {
-        var eventsList = eventQueue.retrieveEvents();
+        List<EventMessage> eventsList = eventQueue.retrieveEvents();
 
         assertNotNull(eventsList);
         assertFalse(eventsList.isEmpty());

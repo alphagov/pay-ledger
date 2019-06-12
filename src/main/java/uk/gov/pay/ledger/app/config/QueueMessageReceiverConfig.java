@@ -9,7 +9,7 @@ public class QueueMessageReceiverConfig extends Configuration {
 
     @Valid
     @NotNull
-    private int threadDelayInSeconds;
+    private int threadDelayInMilliseconds;
 
     @Valid
     @NotNull
@@ -19,8 +19,8 @@ public class QueueMessageReceiverConfig extends Configuration {
     @NotNull
     private int messageRetryDelayInSeconds;
 
-    public int getThreadDelayInSeconds() {
-        return threadDelayInSeconds;
+    public int getThreadDelayInMilliseconds() {
+        return threadDelayInMilliseconds;
     }
 
     public int getNumberOfThreads() {

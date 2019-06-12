@@ -42,12 +42,9 @@ public class SqsQueueService {
             ReceiveMessageResult receiveMessageResult = sqsClient.receiveMessage(receiveMessageRequest);
 
             return QueueMessage.of(receiveMessageResult);
-        } catch (AmazonSQSException | UnsupportedOperationException e) {
-            logger.error("Failed to receive messages from SQS queue - [{}] {}", e.getClass().getCanonicalName(), e.getMessage());
-            throw new QueueException(e.getMessage());
         } catch (Exception e) {
             logger.error("Failed to receive messages from SQS queue - [{}] {}", e.getClass().getCanonicalName(), e.getMessage());
-            throw new QueueException(e.getMessage());
+            throw new QueueException("Failed to receive messages from SQS queue", e);
         }
     }
 
@@ -56,11 +53,10 @@ public class SqsQueueService {
             sqsClient.deleteMessage(new DeleteMessageRequest(queueUrl, messageReceiptHandle));
         } catch (AmazonSQSException | UnsupportedOperationException e) {
             logger.error("Failed to delete message from SQS queue - {}", e.getMessage());
-            throw new QueueException(e.getMessage());
+            throw new QueueException("Failed to delete message from SQS queue", e);
         } catch (AmazonServiceException e) {
             logger.error("Failed to delete message from SQS queue - [errorMessage={}] [awsErrorCode={}]", e.getMessage(), e.getErrorCode());
-            String errorMessage = String.format("%s [%s]", e.getMessage(), e.getErrorCode());
-            throw new QueueException(errorMessage);
+            throw new QueueException("Failed to delete message from SQS queue", e);
         }
     }
 
@@ -75,7 +71,7 @@ public class SqsQueueService {
             sqsClient.changeMessageVisibility(changeMessageVisibilityRequest);
         } catch (AmazonSQSException | UnsupportedOperationException e) {
             logger.error("Failed to defer message from SQS queue - {}", e.getMessage());
-            throw new QueueException(e.getMessage());
+            throw new QueueException("Failed to defer message from SQS queue", e);
         }
     }
 }

@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -34,16 +35,26 @@ public class EventDaoITest {
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
     private ObjectMapper objectMapper = new ObjectMapper();
 
+    private EventDao eventDao;
+    private ResourceTypeDao resourceTypeDao;
+    private DatabaseTestHelper dbHelper;
+
+    @Before
+    public void setUp() {
+        eventDao = rule.getJdbi().onDemand(EventDao.class);
+        resourceTypeDao = rule.getJdbi().onDemand(ResourceTypeDao.class);
+        dbHelper = aDatabaseTestHelper(rule.getJdbi());
+    }
+
     @Test
     public void shouldInsertEvent() throws IOException {
         Event event = anEventFixture()
                 .withEventDate(CREATED_AT)
                 .toEntity();
-        EventDao eventDao = rule.getJdbi().onDemand(EventDao.class);
+
         eventDao.insertEventWithResourceTypeId(event);
-        ResourceTypeDao resourceTypeDao = rule.getJdbi().onDemand(ResourceTypeDao.class);
+
         int resourceTypeId = resourceTypeDao.getResourceTypeIdByName(event.getResourceType().name());
-        DatabaseTestHelper dbHelper = aDatabaseTestHelper(rule.getJdbi());
         Map<String, Object> result = dbHelper.getEventByExternalId(event.getResourceExternalId());
         assertThat(result.get("sqs_message_id"), is(event.getSqsMessageId()));
         assertThat(result.get("resource_type_id"), is(resourceTypeId));
@@ -54,19 +65,16 @@ public class EventDaoITest {
     }
 
     @Test
-    public void shouldInsertEventIfDoesNotExistWhenInsertEventIfDoesNotExist() throws IOException {
+    public void shouldInsertNotExistingEventWhenInsertEventIfDoesNotExist() throws IOException {
         Event event = anEventFixture()
                 .withEventDate(CREATED_AT)
                 .toEntity();
-        EventDao eventDao = rule.getJdbi().onDemand(EventDao.class);
 
-        var status = eventDao.insertEventIfDoesNotExistWithResourceTypeId(event);
+        Optional<Long> status = eventDao.insertEventIfDoesNotExistWithResourceTypeId(event);
 
         assertTrue(status.isPresent());
 
-        ResourceTypeDao resourceTypeDao = rule.getJdbi().onDemand(ResourceTypeDao.class);
         int resourceTypeId = resourceTypeDao.getResourceTypeIdByName(event.getResourceType().name());
-        DatabaseTestHelper dbHelper = aDatabaseTestHelper(rule.getJdbi());
         Map<String, Object> result = dbHelper.getEventByExternalId(event.getResourceExternalId());
         assertThat(result.get("sqs_message_id"), is(event.getSqsMessageId()));
         assertThat(result.get("resource_type_id"), is(resourceTypeId));
@@ -77,7 +85,7 @@ public class EventDaoITest {
     }
 
     @Test
-    public void shouldNotInsertEventIfDoesExistWhenInsertEventIfDoesNotExist() throws IOException {
+    public void shouldNotInsertDuplicateEventWhenInsertEventIfDoesNotExist() throws IOException {
         Event event = anEventFixture()
                 .insert(rule.getJdbi())
                 .toEntity();
@@ -88,14 +96,11 @@ public class EventDaoITest {
                 .withEventData("{\"event_data\": \"duplicate event data\"}")
                 .toEntity();
 
-        EventDao eventDao = rule.getJdbi().onDemand(EventDao.class);
-        var status = eventDao.insertEventIfDoesNotExistWithResourceTypeId(duplicateEvent);
+        Optional<Long> status = eventDao.insertEventIfDoesNotExistWithResourceTypeId(duplicateEvent);
 
         assertFalse(status.isPresent());
 
-        ResourceTypeDao resourceTypeDao = rule.getJdbi().onDemand(ResourceTypeDao.class);
         int resourceTypeId = resourceTypeDao.getResourceTypeIdByName(event.getResourceType().name());
-        DatabaseTestHelper dbHelper = aDatabaseTestHelper(rule.getJdbi());
         Map<String, Object> result = dbHelper.getEventByExternalId(event.getResourceExternalId());
         int numberOfEvents = dbHelper.getEventsCountByExternalId(event.getResourceExternalId());
         assertThat(numberOfEvents, is(1));
@@ -112,7 +117,7 @@ public class EventDaoITest {
         Event event = anEventFixture()
                 .insert(rule.getJdbi())
                 .toEntity();
-        EventDao eventDao = rule.getJdbi().onDemand(EventDao.class);
+
         Optional<Event> optionalEvent = eventDao.getById(event.getId());
         assertThat(optionalEvent.isPresent(), is(true));
         Event retrievedEvent = optionalEvent.get();

@@ -22,14 +22,13 @@ public class EventIntegrationTest {
 
     @Test
     public void shouldGetEventFromDB() {
-        var x =rule.getAppRule().getConfiguration();
         Event event = anEventFixture()
-                .insert(rule.getSqsClient())
+                .insert(rule.getJdbi())
                 .toEntity();
 
         given().port(port)
                 .contentType(JSON)
-                .get("/v1/event/1")
+                .get("/v1/event/" + event.getId())
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
