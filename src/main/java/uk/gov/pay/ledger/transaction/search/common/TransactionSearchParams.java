@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.search.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -29,21 +30,31 @@ public class TransactionSearchParams {
     private static final String REFUND_STATES_KEY = "refund_states";
     private static final String CARD_BRAND_KEY = "card_brand";
     private static final long MAX_DISPLAY_SIZE = 500;
+    private static final long DEFAULT_PAGE_NUMBER = 1L;
 
     private String accountId;
+    @QueryParam("email")
     private String email;
+    @QueryParam("reference")
     private String reference;
+    @QueryParam("cardholder_name")
     private String cardHolderName;
+    @QueryParam("last_digits_card_number")
     private String lastDigitsCardNumber;
+    @QueryParam("first_digits_card_number")
     private String firstDigitsCardNumber;
+    @QueryParam("payment_states")
     private CommaDelimitedSetParameter paymentStates;
+    @QueryParam("refund_staes")
     private CommaDelimitedSetParameter refundStates;
+    @QueryParam("card_brands")
     private List<String> cardBrands;
+    @QueryParam("from_date")
     private ZonedDateTime fromDate;
+    @QueryParam("to_date")
     private ZonedDateTime toDate;
     private Long pageNumber = 1L;
     private Long displaySize = MAX_DISPLAY_SIZE;
-
     private Map<String, Object> queryMap;
 
     public void setAccountId(String accountId) {
@@ -90,12 +101,18 @@ public class TransactionSearchParams {
         this.toDate = toDate;
     }
 
-    public void setPageNumber(long pageNumber) {
-        this.pageNumber = pageNumber;
+    @QueryParam("page")
+    public void setPageNumber(Long pageNumber) {
+        if (pageNumber == null) {
+            this.pageNumber = DEFAULT_PAGE_NUMBER;
+        } else {
+            this.pageNumber = pageNumber;
+        }
     }
 
-    public void setDisplaySize(long displaySize) {
-        if (displaySize > MAX_DISPLAY_SIZE) {
+    @QueryParam("display_size")
+    public void setDisplaySize(Long displaySize) {
+        if (displaySize == null || displaySize > MAX_DISPLAY_SIZE) {
             LOGGER.info("Invalid display_size [{}] for transaction search params. Setting display_size to default [{}]",
                     displaySize, MAX_DISPLAY_SIZE);
             this.displaySize = MAX_DISPLAY_SIZE;
@@ -135,7 +152,7 @@ public class TransactionSearchParams {
         if (refundStates != null) {
             sb.append(" AND false");
         }
-        if (cardBrands != null) {
+        if (cardBrands != null && !cardBrands.isEmpty()) {
             sb.append(" AND false");
         }
         if (isNotBlank(lastDigitsCardNumber)) {
@@ -243,7 +260,7 @@ public class TransactionSearchParams {
 
     private String addPaginationParams(Long forPage) {
         String queryParams = format("&page=%s", forPage);
-        queryParams += format("&display_size=%s", displaySize);
+        queryParams += format("&display_size=%s", displaySize.intValue());
         return queryParams;
     }
 }
