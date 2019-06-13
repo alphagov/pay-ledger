@@ -4,7 +4,7 @@ import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.rules.AppWithPostgresRule;
+import uk.gov.pay.ledger.rules.AppWithPostgresAndSqsRule;
 
 import javax.ws.rs.core.Response;
 
@@ -16,7 +16,7 @@ import static uk.gov.pay.ledger.utils.fixtures.EventFixture.anEventFixture;
 @Ignore
 public class EventIntegrationTest {
     @ClassRule
-    public static AppWithPostgresRule rule = new AppWithPostgresRule();
+    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
 
     private Integer port = rule.getAppRule().getLocalPort();
 

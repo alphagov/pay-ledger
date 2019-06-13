@@ -34,6 +34,16 @@ public class Event {
         this.eventData = eventData;
     }
 
+    public Event(String queueMessageId, ResourceType resourceType, String resourceExternalId, ZonedDateTime eventDate,
+                 String eventType, String eventData) {
+        this.sqsMessageId = queueMessageId;
+        this.resourceType = resourceType;
+        this.resourceExternalId = resourceExternalId;
+        this.eventDate = eventDate;
+        this.eventType = eventType;
+        this.eventData = eventData;
+    }
+
     public Long getId() {
         return id;
     }

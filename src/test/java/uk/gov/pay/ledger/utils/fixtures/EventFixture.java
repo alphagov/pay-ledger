@@ -119,4 +119,15 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
     public String getEventData() {
         return eventData;
     }
+
+    public EventFixture from(Event event) {
+        id = event.getId();
+        sqsMessageId = event.getSqsMessageId();
+        resourceType = event.getResourceType();
+        resourceExternalId = event.getResourceExternalId();
+        eventDate = event.getEventDate();
+        eventType = event.getEventType();
+        eventData = event.getEventData();
+        return this;
+    }
 }

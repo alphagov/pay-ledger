@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.rules;
 
+import com.amazonaws.services.sqs.AmazonSQS;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
@@ -14,21 +15,25 @@ import uk.gov.pay.ledger.app.LedgerConfig;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
-public class AppWithPostgresRule extends ExternalResource {
+public class AppWithPostgresAndSqsRule extends ExternalResource {
     private static String CONFIG_PATH = resourceFilePath("config/test-config.yaml");
     private final Jdbi jdbi;
+    private final AmazonSQS sqsClient;
     private PostgreSQLContainer postgres;
     private DropwizardAppRule<LedgerConfig> appRule;
 
-    public AppWithPostgresRule() {
+    public AppWithPostgresAndSqsRule() {
         postgres = new PostgreSQLContainer("postgres:11.1");
         postgres.start();
+        sqsClient = SqsTestDocker.initialise("event-queue");
         appRule = new DropwizardAppRule<>(
                 LedgerApp.class,
                 CONFIG_PATH,
                 config("database.url", postgres.getJdbcUrl()),
                 config("database.user", postgres.getUsername()),
-                config("database.password", postgres.getPassword())
+                config("database.password", postgres.getPassword()),
+                config("sqsConfig.eventQueueUrl", SqsTestDocker.getQueueUrl("event-queue")),
+                config("sqsConfig.endpoint", SqsTestDocker.getEndpoint())
         );
 
         jdbi = Jdbi.create(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
@@ -53,5 +58,9 @@ public class AppWithPostgresRule extends ExternalResource {
     }
     public Jdbi getJdbi() {
         return jdbi;
+    }
+
+    public AmazonSQS getSqsClient() {
+        return sqsClient;
     }
 }
