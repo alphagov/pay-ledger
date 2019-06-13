@@ -1,7 +1,11 @@
 package uk.gov.pay.ledger.transaction.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class CardDetails {
 
     private String cardHolderName;
@@ -24,8 +28,8 @@ public class CardDetails {
         return billingAddress;
     }
 
-    @JsonProperty("card_brand")
+    @JsonProperty(value = "card_brand")
     public String getCardBrand() {
-        return cardBrand;
+        return cardBrand == null ? "" : cardBrand;
     }
 }
