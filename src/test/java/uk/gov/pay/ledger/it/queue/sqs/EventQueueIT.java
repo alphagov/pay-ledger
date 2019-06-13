@@ -1,7 +1,6 @@
-package uk.gov.pay.ledger.queue.sqs;
+package uk.gov.pay.ledger.it.queue.sqs;
 
 import com.amazonaws.services.sqs.AmazonSQS;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -13,6 +12,7 @@ import uk.gov.pay.ledger.queue.EventMessage;
 import uk.gov.pay.ledger.queue.EventQueue;
 import uk.gov.pay.ledger.queue.QueueException;
 import uk.gov.pay.ledger.queue.QueueMessage;
+import uk.gov.pay.ledger.queue.sqs.SqsQueueService;
 import uk.gov.pay.ledger.rules.SqsTestDocker;
 
 import java.util.List;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.utils.fixtures.QueueEventFixture.aQueueEventFixture;
 
 @Ignore
-public class EventQueueTest {
+public class EventQueueIT {
 
     @Test
     public void shouldGetEventMessageDtoFromTheQueue() throws QueueException {
@@ -48,7 +48,7 @@ public class EventQueueTest {
     }
 
     @Test
-    public void shouldGetEventMessageFromTheQueue() throws QueueException, JsonProcessingException {
+    public void shouldGetEventMessageFromTheQueue() throws QueueException {
         AmazonSQS client = SqsTestDocker.initialise("event-queue");
 
         Event event = aQueueEventFixture()

@@ -65,7 +65,7 @@ public class EventDaoITest {
     }
 
     @Test
-    public void shouldInsertNotExistingEventWhenInsertEventIfDoesNotExist() throws IOException {
+    public void shouldInsertNotExistingEvent() throws IOException {
         Event event = anEventFixture()
                 .withEventDate(CREATED_AT)
                 .toEntity();
@@ -85,7 +85,7 @@ public class EventDaoITest {
     }
 
     @Test
-    public void shouldNotInsertDuplicateEventWhenInsertEventIfDoesNotExist() throws IOException {
+    public void shouldNotInsertDuplicateEvent() throws IOException {
         Event event = anEventFixture()
                 .insert(rule.getJdbi())
                 .toEntity();

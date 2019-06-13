@@ -40,7 +40,7 @@ public class EventMessageHandlerTest {
     }
 
     @Test
-    public void marksMessageAsProcessedWhenSuccessfulCreation() throws QueueException {
+    public void shouldMarkMessageAsProcessed_WhenEventIsProcessedSuccessfully() throws QueueException {
         when(createEventResponse.isSuccessful()).thenReturn(true);
 
         eventMessageHandler.handle();
@@ -49,7 +49,7 @@ public class EventMessageHandlerTest {
     }
 
     @Test
-    public void schedulesMessageForRetryWhenUnsuccessfulCreation() throws QueueException {
+    public void shouldScheduleMessageForRetry_WhenEventIsNotProcessedSuccessfully() throws QueueException {
         when(createEventResponse.isSuccessful()).thenReturn(false);
 
         eventMessageHandler.handle();

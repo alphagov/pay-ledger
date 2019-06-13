@@ -1,7 +1,6 @@
 package uk.gov.pay.ledger.queue;
 
 import com.amazonaws.services.sqs.model.SendMessageResult;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +64,7 @@ public class EventQueueTest {
     }
 
     @Test
-    public void retrieveEvents() throws QueueException, JsonProcessingException {
+    public void retrieveEvents() throws QueueException {
         List<EventMessage> eventsList = eventQueue.retrieveEvents();
 
         assertNotNull(eventsList);
