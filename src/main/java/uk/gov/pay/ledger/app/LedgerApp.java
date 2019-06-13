@@ -13,6 +13,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.ledger.event.resources.EventResource;
+import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.healthcheck.HealthCheckResource;
 import uk.gov.pay.ledger.transaction.resources.TransactionResource;
 
@@ -49,6 +50,7 @@ public class LedgerApp extends Application<LedgerConfig> {
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
+        environment.jersey().register(new BadRequestExceptionMapper());
     }
 
     private Jdbi createJdbi(DataSourceFactory dataSourceFactory) {

@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -45,14 +47,14 @@ public class TransactionSearchParams {
     private String firstDigitsCardNumber;
     @QueryParam("payment_states")
     private CommaDelimitedSetParameter paymentStates;
-    @QueryParam("refund_staes")
+    @QueryParam("refund_states")
     private CommaDelimitedSetParameter refundStates;
     @QueryParam("card_brands")
-    private List<String> cardBrands;
+    private List<String> cardBrands = new ArrayList<>();
     @QueryParam("from_date")
-    private ZonedDateTime fromDate;
+    private String fromDate;
     @QueryParam("to_date")
-    private ZonedDateTime toDate;
+    private String toDate;
     private Long pageNumber = 1L;
     private Long displaySize = MAX_DISPLAY_SIZE;
     private Map<String, Object> queryMap;
@@ -93,11 +95,11 @@ public class TransactionSearchParams {
         this.cardBrands = cardBrands;
     }
 
-    public void setFromDate(ZonedDateTime fromDate) {
+    public void setFromDate(String fromDate) {
         this.fromDate = fromDate;
     }
 
-    public void setToDate(ZonedDateTime toDate) {
+    public void setToDate(String toDate) {
         this.toDate = toDate;
     }
 
@@ -182,10 +184,10 @@ public class TransactionSearchParams {
                 queryMap.put(CARDHOLDER_NAME_FIELD, cardHolderName);
             }
             if (fromDate != null) {
-                queryMap.put(FROM_DATE_FIELD, fromDate);
+                queryMap.put(FROM_DATE_FIELD, ZonedDateTime.parse(fromDate));
             }
             if (toDate != null) {
-                queryMap.put(TO_DATE_FIELD, toDate);
+                queryMap.put(TO_DATE_FIELD, ZonedDateTime.parse(toDate));
             }
         }
         return queryMap;
@@ -203,6 +205,14 @@ public class TransactionSearchParams {
         return displaySize;
     }
 
+    public String getFromDate() {
+        return fromDate;
+    }
+
+    public String getToDate() {
+        return toDate;
+    }
+
     private Long getOffset() {
         Long offset = 0l;
 
@@ -212,7 +222,6 @@ public class TransactionSearchParams {
 
         return offset;
     }
-
 
     private String likeClause(String rawUserInputText) {
         return "%" + rawUserInputText + "%";
