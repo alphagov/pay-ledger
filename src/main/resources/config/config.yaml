@@ -7,7 +7,7 @@ database:
   driverClass: org.postgresql.Driver
   user: ${DB_USER}
   password: ${DB_PASSWORD}
-  url: jdbc:postgresql://${DB_HOST}/${DB_NAME:-ledger}?${DB_SSL_OPTION}
+  url: jdbc:postgresql://${DB_HOST}/${DB_NAME:-ledger}?sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory&${DB_SSL_OPTION}
 
   # the maximum amount of time to wait on an empty pool before throwing an maception
   maxWaitForConnection: 1s
