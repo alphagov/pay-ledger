@@ -30,7 +30,7 @@ public class PaginationBuilderTest {
     public void setUp() throws URISyntaxException {
         URI uri = new URI("http://example.org");
         when(mockedUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri(uri), UriBuilder.fromUri(uri));
-        when(mockedUriInfo.getPath()).thenReturn("/v1/api/accounts/" + gatewayAccountExternalId + "/transactions/view");
+        when(mockedUriInfo.getPath()).thenReturn("/transaction");
 
         searchParams = new TransactionSearchParams();
     }
@@ -44,9 +44,9 @@ public class PaginationBuilderTest {
                 .withTotalCount(120L);
         builder = builder.buildResponse();
         assertThat(builder.getPrevLink(), is(nullValue()));
-        assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
-        assertThat(builder.getLastLink().getHref().contains("?page=1&display_size=500"), is(true));
-        assertThat(builder.getSelfLink().getHref().contains("?page=1&display_size=500"), is(true));
+        assertThat(builder.getFirstLink().getHref().contains("page=1&display_size=500"), is(true));
+        assertThat(builder.getLastLink().getHref().contains("page=1&display_size=500"), is(true));
+        assertThat(builder.getSelfLink().getHref().contains("page=1&display_size=500"), is(true));
         assertThat(builder.getNextLink(), is(nullValue()));
     }
 
@@ -58,10 +58,10 @@ public class PaginationBuilderTest {
         PaginationBuilder builder = new PaginationBuilder(searchParams, mockedUriInfo)
                 .withTotalCount(120L);
         builder = builder.buildResponse();
-        assertThat(builder.getPrevLink().getHref().contains("?page=1&display_size=500"), is(true));
-        assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
-        assertThat(builder.getLastLink().getHref().contains("?page=1&display_size=500"), is(true));
-        assertThat(builder.getSelfLink().getHref().contains("?page=777&display_size=500"), is(true));
+        assertThat(builder.getPrevLink().getHref().contains("page=1&display_size=500"), is(true));
+        assertThat(builder.getFirstLink().getHref().contains("page=1&display_size=500"), is(true));
+        assertThat(builder.getLastLink().getHref().contains("page=1&display_size=500"), is(true));
+        assertThat(builder.getSelfLink().getHref().contains("page=777&display_size=500"), is(true));
         assertThat(builder.getNextLink(), is(nullValue()));
     }
 
@@ -72,11 +72,11 @@ public class PaginationBuilderTest {
         PaginationBuilder builder = new PaginationBuilder(searchParams, mockedUriInfo)
                 .withTotalCount(120L);
         builder = builder.buildResponse();
-        assertThat(builder.getPrevLink().getHref().contains("?page=1&display_size=50"), is(true));
-        assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=50"), is(true));
-        assertThat(builder.getLastLink().getHref().contains("?page=3&display_size=50"), is(true));
-        assertThat(builder.getNextLink().getHref().contains("?page=3&display_size=50"), is(true));
-        assertThat(builder.getSelfLink().getHref().contains("?page=2&display_size=50"), is(true));
+        assertThat(builder.getPrevLink().getHref().contains("page=1&display_size=50"), is(true));
+        assertThat(builder.getFirstLink().getHref().contains("page=1&display_size=50"), is(true));
+        assertThat(builder.getLastLink().getHref().contains("page=3&display_size=50"), is(true));
+        assertThat(builder.getNextLink().getHref().contains("page=3&display_size=50"), is(true));
+        assertThat(builder.getSelfLink().getHref().contains("page=2&display_size=50"), is(true));
     }
 
     @Test
@@ -86,10 +86,10 @@ public class PaginationBuilderTest {
         PaginationBuilder builder = new PaginationBuilder(searchParams, mockedUriInfo)
                 .withTotalCount(120L);
         builder = builder.buildResponse();
-        assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=10"), is(true));
-        assertThat(builder.getLastLink().getHref().contains("?page=12&display_size=10"), is(true));
-        assertThat(builder.getPrevLink().getHref().contains("?page=2&display_size=10"), is(true));
-        assertThat(builder.getNextLink().getHref().contains("?page=4&display_size=10"), is(true));
-        assertThat(builder.getSelfLink().getHref().contains("?page=3&display_size=10"), is(true));
+        assertThat(builder.getFirstLink().getHref().contains("page=1&display_size=10"), is(true));
+        assertThat(builder.getLastLink().getHref().contains("page=12&display_size=10"), is(true));
+        assertThat(builder.getPrevLink().getHref().contains("page=2&display_size=10"), is(true));
+        assertThat(builder.getNextLink().getHref().contains("page=4&display_size=10"), is(true));
+        assertThat(builder.getSelfLink().getHref().contains("page=3&display_size=10"), is(true));
     }
 }

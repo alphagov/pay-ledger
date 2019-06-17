@@ -44,19 +44,19 @@ public class TransactionService {
                                                            UriInfo uriInfo) {
         return transactionList.stream()
                 .map(transaction -> decorateWithLinks(TransactionView.from(transaction),
-                        searchParams.getAccountId(), uriInfo))
+                        uriInfo))
                 .collect(Collectors.toList());
     }
 
     private TransactionView decorateWithLinks(TransactionView transactionView,
-                                              String gatewayAccountId, UriInfo uriInfo) {
+                                              UriInfo uriInfo) {
 
-        Link selfLink = HalLinkBuilder.createSelfLink(uriInfo, "/v1/api/accounts/{accountId}/charges/{externalId}",
-                gatewayAccountId, transactionView.getExternalId());
+        Link selfLink = HalLinkBuilder.createSelfLink(uriInfo, "/v1/transaction/{externalId}",
+                transactionView.getExternalId());
         transactionView.addLink(selfLink);
 
-        Link refundsLink = HalLinkBuilder.createRefundsLink(uriInfo, "/v1/api/accounts/{accountId}/charges/{externalId}/refunds",
-                gatewayAccountId, transactionView.getExternalId());
+        Link refundsLink = HalLinkBuilder.createRefundsLink(uriInfo, "/v1/transaction/{externalId}/refunds",
+                transactionView.getExternalId());
         transactionView.addLink(refundsLink);
 
         return transactionView;

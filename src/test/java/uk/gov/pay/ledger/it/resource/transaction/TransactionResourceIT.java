@@ -43,7 +43,7 @@ public class TransactionResourceIT {
 
         given().port(port)
                 .contentType(JSON)
-                .get("/v1/api/accounts/" + transactionFixture.getGatewayAccountId() + "/transaction/" + transactionFixture.getExternalId())
+                .get("/v1/transaction/" + transactionFixture.getExternalId())
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
@@ -61,9 +61,9 @@ public class TransactionResourceIT {
         given().port(port)
                 .contentType(JSON)
                 //todo: add more query params (card_brands, refund_states...) when search functionality is available
-                .get("/v1/api/accounts/" + gatewayAccountId
-                        + "/transactions?" +
-                        "page=2" +
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=2" +
                         "&display_size=2" +
                         "&email=example.org" +
                         "&reference=reference" +
@@ -95,10 +95,10 @@ public class TransactionResourceIT {
                 .body("results[0].card_details.card_brand", is(transactionToVerify.getCardDetails().getCardBrand()))
                 .body("results[0].delayed_capture", is(transactionToVerify.getDelayedCapture()))
                 .body("results[0].charge_id", is(transactionToVerify.getExternalId()))
-                .body("results[0].links[0].href", containsString("v1/api/accounts/" + gatewayAccountId + "/charges/" + transactionToVerify.getExternalId()))
+                .body("results[0].links[0].href", containsString("v1/transaction/" + transactionToVerify.getExternalId()))
                 .body("results[0].links[0].method", is("GET"))
                 .body("results[0].links[0].rel", is("self"))
-                .body("results[0].links[1].href", containsString("v1/api/accounts/" + gatewayAccountId + "/charges/" + transactionToVerify.getExternalId() + "/refunds"))
+                .body("results[0].links[1].href", containsString("v1/transaction/" + transactionToVerify.getExternalId() + "/refunds"))
                 .body("results[0].links[1].method", is("GET"))
                 .body("results[0].links[1].rel", is("refunds"))
 
@@ -106,10 +106,10 @@ public class TransactionResourceIT {
                 .body("page", is(2))
                 .body("total", is(10))
 
-                .body("_links.self.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=2&display_size=2"))
-                .body("_links.first_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=1&display_size=2"))
-                .body("_links.last_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=5&display_size=2"))
-                .body("_links.prev_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=1&display_size=2"))
-                .body("_links.next_page.href", containsString("v1/api/accounts/" + gatewayAccountId + "/transactions?from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=3&display_size=2"));
+                .body("_links.self.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=2&display_size=2"))
+                .body("_links.first_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=1&display_size=2"))
+                .body("_links.last_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=5&display_size=2"))
+                .body("_links.prev_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=1&display_size=2"))
+                .body("_links.next_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=3&display_size=2"));
     }
 }

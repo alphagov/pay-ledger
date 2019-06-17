@@ -18,7 +18,7 @@ public class TransactionSearchParams {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionSearchParams.class);
 
-    private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "gatewayAccountExternalId";
+    private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "account_id";
     private static final String OFFSET_FIELD = "offset";
     private static final String PAGE_SIZE_FIELD = "limit";
     private static final String CARDHOLDER_NAME_FIELD = "cardholder_name";
@@ -34,6 +34,7 @@ public class TransactionSearchParams {
     private static final long MAX_DISPLAY_SIZE = 500;
     private static final long DEFAULT_PAGE_NUMBER = 1L;
 
+    @QueryParam("account_id")
     private String accountId;
     @QueryParam("email")
     private String email;
@@ -228,7 +229,7 @@ public class TransactionSearchParams {
     }
 
     public String buildQueryParamString(Long forPage) {
-        String query = "";
+        String query = GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + accountId;
 
         if (fromDate != null) {
             query += "&" + FROM_DATE_FIELD + "=" + fromDate;
@@ -264,7 +265,7 @@ public class TransactionSearchParams {
         }
 
         query += addPaginationParams(forPage);
-        return query.substring(1);
+        return query;
     }
 
     private String addPaginationParams(Long forPage) {
