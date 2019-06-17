@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.event.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -15,6 +16,7 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -60,7 +62,7 @@ public class EventDaoIT {
         assertThat(result.get("resource_type_id"), is(resourceTypeId));
         assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
         assertThat((Timestamp) result.get("event_date"), isDate(CREATED_AT));
-        assertThat(result.get("event_type"), is(event.getEventType()));
+        assertThat(result.get("event_type").toString(), is(event.getEventType().toString()));
         assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
     }
 
@@ -80,7 +82,7 @@ public class EventDaoIT {
         assertThat(result.get("resource_type_id"), is(resourceTypeId));
         assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
         assertThat((Timestamp) result.get("event_date"), isDate(CREATED_AT));
-        assertThat(result.get("event_type"), is(event.getEventType()));
+        assertThat(result.get("event_type").toString(), is(event.getEventType().toString()));
         assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
     }
 
@@ -108,7 +110,7 @@ public class EventDaoIT {
         assertThat(result.get("resource_type_id"), is(resourceTypeId));
         assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
         assertThat((Timestamp) result.get("event_date"), isDate(event.getEventDate()));
-        assertThat(result.get("event_type"), is(event.getEventType()));
+        assertThat(result.get("event_type").toString(), is(event.getEventType().toString()));
         assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
     }
 
@@ -125,8 +127,45 @@ public class EventDaoIT {
         assertThat(retrievedEvent.getResourceExternalId(), is(event.getResourceExternalId()));
         assertThat(retrievedEvent.getResourceType().name(), is(event.getResourceType().name()));
         assertThat(retrievedEvent.getSqsMessageId(), is(event.getSqsMessageId()));
-        assertThat(retrievedEvent.getEventType(), is(event.getEventType()));
+        assertThat(retrievedEvent.getEventType().toString(), is(event.getEventType().toString()));
         assertThat(retrievedEvent.getEventDate(), is(event.getEventDate()));
         assertThat(retrievedEvent.getEventData(), is(event.getEventData()));
+    }
+
+    @Test
+    public void shouldGetAllEventsForResourceExternalIdInDescendingDateOrder() {
+        final String resourceExternalId = "resourceExternalId";
+
+        Event earliestEvent = anEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(ZonedDateTime.now().minusHours(4))
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        Event latestEvent = anEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(ZonedDateTime.now().minusHours(1))
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        Event middleEvent = anEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(ZonedDateTime.now().minusHours(2))
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        List<Event> events = eventDao.getEventsByResourceExternalId(resourceExternalId);
+
+        assertThat(events.size(), is(3));
+        assertThat(events.get(0).getId(), is(latestEvent.getId()));
+        assertThat(events.get(1).getId(), is(middleEvent.getId()));
+        assertThat(events.get(2).getId(), is(earliestEvent.getId()));
+    }
+
+    @Test
+    public void shouldGetEmptyListWhenNoEventsWithResourceExternalId() {
+        List<Event> events = eventDao.getEventsByResourceExternalId("no_events_for_this_id");
+
+        assertThat(events.size(), is(0));
     }
 }

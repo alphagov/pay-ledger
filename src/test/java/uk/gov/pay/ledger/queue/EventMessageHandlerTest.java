@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.event.service.EventService;
-import uk.gov.pay.ledger.event.service.model.response.CreateEventResponse;
+import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 
 import java.util.List;
 

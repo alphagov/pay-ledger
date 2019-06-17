@@ -11,6 +11,7 @@ import org.jdbi.v3.sqlobject.transaction.Transaction;
 import uk.gov.pay.ledger.event.dao.mapper.EventMapper;
 import uk.gov.pay.ledger.event.model.Event;
 
+import java.util.List;
 import java.util.Optional;
 
 @RegisterRowMapper(EventMapper.class)
@@ -54,4 +55,9 @@ public interface EventDao {
         int resourceTypeId = getResourceTypeDao().getResourceTypeIdByName(event.getResourceType().name());
         return insertIfDoesNotExist(event, resourceTypeId);
     }
+
+    @SqlQuery("SELECT  e.id, e.sqs_message_id, rt.name AS resource_type_name, e.resource_external_id, e.event_date," +
+            "e.event_type, e.event_data FROM event e, resource_type rt WHERE e.resource_external_id = :resourceExternalId" +
+            " AND e.resource_type_id = rt.id ORDER BY e.event_date DESC")
+    List<Event> getEventsByResourceExternalId(@Bind("resourceExternalId") String resourceExternalId);
 }

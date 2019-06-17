@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.event.service.model.response;
+package uk.gov.pay.ledger.event.model.response;
 
 import java.util.Optional;
 
