@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.utils.fixtures;
+package uk.gov.pay.ledger.util.fixture;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;

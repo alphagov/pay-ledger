@@ -8,8 +8,8 @@ import org.junit.Test;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.rules.AppWithPostgresAndSqsRule;
-import uk.gov.pay.ledger.utils.DatabaseTestHelper;
+import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -18,9 +18,9 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.ledger.utils.DatabaseTestHelper.aDatabaseTestHelper;
-import static uk.gov.pay.ledger.utils.ZonedDateTimeTimestampMatcher.isDate;
-import static uk.gov.pay.ledger.utils.fixtures.QueueEventFixture.aQueueEventFixture;
+import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.util.ZonedDateTimeTimestampMatcher.isDate;
+import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
 
 @Ignore
 public class QueueEventProcessingIT {

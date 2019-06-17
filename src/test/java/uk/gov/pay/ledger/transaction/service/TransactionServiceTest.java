@@ -12,12 +12,11 @@ import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
-import uk.gov.pay.ledger.utils.fixtures.TransactionFixture;
+import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.MalformedURLException;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 

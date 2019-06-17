@@ -8,8 +8,8 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.resources.EventResource;
-import uk.gov.pay.ledger.utils.fixtures.EventFixture;
+import uk.gov.pay.ledger.event.resource.EventResource;
+import uk.gov.pay.ledger.util.fixture.EventFixture;
 
 import javax.ws.rs.core.Response;
 import java.util.Optional;

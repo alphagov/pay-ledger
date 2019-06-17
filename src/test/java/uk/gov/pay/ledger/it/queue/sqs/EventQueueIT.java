@@ -13,7 +13,7 @@ import uk.gov.pay.ledger.queue.EventQueue;
 import uk.gov.pay.ledger.queue.QueueException;
 import uk.gov.pay.ledger.queue.QueueMessage;
 import uk.gov.pay.ledger.queue.sqs.SqsQueueService;
-import uk.gov.pay.ledger.rules.SqsTestDocker;
+import uk.gov.pay.ledger.rule.SqsTestDocker;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.ledger.utils.fixtures.QueueEventFixture.aQueueEventFixture;
+import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
 
 @Ignore
 public class EventQueueIT {

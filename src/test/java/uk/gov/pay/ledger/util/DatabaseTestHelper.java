@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.utils;
+package uk.gov.pay.ledger.util;
 
 import org.jdbi.v3.core.Jdbi;
 

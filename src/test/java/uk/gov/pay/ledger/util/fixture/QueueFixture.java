@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.utils.fixtures;
+package uk.gov.pay.ledger.util.fixture;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 

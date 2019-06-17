@@ -6,13 +6,13 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
-import uk.gov.pay.ledger.rules.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
-import uk.gov.pay.ledger.utils.fixtures.TransactionFixture;
+import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ import java.util.List;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.ledger.utils.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 @Ignore
 public class TransactionDaoSearchITest {
