@@ -24,7 +24,7 @@ import javax.ws.rs.core.UriInfo;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParamsValidator.validateSearchParams;
 
-@Path("/v1/api")
+@Path("/v1/transaction")
 @Produces(APPLICATION_JSON)
 public class TransactionResource {
 
@@ -38,28 +38,25 @@ public class TransactionResource {
         this.transactionDao = transactionDao;
     }
 
-    @Path("/accounts/{accountId}/transaction/{transactionExternalId}")
+    @Path("/{transactionExternalId}")
     @GET
     @Timed
-    public Transaction getById(@PathParam("accountId") String accountId,
-                               @PathParam("transactionExternalId") String transactionExternalId) {
+    public Transaction getById(@PathParam("transactionExternalId") String transactionExternalId) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
-        return transactionDao.findTransactionByExternalId(accountId, transactionExternalId)
+        return transactionDao.findTransactionByExternalId(transactionExternalId)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
 
-    @Path("/accounts/{accountId}/transactions")
+    @Path("/")
     @GET
     @Timed
-    public TransactionSearchResponse search(@PathParam("accountId") String accountId,
-                                            @Valid @BeanParam TransactionSearchParams searchParams,
+    public TransactionSearchResponse search(@Valid @BeanParam TransactionSearchParams searchParams,
                                             @Context UriInfo uriInfo) {
 
         if (searchParams == null) {
             searchParams = new TransactionSearchParams();
         }
         validateSearchParams(searchParams);
-        searchParams.setAccountId(accountId);
         return transactionService.searchTransactions(searchParams, uriInfo);
     }
 }

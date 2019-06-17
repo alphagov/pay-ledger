@@ -13,15 +13,15 @@ import java.util.Optional;
 public class TransactionDao {
 
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID = "SELECT * FROM transaction " +
-            "WHERE external_id = :externalId and gateway_account_id= :gatewayAccountId ";
+            "WHERE external_id = :externalId";
     private static final String SEARCH_QUERY_STRING = "SELECT * FROM transaction t " +
-            "WHERE t.gateway_account_id = :gatewayAccountExternalId " +
+            "WHERE t.gateway_account_id = :account_id " +
             ":searchExtraFields " +
             "ORDER BY t.id DESC OFFSET :offset LIMIT :limit";
 
     private static final String SEARCH_COUNT_QUERY_STRING = "SELECT count(t.id) " +
             "FROM transaction t " +
-            "WHERE t.gateway_account_id = :gatewayAccountExternalId " +
+            "WHERE t.gateway_account_id = :account_id " +
             ":searchExtraFields ";
     private final Jdbi jdbi;
 
@@ -30,10 +30,9 @@ public class TransactionDao {
         this.jdbi = jdbi;
     }
 
-    public Optional<Transaction> findTransactionByExternalId(String gatewayAccountId, String externalId) {
+    public Optional<Transaction> findTransactionByExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery(FIND_TRANSACTION_BY_EXTERNAL_ID)
-                        .bind("gatewayAccountId", gatewayAccountId)
                         .bind("externalId", externalId)
                         .map(new TransactionMapper())
                         .findFirst());

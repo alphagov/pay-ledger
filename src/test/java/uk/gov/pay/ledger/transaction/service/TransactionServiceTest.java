@@ -47,7 +47,7 @@ public class TransactionServiceTest {
 
         when(mockUriInfo.getBaseUri()).thenReturn(UriBuilder.fromUri("http://app.com").build());
         when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://app.com"));
-        when(mockUriInfo.getPath()).thenReturn("/v1/api/accounts/{accountId}/charges");
+        when(mockUriInfo.getPath()).thenReturn("/v1/transaction");
     }
 
     @Test
@@ -74,11 +74,11 @@ public class TransactionServiceTest {
 
         assertThat(transactionView.getLinks().get(0).getRel(), is("self"));
         assertThat(transactionView.getLinks().get(0).getMethod(), is("GET"));
-        assertThat(transactionView.getLinks().get(0).getHref(), is("http://app.com/v1/api/accounts/gateway_account_id/charges/" + transactionView.getExternalId()));
+        assertThat(transactionView.getLinks().get(0).getHref(), is("http://app.com/v1/transaction/" + transactionView.getExternalId()));
 
         assertThat(transactionView.getLinks().get(1).getRel(), is("refunds"));
         assertThat(transactionView.getLinks().get(1).getMethod(), is("GET"));
-        assertThat(transactionView.getLinks().get(1).getHref(), is("http://app.com/v1/api/accounts/gateway_account_id/charges/" + transactionView.getExternalId() + "/refunds"));
+        assertThat(transactionView.getLinks().get(1).getHref(), is("http://app.com/v1/transaction/" + transactionView.getExternalId() + "/refunds"));
     }
 
     @Test
@@ -92,11 +92,11 @@ public class TransactionServiceTest {
         TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(searchParams, mockUriInfo);
         PaginationBuilder paginationBuilder = transactionSearchResponse.getPaginationBuilder();
 
-        assertThat(paginationBuilder.getFirstLink().getHref(), is("http://app.com/v1/api/accounts/gateway_account_id/charges?page=1&display_size=10"));
-        assertThat(paginationBuilder.getPrevLink().getHref(), is("http://app.com/v1/api/accounts/gateway_account_id/charges?page=2&display_size=10"));
-        assertThat(paginationBuilder.getSelfLink().getHref(), is("http://app.com/v1/api/accounts/gateway_account_id/charges?page=3&display_size=10"));
-        assertThat(paginationBuilder.getNextLink().getHref(), is("http://app.com/v1/api/accounts/gateway_account_id/charges?page=4&display_size=10"));
-        assertThat(paginationBuilder.getLastLink().getHref(), is("http://app.com/v1/api/accounts/gateway_account_id/charges?page=10&display_size=10"));
+        assertThat(paginationBuilder.getFirstLink().getHref(), is("http://app.com/v1/transaction?account_id=gateway_account_id&page=1&display_size=10"));
+        assertThat(paginationBuilder.getPrevLink().getHref(), is("http://app.com/v1/transaction?account_id=gateway_account_id&page=2&display_size=10"));
+        assertThat(paginationBuilder.getSelfLink().getHref(), is("http://app.com/v1/transaction?account_id=gateway_account_id&page=3&display_size=10"));
+        assertThat(paginationBuilder.getNextLink().getHref(), is("http://app.com/v1/transaction?account_id=gateway_account_id&page=4&display_size=10"));
+        assertThat(paginationBuilder.getLastLink().getHref(), is("http://app.com/v1/transaction?account_id=gateway_account_id&page=10&display_size=10"));
     }
 
     @Test
