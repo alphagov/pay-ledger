@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.ledger.event.model.serializer.MicrosecondPrecisionDateTimeSerializer;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Event {
@@ -70,5 +71,37 @@ public class Event {
 
     public String getEventData() {
         return eventData;
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id=" + id +
+                ", sqsMessageId='" + sqsMessageId + '\'' +
+                ", resourceType=" + resourceType +
+                ", resourceExternalId='" + resourceExternalId + '\'' +
+                ", eventDate=" + eventDate +
+                ", eventType=" + eventType +
+                ", eventData='" + eventData + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Event event = (Event) o;
+        return Objects.equals(id, event.id) &&
+                Objects.equals(sqsMessageId, event.sqsMessageId) &&
+                resourceType == event.resourceType &&
+                Objects.equals(resourceExternalId, event.resourceExternalId) &&
+                Objects.equals(eventDate, event.eventDate) &&
+                eventType == event.eventType &&
+                Objects.equals(eventData, event.eventData);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, sqsMessageId, resourceType, resourceExternalId, eventDate, eventType, eventData);
     }
 }
