@@ -12,11 +12,11 @@ import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import uk.gov.pay.commons.utils.logging.LoggingFilter;
-import uk.gov.pay.ledger.event.resources.EventResource;
+import uk.gov.pay.ledger.event.resource.EventResource;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.healthcheck.HealthCheckResource;
 import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
-import uk.gov.pay.ledger.transaction.resources.TransactionResource;
+import uk.gov.pay.ledger.transaction.resource.TransactionResource;
 
 import static java.util.EnumSet.of;
 import static javax.servlet.DispatcherType.REQUEST;

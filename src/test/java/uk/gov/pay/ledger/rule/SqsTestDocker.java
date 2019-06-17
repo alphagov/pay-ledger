@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.rules;
+package uk.gov.pay.ledger.rule;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

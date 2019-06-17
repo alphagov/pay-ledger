@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.event.services;
+package uk.gov.pay.ledger.event.service;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.services.model.response.CreateEventResponse;
+import uk.gov.pay.ledger.event.service.model.response.CreateEventResponse;
 
 import java.util.Optional;
 

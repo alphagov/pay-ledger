@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.utils;
+package uk.gov.pay.ledger.util;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matchers;

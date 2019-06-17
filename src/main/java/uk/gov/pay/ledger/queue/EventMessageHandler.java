@@ -3,8 +3,8 @@ package uk.gov.pay.ledger.queue;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.event.services.EventService;
-import uk.gov.pay.ledger.event.services.model.response.CreateEventResponse;
+import uk.gov.pay.ledger.event.service.EventService;
+import uk.gov.pay.ledger.event.service.model.response.CreateEventResponse;
 
 import java.util.List;
 

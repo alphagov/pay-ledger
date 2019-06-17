@@ -1,11 +1,11 @@
-package uk.gov.pay.ledger.utils.fixtures;
+package uk.gov.pay.ledger.util.fixture;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.SendMessageResult;
 import org.apache.commons.lang3.RandomStringUtils;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
-import uk.gov.pay.ledger.rules.SqsTestDocker;
+import uk.gov.pay.ledger.rule.SqsTestDocker;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;

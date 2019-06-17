@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
-import uk.gov.pay.ledger.transaction.resources.TransactionResource;
+import uk.gov.pay.ledger.transaction.resource.TransactionResource;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import javax.ws.rs.core.Response;

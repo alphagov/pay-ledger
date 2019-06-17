@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.transaction.resources;
+package uk.gov.pay.ledger.transaction.resource;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;

@@ -1,9 +1,9 @@
-package uk.gov.pay.ledger.event.services;
+package uk.gov.pay.ledger.event.service;
 
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.services.model.response.CreateEventResponse;
+import uk.gov.pay.ledger.event.service.model.response.CreateEventResponse;
 
 import java.util.Optional;
 
