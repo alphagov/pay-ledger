@@ -35,7 +35,7 @@ public class EventIntegrationTest {
                 .body("resource_external_id", is(event.getResourceExternalId()))
                 .body("resource_type", is(event.getResourceType().name().toLowerCase()))
                 .body("sqs_message_id", is(event.getSqsMessageId()))
-                .body("event_type", is(event.getEventType()))
+                .body("event_type", is(event.getEventType().toString()))
                 .body("event_data", is(event.getEventData()));
     }
 }

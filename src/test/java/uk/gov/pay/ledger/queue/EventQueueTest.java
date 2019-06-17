@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
+import uk.gov.pay.ledger.event.model.EventType;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.queue.sqs.SqsQueueService;
 
@@ -41,7 +42,7 @@ public class EventQueueTest {
                 "\"id\": \"my-id\"," +
                 "\"timestamp\": \"2018-03-12T16:25:01.123456Z\"," +
                 "\"resource_external_id\": \"3uwuyr38rry\"," +
-                "\"event_type\":\"example type\"," +
+                "\"event_type\":\"PAYMENT_CREATED\"," +
                 "\"resource_type\": \"charge\"," +
                 "\"event_details\": {" +
                 "\"example_event_details_field\": \"and its value\"" +
@@ -71,7 +72,7 @@ public class EventQueueTest {
         assertFalse(eventsList.isEmpty());
         assertEquals("3uwuyr38rry", eventsList.get(0).getEvent().getResourceExternalId());
         assertEquals(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"), eventsList.get(0).getEvent().getEventDate());
-        assertEquals("example type", eventsList.get(0).getEvent().getEventType());
+        assertEquals(EventType.PAYMENT_CREATED, eventsList.get(0).getEvent().getEventType());
         assertEquals(ResourceType.CHARGE, eventsList.get(0).getEvent().getResourceType());
         assertEquals("{\"example_event_details_field\":\"and its value\"}", eventsList.get(0).getEvent().getEventData());
     }

@@ -15,7 +15,7 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
     private ResourceType resourceType = ResourceType.CHARGE;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
-    private String eventType = "PaymentCreated";
+    private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
 
     private QueueEventFixture() {
