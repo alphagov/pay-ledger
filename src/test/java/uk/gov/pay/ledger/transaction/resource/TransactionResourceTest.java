@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.transaction;
+package uk.gov.pay.ledger.transaction.resource;
 
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.junit.ClassRule;

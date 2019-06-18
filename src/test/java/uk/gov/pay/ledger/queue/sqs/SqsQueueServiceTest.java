@@ -69,7 +69,6 @@ public class SqsQueueServiceTest {
         assertThat(queueMessages.get(1).getReceiptHandle(), is("mock-message-receipt-handle-2"));
     }
 
-
     @Test
     public void receiveMessagesShouldReturnEmptyListWhenNoMessagesAvailable() throws QueueException {
         ReceiveMessageResult receiveMessageResult = new ReceiveMessageResult();

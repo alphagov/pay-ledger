@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.it.transaction.search;
+package uk.gov.pay.ledger.transaction.dao;
 
 
 import org.hamcrest.Matchers;
@@ -24,7 +24,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 @Ignore
-public class TransactionDaoSearchITest {
+public class TransactionDaoSearchIT {
 
     @ClassRule
     public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();

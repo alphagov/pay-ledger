@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.event;
+package uk.gov.pay.ledger.event.resource;
 
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -14,7 +14,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 
 @Ignore
-public class EventIntegrationTest {
+public class EventResourceIT {
     @ClassRule
     public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
 

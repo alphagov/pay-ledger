@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.it.queue.sqs;
+package uk.gov.pay.ledger.queue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -24,7 +24,7 @@ import static uk.gov.pay.ledger.util.ZonedDateTimeTimestampMatcher.isDate;
 import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
 
 @Ignore
-public class QueueEventProcessingIT {
+public class QueueMessageReceiverIT {
 
     @ClassRule
     public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule(config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true"));

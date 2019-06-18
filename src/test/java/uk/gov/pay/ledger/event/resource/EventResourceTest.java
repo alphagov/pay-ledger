@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.event;
+package uk.gov.pay.ledger.event.resource;
 
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.junit.Before;
