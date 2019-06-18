@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.it.resource.transaction;
+package uk.gov.pay.ledger.transaction.resource;
 
 import org.junit.Before;
 import org.junit.ClassRule;

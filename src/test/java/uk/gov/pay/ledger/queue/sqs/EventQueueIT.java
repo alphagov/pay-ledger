@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.it.queue.sqs;
+package uk.gov.pay.ledger.queue.sqs;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;

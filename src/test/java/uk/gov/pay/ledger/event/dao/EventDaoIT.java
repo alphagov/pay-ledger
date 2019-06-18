@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.event;
+package uk.gov.pay.ledger.event.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -27,7 +27,7 @@ import static uk.gov.pay.ledger.util.ZonedDateTimeTimestampMatcher.isDate;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 
 @Ignore
-public class EventDaoITest {
+public class EventDaoIT {
 
     @ClassRule
     public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
