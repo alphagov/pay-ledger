@@ -93,7 +93,7 @@ pipeline {
         deployEcs("ledger")
       }
     }
-    /*stage('Pact Tag') {
+    stage('Pact Tag') {
       when {
         branch 'master'
       }
@@ -101,7 +101,7 @@ pipeline {
         echo 'Tagging provider pact with "test"'
         tagPact("ledger", gitCommit(), "test")
       }
-    }*/
+    }
     /*stage('Smoke Tests') {
       when {
         branch 'master'
