@@ -12,13 +12,13 @@ import au.com.dius.pact.provider.junit.target.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
-import uk.gov.pay.ledger.rules.AppWithPostgresAndSqsRule;
-import uk.gov.pay.ledger.utils.fixtures.TransactionFixture;
+import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-import static uk.gov.pay.ledger.utils.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 @RunWith(PactRunner.class)
 @Provider("ledger")
