@@ -12,8 +12,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import uk.gov.pay.ledger.app.LedgerApp;
 import uk.gov.pay.ledger.app.LedgerConfig;
 
-import java.time.Duration;
-
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
@@ -25,9 +23,9 @@ public class AppWithPostgresAndSqsRule extends ExternalResource {
     private DropwizardAppRule<LedgerConfig> appRule;
 
     public AppWithPostgresAndSqsRule() {
-        postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:11.1")
-                .withStartupTimeout(Duration.ofSeconds(600));
-        postgres.start();
+
+        postgres = PostgresTestDocker.initialise();
+
         sqsClient = SqsTestDocker.initialise("event-queue");
         appRule = new DropwizardAppRule<>(
                 LedgerApp.class,
