@@ -8,6 +8,9 @@ import javax.validation.constraints.NotNull;
 public class QueueMessageReceiverConfig extends Configuration {
 
     @Valid
+    private boolean backgroundProcessingEnabled;
+
+    @Valid
     @NotNull
     private int threadDelayInMilliseconds;
 
@@ -30,4 +33,6 @@ public class QueueMessageReceiverConfig extends Configuration {
     public int getMessageRetryDelayInSeconds() {
         return messageRetryDelayInSeconds;
     }
+
+    public boolean isBackgroundProcessingEnabled() { return backgroundProcessingEnabled; }
 }

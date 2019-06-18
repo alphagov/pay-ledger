@@ -2,8 +2,11 @@ package uk.gov.pay.ledger.it.queue.sqs;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
@@ -25,12 +28,18 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
 
 @Ignore
+@RunWith(MockitoJUnitRunner.class)
 public class EventQueueIT {
+
+    private AmazonSQS client;
+
+    @Before
+    public void setUp() {
+        client = SqsTestDocker.initialise("event-queue");
+    }
 
     @Test
     public void shouldGetEventMessageDtoFromTheQueue() throws QueueException {
-        AmazonSQS client = SqsTestDocker.initialise("event-queue");
-
         Event event = aQueueEventFixture()
                 .insert(client)
                 .toEntity();
@@ -49,8 +58,6 @@ public class EventQueueIT {
 
     @Test
     public void shouldGetEventMessageFromTheQueue() throws QueueException {
-        AmazonSQS client = SqsTestDocker.initialise("event-queue");
-
         Event event = aQueueEventFixture()
                 .insert(client)
                 .toEntity();

@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
+import static io.dropwizard.testing.ConfigOverride.config;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
@@ -26,7 +27,7 @@ import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixtur
 public class QueueEventProcessingIT {
 
     @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule(config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true"));
 
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
     private ObjectMapper objectMapper = new ObjectMapper();

@@ -53,7 +53,9 @@ public class LedgerApp extends Application<LedgerConfig> {
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
         environment.jersey().register(new BadRequestExceptionMapper());
 
-        environment.lifecycle().manage(injector.getInstance(QueueMessageReceiver.class));
+        if(config.getQueueMessageReceiverConfig().isBackgroundProcessingEnabled()) {
+            environment.lifecycle().manage(injector.getInstance(QueueMessageReceiver.class));
+        }
     }
 
     private Jdbi createJdbi(DataSourceFactory dataSourceFactory) {
