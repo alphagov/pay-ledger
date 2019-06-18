@@ -26,7 +26,7 @@ import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixtur
 public class QueueEventProcessingIT {
 
     @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule(true);
 
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
     private ObjectMapper objectMapper = new ObjectMapper();

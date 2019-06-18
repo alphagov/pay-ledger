@@ -18,22 +18,30 @@ import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 public class AppWithPostgresAndSqsRule extends ExternalResource {
     private static String CONFIG_PATH = resourceFilePath("config/test-config.yaml");
     private final Jdbi jdbi;
-    private final AmazonSQS sqsClient;
+    private AmazonSQS sqsClient;
     private PostgreSQLContainer postgres;
     private DropwizardAppRule<LedgerConfig> appRule;
 
     public AppWithPostgresAndSqsRule() {
+        this(false);
+    }
+
+    public AppWithPostgresAndSqsRule(boolean enableBackgroundProcessing) {
         postgres = new PostgreSQLContainer("postgres:11.1");
         postgres.start();
+
         sqsClient = SqsTestDocker.initialise("event-queue");
+        String eventQueueUrl = SqsTestDocker.getQueueUrl("event-queue");
+        String endpoint = SqsTestDocker.getEndpoint();
         appRule = new DropwizardAppRule<>(
                 LedgerApp.class,
                 CONFIG_PATH,
                 config("database.url", postgres.getJdbcUrl()),
                 config("database.user", postgres.getUsername()),
                 config("database.password", postgres.getPassword()),
-                config("sqsConfig.eventQueueUrl", SqsTestDocker.getQueueUrl("event-queue")),
-                config("sqsConfig.endpoint", SqsTestDocker.getEndpoint())
+                config("queueMessageReceiverConfig.backgroundProcessingEnabled", String.valueOf(enableBackgroundProcessing)),
+                config("sqsConfig.eventQueueUrl", eventQueueUrl),
+                config("sqsConfig.endpoint", endpoint)
         );
 
         jdbi = Jdbi.create(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
