@@ -1,7 +1,6 @@
 package uk.gov.pay.ledger.event.resource;
 
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
@@ -13,7 +12,6 @@ import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 
-@Ignore
 public class EventResourceIT {
     @ClassRule
     public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
