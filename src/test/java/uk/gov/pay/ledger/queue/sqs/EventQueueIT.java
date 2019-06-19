@@ -4,7 +4,6 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
@@ -26,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
 
-@Ignore
 public class EventQueueIT {
 
     @ClassRule
