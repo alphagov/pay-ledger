@@ -119,7 +119,7 @@ public class TransactionDaoSearchIT {
 
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 
-        assertThat(transactionList.size(), Matchers.is(1));
+        assertThat(transactionList.size(), is(1));
         assertThat(transactionList.get(0).getEmail(), is("testemail1@example.org"));
 
         Long total = transactionDao.getTotalForSearch(searchParams);
