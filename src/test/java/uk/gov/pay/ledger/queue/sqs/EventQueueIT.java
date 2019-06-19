@@ -3,10 +3,9 @@ package uk.gov.pay.ledger.queue.sqs;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
@@ -15,7 +14,7 @@ import uk.gov.pay.ledger.queue.EventMessage;
 import uk.gov.pay.ledger.queue.EventQueue;
 import uk.gov.pay.ledger.queue.QueueException;
 import uk.gov.pay.ledger.queue.QueueMessage;
-import uk.gov.pay.ledger.queue.sqs.SqsQueueService;
+import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 
 import java.util.List;
@@ -28,14 +27,15 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
 
 @Ignore
-@RunWith(MockitoJUnitRunner.class)
 public class EventQueueIT {
 
+    @ClassRule
+    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
     private AmazonSQS client;
 
     @Before
     public void setUp() {
-        client = SqsTestDocker.initialise("event-queue");
+        client = rule.getSqsClient();
     }
 
     @Test
@@ -50,9 +50,9 @@ public class EventQueueIT {
         LedgerConfig mockConfig = mock(LedgerConfig.class);
         when(mockConfig.getSqsConfig()).thenReturn(sqsConfig);
 
-        SqsQueueService x = new SqsQueueService(client, mockConfig);
+        SqsQueueService sqsQueueService = new SqsQueueService(client, mockConfig);
 
-        List<QueueMessage> result = x.receiveMessages(SqsTestDocker.getQueueUrl("event-queue"), "All");
+        List<QueueMessage> result = sqsQueueService.receiveMessages(SqsTestDocker.getQueueUrl("event-queue"), "All");
         assertFalse(result.isEmpty());
     }
 
@@ -72,10 +72,10 @@ public class EventQueueIT {
         when(mockConfig.getSqsConfig()).thenReturn(sqsConfig);
         when(mockConfig.getQueueMessageReceiverConfig()).thenReturn(queueReceiverConfig);
 
-        SqsQueueService x = new SqsQueueService(client, mockConfig);
-        EventQueue y = new EventQueue(x, mockConfig, new ObjectMapper());
+        SqsQueueService sqsQueueService = new SqsQueueService(client, mockConfig);
+        EventQueue eventQueue = new EventQueue(sqsQueueService, mockConfig, new ObjectMapper());
 
-        List<EventMessage> result = y.retrieveEvents();
+        List<EventMessage> result = eventQueue.retrieveEvents();
         assertFalse(result.isEmpty());
         assertThat(result.get(0).getId(), is(event.getResourceExternalId()));
     }

@@ -9,7 +9,6 @@ import org.junit.rules.ExternalResource;
 import org.junit.rules.RuleChain;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-import org.testcontainers.containers.PostgreSQLContainer;
 import uk.gov.pay.ledger.app.LedgerApp;
 import uk.gov.pay.ledger.app.LedgerConfig;
 
@@ -18,21 +17,23 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
+import static uk.gov.pay.ledger.rule.PostgresTestDocker.getConnectionUrl;
+import static uk.gov.pay.ledger.rule.PostgresTestDocker.getDbPassword;
+import static uk.gov.pay.ledger.rule.PostgresTestDocker.getDbUsername;
+import static uk.gov.pay.ledger.rule.PostgresTestDocker.getOrCreate;
 
 public class AppWithPostgresAndSqsRule extends ExternalResource {
     private static String CONFIG_PATH = resourceFilePath("config/test-config.yaml");
     private final Jdbi jdbi;
     private AmazonSQS sqsClient;
-    private PostgreSQLContainer postgres;
     private DropwizardAppRule<LedgerConfig> appRule;
 
     public AppWithPostgresAndSqsRule(ConfigOverride... configOverrides) {
-        postgres = new PostgreSQLContainer("postgres:11.1");
-        postgres.start();
+        getOrCreate();
 
         sqsClient = SqsTestDocker.initialise("event-queue");
 
-        ConfigOverride[] newConfigOverrides = overrideDatabaseConfig(configOverrides, postgres);
+        ConfigOverride[] newConfigOverrides = overrideDatabaseConfig(configOverrides);
         newConfigOverrides = overrideSqsConfig(newConfigOverrides);
 
         appRule = new DropwizardAppRule<>(
@@ -41,13 +42,13 @@ public class AppWithPostgresAndSqsRule extends ExternalResource {
                 newConfigOverrides
         );
 
-        jdbi = Jdbi.create(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+        jdbi = Jdbi.create(getConnectionUrl(), getDbUsername(), getDbPassword());
         jdbi.installPlugin(new SqlObjectPlugin());
     }
 
     @Override
     public Statement apply(Statement base, Description description) {
-        return RuleChain.outerRule(postgres).around(appRule).apply(
+        return RuleChain.emptyRuleChain().around(appRule).apply(
                 new Statement() {
                     @Override
                     public void evaluate() throws Throwable {
@@ -58,11 +59,11 @@ public class AppWithPostgresAndSqsRule extends ExternalResource {
                 }, description);
     }
 
-    private ConfigOverride[] overrideDatabaseConfig(ConfigOverride[] configOverrides, PostgreSQLContainer postgreSQLContainer) {
+    private ConfigOverride[] overrideDatabaseConfig(ConfigOverride[] configOverrides) {
         List<ConfigOverride> newConfigOverride = newArrayList(configOverrides);
-        newConfigOverride.add(config("database.url", postgreSQLContainer.getJdbcUrl()));
-        newConfigOverride.add(config("database.user", postgreSQLContainer.getUsername()));
-        newConfigOverride.add(config("database.password", postgreSQLContainer.getPassword()));
+        newConfigOverride.add(config("database.url", getConnectionUrl()));
+        newConfigOverride.add(config("database.user", getDbUsername()));
+        newConfigOverride.add(config("database.password", getDbPassword()));
         return newConfigOverride.toArray(new ConfigOverride[0]);
     }
 
@@ -76,6 +77,7 @@ public class AppWithPostgresAndSqsRule extends ExternalResource {
     public DropwizardAppRule<LedgerConfig> getAppRule() {
         return appRule;
     }
+
     public Jdbi getJdbi() {
         return jdbi;
     }

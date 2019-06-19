@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
-import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
@@ -26,7 +23,6 @@ import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.ZonedDateTimeTimestampMatcher.isDate;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 
-@Ignore
 public class EventDaoIT {
 
     @ClassRule
