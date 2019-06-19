@@ -7,7 +7,6 @@ import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
-import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
@@ -23,7 +22,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
-@Ignore
+//@Ignore
 public class TransactionDaoSearchIT {
 
     @ClassRule

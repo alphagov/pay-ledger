@@ -6,8 +6,6 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
-import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
