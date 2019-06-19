@@ -1,8 +1,10 @@
 package uk.gov.pay.ledger.util.fixture;
 
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
+import org.jetbrains.annotations.NotNull;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
@@ -11,6 +13,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TransactionFixture implements DbFixture<TransactionFixture, Transaction> {
 
@@ -145,6 +148,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
+        JsonObject transactionDetail = getTransactionDetail();
         jdbi.withHandle(h ->
                 h.execute(
                         "INSERT INTO" +
@@ -155,47 +159,53 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        amount,\n" +
                                 "        reference,\n" +
                                 "        description,\n" +
-                                "        return_url, \n" +
                                 "        status,\n" +
-                                "        payment_provider,\n" +
-                                "        language,\n" +
-                                "        delayed_capture,\n" +
-                                "        email,\n" +
                                 "        cardholder_name,\n" +
-                                "        address_line1,\n" +
-                                "        address_line2,\n" +
-                                "        address_postcode,\n" +
-                                "        address_city,\n" +
-                                "        address_county,\n" +
-                                "        address_country,\n" +
                                 "        external_metadata,\n" +
-                                "        created_date\n" +
+                                "        created_date,\n" +
+                                "        email,\n" +
+                                "        transaction_details\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, CAST(? as jsonb))\n",
                         id,
                         gatewayAccountId,
                         externalId,
                         amount,
                         reference,
                         description,
-                        returnUrl,
                         state,
-                        paymentProvider,
-                        language,
-                        delayedCapture,
-                        email,
-                        cardDetails == null ? null : cardDetails.getCardHolderName(),
-                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressLine1() : null,
-                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressLine2() : null,
-                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressPostCode() : null,
-                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressCity() : null,
-                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressCounty() : null,
-                        (cardDetails != null && cardDetails.getBillingAddress() != null) ? cardDetails.getBillingAddress().getAddressCountry() : null,
+                        cardDetails != null ? cardDetails.getCardHolderName() : null,
                         externalMetadata,
-                        createdAt
+                        createdAt,
+                        email,
+                        transactionDetail.toString()
                 )
         );
         return this;
+    }
+
+    @NotNull
+    private JsonObject getTransactionDetail() {
+        JsonObject transactionDetail = new JsonObject();
+
+        transactionDetail.addProperty("language", language);
+        transactionDetail.addProperty("return_url", returnUrl);
+        transactionDetail.addProperty("payment_provider", paymentProvider);
+        transactionDetail.addProperty("delayed_capture", delayedCapture);
+        Optional.ofNullable(cardDetails)
+                .ifPresent(cd -> {
+                    Optional.ofNullable(cd.getBillingAddress())
+                            .ifPresent(ba -> {
+                                transactionDetail.addProperty("address_line1", ba.getAddressLine1());
+                                transactionDetail.addProperty("address_line2", ba.getAddressLine2());
+                                transactionDetail.addProperty("address_postcode", ba.getAddressPostCode());
+                                transactionDetail.addProperty("address_city", ba.getAddressCity());
+                                transactionDetail.addProperty("address_county", ba.getAddressCounty());
+                                transactionDetail.addProperty("address_country", ba.getAddressCountry());
+                            });
+
+                });
+        return transactionDetail;
     }
 
     @Override

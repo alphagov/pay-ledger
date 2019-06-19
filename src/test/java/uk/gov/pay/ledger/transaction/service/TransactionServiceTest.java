@@ -128,5 +128,4 @@ public class TransactionServiceTest {
         assertThat(selfLink, containsString("refund_states=created%2Crefunded"));
         assertThat(selfLink, containsString("card_brand=visa%2Cmastercard"));
     }
-
 }
