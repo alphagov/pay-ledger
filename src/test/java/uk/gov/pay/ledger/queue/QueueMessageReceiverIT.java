@@ -56,7 +56,7 @@ public class QueueMessageReceiverIT {
         assertThat(result.get("resource_type_id"), is(resourceTypeId));
         assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
         assertThat((Timestamp) result.get("event_date"), isDate(CREATED_AT));
-        assertThat(result.get("event_type"), is(event.getEventType()));
+        assertThat(result.get("event_type"), is(event.getEventType().toString()));
         assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
     }
 }
