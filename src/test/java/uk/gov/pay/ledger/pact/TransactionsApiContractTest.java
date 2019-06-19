@@ -9,15 +9,18 @@ import au.com.dius.pact.provider.junit.loader.PactBrokerAuth;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 
+import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 @RunWith(PactRunner.class)
@@ -35,8 +38,14 @@ public class TransactionsApiContractTest {
     public static Target target;
 
     @BeforeClass
-    public static void setup() {
+    public static void setupClass() {
         target = new HttpTarget(app.getAppRule().getLocalPort());
+    }
+
+    @Before
+    public void setUp() {
+        DatabaseTestHelper helper = aDatabaseTestHelper(app.getJdbi());
+        helper.truncateAllData();
     }
 
     @State("a transaction with created state exist")
@@ -44,15 +53,14 @@ public class TransactionsApiContractTest {
         String transactionExternalId = params.get("transaction_external_id");
         String gatewayAccountId = params.get("gateway_account_id");
 
-        TransactionFixture transactionFixture
-                = aTransactionFixture()
+        aTransactionFixture()
                 .withExternalId(transactionExternalId)
                 .withGatewayAccountId(gatewayAccountId)
                 .withAmount(1000l)
                 .withReference("aReference")
                 .withDescription("Test description")
                 .withState("created")
-                .withReturnUrl("aReturnUrl")
+                .withReturnUrl("https://example.org")
                 .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:13:16.067Z"))
                 .insert(app.getJdbi());
     }

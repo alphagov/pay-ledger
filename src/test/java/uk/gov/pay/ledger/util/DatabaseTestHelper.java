@@ -27,6 +27,13 @@ public class DatabaseTestHelper {
         );
     }
 
+    public void truncateAllData() {
+        jdbi.withHandle(h -> h.createScript(
+                "TRUNCATE TABLE event CASCADE; " +
+                        "TRUNCATE TABLE transaction CASCADE"
+        ).execute());
+    }
+
     public int getEventsCountByExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle
