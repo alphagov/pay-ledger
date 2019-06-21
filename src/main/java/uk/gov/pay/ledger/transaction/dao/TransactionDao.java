@@ -23,6 +23,17 @@ public class TransactionDao {
             "FROM transaction t " +
             "WHERE t.gateway_account_id = :account_id " +
             ":searchExtraFields ";
+
+    private static final String INSERT_STRING =
+            "INSERT INTO transaction(" +
+                "external_id,gateway_account_id, amount,description,reference,status,email,cardholder_name," +
+                "external_metadata,created_date,transaction_details" +
+            ") " +
+            "VALUES (" +
+                ":externalId,:gatewayAccountId,:amount,:description,:reference,:status,:email,:cardholderName," +
+                "CAST(:externalMetadata as jsonb),:createdDate,CAST(:transactionDetails as jsonb)" +
+            ");";
+
     private final Jdbi jdbi;
 
     @Inject
@@ -59,5 +70,12 @@ public class TransactionDao {
                     .mapTo(Long.class)
                     .findOnly();
         });
+    }
+
+    public void insert(Transaction transaction) {
+        jdbi.withHandle(handle ->
+                handle.createUpdate(INSERT_STRING)
+                .bindBean(TransactionRow.fromTransaction(transaction))
+                .execute());
     }
 }

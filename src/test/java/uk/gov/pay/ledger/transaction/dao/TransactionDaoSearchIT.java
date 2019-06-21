@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
+import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import java.time.ZonedDateTime;
@@ -30,8 +31,11 @@ public class TransactionDaoSearchIT {
     private TransactionDao transactionDao;
     private TransactionSearchParams searchParams;
 
+    private DatabaseTestHelper databaseTestHelper = DatabaseTestHelper.aDatabaseTestHelper(rule.getJdbi());
+
     @Before
     public void setUp() {
+        databaseTestHelper.truncateAllData();
         transactionDao = new TransactionDao(rule.getJdbi());
         searchParams = new TransactionSearchParams();
     }
@@ -133,7 +137,6 @@ public class TransactionDaoSearchIT {
 
         for (int i = 0; i < 2; i++) {
             aTransactionFixture()
-                    .withId((long) i)
                     .withAmount(100l + i)
                     .withGatewayAccountId(gatewayAccountId)
                     .withReference("reference " + i)
