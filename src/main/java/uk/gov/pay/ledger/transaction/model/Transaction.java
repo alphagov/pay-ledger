@@ -29,7 +29,7 @@ public class Transaction {
     private Boolean delayedCapture;
     private String externalMetaData;
 
-    public Transaction(){
+    public Transaction() {
 
     }
 
@@ -53,6 +53,16 @@ public class Transaction {
         this.cardDetails = cardDetails;
         this.delayedCapture = delayedCapture;
         this.externalMetaData = externalMetaData;
+    }
+
+    public Transaction(String gatewayAccountId, Long amount,
+                       String reference, String description, String state,
+                       String language, String externalId, String returnUrl,
+                       String email, String paymentProvider, ZonedDateTime createdAt,
+                       CardDetails cardDetails, Boolean delayedCapture, String externalMetaData) {
+
+        this(null, gatewayAccountId, amount, reference, description, state, language, externalId, returnUrl, email,
+                paymentProvider, createdAt, cardDetails, delayedCapture, externalMetaData);
     }
 
 

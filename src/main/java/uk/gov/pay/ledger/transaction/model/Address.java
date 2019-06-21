@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.transaction.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Address {
 
@@ -51,5 +53,23 @@ public class Address {
     @JsonProperty("country")
     public String getAddressCountry() {
         return addressCountry;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Address address = (Address) o;
+        return Objects.equals(addressLine1, address.addressLine1) &&
+                Objects.equals(addressLine2, address.addressLine2) &&
+                Objects.equals(addressPostCode, address.addressPostCode) &&
+                Objects.equals(addressCity, address.addressCity) &&
+                Objects.equals(addressCounty, address.addressCounty) &&
+                Objects.equals(addressCountry, address.addressCountry);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(addressLine1, addressLine2, addressPostCode, addressCity, addressCounty, addressCountry);
     }
 }
