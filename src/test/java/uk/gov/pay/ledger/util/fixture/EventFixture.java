@@ -50,7 +50,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         return this;
     }
 
-    private EventFixture withEventType(String eventType) {
+    public EventFixture withEventType(String eventType) {
         this.eventType = eventType;
         return this;
     }

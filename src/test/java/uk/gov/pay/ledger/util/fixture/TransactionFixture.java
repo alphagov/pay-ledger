@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -23,7 +24,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String reference = RandomStringUtils.randomAlphanumeric(10);
     private String description = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
-    private String state = "created";
+    private String state = "CREATED";
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private String language = "en";
     private String returnUrl = "https://example.org";
@@ -59,7 +60,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
             transactionList.add(aTransactionFixture()
                     .withGatewayAccountId(gatewayAccountId)
                     .withId(preId + i)
-                    .withAmount(100l + i)
+                    .withAmount(100L + i)
                     .withReference("reference " + i)
                     .insert(jdbi)
                     .toEntity());
@@ -193,8 +194,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetail.addProperty("payment_provider", paymentProvider);
         transactionDetail.addProperty("delayed_capture", delayedCapture);
         Optional.ofNullable(cardDetails)
-                .ifPresent(cd -> {
-                    Optional.ofNullable(cd.getBillingAddress())
+                .ifPresent(cd -> Optional.ofNullable(cd.getBillingAddress())
                             .ifPresent(ba -> {
                                 transactionDetail.addProperty("address_line1", ba.getAddressLine1());
                                 transactionDetail.addProperty("address_line2", ba.getAddressLine2());
@@ -202,16 +202,15 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 transactionDetail.addProperty("address_city", ba.getAddressCity());
                                 transactionDetail.addProperty("address_county", ba.getAddressCounty());
                                 transactionDetail.addProperty("address_country", ba.getAddressCountry());
-                            });
+                            }));
 
-                });
         return transactionDetail;
     }
 
     @Override
     public Transaction toEntity() {
         return new Transaction(id, gatewayAccountId, amount,
-                reference, description, state,
+                reference, description, TransactionState.valueOf(state),
                 language, externalId, returnUrl,
                 email, paymentProvider, createdAt,
                 cardDetails, delayedCapture, externalMetadata);

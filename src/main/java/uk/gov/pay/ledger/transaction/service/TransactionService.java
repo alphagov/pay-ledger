@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.transaction.service;
 
 import com.google.inject.Inject;
+import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
@@ -9,6 +10,7 @@ import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.Link;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
@@ -62,7 +64,27 @@ public class TransactionService {
         return transactionView;
     }
 
-    public void insert(Transaction transaction) {
-        transactionDao.insert(transaction);
+    public void upsertTransactionFor(EventDigest eventDigest) {
+        Transaction transaction = convertToTransaction(eventDigest);
+        transactionDao.upsert(transaction);
+    }
+
+    private Transaction convertToTransaction(EventDigest eventDigest) {
+        return new Transaction(
+                eventDigest.getEventDetailsDigest().getGatewayAccountId(),
+                eventDigest.getEventDetailsDigest().getAmount(),
+                eventDigest.getEventDetailsDigest().getReference(),
+                eventDigest.getEventDetailsDigest().getDescription(),
+                TransactionState.fromSalientEventType(eventDigest.getMostRecentSalientEventType()),
+                eventDigest.getEventDetailsDigest().getLanguage(),
+                eventDigest.getResourceExternalId(),
+                eventDigest.getEventDetailsDigest().getReturnUrl(),
+                eventDigest.getEventDetailsDigest().getEmail(),
+                eventDigest.getEventDetailsDigest().getPaymentProvider(),
+                eventDigest.getMostRecentEventTimestamp(),
+                null,
+                eventDigest.getEventDetailsDigest().getDelayedCapture(),
+                null
+        );
     }
 }

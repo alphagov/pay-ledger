@@ -8,6 +8,7 @@ import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,13 +35,13 @@ public class TransactionMapper implements RowMapper<Transaction> {
                 billingAddress,
                 null);
 
-        Transaction transaction = new Transaction(
+        return new Transaction(
                 rs.getLong("id"),
                 rs.getString("gateway_account_id"),
                 rs.getLong("amount"),
                 rs.getString("reference"),
                 rs.getString("description"),
-                rs.getString("status"),
+                TransactionState.valueOf(rs.getString("status")),
                 safeGetAsString(transactionDetail, "language"),
                 rs.getString("external_id"),
                 safeGetAsString(transactionDetail, "return_url"),
@@ -53,8 +54,6 @@ public class TransactionMapper implements RowMapper<Transaction> {
                         .orElse(null),
                 rs.getString("external_metadata")
         );
-
-        return transaction;
     }
 
     private String safeGetAsString(JsonObject object, String propertyName) {

@@ -22,7 +22,7 @@ public class QueueMessageReceiverIT {
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
 
     @Test
-    public void shouldInsertEvent() throws IOException, InterruptedException {
+    public void shouldInsertEvent() throws InterruptedException {
         Event event = aQueueEventFixture()
                 .withEventDate(CREATED_AT)
                 .insert(rule.getSqsClient())
@@ -37,6 +37,29 @@ public class QueueMessageReceiverIT {
                 .then()
                 .statusCode(200)
                 .body("external_id", is(resourceExternalId))
-                .body("state", is("Created"));
+                .body("state", is("CREATED"));
+    }
+
+    @Test
+    public void shouldHandlerCreatedFollowedByAuthoriseEvent() throws InterruptedException {
+        final String resourceExternalId = "rexid";
+
+        aQueueEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT)
+                .insert(rule.getSqsClient())
+                .withEventDate(CREATED_AT.plusMinutes(1))
+                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(1000);
+
+        given().port(rule.getAppRule().getLocalPort())
+                .contentType(JSON)
+                .get("/v1/transaction/" + resourceExternalId)
+                .then()
+                .statusCode(200)
+                .body("external_id", is(resourceExternalId))
+                .body("state", is("AUTHORISED"));
     }
 }

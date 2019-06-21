@@ -22,7 +22,7 @@ public class TransactionDaoIT {
         Transaction transaction = aTransactionFixture()
                 .toEntity();
 
-        transactionDao.insert(transaction);
+        transactionDao.upsert(transaction);
 
         Transaction retrievedTransaction = transactionDao.findTransactionByExternalId(transaction.getExternalId()).get();
 
@@ -40,5 +40,35 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getReturnUrl(), is(transaction.getReturnUrl()));
         assertThat(retrievedTransaction.getState(), is(transaction.getState()));
         assertThat(retrievedTransaction.getExternalMetaData(), is(transaction.getExternalMetaData()));
+    }
+
+    @Test
+    public void shouldupsertTransaction() {
+        Transaction transaction = aTransactionFixture()
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        Transaction modifiedTransaction = new Transaction(
+                transaction.getId(),
+                transaction.getGatewayAccountId(),
+                transaction.getAmount(),
+                transaction.getReference(),
+                "my new description",
+                transaction.getState(),
+                transaction.getLanguage(),
+                transaction.getExternalId(),
+                transaction.getReturnUrl(),
+                transaction.getEmail(),
+                transaction.getPaymentProvider(),
+                transaction.getCreatedAt(),
+                transaction.getCardDetails(),
+                transaction.getDelayedCapture(),
+                transaction.getExternalMetaData()
+        );
+        transactionDao.upsert(transaction);
+
+        Transaction retrievedTransaction = transactionDao.findTransactionByExternalId(transaction.getExternalId()).get();
+
+        assertThat(retrievedTransaction.getDescription(), is(transaction.getDescription()));
     }
 }

@@ -63,7 +63,7 @@ public class TransactionView {
 
     public static TransactionView from(Transaction transaction) {
         return new TransactionView(transaction.getId(), transaction.getGatewayAccountId(),
-                transaction.getAmount(), TransactionState.valueOf(transaction.getState().toUpperCase()),
+                transaction.getAmount(), transaction.getState(),
                 transaction.getDescription(), transaction.getReference(), transaction.getLanguage(),
                 transaction.getExternalId(), transaction.getReturnUrl(), transaction.getEmail(),
                 transaction.getPaymentProvider(), transaction.getCreatedAt(), transaction.getCardDetails(),

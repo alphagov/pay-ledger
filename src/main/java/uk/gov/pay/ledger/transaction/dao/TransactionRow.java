@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.dao;
 import com.google.gson.JsonObject;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -13,7 +14,7 @@ public class TransactionRow {
     private Long amount;
     private String reference;
     private String description;
-    private String status;
+    private TransactionState status;
     private String language;
     private String externalId;
     private String returnUrl;
@@ -62,7 +63,7 @@ public class TransactionRow {
         return description;
     }
 
-    public String getStatus() {
+    public TransactionState getStatus() {
         return status;
     }
 
@@ -112,7 +113,7 @@ public class TransactionRow {
         return transactionDetail.toString();
     }
 
-    public static TransactionRow fromTransaction(Transaction transaction) {
+    static TransactionRow fromTransaction(Transaction transaction) {
         return new TransactionRow(transaction);
     }
 }

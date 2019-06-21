@@ -10,7 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
-import uk.gov.pay.ledger.event.model.EventType;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 
@@ -63,7 +63,7 @@ public class EventServiceTest {
         EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
 
         assertThat(eventDigest.getMostRecentEventTimestamp(), is(latestEventTime));
-        assertThat(eventDigest.getMostRecentEventType(), is(EventType.PAYMENT_CREATED));
+        assertThat(eventDigest.getMostRecentSalientEventType(), is(SalientEventType.PAYMENT_CREATED));
     }
 
     @Test
@@ -72,6 +72,28 @@ public class EventServiceTest {
 
         assertThat(eventDigest.getEventDetailsDigest().getDescription(), is("a payment"));
         assertThat(eventDigest.getEventDetailsDigest().getAmount(), is(1000L));
+    }
+
+    @Test
+    public void shouldGetCorrectLatestSalientEventType() {
+        String eventDetails1 = "{ \"amount\": 1000}";
+        Event event1 = EventFixture.anEventFixture()
+                .withEventData(eventDetails1)
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(latestEventTime)
+                .toEntity();
+        String eventDetails2 = "{ \"amount\": 2000, \"description\": \"a payment\"}";
+        Event event2 = EventFixture.anEventFixture()
+                .withEventData(eventDetails2)
+                .withEventType("A_WEIRD_EVENT_THAT_SHOULD_NOT_BE_CONSIDERED_SALIENT")
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(ZonedDateTime.now().plusMinutes(2L))
+                .toEntity();
+        when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(List.of(event1, event2));
+
+        EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
+
+        assertThat(eventDigest.getMostRecentSalientEventType(), is(SalientEventType.PAYMENT_CREATED));
     }
 
     @Test

@@ -56,7 +56,7 @@ public class TransactionDaoSearchIT {
         assertThat(transaction.getId(), is(transactionFixture.getId()));
         assertThat(transaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
         assertThat(transaction.getAmount(), is(transactionFixture.getAmount()));
-        assertThat(transaction.getState(), is(transactionFixture.getState()));
+        assertThat(transaction.getState().name(), is(transactionFixture.getState()));
         assertThat(transaction.getReference(), is(transactionFixture.getReference()));
         assertThat(transaction.getDescription(), is(transactionFixture.getDescription()));
         assertThat(transaction.getLanguage(), is(transactionFixture.getLanguage()));
@@ -300,7 +300,7 @@ public class TransactionDaoSearchIT {
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
-        searchParams.setPaymentStates(new CommaDelimitedSetParameter("created"));
+        searchParams.setPaymentStates(new CommaDelimitedSetParameter("CREATED"));
 
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 

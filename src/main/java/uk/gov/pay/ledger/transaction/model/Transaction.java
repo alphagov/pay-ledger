@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
 
@@ -17,7 +19,8 @@ public class Transaction {
     private Long amount;
     private String reference;
     private String description;
-    private String state;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private TransactionState state;
     private String language;
     private String externalId;
     private String returnUrl;
@@ -34,7 +37,7 @@ public class Transaction {
     }
 
     public Transaction(Long id, String gatewayAccountId, Long amount,
-                       String reference, String description, String state,
+                       String reference, String description, TransactionState state,
                        String language, String externalId, String returnUrl,
                        String email, String paymentProvider, ZonedDateTime createdAt,
                        CardDetails cardDetails, Boolean delayedCapture, String externalMetaData) {
@@ -56,7 +59,7 @@ public class Transaction {
     }
 
     public Transaction(String gatewayAccountId, Long amount,
-                       String reference, String description, String state,
+                       String reference, String description, TransactionState state,
                        String language, String externalId, String returnUrl,
                        String email, String paymentProvider, ZonedDateTime createdAt,
                        CardDetails cardDetails, Boolean delayedCapture, String externalMetaData) {
@@ -86,7 +89,7 @@ public class Transaction {
         return description;
     }
 
-    public String getState() {
+    public TransactionState getState() {
         return state;
     }
 

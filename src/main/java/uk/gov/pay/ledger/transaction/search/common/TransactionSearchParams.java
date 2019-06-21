@@ -144,8 +144,8 @@ public class TransactionSearchParams {
         }
         if (paymentStates != null && !paymentStates.isEmpty()) {
 
-            if (paymentStates.has("created")) {
-                sb.append(" AND t.status in ('created')");
+            if (paymentStates.has("CREATED")) {
+                sb.append(" AND t.status in ('CREATED')");
             } else {
                 sb.append(" AND false");
             }
