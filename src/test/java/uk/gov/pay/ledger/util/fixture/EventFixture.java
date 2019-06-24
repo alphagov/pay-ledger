@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 public class EventFixture implements DbFixture<EventFixture, Event> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private String sqsMessageId = RandomStringUtils.randomAlphanumeric(50);
-    private ResourceType resourceType = ResourceType.CHARGE;
+    private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
     private String eventType = "PAYMENT_CREATED";

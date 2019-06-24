@@ -46,7 +46,7 @@ public class TransactionsApiContractTest {
     }
 
     @State("a transaction with created state exist")
-    public void createChargeWithCardDetails(Map<String, String> params) {
+    public void createTransactionWithCardDetails(Map<String, String> params) {
         String transactionExternalId = params.get("transaction_external_id");
         String gatewayAccountId = params.get("gateway_account_id");
 
