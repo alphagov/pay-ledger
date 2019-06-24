@@ -7,45 +7,53 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class EventDigest {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final ZonedDateTime mostRecentEventTimestamp;
-    private final EventType mostRecentEventType;
     private final ResourceType resourceType;
     private final String resourceExternalId;
     private final EventDetailsDigest eventDetailsDigest;
+    private final SalientEventType mostRecentSalientEventType;
+    private Integer eventCount;
 
     private EventDigest(
             ZonedDateTime mostRecentEventTimestamp,
-            EventType mostRecentEventType,
+            SalientEventType mostRecentSalientEventType,
             ResourceType resourceType,
             String resourceExternalId,
+            Integer eventCount,
             EventDetailsDigest eventDetailsDigest
     ) {
         this.mostRecentEventTimestamp = mostRecentEventTimestamp;
-        this.mostRecentEventType = mostRecentEventType;
+        this.mostRecentSalientEventType = mostRecentSalientEventType;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
+        this.eventCount = eventCount;
         this.eventDetailsDigest = eventDetailsDigest;
     }
 
     public static EventDigest fromEventList(List<Event> events) {
-        EventDetailsDigest eventDetailsDigest = buildEventDetailsDigest(events);
-        return events.stream()
+        var eventDetailsDigest = buildEventDetailsDigest(events);
+
+        var latestEvent = events.stream()
                 .findFirst()
-                .map(e -> EventDigest.from(e, eventDetailsDigest))
                 .orElseThrow(() -> new RuntimeException("No events found"));
 
-    }
+        var latestSalientEventType = events.stream()
+                .map(e -> SalientEventType.from(e.getEventType()))
+                .flatMap(Optional::stream)
+                .findFirst()
+                .orElse(SalientEventType.PAYMENT_CREATED);
 
-    private static EventDigest from(Event latestEvent, EventDetailsDigest eventDetailsDigest) {
         return new EventDigest(
                 latestEvent.getEventDate(),
-                latestEvent.getEventType(),
+                latestSalientEventType,
                 latestEvent.getResourceType(),
                 latestEvent.getResourceExternalId(),
+                events.size(),
                 eventDetailsDigest
         );
     }
@@ -80,8 +88,8 @@ public class EventDigest {
         return resourceExternalId;
     }
 
-    public EventType getMostRecentEventType() {
-        return mostRecentEventType;
+    public SalientEventType getMostRecentSalientEventType() {
+        return mostRecentSalientEventType;
     }
 
     public EventDetailsDigest getEventDetailsDigest() {

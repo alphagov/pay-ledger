@@ -40,7 +40,7 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
         return this;
     }
 
-    private QueueEventFixture withEventType(String eventType) {
+    public QueueEventFixture withEventType(String eventType) {
         this.eventType = eventType;
         return this;
     }
