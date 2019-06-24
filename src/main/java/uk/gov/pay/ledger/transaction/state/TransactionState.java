@@ -3,12 +3,16 @@ package uk.gov.pay.ledger.transaction.state;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.ledger.event.model.SalientEventType;
+
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum TransactionState {
 
-    CREATED("created", false);
+    CREATED("created", false),
+    SUBMITTED("submitted", false);
 
     private final String value;
     private final boolean finished;
@@ -38,5 +42,14 @@ public enum TransactionState {
 
     public String getMessage() {
         return message;
+    }
+
+    private static final Map<SalientEventType, TransactionState> EVENT_TYPE_TRANSACTION_STATE_MAP = Map.of(
+            SalientEventType.PAYMENT_CREATED, CREATED,
+            SalientEventType.AUTHORISATION_SUCCESSFUL, SUBMITTED
+    );
+
+    public static TransactionState fromSalientEventType(SalientEventType salientEventType) {
+        return EVENT_TYPE_TRANSACTION_STATE_MAP.get(salientEventType);
     }
 }

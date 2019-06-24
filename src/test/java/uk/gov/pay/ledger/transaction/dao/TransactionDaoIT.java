@@ -22,7 +22,7 @@ public class TransactionDaoIT {
         Transaction transaction = aTransactionFixture()
                 .toEntity();
 
-        transactionDao.insert(transaction);
+        transactionDao.upsert(transaction);
 
         Transaction retrievedTransaction = transactionDao.findTransactionByExternalId(transaction.getExternalId()).get();
 
@@ -33,12 +33,52 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getGatewayAccountId(), is(transaction.getGatewayAccountId()));
         assertThat(retrievedTransaction.getEmail(), is(transaction.getEmail()));
         assertThat(retrievedTransaction.getAmount(), is(transaction.getAmount()));
-        assertThat(retrievedTransaction.getCreatedAt(), is(transaction.getCreatedAt()));
+        assertThat(retrievedTransaction.getCreatedDate(), is(transaction.getCreatedDate()));
         assertThat(retrievedTransaction.getDelayedCapture(), is(transaction.getDelayedCapture()));
         assertThat(retrievedTransaction.getLanguage(), is(transaction.getLanguage()));
         assertThat(retrievedTransaction.getPaymentProvider(), is(transaction.getPaymentProvider()));
         assertThat(retrievedTransaction.getReturnUrl(), is(transaction.getReturnUrl()));
         assertThat(retrievedTransaction.getState(), is(transaction.getState()));
-        assertThat(retrievedTransaction.getExternalMetaData(), is(transaction.getExternalMetaData()));
+        assertThat(retrievedTransaction.getExternalMetadata(), is(transaction.getExternalMetadata()));
+    }
+
+    @Test
+    public void shouldUpsertTransaction() {
+        Transaction transaction = aTransactionFixture()
+                .insert(rule.getJdbi())
+                .toEntity();
+
+
+        Transaction modifiedTransaction = aTransactionFixture()
+                .withExternalId(transaction.getExternalId())
+                .withEventCount(2)
+                .withState("SUBMITTED")
+                .toEntity();
+
+        transactionDao.upsert(modifiedTransaction);
+
+        Transaction retrievedTransaction = transactionDao.findTransactionByExternalId(transaction.getExternalId()).get();
+
+        assertThat(retrievedTransaction.getState(), is(modifiedTransaction.getState()));
+    }
+
+    @Test
+    public void shouldNotOverwriteTransactionIfItConsistsOfFewerEvents() {
+        Transaction transaction = aTransactionFixture()
+                .withEventCount(5)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        Transaction modifiedTransaction = aTransactionFixture()
+                .withExternalId(transaction.getExternalId())
+                .withEventCount(4)
+                .withState("SUBMITTED")
+                .toEntity();
+
+        transactionDao.upsert(modifiedTransaction);
+
+        Transaction retrievedTransaction = transactionDao.findTransactionByExternalId(transaction.getExternalId()).get();
+
+        assertThat(retrievedTransaction.getState(), is(transaction.getState()));
     }
 }

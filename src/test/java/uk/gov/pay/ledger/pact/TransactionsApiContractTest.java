@@ -56,7 +56,7 @@ public class TransactionsApiContractTest {
                 .withAmount(1000l)
                 .withReference("aReference")
                 .withDescription("Test description")
-                .withState("created")
+                .withState("CREATED")
                 .withReturnUrl("https://example.org")
                 .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:13:16.067Z"))
                 .insert(app.getJdbi());

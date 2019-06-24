@@ -1,7 +1,6 @@
 package uk.gov.pay.ledger.event.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.pay.ledger.transaction.model.Transaction;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -96,22 +95,7 @@ public class EventDigest {
         return eventDetailsDigest;
     }
 
-    public Transaction toTransaction() {
-        return new Transaction(
-                eventDetailsDigest.getGatewayAccountId(),
-                eventDetailsDigest.getAmount(),
-                eventDetailsDigest.getReference(),
-                eventDetailsDigest.getDescription(),
-                "Created",
-                eventDetailsDigest.getLanguage(),
-                getResourceExternalId(),
-                eventDetailsDigest.getReturnUrl(),
-                eventDetailsDigest.getEmail(),
-                eventDetailsDigest.getPaymentProvider(),
-                getMostRecentEventTimestamp(),
-                null,
-                eventDetailsDigest.getDelayedCapture(),
-                null
-        );
+    public Integer getEventCount() {
+        return eventCount;
     }
 }

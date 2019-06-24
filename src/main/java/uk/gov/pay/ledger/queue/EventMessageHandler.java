@@ -47,7 +47,7 @@ public class EventMessageHandler {
 
         if(response.isSuccessful()) {
             EventDigest eventDigest = eventService.getEventDigestForResource(event.getResourceExternalId());
-            transactionService.insert(eventDigest.toTransaction());
+            transactionService.upsertTransactionFor(eventDigest);
             eventQueue.markMessageAsProcessed(message);
             LOGGER.info("The event message has been processed. [id={}] [state={}]",
                     message.getId(),
