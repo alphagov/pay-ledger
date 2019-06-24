@@ -56,8 +56,8 @@ public class EventQueue {
             return EventMessage.of(eventDto, queueMessage);
         } catch (IOException e) {
             LOGGER.warn(
-                    "There was an exception parsing the payload [{}] into an [{}]",
-                    queueMessage.getMessageBody(),
+                    "There was an exception parsing message [messageId={}] into an [{}]",
+                    queueMessage.getMessageId(),
                     EventMessage.class);
 
             return null;
