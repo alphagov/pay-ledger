@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 
 public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event> {
     private String sqsMessageId;
-    private ResourceType resourceType = ResourceType.CHARGE;
+    private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
     private String eventType = "PAYMENT_CREATED";

@@ -43,7 +43,7 @@ public class EventQueueTest {
                 "\"timestamp\": \"2018-03-12T16:25:01.123456Z\"," +
                 "\"resource_external_id\": \"3uwuyr38rry\"," +
                 "\"event_type\":\"PAYMENT_CREATED\"," +
-                "\"resource_type\": \"charge\"," +
+                "\"resource_type\": \"payment\"," +
                 "\"event_details\": {" +
                 "\"example_event_details_field\": \"and its value\"" +
                 "}" +
@@ -73,7 +73,7 @@ public class EventQueueTest {
         assertEquals("3uwuyr38rry", eventsList.get(0).getEvent().getResourceExternalId());
         assertEquals(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"), eventsList.get(0).getEvent().getEventDate());
         assertEquals(EventType.PAYMENT_CREATED, eventsList.get(0).getEvent().getEventType());
-        assertEquals(ResourceType.CHARGE, eventsList.get(0).getEvent().getResourceType());
+        assertEquals(ResourceType.PAYMENT, eventsList.get(0).getEvent().getResourceType());
         assertEquals("{\"example_event_details_field\":\"and its value\"}", eventsList.get(0).getEvent().getEventData());
     }
 }
