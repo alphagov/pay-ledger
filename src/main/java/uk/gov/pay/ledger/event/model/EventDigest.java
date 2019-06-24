@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.event.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.pay.ledger.transaction.model.Transaction;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -14,9 +15,15 @@ public class EventDigest {
     private final EventType mostRecentEventType;
     private final ResourceType resourceType;
     private final String resourceExternalId;
-    private final Map<String, Object> eventDetailsDigest;
+    private final EventDetailsDigest eventDetailsDigest;
 
-    private EventDigest(ZonedDateTime mostRecentEventTimestamp, EventType mostRecentEventType, ResourceType resourceType, String resourceExternalId, Map<String, Object> eventDetailsDigest) {
+    private EventDigest(
+            ZonedDateTime mostRecentEventTimestamp,
+            EventType mostRecentEventType,
+            ResourceType resourceType,
+            String resourceExternalId,
+            EventDetailsDigest eventDetailsDigest
+    ) {
         this.mostRecentEventTimestamp = mostRecentEventTimestamp;
         this.mostRecentEventType = mostRecentEventType;
         this.resourceType = resourceType;
@@ -25,14 +32,15 @@ public class EventDigest {
     }
 
     public static EventDigest fromEventList(List<Event> events) {
-        Map<String, Object> eventDetailsDigest = getEventDetailsDigest(events);
+        EventDetailsDigest eventDetailsDigest = buildEventDetailsDigest(events);
         return events.stream()
                 .findFirst()
                 .map(e -> EventDigest.from(e, eventDetailsDigest))
                 .orElseThrow(() -> new RuntimeException("No events found"));
+
     }
 
-    private static EventDigest from(Event latestEvent, Map<String, Object> eventDetailsDigest) {
+    private static EventDigest from(Event latestEvent, EventDetailsDigest eventDetailsDigest) {
         return new EventDigest(
                 latestEvent.getEventDate(),
                 latestEvent.getEventType(),
@@ -42,12 +50,14 @@ public class EventDigest {
         );
     }
 
-    private static Map<String, Object> getEventDetailsDigest(List<Event> events) {
-        return events.stream()
+    private static EventDetailsDigest buildEventDetailsDigest(List<Event> events) {
+        Map<String, Object> eventDetailsMap = events.stream()
                 .map(Event::getEventData)
                 .map(EventDigest::eventDetailsJsonStringToMap)
                 .flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (later, earlier) -> later));
+
+        return objectMapper.convertValue(eventDetailsMap, EventDetailsDigest.class);
     }
 
     private static Map<String, Object> eventDetailsJsonStringToMap(String eventDetails) {
@@ -70,11 +80,30 @@ public class EventDigest {
         return resourceExternalId;
     }
 
-    public Map<String, Object> getEventDetailsDigest() {
+    public EventType getMostRecentEventType() {
+        return mostRecentEventType;
+    }
+
+    public EventDetailsDigest getEventDetailsDigest() {
         return eventDetailsDigest;
     }
 
-    public EventType getMostRecentEventType() {
-        return mostRecentEventType;
+    public Transaction toTransaction() {
+        return new Transaction(
+                eventDetailsDigest.getGatewayAccountId(),
+                eventDetailsDigest.getAmount(),
+                eventDetailsDigest.getReference(),
+                eventDetailsDigest.getDescription(),
+                "Created",
+                eventDetailsDigest.getLanguage(),
+                getResourceExternalId(),
+                eventDetailsDigest.getReturnUrl(),
+                eventDetailsDigest.getEmail(),
+                eventDetailsDigest.getPaymentProvider(),
+                getMostRecentEventTimestamp(),
+                null,
+                eventDetailsDigest.getDelayedCapture(),
+                null
+        );
     }
 }

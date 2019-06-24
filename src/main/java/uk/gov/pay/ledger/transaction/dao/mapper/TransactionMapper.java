@@ -13,7 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Objects;
+import java.util.Optional;
 
 public class TransactionMapper implements RowMapper<Transaction> {
 
@@ -21,12 +21,12 @@ public class TransactionMapper implements RowMapper<Transaction> {
     public Transaction map(ResultSet rs, StatementContext ctx) throws SQLException {
         JsonObject transactionDetail = new JsonParser().parse(rs.getString("transaction_details")).getAsJsonObject();
         Address billingAddress = new Address(
-                getAsString(transactionDetail, "address_line1"),
-                getAsString(transactionDetail, "address_line2"),
-                getAsString(transactionDetail, "address_postcode"),
-                getAsString(transactionDetail, "address_city"),
-                getAsString(transactionDetail, "address_county"),
-                getAsString(transactionDetail, "address_country")
+                safeGetAsString(transactionDetail, "address_line1"),
+                safeGetAsString(transactionDetail, "address_line2"),
+                safeGetAsString(transactionDetail, "address_postcode"),
+                safeGetAsString(transactionDetail, "address_city"),
+                safeGetAsString(transactionDetail, "address_county"),
+                safeGetAsString(transactionDetail, "address_country")
         );
 
         CardDetails cardDetails = new CardDetails(
@@ -41,30 +41,30 @@ public class TransactionMapper implements RowMapper<Transaction> {
                 rs.getString("reference"),
                 rs.getString("description"),
                 rs.getString("status"),
-                getAsString(transactionDetail, "language"),
+                safeGetAsString(transactionDetail, "language"),
                 rs.getString("external_id"),
-                getAsString(transactionDetail, "return_url"),
+                safeGetAsString(transactionDetail, "return_url"),
                 rs.getString( "email"),
-                getAsString(transactionDetail, "payment_provider"),
+                safeGetAsString(transactionDetail, "payment_provider"),
                 ZonedDateTime.ofInstant(rs.getTimestamp("created_date").toInstant(), ZoneOffset.UTC),
                 cardDetails,
-
-                Objects.nonNull(transactionDetail.get("delayed_capture")) ?
-                        transactionDetail.get(  "delayed_capture").getAsBoolean() :
-                        null,
+                safeGetJsonElement(transactionDetail, "delayed_capture")
+                        .map(JsonElement::getAsBoolean)
+                        .orElse(null),
                 rs.getString("external_metadata")
         );
 
         return transaction;
     }
 
-    private String getAsString(JsonObject object, String propertyName) {
-        JsonElement property = object.get(propertyName);
+    private String safeGetAsString(JsonObject object, String propertyName) {
+        return safeGetJsonElement(object, propertyName)
+                .map(JsonElement::getAsString)
+                .orElse(null);
+    }
 
-        if (property != null && !property.isJsonNull()) {
-            return property.getAsString();
-        }
-
-        return null;
+    private Optional<JsonElement> safeGetJsonElement(JsonObject object, String propertyName) {
+        return Optional.ofNullable(object.get(propertyName))
+                .filter(p -> !p.isJsonNull());
     }
 }

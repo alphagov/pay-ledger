@@ -61,4 +61,8 @@ public class TransactionService {
 
         return transactionView;
     }
+
+    public void insert(Transaction transaction) {
+        transactionDao.insert(transaction);
+    }
 }
