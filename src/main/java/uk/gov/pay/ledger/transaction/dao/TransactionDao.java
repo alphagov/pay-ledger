@@ -14,6 +14,7 @@ public class TransactionDao {
 
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID = "SELECT * FROM transaction " +
             "WHERE external_id = :externalId";
+
     private static final String SEARCH_QUERY_STRING = "SELECT * FROM transaction t " +
             "WHERE t.gateway_account_id = :account_id " +
             ":searchExtraFields " +
@@ -24,15 +25,30 @@ public class TransactionDao {
             "WHERE t.gateway_account_id = :account_id " +
             ":searchExtraFields ";
 
-    private static final String INSERT_STRING =
+    private static final String UPSERT_STRING =
             "INSERT INTO transaction(" +
-                "external_id,gateway_account_id, amount,description,reference,status,email,cardholder_name," +
-                "external_metadata,created_date,transaction_details" +
+                "external_id,gateway_account_id, amount,description,reference,state,email,cardholder_name," +
+                "external_metadata,created_date,transaction_details, event_count" +
             ") " +
             "VALUES (" +
-                ":externalId,:gatewayAccountId,:amount,:description,:reference,:status,:email,:cardholderName," +
-                "CAST(:externalMetadata as jsonb),:createdDate,CAST(:transactionDetails as jsonb)" +
-            ");";
+                ":externalId,:gatewayAccountId,:amount,:description,:reference,:state,:email,:cardholderName," +
+                "CAST(:externalMetadata as jsonb),:createdDate,CAST(:transactionDetails as jsonb), :eventCount" +
+            ")" +
+            "ON CONFLICT (external_id) " +
+            "DO UPDATE SET " +
+                "external_id = EXCLUDED.external_id," +
+                "gateway_account_id = EXCLUDED.gateway_account_id," +
+                "amount = EXCLUDED.amount," +
+                "description = EXCLUDED.description," +
+                "reference = EXCLUDED.reference," +
+                "state = EXCLUDED.state," +
+                "email = EXCLUDED.email," +
+                "cardholder_name = EXCLUDED.cardholder_name," +
+                "external_metadata = EXCLUDED.external_metadata," +
+                "created_date = EXCLUDED.created_date," +
+                "event_count = EXCLUDED.event_count," +
+                "transaction_details = EXCLUDED.transaction_details " +
+            "WHERE EXCLUDED.event_count > transaction.event_count;";
 
     private final Jdbi jdbi;
 
@@ -72,10 +88,10 @@ public class TransactionDao {
         });
     }
 
-    public void insert(Transaction transaction) {
+    public void upsert(Transaction transaction) {
         jdbi.withHandle(handle ->
-                handle.createUpdate(INSERT_STRING)
-                .bindBean(TransactionRow.fromTransaction(transaction))
+                handle.createUpdate(UPSERT_STRING)
+                .bindBean(transaction)
                 .execute());
     }
 }

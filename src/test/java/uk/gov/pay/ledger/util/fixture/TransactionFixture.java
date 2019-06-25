@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -23,13 +24,14 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String reference = RandomStringUtils.randomAlphanumeric(10);
     private String description = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
-    private String state = "created";
+    private TransactionState state = TransactionState.CREATED;
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private String language = "en";
     private String returnUrl = "https://example.org";
     private String email = "someone@example.org";
     private String paymentProvider = "sandbox";
     private CardDetails cardDetails = getDefaultCardDetails();
+    private Integer eventCount = 1;
 
     private Boolean delayedCapture = false;
 
@@ -59,7 +61,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
             transactionList.add(aTransactionFixture()
                     .withGatewayAccountId(gatewayAccountId)
                     .withId(preId + i)
-                    .withAmount(100l + i)
+                    .withAmount(100L + i)
                     .withReference("reference " + i)
                     .insert(jdbi)
                     .toEntity());
@@ -91,7 +93,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withState(String state) {
+    public TransactionFixture withState(TransactionState state) {
         this.state = state;
         return this;
     }
@@ -146,6 +148,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withEventCount(Integer eventCount) {
+        this.eventCount = eventCount;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         JsonObject transactionDetail = getTransactionDetail();
@@ -159,14 +166,15 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        amount,\n" +
                                 "        reference,\n" +
                                 "        description,\n" +
-                                "        status,\n" +
+                                "        state,\n" +
                                 "        cardholder_name,\n" +
                                 "        external_metadata,\n" +
                                 "        created_date,\n" +
                                 "        email,\n" +
-                                "        transaction_details\n" +
+                                "        transaction_details,\n" +
+                                "        event_count\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, CAST(? as jsonb))\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, CAST(? as jsonb), ?)\n",
                         id,
                         gatewayAccountId,
                         externalId,
@@ -178,7 +186,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         externalMetadata,
                         createdAt,
                         email,
-                        transactionDetail.toString()
+                        transactionDetail.toString(),
+                        eventCount
                 )
         );
         return this;
@@ -193,8 +202,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetail.addProperty("payment_provider", paymentProvider);
         transactionDetail.addProperty("delayed_capture", delayedCapture);
         Optional.ofNullable(cardDetails)
-                .ifPresent(cd -> {
-                    Optional.ofNullable(cd.getBillingAddress())
+                .ifPresent(cd -> Optional.ofNullable(cd.getBillingAddress())
                             .ifPresent(ba -> {
                                 transactionDetail.addProperty("address_line1", ba.getAddressLine1());
                                 transactionDetail.addProperty("address_line2", ba.getAddressLine2());
@@ -202,9 +210,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 transactionDetail.addProperty("address_city", ba.getAddressCity());
                                 transactionDetail.addProperty("address_county", ba.getAddressCounty());
                                 transactionDetail.addProperty("address_country", ba.getAddressCountry());
-                            });
+                            }));
 
-                });
         return transactionDetail;
     }
 
@@ -214,7 +221,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 reference, description, state,
                 language, externalId, returnUrl,
                 email, paymentProvider, createdAt,
-                cardDetails, delayedCapture, externalMetadata);
+                cardDetails, delayedCapture, externalMetadata, eventCount);
     }
 
     public String getExternalId() {
@@ -237,7 +244,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return createdAt;
     }
 
-    public String getState() {
+    public TransactionState getState() {
         return state;
     }
 

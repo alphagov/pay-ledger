@@ -2,10 +2,8 @@ package uk.gov.pay.ledger.queue;
 
 import org.junit.ClassRule;
 import org.junit.Test;
-import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 
-import java.io.IOException;
 import java.time.ZonedDateTime;
 
 import static io.dropwizard.testing.ConfigOverride.config;
@@ -22,21 +20,28 @@ public class QueueMessageReceiverIT {
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
 
     @Test
-    public void shouldInsertEvent() throws IOException, InterruptedException {
-        Event event = aQueueEventFixture()
+    public void shouldHandleOutOfOrderEvents() throws InterruptedException {
+        final String resourceExternalId = "rexid";
+        aQueueEventFixture()
+                .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
-                .insert(rule.getSqsClient())
-                .toEntity();
+                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .insert(rule.getSqsClient());
 
-        Thread.sleep(1000);
+        // A created event with an earlier timestamp, sent later
+        aQueueEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT.minusMinutes(1))
+                .insert(rule.getSqsClient());
 
-        String resourceExternalId = event.getResourceExternalId();
+        Thread.sleep(500);
+
         given().port(rule.getAppRule().getLocalPort())
                 .contentType(JSON)
                 .get("/v1/transaction/" + resourceExternalId)
                 .then()
                 .statusCode(200)
                 .body("external_id", is(resourceExternalId))
-                .body("state", is("Created"));
+                .body("state", is("SUBMITTED"));
     }
 }

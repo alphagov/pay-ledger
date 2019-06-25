@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.ledger.event.model.serializer.MicrosecondPrecisionDateTimeSerializer;
 
 import java.time.ZonedDateTime;
@@ -20,19 +19,19 @@ public class Event {
     private String resourceExternalId;
     @JsonSerialize(using = MicrosecondPrecisionDateTimeSerializer.class)
     private ZonedDateTime eventDate;
-    private EventType eventType;
+    private String eventType;
     private String eventData;
 
     public Event() { }
 
     public Event(Long id, String sqsMessageId, ResourceType resourceType, String resourceExternalId,
-                 ZonedDateTime eventDate, String eventName, String eventData) {
+                 ZonedDateTime eventDate, String eventType, String eventData) {
         this.id = id;
         this.sqsMessageId = sqsMessageId;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
         this.eventDate = eventDate;
-        this.eventType = EventType.valueOf(eventName);
+        this.eventType = eventType;
         this.eventData = eventData;
     }
 
@@ -61,8 +60,7 @@ public class Event {
         return eventDate;
     }
 
-    @JsonSerialize(using = ToStringSerializer.class)
-    public EventType getEventType() {
+    public String getEventType() {
         return eventType;
     }
 
@@ -93,7 +91,7 @@ public class Event {
                 resourceType == event.resourceType &&
                 Objects.equals(resourceExternalId, event.resourceExternalId) &&
                 Objects.equals(eventDate, event.eventDate) &&
-                eventType == event.eventType &&
+                Objects.equals(eventType, event.eventType) &&
                 Objects.equals(eventData, event.eventData);
     }
 
