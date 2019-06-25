@@ -4,6 +4,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -52,7 +53,7 @@ public class TransactionDaoIT {
         Transaction modifiedTransaction = aTransactionFixture()
                 .withExternalId(transaction.getExternalId())
                 .withEventCount(2)
-                .withState("SUBMITTED")
+                .withState(TransactionState.SUBMITTED)
                 .toEntity();
 
         transactionDao.upsert(modifiedTransaction);
@@ -72,7 +73,7 @@ public class TransactionDaoIT {
         Transaction modifiedTransaction = aTransactionFixture()
                 .withExternalId(transaction.getExternalId())
                 .withEventCount(4)
-                .withState("SUBMITTED")
+                .withState(TransactionState.SUBMITTED)
                 .toEntity();
 
         transactionDao.upsert(modifiedTransaction);

@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
@@ -56,7 +57,7 @@ public class TransactionDaoSearchIT {
         assertThat(transaction.getId(), is(transactionFixture.getId()));
         assertThat(transaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
         assertThat(transaction.getAmount(), is(transactionFixture.getAmount()));
-        assertThat(transaction.getState().name(), is(transactionFixture.getState()));
+        assertThat(transaction.getState(), is(transactionFixture.getState()));
         assertThat(transaction.getReference(), is(transactionFixture.getReference()));
         assertThat(transaction.getDescription(), is(transactionFixture.getDescription()));
         assertThat(transaction.getLanguage(), is(transactionFixture.getLanguage()));
@@ -294,7 +295,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         aTransactionFixture()
-                .withState("random-state")
+                .withState(TransactionState.SUBMITTED)
                 .withGatewayAccountId(gatewayAccountId)
                 .insert(rule.getJdbi());
 
@@ -317,34 +318,12 @@ public class TransactionDaoSearchIT {
         for (int i = 0; i < 2; i++) {
             aTransactionFixture()
                     .withGatewayAccountId(gatewayAccountId)
-                    .withState("random-state")
+                    .withState(TransactionState.SUBMITTED)
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
-        searchParams.setPaymentStates(new CommaDelimitedSetParameter("random-state"));
-
-        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
-
-        assertThat(transactionList.size(), Matchers.is(0));
-
-        Long total = transactionDao.getTotalForSearch(searchParams);
-        assertThat(total, is(0L));
-    }
-
-    @Test
-    public void shouldReturnNoRecords_whenRefundStatesAreSpecified() {
-        String gatewayAccountId = "account-id-" + nextLong();
-
-        for (int i = 0; i < 2; i++) {
-            aTransactionFixture()
-                    .withGatewayAccountId(gatewayAccountId)
-                    .withState("random-refund-state")
-                    .insert(rule.getJdbi());
-        }
-        TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
-        searchParams.setRefundStates(new CommaDelimitedSetParameter("random-refund-state"));
+        searchParams.setPaymentStates(new CommaDelimitedSetParameter("submitted"));
 
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams);
 

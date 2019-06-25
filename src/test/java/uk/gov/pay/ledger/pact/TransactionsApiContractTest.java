@@ -13,6 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.time.ZonedDateTime;
@@ -56,7 +57,7 @@ public class TransactionsApiContractTest {
                 .withAmount(1000l)
                 .withReference("aReference")
                 .withDescription("Test description")
-                .withState("CREATED")
+                .withState(TransactionState.CREATED)
                 .withReturnUrl("https://example.org")
                 .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:13:16.067Z"))
                 .insert(app.getJdbi());

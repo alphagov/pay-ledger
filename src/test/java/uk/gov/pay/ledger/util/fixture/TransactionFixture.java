@@ -24,7 +24,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String reference = RandomStringUtils.randomAlphanumeric(10);
     private String description = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
-    private String state = "CREATED";
+    private TransactionState state = TransactionState.CREATED;
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private String language = "en";
     private String returnUrl = "https://example.org";
@@ -93,7 +93,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withState(String state) {
+    public TransactionFixture withState(TransactionState state) {
         this.state = state;
         return this;
     }
@@ -218,7 +218,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     @Override
     public Transaction toEntity() {
         return new Transaction(id, gatewayAccountId, amount,
-                reference, description, TransactionState.valueOf(state),
+                reference, description, state,
                 language, externalId, returnUrl,
                 email, paymentProvider, createdAt,
                 cardDetails, delayedCapture, externalMetadata, eventCount);
@@ -244,7 +244,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return createdAt;
     }
 
-    public String getState() {
+    public TransactionState getState() {
         return state;
     }
 
