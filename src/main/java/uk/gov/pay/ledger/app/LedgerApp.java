@@ -15,6 +15,7 @@ import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.ledger.event.resource.EventResource;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.healthcheck.HealthCheckResource;
+import uk.gov.pay.ledger.healthcheck.SQSHealthCheck;
 import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
 import uk.gov.pay.ledger.transaction.resource.TransactionResource;
 
@@ -52,6 +53,7 @@ public class LedgerApp extends Application<LedgerConfig> {
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
         environment.jersey().register(new BadRequestExceptionMapper());
+        environment.healthChecks().register("sqsQueue", injector.getInstance(SQSHealthCheck.class));
 
         if(config.getQueueMessageReceiverConfig().isBackgroundProcessingEnabled()) {
             environment.lifecycle().manage(injector.getInstance(QueueMessageReceiver.class));
