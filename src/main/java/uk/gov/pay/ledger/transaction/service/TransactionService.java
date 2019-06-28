@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.transaction.service;
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
+import uk.gov.pay.ledger.transaction.model.Address;
+import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.search.common.HalLinkBuilder;
@@ -70,6 +72,21 @@ public class TransactionService {
     }
 
     private Transaction convertToTransaction(EventDigest eventDigest) {
+        Address address = new Address(
+                eventDigest.getEventDetailsDigest().getAddressLine1(),
+                eventDigest.getEventDetailsDigest().getAddressLine2(),
+                eventDigest.getEventDetailsDigest().getAddressPostcode(),
+                eventDigest.getEventDetailsDigest().getAddressCity(),
+                eventDigest.getEventDetailsDigest().getAddressCounty(),
+                eventDigest.getEventDetailsDigest().getAddressCountry()
+        );
+
+        CardDetails cardDetails = new CardDetails(
+                eventDigest.getEventDetailsDigest().getCardholderName(),
+                address,
+                null
+        );
+
         return new Transaction(
                 eventDigest.getEventDetailsDigest().getGatewayAccountId(),
                 eventDigest.getEventDetailsDigest().getAmount(),
@@ -82,7 +99,7 @@ public class TransactionService {
                 eventDigest.getEventDetailsDigest().getEmail(),
                 eventDigest.getEventDetailsDigest().getPaymentProvider(),
                 eventDigest.getMostRecentEventTimestamp(),
-                null,
+                cardDetails,
                 eventDigest.getEventDetailsDigest().getDelayedCapture(),
                 null,
                 eventDigest.getEventCount()

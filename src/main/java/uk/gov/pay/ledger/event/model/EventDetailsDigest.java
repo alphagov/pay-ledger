@@ -19,6 +19,13 @@ public class EventDetailsDigest {
     private String paymentProvider;
     private Boolean delayedCapture;
     private String externalMetaData;
+    private String addressLine1;
+    private String addressLine2;
+    private String addressCity;
+    private String addressPostcode;
+    private String addressCounty;
+    private String addressCountry;
+    private String cardholderName;
 
     public String getGatewayAccountId() {
         return gatewayAccountId;
@@ -54,5 +61,33 @@ public class EventDetailsDigest {
 
     public Boolean getDelayedCapture() {
         return delayedCapture;
+    }
+
+    public String getAddressLine1() {
+        return addressLine1;
+    }
+
+    public String getAddressLine2() {
+        return addressLine2;
+    }
+
+    public String getAddressCity() {
+        return addressCity;
+    }
+
+    public String getAddressPostcode() {
+        return addressPostcode;
+    }
+
+    public String getAddressCounty() {
+        return addressCounty;
+    }
+
+    public String getAddressCountry() {
+        return addressCountry;
+    }
+
+    public String getCardholderName() {
+        return cardholderName;
     }
 }

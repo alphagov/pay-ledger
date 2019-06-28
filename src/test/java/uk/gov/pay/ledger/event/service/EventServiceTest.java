@@ -1,7 +1,6 @@
 package uk.gov.pay.ledger.event.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.jackson.Jackson;
+import com.google.gson.JsonObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,10 +25,23 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventServiceTest {
+    private final long amount = 2000L;
+    private final String description = "a payment";
+    private final String reference = "my reference";
+    private final String returnUrl = "https://example.com";
+    private final String gatewayAccountId = "gateway_account_id";
+    private final String paymentProvider = "stripe";
+    private final String email = "bob@example.com";
+    private final String cardholderName = "Bob";
+    private final String addressLine1 = "13 Pudding Lane";
+    private final String addressLine2 = "Clerkenwell";
+    private final String postcode = "EC1 1UT";
+    private final String city = "London";
+    private final String county = "London";
+    private final String country = "UK";
+
     @Mock
     EventDao mockEventDao;
-
-    private static ObjectMapper objectMapper = Jackson.newObjectMapper();
 
     private EventService eventService;
 
@@ -37,63 +49,90 @@ public class EventServiceTest {
 
     private ZonedDateTime latestEventTime;
     private final String resourceExternalId = "resource_external_id";
+    private Event paymentCreatedEvent;
+    private Event paymentDetailsEvent;
+    private EventDigest eventDigest;
 
     @Before
     public void setUp() {
         eventService = new EventService(mockEventDao);
 
         latestEventTime = ZonedDateTime.now().minusHours(1L);
-        String eventDetails1 = "{ \"amount\": 1000}";
-        Event event1 = EventFixture.anEventFixture()
-                .withEventData(eventDetails1)
+        JsonObject paymentCreatedEventDetails = new JsonObject();
+        paymentCreatedEventDetails.addProperty("amount", amount);
+        paymentCreatedEventDetails.addProperty("description", description);
+        paymentCreatedEventDetails.addProperty("reference", reference);
+        paymentCreatedEventDetails.addProperty("return_url", returnUrl);
+        paymentCreatedEventDetails.addProperty("gateway_account_id", gatewayAccountId);
+        paymentCreatedEventDetails.addProperty("payment_provider", paymentProvider);
+        paymentCreatedEvent = EventFixture.anEventFixture()
                 .withResourceExternalId(resourceExternalId)
+                .withEventData(paymentCreatedEventDetails.toString())
+                .toEntity();
+
+        JsonObject paymentDetailsEventDetails = new JsonObject();
+        paymentDetailsEventDetails.addProperty("email", email);
+        paymentDetailsEventDetails.addProperty("cardholder_name", cardholderName);
+        paymentDetailsEventDetails.addProperty("address_line1", addressLine1);
+        paymentDetailsEventDetails.addProperty("address_line2", addressLine2);
+        paymentDetailsEventDetails.addProperty("address_postcode", postcode);
+        paymentDetailsEventDetails.addProperty("address_city", city);
+        paymentDetailsEventDetails.addProperty("address_county", county);
+        paymentDetailsEventDetails.addProperty("address_country", country);
+        paymentDetailsEvent = EventFixture.anEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventData(paymentDetailsEventDetails.toString())
+                .withEventType("PAYMENT_DETAILS_EVENT")
                 .withEventDate(latestEventTime)
                 .toEntity();
-        String eventDetails2 = "{ \"amount\": 2000, \"description\": \"a payment\"}";
-        Event event2 = EventFixture.anEventFixture()
-                .withEventData(eventDetails2)
-                .withResourceExternalId(resourceExternalId)
-                .withEventDate(ZonedDateTime.now().minusHours(2L))
-                .toEntity();
-        when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(List.of(event1, event2));
-    }
 
-    @Test
-    public void getEventDigestForResource_shouldUseFirstEventInListToPopulateEventDigestMetadata() {
-        EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
-
-        assertThat(eventDigest.getMostRecentEventTimestamp(), is(latestEventTime));
-        assertThat(eventDigest.getMostRecentSalientEventType(), is(SalientEventType.PAYMENT_CREATED));
+        when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(
+                List.of(paymentCreatedEvent, paymentDetailsEvent));
+        eventDigest = eventService.getEventDigestForResource(resourceExternalId);
     }
 
     @Test
     public void laterEventsShouldOverrideEarlierEventsInEventDetailsDigest() {
-        EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
+        JsonObject eventDetails = new JsonObject();
+        eventDetails.addProperty("email", "new_email@example.com");
+        Event latestEvent = EventFixture.anEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventData(eventDetails.toString())
+                .toEntity();
 
-        assertThat(eventDigest.getEventDetailsDigest().getDescription(), is("a payment"));
-        assertThat(eventDigest.getEventDetailsDigest().getAmount(), is(1000L));
+        when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(
+                List.of(latestEvent, paymentCreatedEvent, paymentDetailsEvent));
+
+        EventDigest eventDigest =  eventService.getEventDigestForResource(resourceExternalId);
+        assertThat(eventDigest.getEventDetailsDigest().getEmail(), is("new_email@example.com"));
     }
 
     @Test
     public void shouldGetCorrectLatestSalientEventType() {
-        String eventDetails1 = "{ \"amount\": 1000}";
-        Event event1 = EventFixture.anEventFixture()
-                .withEventData(eventDetails1)
-                .withResourceExternalId(resourceExternalId)
-                .withEventDate(latestEventTime)
-                .toEntity();
-        String eventDetails2 = "{ \"amount\": 2000, \"description\": \"a payment\"}";
-        Event event2 = EventFixture.anEventFixture()
-                .withEventData(eventDetails2)
-                .withEventType("A_WEIRD_EVENT_THAT_SHOULD_NOT_BE_CONSIDERED_SALIENT")
-                .withResourceExternalId(resourceExternalId)
-                .withEventDate(ZonedDateTime.now().plusMinutes(2L))
-                .toEntity();
-        when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(List.of(event2, event1));
-
-        EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
-
         assertThat(eventDigest.getMostRecentSalientEventType(), is(SalientEventType.PAYMENT_CREATED));
+    }
+
+    @Test
+    public void shouldDeserialisePaymentCreatedEventCorrectly() {
+        assertThat(eventDigest.getMostRecentSalientEventType(), is(SalientEventType.PAYMENT_CREATED));
+        assertThat(eventDigest.getEventDetailsDigest().getAmount(), is(amount));
+        assertThat(eventDigest.getEventDetailsDigest().getDescription(), is(description));
+        assertThat(eventDigest.getEventDetailsDigest().getReference(), is(reference));
+        assertThat(eventDigest.getEventDetailsDigest().getReturnUrl(), is(returnUrl));
+        assertThat(eventDigest.getEventDetailsDigest().getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(eventDigest.getEventDetailsDigest().getPaymentProvider(), is(paymentProvider));
+    }
+
+    @Test
+    public void shouldDeserialisePaymentDetailsEventCorrectly() {
+        assertThat(eventDigest.getEventDetailsDigest().getEmail(), is(email));
+        assertThat(eventDigest.getEventDetailsDigest().getCardholderName(), is(cardholderName));
+        assertThat(eventDigest.getEventDetailsDigest().getAddressLine1(), is(addressLine1));
+        assertThat(eventDigest.getEventDetailsDigest().getAddressLine2(), is(addressLine2));
+        assertThat(eventDigest.getEventDetailsDigest().getAddressPostcode(), is(postcode));
+        assertThat(eventDigest.getEventDetailsDigest().getAddressCity(), is(city));
+        assertThat(eventDigest.getEventDetailsDigest().getAddressCounty(), is(county));
+        assertThat(eventDigest.getEventDetailsDigest().getAddressCountry(), is(country));
     }
 
     @Test
