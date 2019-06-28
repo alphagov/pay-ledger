@@ -11,7 +11,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 

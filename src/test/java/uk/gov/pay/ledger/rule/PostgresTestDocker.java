@@ -37,6 +37,11 @@ public class PostgresTestDocker {
         return "jdbc:postgresql://localhost:" + container.getMappedPort(5432) + "/";
     }
 
+    public static void stopContainer() {
+        container.stop();
+        container = null;
+    }
+
     private static void createDatabase(final String dbName) {
         final String dbUser = getDbUsername();
 
