@@ -59,6 +59,9 @@ public class TransactionsApiContractTest {
                 .withDescription("Test description")
                 .withState(TransactionState.CREATED)
                 .withReturnUrl("https://example.org")
+                .withCardBrand(null)
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails()
                 .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:13:16.067Z"))
                 .insert(app.getJdbi());
     }

@@ -2,9 +2,12 @@ package uk.gov.pay.ledger.util.fixture;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.SendMessageResult;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.RandomStringUtils;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 
 import java.time.ZoneOffset;
@@ -17,6 +20,7 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
     private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
+    private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(5);
 
     private QueueEventFixture() {
     }
@@ -47,6 +51,49 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
 
     public QueueEventFixture withEventData(String eventData) {
         this.eventData = eventData;
+        return this;
+    }
+
+    public QueueEventFixture withGatewayAccountId(String gatewayAccountId) {
+        this.gatewayAccountId = gatewayAccountId;
+        return this;
+    }
+
+    public QueueEventFixture withEventData(SalientEventType eventType) {
+        switch (eventType) {
+            case PAYMENT_CREATED:
+                eventData = new GsonBuilder().create()
+                        .toJson(ImmutableMap.builder()
+                                .put("amount", 1000)
+                                .put("description", "a description")
+                                .put("reference", "aref")
+                                .put("return_url", "https://example.org")
+                                .put("gateway_account_id", gatewayAccountId)
+                                .put("payment_provider", "sandbox")
+                                .build());
+                break;
+            case PAYMENT_DETAILS_EVENT:
+                eventData = new GsonBuilder().create()
+                        .toJson(ImmutableMap.builder()
+                                .put("email", "j.doe@example.org")
+                                .put("language", "en")
+                                .put("last_digits_card_number", "4242")
+                                .put("first_digits_card_number", "424242")
+                                .put("cardholder_name", "J citizen")
+                                .put("expiry_date", "11/21")
+                                .put("address_line1", "12 Rouge Avenue")
+                                .put("address_postcode", "N1 3QU")
+                                .put("address_city", "London")
+                                .put("address_country", "GB")
+                                .put("card_brand", "visa")
+                                .put("delayed_capture", false)
+                                .put("gateway_transaction_id", gatewayAccountId)
+                                .build());
+                break;
+             default:
+                 eventData = new GsonBuilder().create()
+                         .toJson(ImmutableMap.of("event_data", "event_data"));
+        }
         return this;
     }
 

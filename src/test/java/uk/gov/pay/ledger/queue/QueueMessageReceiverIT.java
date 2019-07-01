@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.queue;
 
 import org.junit.ClassRule;
 import org.junit.Test;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 
 import java.time.ZonedDateTime;
@@ -25,13 +26,15 @@ public class QueueMessageReceiverIT {
         aQueueEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
-                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .withEventType("PAYMENT_DETAILS_EVENT")
+                .withEventData(SalientEventType.PAYMENT_DETAILS_EVENT)
                 .insert(rule.getSqsClient());
 
         // A created event with an earlier timestamp, sent later
         aQueueEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT.minusMinutes(1))
+                .withEventData(SalientEventType.PAYMENT_CREATED)
                 .insert(rule.getSqsClient());
 
         Thread.sleep(500);
@@ -41,7 +44,7 @@ public class QueueMessageReceiverIT {
                 .get("/v1/transaction/" + resourceExternalId)
                 .then()
                 .statusCode(200)
-                .body("external_id", is(resourceExternalId))
-                .body("state", is("SUBMITTED"));
+                .body("charge_id", is(resourceExternalId))
+                .body("state.status", is("submitted"));
     }
 }

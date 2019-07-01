@@ -14,9 +14,10 @@ public class EventDigest {
     private final ZonedDateTime mostRecentEventTimestamp;
     private final ResourceType resourceType;
     private final String resourceExternalId;
-    private final EventDetailsDigest eventDetailsDigest;
     private final SalientEventType mostRecentSalientEventType;
     private Integer eventCount;
+    private Map<String, Object> eventPayload;
+    private final ZonedDateTime eventCreatedDate;
 
     private EventDigest(
             ZonedDateTime mostRecentEventTimestamp,
@@ -24,18 +25,20 @@ public class EventDigest {
             ResourceType resourceType,
             String resourceExternalId,
             Integer eventCount,
-            EventDetailsDigest eventDetailsDigest
+            Map<String, Object> eventPayload,
+            ZonedDateTime eventCreatedDate
     ) {
         this.mostRecentEventTimestamp = mostRecentEventTimestamp;
         this.mostRecentSalientEventType = mostRecentSalientEventType;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
         this.eventCount = eventCount;
-        this.eventDetailsDigest = eventDetailsDigest;
+        this.eventPayload = eventPayload;
+        this.eventCreatedDate = eventCreatedDate;
     }
 
     public static EventDigest fromEventList(List<Event> events) {
-        var eventDetailsDigest = buildEventDetailsDigest(events);
+        var eventPayload = buildEventPayload(events);
 
         var latestEvent = events.stream()
                 .findFirst()
@@ -47,24 +50,27 @@ public class EventDigest {
                 .findFirst()
                 .orElse(SalientEventType.PAYMENT_CREATED);
 
+        var earliestDate = events.stream()
+                .map(event -> event.getEventDate())
+                .min(ZonedDateTime::compareTo).get();
+
         return new EventDigest(
                 latestEvent.getEventDate(),
                 latestSalientEventType,
                 latestEvent.getResourceType(),
                 latestEvent.getResourceExternalId(),
                 events.size(),
-                eventDetailsDigest
+                eventPayload,
+                earliestDate
         );
     }
 
-    private static EventDetailsDigest buildEventDetailsDigest(List<Event> events) {
-        Map<String, Object> eventDetailsMap = events.stream()
+    private static Map<String, Object> buildEventPayload(List<Event> events) {
+        return events.stream()
                 .map(Event::getEventData)
                 .map(EventDigest::eventDetailsJsonStringToMap)
                 .flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (later, earlier) -> later));
-
-        return objectMapper.convertValue(eventDetailsMap, EventDetailsDigest.class);
     }
 
     private static Map<String, Object> eventDetailsJsonStringToMap(String eventDetails) {
@@ -91,11 +97,15 @@ public class EventDigest {
         return mostRecentSalientEventType;
     }
 
-    public EventDetailsDigest getEventDetailsDigest() {
-        return eventDetailsDigest;
+    public Map<String, Object> getEventPayload() {
+        return eventPayload;
     }
 
     public Integer getEventCount() {
         return eventCount;
+    }
+
+    public ZonedDateTime getEventCreatedDate() {
+        return eventCreatedDate;
     }
 }
