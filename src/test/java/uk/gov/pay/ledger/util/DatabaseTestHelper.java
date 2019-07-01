@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.util;
 
 import org.jdbi.v3.core.Jdbi;
 
+import java.util.List;
 import java.util.Map;
 
 public class DatabaseTestHelper {
@@ -42,5 +43,12 @@ public class DatabaseTestHelper {
                         .mapTo(Integer.class)
                         .findOnly()
         );
+    }
+
+    public List<Map<String, Object>> getAllTransactions() {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT * FROM transaction")
+                .mapToMap()
+                .list());
     }
 }

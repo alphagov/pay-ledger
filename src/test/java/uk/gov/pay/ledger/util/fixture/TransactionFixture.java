@@ -5,8 +5,12 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jetbrains.annotations.NotNull;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.pay.ledger.event.model.SalientEventType;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
+import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -16,26 +20,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class TransactionFixture implements DbFixture<TransactionFixture, Transaction> {
+public class TransactionFixture implements DbFixture<TransactionFixture, TransactionEntity> {
 
+    private ObjectMapper objectMapper = new ObjectMapper();
     private Long id = RandomUtils.nextLong(1, 99999);
+    private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private String externalId = RandomStringUtils.randomAlphanumeric(20);
     private Long amount = RandomUtils.nextLong(1, 99999);
     private String reference = RandomStringUtils.randomAlphanumeric(10);
     private String description = RandomStringUtils.randomAlphanumeric(20);
-    private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
-    private TransactionState state = TransactionState.CREATED;
-    private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
-    private String language = "en";
-    private String returnUrl = "https://example.org";
+    private TransactionState state = TransactionState.SUBMITTED;
     private String email = "someone@example.org";
-    private String paymentProvider = "sandbox";
-    private CardDetails cardDetails = getDefaultCardDetails();
-    private Integer eventCount = 1;
-
-    private Boolean delayedCapture = false;
-
+    private String cardholderName = "j.doe@example.org";
     private String externalMetadata = null;
+    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+    private String transactionDetails = "{}";
+    private Integer eventCount = 1;
+    private String cardBrand = "visa";
+    private String language = "en";
+    private String lastDigitsCardNumber;
+    private String firstDigitsCardNumber;
+    private CardDetails cardDetails;
+    private Boolean delayedCapture = false;
+    private String returnUrl = "https://example.org/transactions";
+    private String paymentProvider = "sandbox";
+
 
     private TransactionFixture() {
     }
@@ -44,27 +53,37 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return new TransactionFixture();
     }
 
-    public static List<Transaction> aTransactionList(String gatewayAccountId, int noOfViews) {
-        List<Transaction> transactionList = new ArrayList<>();
+    public static List<TransactionEntity> aTransactionList(String gatewayAccountId, int noOfViews) {
+        List<TransactionEntity> transactionList = new ArrayList<>();
         for (int i = 0; i < noOfViews; i++) {
             transactionList.add(aTransactionFixture()
                     .withGatewayAccountId(gatewayAccountId)
+                    .withDefaultTransactionDetails()
                     .toEntity());
         }
         return transactionList;
     }
 
-    public static List<Transaction> aPersistedTransactionList(String gatewayAccountId, int noOfViews, Jdbi jdbi) {
-        List<Transaction> transactionList = new ArrayList<>();
+    public static List<Payment> aPersistedTransactionList(String gatewayAccountId, int noOfViews, Jdbi jdbi, boolean includeCardDeatils) {
+        List<Payment> transactionList = new ArrayList<>();
         long preId = RandomUtils.nextLong();
         for (int i = 0; i < noOfViews; i++) {
-            transactionList.add(aTransactionFixture()
+            TransactionEntity entity = aTransactionFixture()
                     .withGatewayAccountId(gatewayAccountId)
                     .withId(preId + i)
                     .withAmount(100L + i)
+                    .withEmail("j.smith@example.org")
+                    .withCardholderName("J Smith")
                     .withReference("reference " + i)
+                    .withDefaultCardDetails(includeCardDeatils)
+                    .withFirstDigitsCardNumber("123456")
+                    .withLastDigitsCardNumber("1234")
+                    .withDefaultTransactionDetails()
+                    .withCardBrand(i % 2 == 0 ? "visa" : "mastercard")
+                    .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1L).plusMinutes(i))
                     .insert(jdbi)
-                    .toEntity());
+                    .toEntity();
+            transactionList.add(Payment.fromTransactionEntity(entity));
         }
         return transactionList;
     }
@@ -93,11 +112,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withState(TransactionState state) {
-        this.state = state;
-        return this;
-    }
-
     public TransactionFixture withReference(String reference) {
         this.reference = reference;
         return this;
@@ -108,18 +122,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withCreatedDate(ZonedDateTime createdDate) {
-        this.createdAt = createdDate;
-        return this;
-    }
-
-    public TransactionFixture withLanguage(String language) {
-        this.language = language;
-        return this;
-    }
-
-    public TransactionFixture withReturnUrl(String returnUrl) {
-        this.returnUrl = returnUrl;
+    public TransactionFixture withState(TransactionState state) {
+        this.state = state;
         return this;
     }
 
@@ -128,18 +132,12 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withPaymentProvider(String paymentProvider) {
-        this.paymentProvider = paymentProvider;
-        return this;
+    public String getCardholderName() {
+        return cardholderName;
     }
 
-    public TransactionFixture withCardDetails(CardDetails cardDetails) {
-        this.cardDetails = cardDetails;
-        return this;
-    }
-
-    public TransactionFixture withDelayedCapture(boolean delayedCapture) {
-        this.delayedCapture = delayedCapture;
+    public TransactionFixture withCardholderName(String cardholderName) {
+        this.cardholderName = cardholderName;
         return this;
     }
 
@@ -148,8 +146,83 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
+        return this;
+    }
+
+    public TransactionFixture withDefaultTransactionDetails() {
+        transactionDetails = getTransactionDetail().toString();
+        return this;
+    }
+
+    public String getTransactionDetails() {
+        return transactionDetails;
+    }
+
+    public TransactionFixture withTransactionDetails(String transactionDetails) {
+        this.transactionDetails = transactionDetails;
+        return this;
+    }
+
+    public Integer getEventCount() {
+        return eventCount;
+    }
+
     public TransactionFixture withEventCount(Integer eventCount) {
         this.eventCount = eventCount;
+        return this;
+    }
+
+    public String getCardBrand() {
+        return cardBrand;
+    }
+
+    public TransactionFixture withCardBrand(String cardBrand) {
+        this.cardBrand = cardBrand;
+        return this;
+    }
+
+    public TransactionFixture withLanguage(String language) {
+        this.language = language;
+        return this;
+    }
+
+    public String getLastDigitsCardNumber() {
+        return lastDigitsCardNumber;
+    }
+
+    public TransactionFixture withLastDigitsCardNumber(String lastDigitsCardNumber) {
+        this.lastDigitsCardNumber = lastDigitsCardNumber;
+        return this;
+    }
+
+    public String getFirstDigitsCardNumber() {
+        return firstDigitsCardNumber;
+    }
+
+    public TransactionFixture withFirstDigitsCardNumber(String firstDigitsCardNumber) {
+        this.firstDigitsCardNumber = firstDigitsCardNumber;
+        return this;
+    }
+
+    public TransactionFixture withCardDetails(CardDetails cardDetails) {
+        this.cardDetails = cardDetails;
+        return this;
+    }
+
+    public TransactionFixture withDelayedCapture(Boolean delayedCapture) {
+        this.delayedCapture = delayedCapture;
+        return this;
+    }
+
+    public TransactionFixture withReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
+        return this;
+    }
+
+    public TransactionFixture withPaymentProvider(String paymentProvider) {
+        this.paymentProvider = paymentProvider;
         return this;
     }
 
@@ -161,33 +234,39 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         "INSERT INTO" +
                                 "    transaction(\n" +
                                 "        id,\n" +
-                                "        gateway_account_id,\n" +
                                 "        external_id,\n" +
+                                "        gateway_account_id,\n" +
                                 "        amount,\n" +
-                                "        reference,\n" +
                                 "        description,\n" +
+                                "        reference,\n" +
                                 "        state,\n" +
+                                "        email,\n" +
                                 "        cardholder_name,\n" +
                                 "        external_metadata,\n" +
                                 "        created_date,\n" +
-                                "        email,\n" +
                                 "        transaction_details,\n" +
-                                "        event_count\n" +
+                                "        event_count,\n" +
+                                "        card_brand,\n" +
+                                "        last_digits_card_number,\n" +
+                                "        first_digits_card_number\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, CAST(? as jsonb), ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?)\n",
                         id,
-                        gatewayAccountId,
                         externalId,
+                        gatewayAccountId,
                         amount,
-                        reference,
                         description,
-                        state,
-                        cardDetails != null ? cardDetails.getCardHolderName() : null,
-                        externalMetadata,
-                        createdAt,
+                        reference,
+                        state.getState(),
                         email,
+                        cardholderName,
+                        externalMetadata,
+                        createdDate,
                         transactionDetail.toString(),
-                        eventCount
+                        eventCount,
+                        cardBrand,
+                        lastDigitsCardNumber,
+                        firstDigitsCardNumber
                 )
         );
         return this;
@@ -216,12 +295,12 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     }
 
     @Override
-    public Transaction toEntity() {
-        return new Transaction(id, gatewayAccountId, amount,
-                reference, description, state,
-                language, externalId, returnUrl,
-                email, paymentProvider, createdAt,
-                cardDetails, delayedCapture, externalMetadata, eventCount);
+    public TransactionEntity toEntity() {
+        return new TransactionEntity(id, gatewayAccountId, externalId, amount,
+                reference, description, state.getState(),
+                email,  cardholderName, externalMetadata, createdDate,
+                transactionDetails, eventCount, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber
+                );
     }
 
     public String getExternalId() {
@@ -240,8 +319,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return description;
     }
 
-    public ZonedDateTime getCreatedAt() {
-        return createdAt;
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
     }
 
     public TransactionState getState() {
@@ -280,11 +359,20 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return externalMetadata;
     }
 
-    private CardDetails getDefaultCardDetails() {
-        Address billingAddress = new Address("line1", "line2", "AB1 2CD",
-                "London", null, "GB");
 
-        return new CardDetails("J. Smith", billingAddress, null);
+
+    public TransactionFixture withDefaultCardDetails(boolean includeCardDetails) {
+        if (includeCardDetails) {
+            Address billingAddress = new Address("line1", "line2", "AB1 2CD",
+                    "London", null, "GB");
+
+            cardDetails = new CardDetails(cardholderName, billingAddress, cardBrand,
+                    "1234", "123456", "11/23");
+        }
+        return this;
     }
 
+    public TransactionFixture withDefaultCardDetails() {
+        return this.withDefaultCardDetails(true);
+    }
 }

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
-import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
@@ -26,7 +26,6 @@ public class TransactionView {
     private String description;
     private String reference;
     private String language;
-    @JsonProperty("charge_id")
     private String externalId;
     private String returnUrl;
     private String email;
@@ -35,13 +34,14 @@ public class TransactionView {
     private ZonedDateTime createdDate;
     private CardDetails cardDetails;
     private Boolean delayedCapture;
-    protected List<Link> links = new ArrayList<>();
+    private String gatewayTransactionId;
+    private List<Link> links = new ArrayList<>();
 
     //todo: replace with builder
-    public TransactionView(Long id, String gatewayAccountId, Long amount, TransactionState state,
+    private TransactionView(Long id, String gatewayAccountId, Long amount, TransactionState state,
                            String description, String reference, String language, String externalId,
                            String returnUrl, String email, String paymentProvider, ZonedDateTime createdDate,
-                           CardDetails cardDetails, Boolean delayedCapture) {
+                           CardDetails cardDetails, Boolean delayedCapture, String gatewayTransactionId) {
         this.id = id;
         this.gatewayAccountId = gatewayAccountId;
         this.amount = amount;
@@ -56,18 +56,19 @@ public class TransactionView {
         this.createdDate = createdDate;
         this.cardDetails = cardDetails;
         this.delayedCapture = delayedCapture;
+        this.gatewayTransactionId = gatewayTransactionId;
     }
 
     public TransactionView() {
     }
 
-    public static TransactionView from(Transaction transaction) {
+    public static TransactionView from(Payment transaction) {
         return new TransactionView(transaction.getId(), transaction.getGatewayAccountId(),
                 transaction.getAmount(), transaction.getState(),
                 transaction.getDescription(), transaction.getReference(), transaction.getLanguage(),
                 transaction.getExternalId(), transaction.getReturnUrl(), transaction.getEmail(),
                 transaction.getPaymentProvider(), transaction.getCreatedDate(), transaction.getCardDetails(),
-                transaction.getDelayedCapture());
+                transaction.getDelayedCapture(), transaction.getGatewayTransactionId());
     }
 
     public TransactionView addLink(Link link) {
@@ -103,6 +104,7 @@ public class TransactionView {
         return language;
     }
 
+    @JsonProperty("charge_id")
     public String getExternalId() {
         return externalId;
     }
@@ -133,6 +135,10 @@ public class TransactionView {
 
     public List<Link> getLinks() {
         return links;
+    }
+
+    public String getGatewayTransactionId() {
+        return gatewayTransactionId;
     }
 
     @Override

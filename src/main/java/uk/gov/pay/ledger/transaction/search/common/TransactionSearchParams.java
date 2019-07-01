@@ -5,10 +5,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -25,11 +24,12 @@ public class TransactionSearchParams {
     private static final String TO_DATE_FIELD = "to_date";
     private static final String EMAIL_FIELD = "email";
     private static final String REFERENCE_FIELD = "reference";
-    private static final String LAST_DIGITS_CARD_NUMBER_KEY = "last_digits_card_number";
-    private static final String FIRST_DIGITS_CARD_NUMBER_KEY = "first_digits_card_number";
-    private static final String PAYMENT_STATES_KEY = "payment_states";
-    private static final String REFUND_STATES_KEY = "refund_states";
-    private static final String CARD_BRAND_KEY = "card_brand";
+    private static final String LAST_DIGITS_CARD_NUMBER_FIELD = "last_digits_card_number";
+    private static final String FIRST_DIGITS_CARD_NUMBER_FIELD = "first_digits_card_number";
+    private static final String PAYMENT_STATES_FIELD = "payment_states";
+    private static final String REFUND_STATES_FIELD = "refund_states";
+    private static final String CARD_BRAND_FIELD = "card_brand";
+    private static final String STATE_FIELD = "state";
     private static final long MAX_DISPLAY_SIZE = 500;
     private static final long DEFAULT_PAGE_NUMBER = 1L;
 
@@ -47,10 +47,12 @@ public class TransactionSearchParams {
     private String firstDigitsCardNumber;
     @QueryParam("payment_states")
     private CommaDelimitedSetParameter paymentStates;
+    @QueryParam("state")
+    private String state;
     @QueryParam("refund_states")
     private CommaDelimitedSetParameter refundStates;
     @QueryParam("card_brands")
-    private List<String> cardBrands = new ArrayList<>();
+    private CommaDelimitedSetParameter cardBrands;
     @QueryParam("from_date")
     private String fromDate;
     @QueryParam("to_date")
@@ -91,7 +93,7 @@ public class TransactionSearchParams {
         this.refundStates = refundStates;
     }
 
-    public void setCardBrands(List<String> cardBrands) {
+    public void setCardBrands(CommaDelimitedSetParameter  cardBrands) {
         this.cardBrands = cardBrands;
     }
 
@@ -101,6 +103,10 @@ public class TransactionSearchParams {
 
     public void setToDate(String toDate) {
         this.toDate = toDate;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     @QueryParam("page")
@@ -135,7 +141,6 @@ public class TransactionSearchParams {
         if (isNotBlank(cardHolderName)) {
             sb.append(" AND t.cardholder_name ILIKE :" + CARDHOLDER_NAME_FIELD);
         }
-
         if (fromDate != null) {
             sb.append(" AND t.created_date > :" + FROM_DATE_FIELD);
         }
@@ -143,25 +148,22 @@ public class TransactionSearchParams {
             sb.append(" AND t.created_date < :" + TO_DATE_FIELD);
         }
         if (paymentStates != null && !paymentStates.isEmpty()) {
-
-            if (paymentStates.has("CREATED")) {
-                sb.append(" AND t.state in ('CREATED')");
-            } else {
-                sb.append(" AND false");
-            }
+            //TODO implement
         }
-
+        if (isNotBlank(state)) {
+            sb.append(" AND t.state = :" + STATE_FIELD);
+        }
         if (refundStates != null) {
-            sb.append(" AND false");
+            //TODO implement
         }
         if (cardBrands != null && !cardBrands.isEmpty()) {
-            sb.append(" AND false");
+            sb.append(" AND t.card_brand IN(" + inClause(cardBrands) + ")");
         }
         if (isNotBlank(lastDigitsCardNumber)) {
-            sb.append(" AND false");
+            sb.append(" AND t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD);
         }
         if (isNotBlank(firstDigitsCardNumber)) {
-            sb.append(" AND false");
+            sb.append(" AND t.first_digits_card_number = :" + FIRST_DIGITS_CARD_NUMBER_FIELD);
         }
 
         return sb.toString();
@@ -181,13 +183,22 @@ public class TransactionSearchParams {
                 queryMap.put(REFERENCE_FIELD, likeClause(reference));
             }
             if (cardHolderName != null) {
-                queryMap.put(CARDHOLDER_NAME_FIELD, cardHolderName);
+                queryMap.put(CARDHOLDER_NAME_FIELD, likeClause(cardHolderName));
             }
             if (fromDate != null) {
                 queryMap.put(FROM_DATE_FIELD, ZonedDateTime.parse(fromDate));
             }
             if (toDate != null) {
                 queryMap.put(TO_DATE_FIELD, ZonedDateTime.parse(toDate));
+            }
+            if (isNotBlank(state)) {
+                queryMap.put(STATE_FIELD, state);
+            }
+            if (isNotBlank(lastDigitsCardNumber)) {
+                queryMap.put(LAST_DIGITS_CARD_NUMBER_FIELD, lastDigitsCardNumber);
+            }
+            if (isNotBlank(firstDigitsCardNumber)) {
+                queryMap.put(FIRST_DIGITS_CARD_NUMBER_FIELD, firstDigitsCardNumber);
             }
         }
         return queryMap;
@@ -213,20 +224,6 @@ public class TransactionSearchParams {
         return toDate;
     }
 
-    private Long getOffset() {
-        Long offset = 0l;
-
-        if (pageNumber != null) {
-            offset = (pageNumber - 1) * getDisplaySize();
-        }
-
-        return offset;
-    }
-
-    private String likeClause(String rawUserInputText) {
-        return "%" + rawUserInputText + "%";
-    }
-
     public String buildQueryParamString(Long forPage) {
         String query = GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + accountId;
 
@@ -247,24 +244,46 @@ public class TransactionSearchParams {
             query += "&" + CARDHOLDER_NAME_FIELD + "=" + cardHolderName;
         }
         if (isNotBlank(firstDigitsCardNumber)) {
-            query += "&" + FIRST_DIGITS_CARD_NUMBER_KEY + "=" + firstDigitsCardNumber;
+            query += "&" + FIRST_DIGITS_CARD_NUMBER_FIELD + "=" + firstDigitsCardNumber;
         }
         if (isNotBlank(lastDigitsCardNumber)) {
-            query += "&" + LAST_DIGITS_CARD_NUMBER_KEY + "=" + lastDigitsCardNumber;
+            query += "&" + LAST_DIGITS_CARD_NUMBER_FIELD + "=" + lastDigitsCardNumber;
         }
-
         if (paymentStates != null && !paymentStates.isEmpty()) {
-            query += "&" + PAYMENT_STATES_KEY + "=" + String.join(",", this.paymentStates.getRawString());
+            query += "&" + PAYMENT_STATES_FIELD + "=" + paymentStates.getRawString();
         }
         if (refundStates != null && !refundStates.isEmpty()) {
-            query += "&" + REFUND_STATES_KEY + "=" + String.join(",", this.refundStates.getRawString());
+            query += "&" + REFUND_STATES_FIELD + "=" + refundStates.getRawString();
         }
-        if (paymentStates != null && !paymentStates.isEmpty()) {
-            query += "&" + CARD_BRAND_KEY + "=" + String.join(",", this.cardBrands);
+        if (cardBrands != null && !cardBrands.isEmpty()) {
+            query += "&" + CARD_BRAND_FIELD + "=" + cardBrands.getRawString();
+        }
+        if (isNotBlank(state)) {
+            query += "&" + STATE_FIELD + "=" + state;
         }
 
         query += addPaginationParams(forPage);
         return query;
+    }
+
+    private Long getOffset() {
+        Long offset = 0l;
+
+        if (pageNumber != null) {
+            offset = (pageNumber - 1) * getDisplaySize();
+        }
+
+        return offset;
+    }
+
+    private String likeClause(String rawUserInputText) {
+        return "%" + rawUserInputText + "%";
+    }
+
+    private String inClause(CommaDelimitedSetParameter parameters) {
+        return parameters.stream()
+                .map(parameter -> parameter = "'" + parameter + "'")
+                .collect(Collectors.joining(","));
     }
 
     private String addPaginationParams(Long forPage) {

@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.transaction.dao.mapper.TransactionMapper;
-import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class TransactionDao {
     private static final String SEARCH_QUERY_STRING = "SELECT * FROM transaction t " +
             "WHERE t.gateway_account_id = :account_id " +
             ":searchExtraFields " +
-            "ORDER BY t.id DESC OFFSET :offset LIMIT :limit";
+            "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
 
     private static final String SEARCH_COUNT_QUERY_STRING = "SELECT count(t.id) " +
             "FROM transaction t " +
@@ -27,12 +27,14 @@ public class TransactionDao {
 
     private static final String UPSERT_STRING =
             "INSERT INTO transaction(" +
-                "external_id,gateway_account_id, amount,description,reference,state,email,cardholder_name," +
-                "external_metadata,created_date,transaction_details, event_count" +
+                "external_id,gateway_account_id,amount,description,reference,state,email,cardholder_name," +
+                "external_metadata,created_date,transaction_details,event_count,card_brand, " +
+                    "last_digits_card_number,first_digits_card_number" +
             ") " +
             "VALUES (" +
                 ":externalId,:gatewayAccountId,:amount,:description,:reference,:state,:email,:cardholderName," +
-                "CAST(:externalMetadata as jsonb),:createdDate,CAST(:transactionDetails as jsonb), :eventCount" +
+                "CAST(:externalMetadata as jsonb),:createdDate,CAST(:transactionDetails as jsonb), :eventCount," +
+                    ":cardBrand,:lastDigitsCardNumber,:firstDigitsCardNumber" +
             ")" +
             "ON CONFLICT (external_id) " +
             "DO UPDATE SET " +
@@ -46,8 +48,11 @@ public class TransactionDao {
                 "cardholder_name = EXCLUDED.cardholder_name," +
                 "external_metadata = EXCLUDED.external_metadata," +
                 "created_date = EXCLUDED.created_date," +
+                "transaction_details = EXCLUDED.transaction_details," +
                 "event_count = EXCLUDED.event_count," +
-                "transaction_details = EXCLUDED.transaction_details " +
+                "card_brand = EXCLUDED.card_brand," +
+                "last_digits_card_number = EXCLUDED.last_digits_card_number," +
+                "first_digits_card_number = EXCLUDED.first_digits_card_number " +
             "WHERE EXCLUDED.event_count > transaction.event_count;";
 
     private final Jdbi jdbi;
@@ -57,7 +62,7 @@ public class TransactionDao {
         this.jdbi = jdbi;
     }
 
-    public Optional<Transaction> findTransactionByExternalId(String externalId) {
+    public Optional<TransactionEntity> findTransactionByExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery(FIND_TRANSACTION_BY_EXTERNAL_ID)
                         .bind("externalId", externalId)
@@ -65,8 +70,7 @@ public class TransactionDao {
                         .findFirst());
     }
 
-    //todo: order results by transaction date
-    public List<Transaction> searchTransactions(TransactionSearchParams searchParams) {
+    public List<TransactionEntity> searchTransactions(TransactionSearchParams searchParams) {
         String searchExtraFields = searchParams.generateQuery();
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(SEARCH_QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
@@ -88,7 +92,7 @@ public class TransactionDao {
         });
     }
 
-    public void upsert(Transaction transaction) {
+    public void upsert(TransactionEntity transaction) {
         jdbi.withHandle(handle ->
                 handle.createUpdate(UPSERT_STRING)
                 .bindBean(transaction)
