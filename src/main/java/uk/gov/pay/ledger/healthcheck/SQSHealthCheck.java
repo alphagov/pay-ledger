@@ -38,7 +38,7 @@ public class SQSHealthCheck extends HealthCheck {
         Optional<String> result = checkQueue(sqsHealthCheckHolder);
 
         if (result.isPresent()) {
-            return Result.unhealthy(format("failed to retrieve %s queue attributes: %s", sqsHealthCheckHolder.getName(), result.get()));
+            return Result.unhealthy(format("Failed %s queue attribute check: %s", sqsHealthCheckHolder.getName(), result.get()));
         }
 
         return Result.healthy();
@@ -50,14 +50,10 @@ public class SQSHealthCheck extends HealthCheck {
                         .withAttributeNames("All");
         try {
             sqsClient.getQueueAttributes(queueAttributesRequest);
-        } catch (AmazonSQSException | UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException | SdkClientException e) {
             logger.error("Failed to retrieve [{}] queue attributes - {}", nameValuePair.getName(), e.getMessage());
-            return Optional.of(e.getMessage());
-        } catch (SdkClientException e) {
-            logger.error("Failed to connect to sqs queue - {}", e.getMessage());
-            return Optional.of("Failed to connect to sqs server - " + e.getMessage());
+            return Optional.of("Failed to retrieve queue attributes - " + e);
         }
-
         return Optional.empty();
     }
 }
