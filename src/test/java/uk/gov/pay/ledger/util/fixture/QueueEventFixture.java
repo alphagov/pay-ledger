@@ -1,9 +1,11 @@
 package uk.gov.pay.ledger.util.fixture;
 
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang3.RandomStringUtils;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
@@ -89,9 +91,9 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
                                 .put("gateway_transaction_id", gatewayAccountId)
                                 .build());
                 break;
-             default:
-                 eventData = new GsonBuilder().create()
-                         .toJson(ImmutableMap.of("event_data", "event_data"));
+            default:
+                eventData = new GsonBuilder().create()
+                        .toJson(ImmutableMap.of("event_data", "event_data"));
         }
         return this;
     }
@@ -139,10 +141,27 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
                 eventType,
                 resourceType.toString().toLowerCase(),
                 eventData
-                );
+        );
 
         SendMessageResult result = sqsClient.sendMessage(SqsTestDocker.getQueueUrl("event-queue"), messageBody);
         this.sqsMessageId = result.getMessageId();
         return this;
+    }
+
+    public PactDslJsonBody getAsPact() {
+        PactDslJsonBody eventDetails = new PactDslJsonBody();
+
+        eventDetails.stringType("event_type", eventType);
+        eventDetails.stringType("timestamp", eventDate.toString());
+        eventDetails.stringType("resource_external_id", resourceExternalId);
+        eventDetails.stringType("resource_type", resourceType.toString().toLowerCase());
+
+        PactDslJsonBody paymentCreatedEventDetails = new PactDslJsonBody();
+        new JsonParser().parse(eventData).getAsJsonObject().entrySet()
+                .forEach(e -> paymentCreatedEventDetails.stringType(e.getKey(), e.getValue().getAsString()));
+
+        eventDetails.object("event_details", paymentCreatedEventDetails);
+
+        return eventDetails;
     }
 }
