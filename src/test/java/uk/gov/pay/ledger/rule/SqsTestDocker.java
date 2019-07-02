@@ -35,6 +35,11 @@ public class SqsTestDocker {
         }
     }
 
+    public static void stopContainer() {
+        sqsContainer.stop();
+        sqsContainer = null;
+    }
+
     private static AmazonSQS createQueues(String... queues) {
         AmazonSQS amazonSQS = getSqsClient();
         if (queues != null) {
