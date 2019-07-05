@@ -5,8 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
-import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
+import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import java.util.List;

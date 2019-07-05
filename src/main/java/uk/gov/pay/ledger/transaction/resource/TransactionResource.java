@@ -4,10 +4,9 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.transaction.dao.TransactionDao;
-import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
+import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import javax.validation.Valid;
@@ -29,21 +28,19 @@ import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParam
 public class TransactionResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
-    private final TransactionDao transactionDao;
     private final TransactionService transactionService;
 
     @Inject
-    public TransactionResource(TransactionService transactionService, TransactionDao transactionDao) {
+    public TransactionResource(TransactionService transactionService) {
         this.transactionService = transactionService;
-        this.transactionDao = transactionDao;
     }
 
     @Path("/{transactionExternalId}")
     @GET
     @Timed
-    public Transaction getById(@PathParam("transactionExternalId") String transactionExternalId) {
+    public TransactionView getById(@PathParam("transactionExternalId") String transactionExternalId, @Context UriInfo uriInfo) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
-        return transactionDao.findTransactionByExternalId(transactionExternalId)
+        return transactionService.getTransaction(transactionExternalId, uriInfo)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
 

@@ -1,11 +1,11 @@
 package uk.gov.pay.ledger.transaction.resource;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
-import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import javax.ws.rs.core.Response;
@@ -13,9 +13,10 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsString;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
+import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aPersistedTransactionList;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -31,12 +32,15 @@ public class TransactionResourceIT {
     @Before
     public void setUp() {
         transactionFixture = aTransactionFixture();
+        aDatabaseTestHelper(rule.getJdbi()).truncateAllData();
     }
 
     @Test
     public void shouldGetTransaction() {
 
-        transactionFixture = aTransactionFixture();
+        transactionFixture = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails();
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -45,30 +49,33 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("external_id", is(transactionFixture.getExternalId()))
+                .body("charge_id", is(transactionFixture.getExternalId()))
                 .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
                 .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()));
     }
 
     @Test
     public void shouldSearchUsingAllFieldsAndReturnAllFieldsCorrectly() {
-        // until we use the date from the event we're sorting by id, that's why the list is inverted
         String gatewayAccountId = RandomStringUtils.randomAlphanumeric(20);
-        List<Transaction> transactionList = aPersistedTransactionList(gatewayAccountId, 10, rule.getJdbi());
-        Transaction transactionToVerify = transactionList.get(7);
+        List<Payment> transactionList = aPersistedTransactionList(gatewayAccountId, 10, rule.getJdbi(), true);
+        Payment transactionToVerify = transactionList.get(7);
         given().port(port)
                 .contentType(JSON)
-                //todo: add more query params (card_brands, refund_states...) when search functionality is available
+                //todo: add more query params (refund_states, payment_states...) when search functionality is available
                 .get("/v1/transaction?" +
                         "account_id=" + gatewayAccountId +
                         "&page=2" +
                         "&display_size=2" +
                         "&email=example.org" +
                         "&reference=reference" +
-                        "&card_holder_name=Smith" +
+                        "&cardholder_name=smith" +
                         "&from_date=2000-01-01T10:15:30Z" +
                         "&to_date=2100-01-01T10:15:30Z" +
-                        "&state=created"
+                        "&state=submitted" +
+                        "&card_brands=visa,mastercard" +
+                        "&last_digits_card_number=1234" +
+                        "&first_digits_card_number=123456"
+
                 )
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
@@ -104,10 +111,10 @@ public class TransactionResourceIT {
                 .body("page", is(2))
                 .body("total", is(10))
 
-                .body("_links.self.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=2&display_size=2"))
-                .body("_links.first_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=1&display_size=2"))
-                .body("_links.last_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=5&display_size=2"))
-                .body("_links.prev_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=1&display_size=2"))
-                .body("_links.next_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&page=3&display_size=2"));
+                .body("_links.self.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&cardholder_name=smith&first_digits_card_number=123456&last_digits_card_number=1234&card_brand=visa%2Cmastercard&state=submitted&page=2&display_size=2"))
+                .body("_links.first_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&cardholder_name=smith&first_digits_card_number=123456&last_digits_card_number=1234&card_brand=visa%2Cmastercard&state=submitted&page=1&display_size=2"))
+                .body("_links.last_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&cardholder_name=smith&first_digits_card_number=123456&last_digits_card_number=1234&card_brand=visa%2Cmastercard&state=submitted&page=5&display_size=2"))
+                .body("_links.prev_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&cardholder_name=smith&first_digits_card_number=123456&last_digits_card_number=1234&card_brand=visa%2Cmastercard&state=submitted&page=1&display_size=2"))
+                .body("_links.next_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&cardholder_name=smith&first_digits_card_number=123456&last_digits_card_number=1234&card_brand=visa%2Cmastercard&state=submitted&page=3&display_size=2"));
     }
 }
