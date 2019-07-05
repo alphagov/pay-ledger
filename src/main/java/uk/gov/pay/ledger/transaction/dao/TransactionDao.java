@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.transaction.dao;
 
 import com.google.inject.Inject;
+import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.transaction.dao.mapper.TransactionMapper;
@@ -71,10 +72,8 @@ public class TransactionDao {
     }
 
     public List<TransactionEntity> searchTransactions(TransactionSearchParams searchParams) {
-        String searchExtraFields = searchParams.generateQuery();
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(SEARCH_QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
-            searchParams.getQueryMap().forEach(query::bind);
+            Query query = getQuery(searchParams, handle, SEARCH_QUERY_STRING);
             return query
                     .map(new TransactionMapper())
                     .list();
@@ -82,14 +81,25 @@ public class TransactionDao {
     }
 
     public Long getTotalForSearch(TransactionSearchParams searchParams) {
-        String searchExtraFields = searchParams.generateQuery();
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(SEARCH_COUNT_QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
-            searchParams.getQueryMap().forEach(query::bind);
+            Query query = getQuery(searchParams, handle, SEARCH_COUNT_QUERY_STRING);
             return query
                     .mapTo(Long.class)
                     .findOnly();
         });
+    }
+
+    private Query getQuery(TransactionSearchParams searchParams, Handle handle, String searchCountQueryString) {
+        String searchExtraFields = searchParams.generateQuery();
+        Query query = handle.createQuery(searchCountQueryString.replace(":searchExtraFields", searchExtraFields));
+        searchParams.getQueryMap().forEach((k, v) -> {
+            if (v instanceof List<?>) {
+                query.bindList(k, ((List<?>) v));
+            } else {
+                query.bind(k, v);
+            }
+        });
+        return query;
     }
 
     public void upsert(TransactionEntity transaction) {
