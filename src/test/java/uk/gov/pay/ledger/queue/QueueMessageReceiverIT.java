@@ -27,14 +27,14 @@ public class QueueMessageReceiverIT {
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
                 .withEventType("PAYMENT_DETAILS_EVENT")
-                .withEventData(SalientEventType.PAYMENT_DETAILS_EVENT)
+                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_DETAILS_EVENT)
                 .insert(rule.getSqsClient());
 
         // A created event with an earlier timestamp, sent later
         aQueueEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT.minusMinutes(1))
-                .withEventData(SalientEventType.PAYMENT_CREATED)
+                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED)
                 .insert(rule.getSqsClient());
 
         Thread.sleep(500);

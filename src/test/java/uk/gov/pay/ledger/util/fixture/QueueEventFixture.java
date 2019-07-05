@@ -49,7 +49,7 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
         return this;
     }
 
-    public QueueEventFixture withEventData(String eventData) {
+    public QueueEventFixture withDefaultEventDataForEventType(String eventData) {
         this.eventData = eventData;
         return this;
     }
@@ -59,7 +59,7 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
         return this;
     }
 
-    public QueueEventFixture withEventData(SalientEventType eventType) {
+    public QueueEventFixture withDefaultEventDataForEventType(SalientEventType eventType) {
         switch (eventType) {
             case PAYMENT_CREATED:
                 eventData = new GsonBuilder().create()

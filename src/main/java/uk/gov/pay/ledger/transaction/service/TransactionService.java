@@ -1,38 +1,32 @@
 package uk.gov.pay.ledger.transaction.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.EventDigest;
+import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.search.common.HalLinkBuilder;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
-import uk.gov.pay.ledger.transaction.search.model.ConvertedTransactionDetails;
 import uk.gov.pay.ledger.transaction.search.model.Link;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
-import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TransactionService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionService.class);
     private final TransactionDao transactionDao;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private TransactionEntityFactory transactionEntityFactory;
 
     @Inject
-    public TransactionService(TransactionDao transactionDao) {
+    public TransactionService(TransactionDao transactionDao, TransactionEntityFactory transactionEntityFactory) {
         this.transactionDao = transactionDao;
+        this.transactionEntityFactory = transactionEntityFactory;
     }
 
     public Optional<TransactionView> getTransaction(String transactionExternalId, UriInfo uriInfo) {
@@ -81,29 +75,7 @@ public class TransactionService {
     }
 
     public void upsertTransactionFor(EventDigest eventDigest) {
-        TransactionEntity transaction = convertToTransaction(eventDigest);
+        TransactionEntity transaction = transactionEntityFactory.from(eventDigest);
         transactionDao.upsert(transaction);
-    }
-
-    public TransactionEntity convertToTransaction(EventDigest eventDigest) {
-        String transactionDetail = convertToTransactionDetails(eventDigest.getEventPayload());
-        TransactionEntity entity = objectMapper.convertValue(eventDigest.getEventPayload(), TransactionEntity.class);
-        entity.setTransactionDetails(transactionDetail);
-        entity.setEventCount(eventDigest.getEventCount());
-        entity.setState(TransactionState.fromSalientEventType(eventDigest.getMostRecentSalientEventType()).getState());
-        entity.setCreatedDate(eventDigest.getEventCreatedDate());
-        entity.setExternalId(eventDigest.getResourceExternalId());
-
-        return entity;
-    }
-
-    private String convertToTransactionDetails(Map<String, Object> transactionPayload) {
-        ConvertedTransactionDetails details = objectMapper.convertValue(transactionPayload, ConvertedTransactionDetails.class);
-        try {
-            return objectMapper.writeValueAsString(details);
-        } catch (JsonProcessingException e) {
-            LOGGER.error("Unable to parse incoming event payload: {}", e.getMessage());
-        }
-        return "{}";
     }
 }
