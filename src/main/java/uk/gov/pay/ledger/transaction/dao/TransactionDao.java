@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public class TransactionDao {
 
@@ -92,14 +93,18 @@ public class TransactionDao {
     private Query getQuery(TransactionSearchParams searchParams, Handle handle, String searchCountQueryString) {
         String searchExtraFields = searchParams.generateQuery();
         Query query = handle.createQuery(searchCountQueryString.replace(":searchExtraFields", searchExtraFields));
-        searchParams.getQueryMap().forEach((k, v) -> {
-            if (v instanceof List<?>) {
-                query.bindList(k, ((List<?>) v));
-            } else {
-                query.bind(k, v);
-            }
-        });
+        searchParams.getQueryMap().forEach(bindSearchParameter(query));
         return query;
+    }
+
+    private BiConsumer<String, Object> bindSearchParameter(Query query) {
+        return (searchKey, searchValue) -> {
+            if (searchValue instanceof List<?>) {
+                query.bindList(searchKey, ((List<?>) searchValue));
+            } else {
+                query.bind(searchKey, searchValue);
+            }
+        };
     }
 
     public void upsert(TransactionEntity transaction) {

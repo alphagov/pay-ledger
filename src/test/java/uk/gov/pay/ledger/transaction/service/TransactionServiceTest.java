@@ -1,6 +1,6 @@
 package uk.gov.pay.ledger.transaction.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.dropwizard.jackson.Jackson;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +40,8 @@ public class TransactionServiceTest {
 
     @Before
     public void setUp() {
-        transactionService = new TransactionService(mockTransactionDao, new TransactionEntityFactory(new ObjectMapper()));
+        TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(Jackson.newObjectMapper());
+        transactionService = new TransactionService(mockTransactionDao, transactionEntityFactory);
         searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
 
