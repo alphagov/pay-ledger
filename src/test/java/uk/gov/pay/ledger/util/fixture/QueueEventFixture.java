@@ -7,7 +7,6 @@ import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.RandomStringUtils;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
-import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 
 import java.time.ZoneOffset;
@@ -49,7 +48,7 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
         return this;
     }
 
-    public QueueEventFixture withDefaultEventDataForEventType(String eventData) {
+    public QueueEventFixture withEventData(String eventData) {
         this.eventData = eventData;
         return this;
     }
@@ -59,9 +58,9 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
         return this;
     }
 
-    public QueueEventFixture withDefaultEventDataForEventType(SalientEventType eventType) {
+    public QueueEventFixture withDefaultEventDataForEventType(String eventType) {
         switch (eventType) {
-            case PAYMENT_CREATED:
+            case "PAYMENT_CREATED":
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
                                 .put("amount", 1000)
@@ -72,7 +71,7 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
                                 .put("payment_provider", "sandbox")
                                 .build());
                 break;
-            case PAYMENT_DETAILS_EVENT:
+            case "PAYMENT_DETAILS_ENTERED":
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
                                 .put("email", "j.doe@example.org")

@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public enum SalientEventType {
     PAYMENT_CREATED,
-    PAYMENT_DETAILS_EVENT;
+    AUTHORISATION_SUCCESSFUL; //might require renaming after the work in connector to publish all the events is finished
 
     public static Optional<SalientEventType> from(String eventName) {
         return Arrays.stream(SalientEventType.values())

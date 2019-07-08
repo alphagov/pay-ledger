@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.util.List;
 
@@ -25,18 +24,18 @@ public class TransactionEntityFactoryTest {
     public void fromShouldConvertEventDigestToTransactionEntity() {
         Event paymentCreatedEvent = aQueueEventFixture()
                 .withEventType(SalientEventType.PAYMENT_CREATED.name())
-                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED)
+                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
                 .toEntity();
         Event paymentDetailsEvent = aQueueEventFixture()
-                .withEventType(SalientEventType.PAYMENT_DETAILS_EVENT.name())
-                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_DETAILS_EVENT)
+                .withEventType("PAYMENT_DETAILS_ENTERED")
+                .withDefaultEventDataForEventType("PAYMENT_DETAILS_ENTERED")
                 .toEntity();
         EventDigest eventDigest = EventDigest.fromEventList(List.of(paymentCreatedEvent, paymentDetailsEvent));
 
         TransactionEntity transactionEntity = transactionEntityFactory.from(eventDigest);
 
         assertThat(transactionEntity.getExternalId(), is(eventDigest.getResourceExternalId()));
-        assertThat(transactionEntity.getState(), is(TransactionState.fromSalientEventType(eventDigest.getMostRecentSalientEventType()).getState()));
+        assertThat(transactionEntity.getState(), is("created"));
         assertThat(transactionEntity.getCreatedDate(), is(paymentCreatedEvent.getEventDate()));
         assertThat(transactionEntity.getEventCount(), is(eventDigest.getEventCount()));
         assertThat(transactionEntity.getReference(), is(eventDigest.getEventPayload().get("reference")));

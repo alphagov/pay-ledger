@@ -26,15 +26,15 @@ public class QueueMessageReceiverIT {
         aQueueEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
-                .withEventType("PAYMENT_DETAILS_EVENT")
-                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_DETAILS_EVENT)
+                .withEventType("AUTHORISATION_SUCCESSFUL")
                 .insert(rule.getSqsClient());
 
         // A created event with an earlier timestamp, sent later
         aQueueEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT.minusMinutes(1))
-                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED)
+                .withEventType(SalientEventType.PAYMENT_CREATED.name())
+                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
                 .insert(rule.getSqsClient());
 
         Thread.sleep(500);
