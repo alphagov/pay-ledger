@@ -7,7 +7,6 @@ import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -157,7 +156,7 @@ public class TransactionSearchParams {
             //TODO implement
         }
         if (cardBrands != null && !cardBrands.isEmpty()) {
-            sb.append(" AND t.card_brand IN(" + inClause(cardBrands) + ")");
+            sb.append(" AND t.card_brand IN(<" + CARD_BRAND_FIELD + ">)");
         }
         if (isNotBlank(lastDigitsCardNumber)) {
             sb.append(" AND t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD);
@@ -193,6 +192,9 @@ public class TransactionSearchParams {
             }
             if (isNotBlank(state)) {
                 queryMap.put(STATE_FIELD, state);
+            }
+            if (cardBrands != null && !cardBrands.isEmpty()) {
+                queryMap.put(CARD_BRAND_FIELD, cardBrands.getParameters());
             }
             if (isNotBlank(lastDigitsCardNumber)) {
                 queryMap.put(LAST_DIGITS_CARD_NUMBER_FIELD, lastDigitsCardNumber);
@@ -278,12 +280,6 @@ public class TransactionSearchParams {
 
     private String likeClause(String rawUserInputText) {
         return "%" + rawUserInputText + "%";
-    }
-
-    private String inClause(CommaDelimitedSetParameter parameters) {
-        return parameters.stream()
-                .map(parameter -> parameter = "'" + parameter + "'")
-                .collect(Collectors.joining(","));
     }
 
     private String addPaginationParams(Long forPage) {
