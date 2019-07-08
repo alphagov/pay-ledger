@@ -23,13 +23,24 @@ pipeline {
   }
 
   stages {
-    stage('Maven Build') {
+    stage('Maven Build Master') {
+      when {
+        branch 'master'
+      }
       steps {
         script {
-          long stepBuildTime = System.currentTimeMillis()
-          sh 'mvn -version'
-          sh 'mvn clean verify'
-          runProviderContractTests()
+          def stepBuildTime = System.currentTimeMillis()
+          def commit = gitCommit()
+          def branchName = 'master'
+
+          withCredentials([
+                  string(credentialsId: 'pact_broker_username', variable: 'PACT_BROKER_USERNAME'),
+                  string(credentialsId: 'pact_broker_password', variable: 'PACT_BROKER_PASSWORD')]
+          ) {
+              sh 'mvn -version'
+              sh "mvn clean package pact:publish -DPACT_BROKER_URL=https://pact-broker-test.cloudapps.digital -DPACT_CONSUMER_VERSION=${commit}" +
+                      " -DPACT_BROKER_USERNAME=${PACT_BROKER_USERNAME} -DPACT_BROKER_PASSWORD=${PACT_BROKER_PASSWORD} -DPACT_CONSUMER_TAG=${branchName}"
+          }
           postSuccessfulMetrics("ledger.maven-build", stepBuildTime)
         }
       }
@@ -39,7 +50,35 @@ pipeline {
         }
       }
     }
+    stage('Maven Build Branch') {
+      when {
+        not {
+          branch 'master'
+        }
+      }
+      steps {
+        script {
+          def stepBuildTime = System.currentTimeMillis()
+          def commit = gitCommit()
+          def branchName = gitBranchName()
 
+          withCredentials([
+                  string(credentialsId: 'pact_broker_username', variable: 'PACT_BROKER_USERNAME'),
+                  string(credentialsId: 'pact_broker_password', variable: 'PACT_BROKER_PASSWORD')]
+          ) {
+              sh 'mvn -version'
+              sh "mvn clean package pact:publish -DPACT_BROKER_URL=https://pact-broker-test.cloudapps.digital -DPACT_CONSUMER_VERSION=${commit}" +
+                      " -DPACT_BROKER_USERNAME=${PACT_BROKER_USERNAME} -DPACT_BROKER_PASSWORD=${PACT_BROKER_PASSWORD} -DPACT_CONSUMER_TAG=${branchName}"
+          }
+          postSuccessfulMetrics("ledger.maven-build", stepBuildTime)
+      }
+      }
+      post {
+          failure {
+              postMetric("ledger.maven-build.failure", 1)
+          }
+      }
+    }
     stage('Docker Build') {
       steps {
         script {
