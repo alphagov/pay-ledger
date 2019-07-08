@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.Arrays.stream;
 
@@ -50,7 +48,7 @@ public enum TransactionState {
 
     private static final Map<SalientEventType, TransactionState> EVENT_TYPE_TRANSACTION_STATE_MAP = Map.of(
             SalientEventType.PAYMENT_CREATED, CREATED,
-            SalientEventType.PAYMENT_DETAILS_EVENT, SUBMITTED
+            SalientEventType.AUTHORISATION_SUCCESSFUL, SUBMITTED
     );
 
     public static TransactionState fromSalientEventType(SalientEventType salientEventType) {
