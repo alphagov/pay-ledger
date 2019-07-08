@@ -1,13 +1,12 @@
 package uk.gov.pay.ledger.transaction.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.model.EventDigest;
-import uk.gov.pay.ledger.event.model.SalientEventType;
+import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
@@ -15,12 +14,10 @@ import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
-import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import java.net.MalformedURLException;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -28,7 +25,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionServiceTest {
@@ -43,8 +39,8 @@ public class TransactionServiceTest {
     private TransactionSearchParams searchParams;
 
     @Before
-    public void setUp() throws MalformedURLException {
-        transactionService = new TransactionService(mockTransactionDao);
+    public void setUp() {
+        transactionService = new TransactionService(mockTransactionDao, new TransactionEntityFactory(new ObjectMapper()));
         searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
 
@@ -133,23 +129,4 @@ public class TransactionServiceTest {
         assertThat(selfLink, containsString("refund_states=created%2Crefunded"));
         assertThat(selfLink, containsString("card_brand=visa%2Cmastercard"));
     }
-
-    @Test
-    public void shouldConvertEventDigestToTransactionEntity() {
-        Event paymentCreatedEvent = aQueueEventFixture()
-                .withEventType(SalientEventType.PAYMENT_CREATED.name())
-                .withEventData(SalientEventType.PAYMENT_CREATED)
-                .toEntity();
-        Event paymentDetailsEvent = aQueueEventFixture()
-                .withEventType(SalientEventType.PAYMENT_DETAILS_EVENT.name())
-                .withEventData(SalientEventType.PAYMENT_DETAILS_EVENT)
-                .toEntity();
-
-        EventDigest eventDigest = EventDigest.fromEventList(List.of(paymentCreatedEvent, paymentDetailsEvent));
-        TransactionEntity transactionEntity = transactionService.convertToTransaction(eventDigest);
-        assertThat(transactionEntity.getExternalId(), is(eventDigest.getResourceExternalId()));
-        assertThat(transactionEntity.getState(), is(TransactionState.fromSalientEventType(eventDigest.getMostRecentSalientEventType()).getState()));
-        assertThat(transactionEntity.getCreatedDate(), is(paymentCreatedEvent.getEventDate()));
-        assertThat(transactionEntity.getEventCount(), is(eventDigest.getEventCount()));
-     }
 }
