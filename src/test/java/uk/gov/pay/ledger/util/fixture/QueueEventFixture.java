@@ -6,6 +6,7 @@ import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang3.RandomStringUtils;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
@@ -158,7 +159,20 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
 
         PactDslJsonBody paymentCreatedEventDetails = new PactDslJsonBody();
         new JsonParser().parse(eventData).getAsJsonObject().entrySet()
-                .forEach(e -> paymentCreatedEventDetails.stringType(e.getKey(), e.getValue().getAsString()));
+                .forEach(e -> {
+                    try {
+                        JsonPrimitive value = ((JsonPrimitive) e.getValue());
+                        if (value.isNumber()) {
+                            paymentCreatedEventDetails.integerType(e.getKey(), value.getAsInt());
+                        } else if (value.isBoolean()) {
+                            paymentCreatedEventDetails.booleanType(e.getKey(), value.getAsBoolean());
+                        } else {
+                            paymentCreatedEventDetails.stringType(e.getKey(), value.getAsString());
+                        }
+                    } catch (Exception ex) {
+                        paymentCreatedEventDetails.stringType(e.getKey(), e.getValue().getAsString());
+                    }
+                });
 
         eventDetails.object("event_details", paymentCreatedEventDetails);
 
