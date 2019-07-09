@@ -79,6 +79,23 @@ pipeline {
           }
       }
     }
+    stage('Contract Tests') {
+      steps {
+        script {
+          env.PACT_TAG = gitBranchName()
+        }
+        ws('contract-tests-wp') {
+          runPactProviderTests("pay-connector", "${env.PACT_TAG}")
+        }
+      }
+      post {
+        always {
+          ws('contract-tests-wp') {
+              deleteDir()
+          }
+        }
+      }
+    }
     stage('Docker Build') {
       steps {
         script {
@@ -121,6 +138,11 @@ pipeline {
         failure {
           postMetric("ledger.docker-tag.failure", 1)
         }
+      }
+    }
+    stage('Check pact compatibility') {
+      steps {
+        checkPactCompatibility("ledger", gitCommit(), "test")
       }
     }
     stage('Deploy') {
