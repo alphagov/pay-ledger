@@ -40,8 +40,12 @@ public class TransactionResource {
     @Timed
     public TransactionView getById(@PathParam("transactionExternalId") String transactionExternalId, @Context UriInfo uriInfo) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
-        return transactionService.getTransaction(transactionExternalId, uriInfo)
-                .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
+        try {
+            return transactionService.getTransaction(transactionExternalId, uriInfo)
+                    .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
+        }catch (Exception e) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        }
     }
 
     @Path("/")

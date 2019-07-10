@@ -13,7 +13,9 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TransactionView {
@@ -22,6 +24,10 @@ public class TransactionView {
     private Long id;
     private String gatewayAccountId;
     private Long amount;
+    private Long totalAmount;
+    private Long corporateCardSurcharge;
+    private Long fee;
+    private Long netAmount;
     private TransactionState state;
     private String description;
     private String reference;
@@ -35,16 +41,25 @@ public class TransactionView {
     private CardDetails cardDetails;
     private Boolean delayedCapture;
     private String gatewayTransactionId;
+    private RefundSummary refundSummary;
+    private SettlementSummary settlementSummary;
+    private Map<String, Object> metadata;
+    private List<Link> paymentLinks;
     private List<Link> links = new ArrayList<>();
 
     //todo: replace with builder
-    private TransactionView(Long id, String gatewayAccountId, Long amount, TransactionState state,
-                           String description, String reference, String language, String externalId,
-                           String returnUrl, String email, String paymentProvider, ZonedDateTime createdDate,
-                           CardDetails cardDetails, Boolean delayedCapture, String gatewayTransactionId) {
+    private TransactionView(Long id, String gatewayAccountId, Long amount, Long totalAmount, Long corporateCardSurcharge, Long fee, Long netAmount, TransactionState state,
+                            String description, String reference, String language, String externalId,
+                            String returnUrl, String email, String paymentProvider, ZonedDateTime createdDate,
+                            CardDetails cardDetails, Boolean delayedCapture, String gatewayTransactionId,
+                            RefundSummary refundSummary, SettlementSummary settlementSummary, Map<String, Object> metadata, List<Link> paymentLinks) {
         this.id = id;
         this.gatewayAccountId = gatewayAccountId;
         this.amount = amount;
+        this.totalAmount = totalAmount;
+        this.corporateCardSurcharge = corporateCardSurcharge;
+        this.fee = fee;
+        this.netAmount = netAmount;
         this.state = state;
         this.description = description;
         this.reference = reference;
@@ -57,22 +72,36 @@ public class TransactionView {
         this.cardDetails = cardDetails;
         this.delayedCapture = delayedCapture;
         this.gatewayTransactionId = gatewayTransactionId;
+        this.refundSummary = refundSummary;
+        this.settlementSummary = settlementSummary;
+        this.metadata = metadata;
+        this.paymentLinks = paymentLinks;
     }
 
     public TransactionView() {
     }
 
     public static TransactionView from(Payment transaction) {
+        RefundSummary refundSummary = Optional.ofNullable(transaction.getRefundSummary()).orElse(RefundSummary.ofValue("available", transaction.getAmount(), 0L));
+        Long totalAmount = transaction.getAmount();
+
+        if (transaction.getCorporateCardSurcharge() != null) {
+            totalAmount += transaction.getCorporateCardSurcharge();
+        }
+
         return new TransactionView(transaction.getId(), transaction.getGatewayAccountId(),
-                transaction.getAmount(), transaction.getState(),
+                transaction.getAmount(), totalAmount, transaction.getCorporateCardSurcharge(), transaction.getFee(), transaction.getNetAmount(), transaction.getState(),
                 transaction.getDescription(), transaction.getReference(), transaction.getLanguage(),
                 transaction.getExternalId(), transaction.getReturnUrl(), transaction.getEmail(),
                 transaction.getPaymentProvider(), transaction.getCreatedDate(), transaction.getCardDetails(),
-                transaction.getDelayedCapture(), transaction.getGatewayTransactionId());
+                transaction.getDelayedCapture(), transaction.getGatewayTransactionId(), refundSummary,
+                new SettlementSummary(), transaction.getExternalMetadata(), transaction.getLinks());
     }
 
     public TransactionView addLink(Link link) {
-        links.add(link);
+        if (link != null) {
+            links.add(link);
+        }
         return this;
     }
 
@@ -152,5 +181,37 @@ public class TransactionView {
     @Override
     public int hashCode() {
         return Objects.hash(externalId);
+    }
+
+    public RefundSummary getRefundSummary() {
+        return refundSummary;
+    }
+
+    public SettlementSummary getSettlementSummary() {
+        return settlementSummary;
+    }
+
+    public Map<String, Object> getMetadata() {
+        return metadata;
+    }
+
+    public Long getCorporateCardSurcharge() {
+        return corporateCardSurcharge;
+    }
+
+    public Long getTotalAmount() {
+        return totalAmount;
+    }
+
+    public Long getFee() {
+        return fee;
+    }
+
+    public Long getNetAmount() {
+        return netAmount;
+    }
+
+    public List<Link> getPaymentLinks() {
+        return paymentLinks;
     }
 }

@@ -1,17 +1,19 @@
 package uk.gov.pay.ledger.util.fixture;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jetbrains.annotations.NotNull;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Payment;
-import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.model.PaymentFactory;
+import uk.gov.pay.ledger.transaction.search.model.Link;
+import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZoneOffset;
@@ -44,6 +46,13 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Boolean delayedCapture = false;
     private String returnUrl = "https://example.org/transactions";
     private String paymentProvider = "sandbox";
+    private PaymentFactory paymentFactory = new PaymentFactory(objectMapper);
+    private String gatewayTransactionId;
+    private Long corporateCardSurcharge;
+    private Long fee;
+    private Long netAmount;
+    private ArrayList<Link> links = new ArrayList<>();
+    private RefundSummary refundSummary;
 
 
     private TransactionFixture() {
@@ -64,7 +73,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return transactionList;
     }
 
-    public static List<Payment> aPersistedTransactionList(String gatewayAccountId, int noOfViews, Jdbi jdbi, boolean includeCardDeatils) {
+    public List<Payment> aPersistedTransactionList(String gatewayAccountId, int noOfViews, Jdbi jdbi, boolean includeCardDeatils) {
         List<Payment> transactionList = new ArrayList<>();
         long preId = RandomUtils.nextLong();
         for (int i = 0; i < noOfViews; i++) {
@@ -83,7 +92,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1L).plusMinutes(i))
                     .insert(jdbi)
                     .toEntity();
-            transactionList.add(Payment.fromTransactionEntity(entity));
+            transactionList.add(paymentFactory.fromTransactionEntity(entity));
         }
         return transactionList;
     }
@@ -99,6 +108,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withGatewayAccountId(String gatewayAccountId) {
         this.gatewayAccountId = gatewayAccountId;
+        return this;
+    }
+
+    public TransactionFixture withGatewayTransactionId(String gatewayTransactionId) {
+        this.gatewayTransactionId = gatewayTransactionId;
         return this;
     }
 
@@ -274,33 +288,46 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @NotNull
     private JsonObject getTransactionDetail() {
-        JsonObject transactionDetail = new JsonObject();
+        JsonObject transactionDetails = new JsonObject();
 
-        transactionDetail.addProperty("language", language);
-        transactionDetail.addProperty("return_url", returnUrl);
-        transactionDetail.addProperty("payment_provider", paymentProvider);
-        transactionDetail.addProperty("delayed_capture", delayedCapture);
+        transactionDetails.addProperty("language", language);
+        transactionDetails.addProperty("return_url", returnUrl);
+        transactionDetails.addProperty("payment_provider", paymentProvider);
+        transactionDetails.addProperty("delayed_capture", delayedCapture);
+        transactionDetails.addProperty("gateway_transaction_id", gatewayTransactionId);
+        transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
+        transactionDetails.addProperty("fee", fee);
+        transactionDetails.addProperty("net_amount", netAmount);
+        transactionDetails.add("links", new Gson().toJsonTree(links));
+        Optional.ofNullable(refundSummary)
+                .ifPresent(rs -> {
+                    var summary = new JsonObject();
+                    summary.addProperty("status", rs.getStatus());
+                    summary.addProperty("amount_available", rs.getAmountAvailable());
+                    summary.addProperty("amount_submitted", rs.getAmountSubmitted());
+                    transactionDetails.add("refund_summary", summary);
+                });
         Optional.ofNullable(cardDetails)
                 .ifPresent(cd -> Optional.ofNullable(cd.getBillingAddress())
-                            .ifPresent(ba -> {
-                                transactionDetail.addProperty("address_line1", ba.getAddressLine1());
-                                transactionDetail.addProperty("address_line2", ba.getAddressLine2());
-                                transactionDetail.addProperty("address_postcode", ba.getAddressPostCode());
-                                transactionDetail.addProperty("address_city", ba.getAddressCity());
-                                transactionDetail.addProperty("address_county", ba.getAddressCounty());
-                                transactionDetail.addProperty("address_country", ba.getAddressCountry());
-                            }));
+                        .ifPresent(ba -> {
+                            transactionDetails.addProperty("address_line1", ba.getAddressLine1());
+                            transactionDetails.addProperty("address_line2", ba.getAddressLine2());
+                            transactionDetails.addProperty("address_postcode", ba.getAddressPostCode());
+                            transactionDetails.addProperty("address_city", ba.getAddressCity());
+                            transactionDetails.addProperty("address_county", ba.getAddressCounty());
+                            transactionDetails.addProperty("address_country", ba.getAddressCountry());
+                        }));
 
-        return transactionDetail;
+        return transactionDetails;
     }
 
     @Override
     public TransactionEntity toEntity() {
         return new TransactionEntity(id, gatewayAccountId, externalId, amount,
                 reference, description, state.getState(),
-                email,  cardholderName, externalMetadata, createdDate,
+                email, cardholderName, externalMetadata, createdDate,
                 transactionDetails, eventCount, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber
-                );
+        );
     }
 
     public String getExternalId() {
@@ -360,7 +387,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     }
 
 
-
     public TransactionFixture withDefaultCardDetails(boolean includeCardDetails) {
         if (includeCardDetails) {
             Address billingAddress = new Address("line1", "line2", "AB1 2CD",
@@ -374,5 +400,31 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withDefaultCardDetails() {
         return this.withDefaultCardDetails(true);
+    }
+
+
+    public TransactionFixture withCorporateCardSurcharge(long value) {
+        this.corporateCardSurcharge = value;
+        return this;
+    }
+
+    public TransactionFixture withFee(long value) {
+        this.fee = value;
+        return this;
+    }
+
+    public TransactionFixture withNetAmount(long value) {
+        this.netAmount = value;
+        return this;
+    }
+
+    public TransactionFixture addLink(Link link) {
+        this.links.add(link);
+        return this;
+    }
+
+    public TransactionFixture withRefundSummary(RefundSummary refundSummary) {
+        this.refundSummary = refundSummary;
+        return this;
     }
 }

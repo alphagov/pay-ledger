@@ -22,4 +22,9 @@ public class HalLinkBuilder {
         String url = createLink(uriInfo, path, ids);
         return Link.ofValue(url, "GET", "refunds");
     }
+
+    public static Link createCaptureLink(UriInfo uriInfo, String path, String... ids) {
+        String url = createLink(uriInfo, path, ids);
+        return Link.ofValue(url, "POST", "capture");
+    }
 }

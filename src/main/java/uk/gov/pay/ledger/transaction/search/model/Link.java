@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.search.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.Map;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -11,14 +12,16 @@ public class Link {
     private String href;
     private String method;
     private String rel;
+    private String type;
+    private Map<String, String> params;
 
-    private Link(String href, String method, String rel) {
+    public Link(String href, String method, String rel, String type, Map<String, String> params) {
         this.href = href;
         this.method = method;
         this.rel = rel;
+        this.type = type;
+        this.params = params;
     }
-
-    public Link() {}
 
     public String getHref() {
         return href;
@@ -30,8 +33,20 @@ public class Link {
 
     public String getRel() { return rel; }
 
+    public String getType() {
+        return type;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
+
     public static Link ofValue(String href, String method, String rel) {
-        return new Link(href, method, rel);
+        return new Link(href, method, rel, null, null);
+    }
+
+    public static Link ofValue(String href, String method, String rel, String type, Map<String, String> params) {
+        return new Link(href, method, rel, type, params);
     }
 
     @Override

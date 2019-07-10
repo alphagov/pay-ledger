@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -27,9 +28,27 @@ public abstract class Transaction {
         this.externalId = externalId;
     }
 
+    protected static Long safeGetAsLong(JsonObject object, String propertyName) {
+        return safeGetJsonElement(object, propertyName)
+                .map(JsonElement::getAsLong)
+                .orElse(null);
+    }
+
     protected static String safeGetAsString(JsonObject object, String propertyName) {
         return safeGetJsonElement(object, propertyName)
                 .map(JsonElement::getAsString)
+                .orElse(null);
+    }
+
+    protected static JsonObject safeGetAsObject(JsonObject object, String propertyName) {
+        return safeGetJsonElement(object, propertyName)
+                .map(JsonElement::getAsJsonObject)
+                .orElse(null);
+    }
+
+    protected static JsonArray safeGetAsArray(JsonObject object, String propertyName) {
+        return safeGetJsonElement(object, propertyName)
+                .map(JsonElement::getAsJsonArray)
                 .orElse(null);
     }
 
