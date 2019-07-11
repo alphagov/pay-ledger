@@ -16,6 +16,8 @@ public class RefundSummary {
 
     private Long amountSubmitted;
 
+    public RefundSummary() {}
+
     public RefundSummary(String status, Long amountAvailable, Long amountSubmitted) {
         this.status = status;
         this.amountAvailable = amountAvailable;

@@ -1,28 +1,24 @@
 package uk.gov.pay.ledger.transaction.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.search.model.Link;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
-import static uk.gov.pay.ledger.transaction.model.Transaction.safeGetAsArray;
-import static uk.gov.pay.ledger.transaction.model.Transaction.safeGetAsLong;
-import static uk.gov.pay.ledger.transaction.model.Transaction.safeGetAsObject;
-import static uk.gov.pay.ledger.transaction.model.Transaction.safeGetAsString;
+import static java.lang.String.format;
 
 public class PaymentFactory {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(PaymentFactory.class);
     private ObjectMapper objectMapper;
 
     @Inject
@@ -31,45 +27,59 @@ public class PaymentFactory {
     }
 
     public Payment fromTransactionEntity(TransactionEntity entity) {
-        JsonObject transactionDetail = new JsonParser().parse(entity.getTransactionDetails()).getAsJsonObject();
-        Address billingAddress = new Address(
-                safeGetAsString(transactionDetail, "address_line1"),
-                safeGetAsString(transactionDetail, "address_line2"),
-                safeGetAsString(transactionDetail, "address_postcode"),
-                safeGetAsString(transactionDetail, "address_city"),
-                safeGetAsString(transactionDetail, "address_county"),
-                safeGetAsString(transactionDetail, "address_country")
-        );
-
-        CardDetails cardDetails = new CardDetails(entity.getCardholderName(), billingAddress, entity.getCardBrand(),
-                entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
-                safeGetAsString(transactionDetail, "card_expiry_date"));
-
-        Map<String, Object> metadata = null;
-        List<Link> links = null;
-        RefundSummary refundSummary = null;
         try {
-            metadata = entity.getExternalMetadata() != null ? objectMapper.readValue(entity.getExternalMetadata(), Map.class) : null;
-            Type listType = new TypeToken<ArrayList<Link>>(){}.getType();
-            links = new Gson().fromJson(safeGetAsArray(transactionDetail, "links"), listType);
-            var refundSummaryObject = safeGetAsObject(transactionDetail, "refund_summary");
-            if(refundSummaryObject != null) {
-                refundSummary = RefundSummary.ofValue(
-                        safeGetAsString(refundSummaryObject, "status"),
-                        safeGetAsLong(refundSummaryObject, "amount_available"),
-                        safeGetAsLong(refundSummaryObject, "amount_submitted"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace(); //todo
-        }
+            Map<String, Object> metadata = null;
+            RefundSummary refundSummary = null;
 
-        return new Payment(entity.getGatewayAccountId(), entity.getAmount(), entity.getReference(), entity.getDescription(),
-                TransactionState.from(entity.getState()), safeGetAsString(transactionDetail, "language"),
-                entity.getExternalId(), safeGetAsString(transactionDetail, "return_url"), entity.getEmail(),
-                safeGetAsString(transactionDetail, "payment_provider"), entity.getCreatedDate(),
-                cardDetails, Boolean.valueOf(safeGetAsString(transactionDetail, "delayed_capture")),
-                metadata, entity.getEventCount(), safeGetAsString(transactionDetail, "gateway_transaction_id"),
-                safeGetAsLong(transactionDetail, "corporate_surcharge"), safeGetAsLong(transactionDetail, "fee"),
-                safeGetAsLong(transactionDetail, "net_amount"), refundSummary, links);
+            JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
+            Address billingAddress = new Address(
+                    safeGetAsString(transactionDetails, "address_line1"),
+                    safeGetAsString(transactionDetails, "address_line2"),
+                    safeGetAsString(transactionDetails, "address_postcode"),
+                    safeGetAsString(transactionDetails, "address_city"),
+                    safeGetAsString(transactionDetails, "address_county"),
+                    safeGetAsString(transactionDetails, "address_country")
+            );
+
+            CardDetails cardDetails = new CardDetails(entity.getCardholderName(), billingAddress, entity.getCardBrand(),
+                    entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
+                    safeGetAsString(transactionDetails, "card_expiry_date"));
+
+            if(entity.getExternalMetadata() != null) {
+                metadata = objectMapper.readValue(entity.getExternalMetadata(), new TypeReference<Map<String, Object>>() {});
+            }
+            if(transactionDetails.get("refund_summary") != null) {
+                refundSummary = objectMapper.treeToValue(transactionDetails.get("refund_summary"), RefundSummary.class);
+            }
+
+            return new Payment(entity.getGatewayAccountId(), entity.getAmount(), entity.getReference(), entity.getDescription(),
+                    TransactionState.from(entity.getState()), safeGetAsString(transactionDetails, "language"),
+                    entity.getExternalId(), safeGetAsString(transactionDetails, "return_url"), entity.getEmail(),
+                    safeGetAsString(transactionDetails, "payment_provider"), entity.getCreatedDate(),
+                    cardDetails, Boolean.valueOf(safeGetAsString(transactionDetails, "delayed_capture")),
+                    metadata, entity.getEventCount(), safeGetAsString(transactionDetails, "gateway_transaction_id"),
+                    safeGetAsLong(transactionDetails, "corporate_surcharge"), safeGetAsLong(transactionDetails, "fee"),
+                    safeGetAsLong(transactionDetails, "net_amount"), refundSummary, safeGetAsLong(transactionDetails, "total_amount"));
+        } catch (IOException e) {
+            LOGGER.error(format("Error during the parsing transaction entity data {}", entity.getExternalId()), e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Long safeGetAsLong(JsonNode object, String propertyName) {
+        return safeGetJsonElement(object, propertyName)
+                .map(JsonNode::asLong)
+                .orElse(null);
+    }
+
+    private static String safeGetAsString(JsonNode object, String propertyName) {
+        return safeGetJsonElement(object, propertyName)
+                .map(JsonNode::asText)
+                .orElse(null);
+    }
+
+    private static Optional<JsonNode> safeGetJsonElement(JsonNode object, String propertyName) {
+        return Optional.ofNullable(object.get(propertyName))
+                .filter(p -> p != null);
     }
 }

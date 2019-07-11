@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.transaction.search.model;
+package uk.gov.pay.ledger.transaction.model;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,6 +14,8 @@ public class Link {
     private String rel;
     private String type;
     private Map<String, String> params;
+
+    public Link() {}
 
     public Link(String href, String method, String rel, String type, Map<String, String> params) {
         this.href = href;
@@ -51,11 +53,13 @@ public class Link {
 
     @Override
     public String toString() {
-        return "Link{" +
-                "rel='" + rel + '\'' +
-                ", href='" + href + '\'' +
-                ", method='" + method + '\'' +
-                '}';
+        return String.format("Link{" +
+                "rel='%s'" +
+                ", href='%s'" +
+                ", method='%s'" +
+                ", type='%s'" +
+                ", params='%s'" +
+                "}", rel, href, method, type, params);
     }
 
     @Override
@@ -65,7 +69,9 @@ public class Link {
         Link link = (Link) o;
         return Objects.equals(href, link.href) &&
                 Objects.equals(rel, link.rel) &&
-                Objects.equals(method, link.method);
+                Objects.equals(method, link.method) &&
+                Objects.equals(type, link.type) &&
+                Objects.equals(params, link.params);
     }
 
     @Override

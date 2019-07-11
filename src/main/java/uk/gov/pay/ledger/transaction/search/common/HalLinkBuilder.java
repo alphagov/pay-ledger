@@ -1,6 +1,6 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
-import uk.gov.pay.ledger.transaction.search.model.Link;
+import uk.gov.pay.ledger.transaction.model.Link;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -21,10 +21,5 @@ public class HalLinkBuilder {
     public static Link createRefundsLink(UriInfo uriInfo, String path, String... ids) {
         String url = createLink(uriInfo, path, ids);
         return Link.ofValue(url, "GET", "refunds");
-    }
-
-    public static Link createCaptureLink(UriInfo uriInfo, String path, String... ids) {
-        String url = createLink(uriInfo, path, ids);
-        return Link.ofValue(url, "POST", "capture");
     }
 }

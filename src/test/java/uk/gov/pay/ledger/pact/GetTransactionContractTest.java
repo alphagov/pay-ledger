@@ -7,13 +7,11 @@ import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
-import uk.gov.pay.ledger.transaction.search.model.Link;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
@@ -79,6 +77,7 @@ public class GetTransactionContractTest {
                 .withState(TransactionState.CREATED)
                 .withAmount(2000L)
                 .withCorporateCardSurcharge(250L)
+                .withTotalAmount(2250L)
                 .insert(app.getJdbi());
     }
 
@@ -118,9 +117,6 @@ public class GetTransactionContractTest {
                 .withDelayedCapture(true)
                 .withRefundSummary(RefundSummary.ofValue("pending", 100L, 0L))
                 .withAmount(100L)
-                .addLink(Link.ofValue("https://card_frontend/secure/ae749781-6562-4e0e-8f56-32d9639079dc", "GET", "next_url"))
-                .addLink(Link.ofValue("https://card_frontend/secure",
-                        "POST", "next_url_post", "application/x-www-form-urlencoded", ImmutableMap.of("chargeTokenId", "ae749781-6562-4e0e-8f56-32d9639079dc")))
                 .insert(app.getJdbi());
     }
 }

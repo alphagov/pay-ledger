@@ -1,8 +1,8 @@
 package uk.gov.pay.ledger.util.fixture;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.dropwizard.jackson.Jackson;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
@@ -12,7 +12,6 @@ import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.PaymentFactory;
-import uk.gov.pay.ledger.transaction.search.model.Link;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -51,8 +50,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Long corporateCardSurcharge;
     private Long fee;
     private Long netAmount;
-    private ArrayList<Link> links = new ArrayList<>();
     private RefundSummary refundSummary;
+    private Long totalAmount;
 
 
     private TransactionFixture() {
@@ -73,7 +72,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return transactionList;
     }
 
-    public List<Payment> aPersistedTransactionList(String gatewayAccountId, int noOfViews, Jdbi jdbi, boolean includeCardDeatils) {
+    public static List<Payment> aPersistedTransactionList(String gatewayAccountId, int noOfViews, Jdbi jdbi, boolean includeCardDeatils) {
         List<Payment> transactionList = new ArrayList<>();
         long preId = RandomUtils.nextLong();
         for (int i = 0; i < noOfViews; i++) {
@@ -92,7 +91,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1L).plusMinutes(i))
                     .insert(jdbi)
                     .toEntity();
-            transactionList.add(paymentFactory.fromTransactionEntity(entity));
+            transactionList.add(new PaymentFactory(Jackson.newObjectMapper()).fromTransactionEntity(entity));
         }
         return transactionList;
     }
@@ -298,7 +297,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
         transactionDetails.addProperty("fee", fee);
         transactionDetails.addProperty("net_amount", netAmount);
-        transactionDetails.add("links", new Gson().toJsonTree(links));
+        transactionDetails.addProperty("total_amount", totalAmount);
         Optional.ofNullable(refundSummary)
                 .ifPresent(rs -> {
                     var summary = new JsonObject();
@@ -418,13 +417,13 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture addLink(Link link) {
-        this.links.add(link);
+    public TransactionFixture withRefundSummary(RefundSummary refundSummary) {
+        this.refundSummary = refundSummary;
         return this;
     }
 
-    public TransactionFixture withRefundSummary(RefundSummary refundSummary) {
-        this.refundSummary = refundSummary;
+    public TransactionFixture withTotalAmount(long value) {
+        this.totalAmount = value;
         return this;
     }
 }

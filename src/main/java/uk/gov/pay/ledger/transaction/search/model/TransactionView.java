@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
+import uk.gov.pay.ledger.transaction.model.Link;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -44,7 +45,6 @@ public class TransactionView {
     private RefundSummary refundSummary;
     private SettlementSummary settlementSummary;
     private Map<String, Object> metadata;
-    private List<Link> paymentLinks;
     private List<Link> links = new ArrayList<>();
 
     //todo: replace with builder
@@ -52,7 +52,7 @@ public class TransactionView {
                             String description, String reference, String language, String externalId,
                             String returnUrl, String email, String paymentProvider, ZonedDateTime createdDate,
                             CardDetails cardDetails, Boolean delayedCapture, String gatewayTransactionId,
-                            RefundSummary refundSummary, SettlementSummary settlementSummary, Map<String, Object> metadata, List<Link> paymentLinks) {
+                            RefundSummary refundSummary, SettlementSummary settlementSummary, Map<String, Object> metadata) {
         this.id = id;
         this.gatewayAccountId = gatewayAccountId;
         this.amount = amount;
@@ -75,27 +75,22 @@ public class TransactionView {
         this.refundSummary = refundSummary;
         this.settlementSummary = settlementSummary;
         this.metadata = metadata;
-        this.paymentLinks = paymentLinks;
     }
 
     public TransactionView() {
     }
 
     public static TransactionView from(Payment transaction) {
-        RefundSummary refundSummary = Optional.ofNullable(transaction.getRefundSummary()).orElse(RefundSummary.ofValue("available", transaction.getAmount(), 0L));
-        Long totalAmount = transaction.getAmount();
-
-        if (transaction.getCorporateCardSurcharge() != null) {
-            totalAmount += transaction.getCorporateCardSurcharge();
-        }
+        RefundSummary refundSummary = Optional.ofNullable(transaction.getRefundSummary())
+                .orElse(RefundSummary.ofValue("available", transaction.getAmount(), 0L));
 
         return new TransactionView(transaction.getId(), transaction.getGatewayAccountId(),
-                transaction.getAmount(), totalAmount, transaction.getCorporateCardSurcharge(), transaction.getFee(), transaction.getNetAmount(), transaction.getState(),
+                transaction.getAmount(), transaction.getTotalAmount(), transaction.getCorporateCardSurcharge(), transaction.getFee(), transaction.getNetAmount(), transaction.getState(),
                 transaction.getDescription(), transaction.getReference(), transaction.getLanguage(),
                 transaction.getExternalId(), transaction.getReturnUrl(), transaction.getEmail(),
                 transaction.getPaymentProvider(), transaction.getCreatedDate(), transaction.getCardDetails(),
                 transaction.getDelayedCapture(), transaction.getGatewayTransactionId(), refundSummary,
-                new SettlementSummary(), transaction.getExternalMetadata(), transaction.getLinks());
+                new SettlementSummary(), transaction.getExternalMetadata());
     }
 
     public TransactionView addLink(Link link) {
@@ -209,9 +204,5 @@ public class TransactionView {
 
     public Long getNetAmount() {
         return netAmount;
-    }
-
-    public List<Link> getPaymentLinks() {
-        return paymentLinks;
     }
 }

@@ -17,6 +17,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aPersistedTransactionList;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class TransactionResourceIT {
@@ -56,7 +57,7 @@ public class TransactionResourceIT {
     @Test
     public void shouldSearchUsingAllFieldsAndReturnAllFieldsCorrectly() {
         String gatewayAccountId = RandomStringUtils.randomAlphanumeric(20);
-        List<Payment> transactionList = transactionFixture.aPersistedTransactionList(gatewayAccountId, 10, rule.getJdbi(), true);
+        List<Payment> transactionList = aPersistedTransactionList(gatewayAccountId, 10, rule.getJdbi(), true);
         Payment transactionToVerify = transactionList.get(7);
         given().port(port)
                 .contentType(JSON)

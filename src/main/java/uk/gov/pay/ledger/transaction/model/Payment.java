@@ -7,12 +7,10 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
-import uk.gov.pay.ledger.transaction.search.model.Link;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Map;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -37,8 +35,8 @@ public class Payment extends Transaction{
     private Long corporateCardSurcharge;
     private Long fee;
     private Long netAmount;
+    private Long totalAmount;
     private RefundSummary refundSummary;
-    private List<Link> links;
 
     public Payment() {
 
@@ -49,13 +47,13 @@ public class Payment extends Transaction{
                    String language, String externalId, String returnUrl,
                    String email, String paymentProvider, ZonedDateTime createdDate,
                    CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
-                   Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee, Long netAmount, RefundSummary refundSummary, List<Link> links) {
+                   Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee, Long netAmount, Long totalAmount, RefundSummary refundSummary) {
         super(id, gatewayAccountId, amount, externalId);
         this.corporateCardSurcharge = corporateCardSurcharge;
         this.fee = fee;
         this.netAmount = netAmount;
+        this.totalAmount = totalAmount;
         this.refundSummary = refundSummary;
-        this.links = links;
         this.id = id;
         this.gatewayAccountId = gatewayAccountId;
         this.amount = amount;
@@ -80,10 +78,10 @@ public class Payment extends Transaction{
                    String language, String externalId, String returnUrl,
                    String email, String paymentProvider, ZonedDateTime createdDate,
                    CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
-                   Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee, Long netAmount, RefundSummary refundSummary, List<Link> links) {
+                   Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee, Long netAmount, RefundSummary refundSummary, Long totalAmount) {
 
         this(null, gatewayAccountId, amount, reference, description, state, language, externalId, returnUrl, email,
-                paymentProvider, createdDate, cardDetails, delayedCapture, externalMetaData, eventCount, gatewayTransactionId, corporateCardSurcharge, fee, netAmount, refundSummary, links);
+                paymentProvider, createdDate, cardDetails, delayedCapture, externalMetaData, eventCount, gatewayTransactionId, corporateCardSurcharge, fee, netAmount, totalAmount, refundSummary);
     }
 
     public String getReference() {
@@ -160,7 +158,7 @@ public class Payment extends Transaction{
         return refundSummary;
     }
 
-    public List<Link> getLinks() {
-        return links;
+    public Long getTotalAmount() {
+        return totalAmount;
     }
 }
