@@ -16,6 +16,7 @@ import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
@@ -78,6 +79,8 @@ public class GetTransactionContractTest {
                 .withAmount(2000L)
                 .withCorporateCardSurcharge(250L)
                 .withTotalAmount(2250L)
+                .withSettlementSubmittedTime(ZonedDateTime.now())
+                .withSettledTime(ZonedDateTime.now())
                 .insert(app.getJdbi());
     }
 

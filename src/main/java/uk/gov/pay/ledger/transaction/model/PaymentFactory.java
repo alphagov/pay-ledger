@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
+import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.io.IOException;
@@ -29,7 +30,6 @@ public class PaymentFactory {
     public Payment fromTransactionEntity(TransactionEntity entity) {
         try {
             Map<String, Object> metadata = null;
-            RefundSummary refundSummary = null;
 
             JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
             Address billingAddress = new Address(
@@ -48,9 +48,9 @@ public class PaymentFactory {
             if(entity.getExternalMetadata() != null) {
                 metadata = objectMapper.readValue(entity.getExternalMetadata(), new TypeReference<Map<String, Object>>() {});
             }
-            if(transactionDetails.get("refund_summary") != null) {
-                refundSummary = objectMapper.treeToValue(transactionDetails.get("refund_summary"), RefundSummary.class);
-            }
+
+            RefundSummary refundSummary = RefundSummary.ofValue(entity.getRefundStatus(), entity.getRefundAmountAvailable(), entity.getRefundAmountSubmitted());
+            SettlementSummary settlementSummary = SettlementSummary.ofValue(entity.getSettlementSubmittedTime(), entity.getSettledTime());
 
             return new Payment(entity.getGatewayAccountId(), entity.getAmount(), entity.getReference(), entity.getDescription(),
                     TransactionState.from(entity.getState()), safeGetAsString(transactionDetails, "language"),
@@ -59,7 +59,7 @@ public class PaymentFactory {
                     cardDetails, Boolean.valueOf(safeGetAsString(transactionDetails, "delayed_capture")),
                     metadata, entity.getEventCount(), safeGetAsString(transactionDetails, "gateway_transaction_id"),
                     safeGetAsLong(transactionDetails, "corporate_surcharge"), safeGetAsLong(transactionDetails, "fee"),
-                    safeGetAsLong(transactionDetails, "net_amount"), refundSummary, safeGetAsLong(transactionDetails, "total_amount"));
+                    entity.getNetAmount(), refundSummary, entity.getTotalAmount(), settlementSummary);
         } catch (IOException e) {
             LOGGER.error(format("Error during the parsing transaction entity data {}", entity.getExternalId()), e);
             throw new RuntimeException(e);

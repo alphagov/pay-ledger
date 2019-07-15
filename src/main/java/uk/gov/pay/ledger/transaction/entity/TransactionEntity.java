@@ -37,6 +37,15 @@ public class TransactionEntity {
     @JsonProperty("first_digits_card_number")
     private String firstDigitsCardNumber;
 
+
+    private Long netAmount;
+    private Long totalAmount;
+    private ZonedDateTime settlementSubmittedTime;
+    private ZonedDateTime settledTime;
+    private String refundStatus;
+    private Long refundAmountSubmitted;
+    private Long refundAmountAvailable;
+
     public TransactionEntity() {}
 
     public TransactionEntity(Long id, String gatewayAccountId, String externalId,
@@ -44,7 +53,10 @@ public class TransactionEntity {
                              String state, String email, String cardholderName,
                              String externalMetadata, ZonedDateTime createdDate,
                              String transactionDetails, Integer eventCount, String cardBrand,
-                             String lastDigitsCardNumber, String firstDigitsCardNumber) {
+                             String lastDigitsCardNumber, String firstDigitsCardNumber,
+                             Long netAmount, Long totalAmount, ZonedDateTime settlementSubmittedTime,
+                             ZonedDateTime settledTime, String refundStatus, Long refundAmountSubmitted,
+                             Long refundAmountAvailable) {
         this.id = id;
         this.gatewayAccountId = gatewayAccountId;
         this.externalId = externalId;
@@ -61,6 +73,13 @@ public class TransactionEntity {
         this.cardBrand = cardBrand;
         this.lastDigitsCardNumber = lastDigitsCardNumber;
         this.firstDigitsCardNumber = firstDigitsCardNumber;
+        this.netAmount = netAmount;
+        this.totalAmount = totalAmount;
+        this.settlementSubmittedTime = settlementSubmittedTime;
+        this.settledTime = settledTime;
+        this.refundStatus = refundStatus;
+        this.refundAmountSubmitted = refundAmountSubmitted;
+        this.refundAmountAvailable = refundAmountAvailable;
     }
 
     public Long getId() {
@@ -145,5 +164,33 @@ public class TransactionEntity {
 
     public void setExternalId(String externalId) {
         this.externalId = externalId;
+    }
+
+    public Long getNetAmount() {
+        return netAmount;
+    }
+
+    public Long getTotalAmount() {
+        return totalAmount;
+    }
+
+    public ZonedDateTime getSettlementSubmittedTime() {
+        return settlementSubmittedTime;
+    }
+
+    public ZonedDateTime getSettledTime() {
+        return settledTime;
+    }
+
+    public String getRefundStatus() {
+        return refundStatus;
+    }
+
+    public Long getRefundAmountSubmitted() {
+        return refundAmountSubmitted;
+    }
+
+    public Long getRefundAmountAvailable() {
+        return refundAmountAvailable;
     }
 }

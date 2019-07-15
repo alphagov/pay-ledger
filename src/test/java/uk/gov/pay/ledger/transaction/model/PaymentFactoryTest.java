@@ -39,20 +39,6 @@ public class PaymentFactoryTest {
             "  \"gateway_transaction_id\": \"gti_12334\",\n" +
             "  \"corporate_surcharge\": 12,\n" +
             "  \"fee\": 5,\n" +
-            "  \"net_amount\": 77,\n" +
-            "  \"total_amount\": 199,\n" +
-            "  \"links\": [\n" +
-            "    {\n" +
-            "      \"href\": \"www.test-something.co.uk\",\n" +
-            "      \"rel\": \"next_url\",\n" +
-            "      \"method\": \"GET\"\n" +
-            "    }\n" +
-            "  ],\n" +
-            "  \"refund_summary\": {\n" +
-            "    \"status\": \"available\",\n" +
-            "    \"amount_available\": 111,\n" +
-            "    \"amount_submitted\": 0\n" +
-            "  },\n" +
             "  \"address_line1\": \"line 1\",\n" +
             "  \"address_line2\": \"line 2\",\n" +
             "  \"address_postcode\": \"A11 11BB\",\n" +
@@ -64,16 +50,25 @@ public class PaymentFactoryTest {
     private String cardBrand = "visa";
     private String lastDigitsCardNumber = "5678";
     private String firstDigitsCardNumber = "123456";
+    private Long netAmount = 77L;
+    private Long totalAmount = 99L;
+    private ZonedDateTime settlementSubmittedTime = ZonedDateTime.parse("2017-09-09T09:35:45.695951+01");
+    private ZonedDateTime settledTime = ZonedDateTime.parse("2017-09-09T12:13Z");
+    private String refundStatus = "available";
+    private Long refundAmountSubmitted = 0L;
+    private Long refundAmountAvailable = 99L;
 
     @Before
     public void setUp() {
         fullDataObject = new TransactionEntity(id, gatewayAccountId, externalId, amount, reference, description, state,
                 email, cardholderName, fullExternalMetadata, createdDate, fullTransactionDetails, eventCount, cardBrand,
-                lastDigitsCardNumber, firstDigitsCardNumber);
+                lastDigitsCardNumber, firstDigitsCardNumber, netAmount, totalAmount, settlementSubmittedTime, settledTime,
+                refundStatus, refundAmountSubmitted, refundAmountAvailable);
 
         minimalDataObject = new TransactionEntity(id, gatewayAccountId, externalId, amount, reference, description, state,
                 email, cardholderName, null, createdDate, null, eventCount, cardBrand,
-                lastDigitsCardNumber, firstDigitsCardNumber);
+                lastDigitsCardNumber, firstDigitsCardNumber, netAmount, totalAmount, settlementSubmittedTime,
+                settledTime, refundStatus, refundAmountSubmitted, refundAmountAvailable);
 
         paymentFactory = new PaymentFactory(Jackson.newObjectMapper());
     }
@@ -111,12 +106,15 @@ public class PaymentFactoryTest {
         assertThat(payment.getGatewayTransactionId(), is("gti_12334"));
         assertThat(payment.getCorporateCardSurcharge(), is(12L));
         assertThat(payment.getFee(), is(5L));
-        assertThat(payment.getNetAmount(), is(77L));
-        assertThat(payment.getTotalAmount(), is(199L));
+        assertThat(payment.getNetAmount(), is(netAmount));
+        assertThat(payment.getTotalAmount(), is(totalAmount));
         assertThat(payment.getRefundSummary(), notNullValue());
-        assertThat(payment.getRefundSummary().getStatus(), is("available"));
-        assertThat(payment.getRefundSummary().getAmountAvailable(), is(111L));
-        assertThat(payment.getRefundSummary().getAmountSubmitted(), is(0L));
+        assertThat(payment.getRefundSummary().getStatus(), is(refundStatus));
+        assertThat(payment.getRefundSummary().getAmountAvailable(), is(refundAmountAvailable));
+        assertThat(payment.getRefundSummary().getAmountSubmitted(), is(refundAmountSubmitted));
+        assertThat(payment.getSettlementSummary(), notNullValue());
+        assertThat(payment.getSettlementSummary().getCapturedDate(), is("2017-09-09"));
+        assertThat(payment.getSettlementSummary().getCaptureSubmitTime(), is("2017-09-09T08:35:45.695Z"));
     }
 
     @Test
@@ -152,8 +150,14 @@ public class PaymentFactoryTest {
         assertThat(payment.getGatewayTransactionId(), nullValue());
         assertThat(payment.getCorporateCardSurcharge(), nullValue());
         assertThat(payment.getFee(), nullValue());
-        assertThat(payment.getNetAmount(), nullValue());
-        assertThat(payment.getTotalAmount(), nullValue());
-        assertThat(payment.getRefundSummary(), nullValue());
+        assertThat(payment.getNetAmount(), is(netAmount));
+        assertThat(payment.getTotalAmount(), is(totalAmount));
+        assertThat(payment.getRefundSummary(), notNullValue());
+        assertThat(payment.getRefundSummary().getStatus(), is(refundStatus));
+        assertThat(payment.getRefundSummary().getAmountAvailable(), is(refundAmountAvailable));
+        assertThat(payment.getRefundSummary().getAmountSubmitted(), is(refundAmountSubmitted));
+        assertThat(payment.getSettlementSummary(), notNullValue());
+        assertThat(payment.getSettlementSummary().getCapturedDate(), is("2017-09-09"));
+        assertThat(payment.getSettlementSummary().getCaptureSubmitTime(), is("2017-09-09T08:35:45.695Z"));
     }
 }

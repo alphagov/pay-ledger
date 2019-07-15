@@ -12,17 +12,18 @@ import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_
 public class SettlementSummary {
     private ZonedDateTime captureSubmitTime, capturedTime;
 
-    public void setCaptureSubmitTime(ZonedDateTime captureSubmitTime) {
-        this.captureSubmitTime = captureSubmitTime;
+    public SettlementSummary(ZonedDateTime settlementSubmittedTime, ZonedDateTime settledTime) {
+        captureSubmitTime = settlementSubmittedTime;
+        capturedTime = settledTime;
+    }
+
+    public static SettlementSummary ofValue(ZonedDateTime settlementSubmittedTime, ZonedDateTime settledTime) {
+        return new SettlementSummary(settlementSubmittedTime, settledTime);
     }
 
     @JsonProperty("capture_submit_time")
     public String getCaptureSubmitTime() {
         return (captureSubmitTime != null) ? ISO_INSTANT_MILLISECOND_PRECISION.format(captureSubmitTime) : null;
-    }
-
-    public void setCapturedTime(ZonedDateTime capturedTime) {
-        this.capturedTime = capturedTime;
     }
 
     @JsonProperty("captured_date")
@@ -40,7 +41,6 @@ public class SettlementSummary {
         if (!Objects.equals(captureSubmitTime, that.captureSubmitTime))
             return false;
         return Objects.equals(capturedTime, that.capturedTime);
-
     }
 
     @Override

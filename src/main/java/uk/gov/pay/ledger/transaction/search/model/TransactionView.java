@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TransactionView {
@@ -81,16 +80,13 @@ public class TransactionView {
     }
 
     public static TransactionView from(Payment transaction) {
-        RefundSummary refundSummary = Optional.ofNullable(transaction.getRefundSummary())
-                .orElse(RefundSummary.ofValue("available", transaction.getAmount(), 0L));
-
         return new TransactionView(transaction.getId(), transaction.getGatewayAccountId(),
                 transaction.getAmount(), transaction.getTotalAmount(), transaction.getCorporateCardSurcharge(), transaction.getFee(), transaction.getNetAmount(), transaction.getState(),
                 transaction.getDescription(), transaction.getReference(), transaction.getLanguage(),
                 transaction.getExternalId(), transaction.getReturnUrl(), transaction.getEmail(),
                 transaction.getPaymentProvider(), transaction.getCreatedDate(), transaction.getCardDetails(),
-                transaction.getDelayedCapture(), transaction.getGatewayTransactionId(), refundSummary,
-                new SettlementSummary(), transaction.getExternalMetadata());
+                transaction.getDelayedCapture(), transaction.getGatewayTransactionId(), transaction.getRefundSummary(),
+                transaction.getSettlementSummary(), transaction.getExternalMetadata());
     }
 
     public TransactionView addLink(Link link) {

@@ -45,13 +45,16 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Boolean delayedCapture = false;
     private String returnUrl = "https://example.org/transactions";
     private String paymentProvider = "sandbox";
-    private PaymentFactory paymentFactory = new PaymentFactory(objectMapper);
     private String gatewayTransactionId;
     private Long corporateCardSurcharge;
     private Long fee;
     private Long netAmount;
-    private RefundSummary refundSummary;
     private Long totalAmount;
+    private ZonedDateTime settlementSubmittedTime;
+    private ZonedDateTime settledTime;
+    private String refundStatus = "available";
+    private Long refundAmountSubmitted = 0L;
+    private Long refundAmountAvailable = 100L;
 
 
     private TransactionFixture() {
@@ -261,9 +264,16 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        event_count,\n" +
                                 "        card_brand,\n" +
                                 "        last_digits_card_number,\n" +
-                                "        first_digits_card_number\n" +
+                                "        first_digits_card_number,\n" +
+                                "        total_amount,\n" +
+                                "        net_amount,\n" +
+                                "        refund_status,\n" +
+                                "        refund_amount_submitted,\n" +
+                                "        refund_amount_available,\n" +
+                                "        settlement_submitted_time,\n" +
+                                "        settled_time\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         externalId,
                         gatewayAccountId,
@@ -279,7 +289,14 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         eventCount,
                         cardBrand,
                         lastDigitsCardNumber,
-                        firstDigitsCardNumber
+                        firstDigitsCardNumber,
+                        totalAmount,
+                        netAmount,
+                        refundStatus,
+                        refundAmountSubmitted,
+                        refundAmountAvailable,
+                        settlementSubmittedTime,
+                        settledTime
                 )
         );
         return this;
@@ -296,16 +313,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("gateway_transaction_id", gatewayTransactionId);
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
         transactionDetails.addProperty("fee", fee);
-        transactionDetails.addProperty("net_amount", netAmount);
-        transactionDetails.addProperty("total_amount", totalAmount);
-        Optional.ofNullable(refundSummary)
-                .ifPresent(rs -> {
-                    var summary = new JsonObject();
-                    summary.addProperty("status", rs.getStatus());
-                    summary.addProperty("amount_available", rs.getAmountAvailable());
-                    summary.addProperty("amount_submitted", rs.getAmountSubmitted());
-                    transactionDetails.add("refund_summary", summary);
-                });
         Optional.ofNullable(cardDetails)
                 .ifPresent(cd -> Optional.ofNullable(cd.getBillingAddress())
                         .ifPresent(ba -> {
@@ -325,7 +332,9 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return new TransactionEntity(id, gatewayAccountId, externalId, amount,
                 reference, description, state.getState(),
                 email, cardholderName, externalMetadata, createdDate,
-                transactionDetails, eventCount, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber
+                transactionDetails, eventCount, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber,
+                netAmount, totalAmount, settlementSubmittedTime, settledTime, refundStatus,
+                refundAmountSubmitted, refundAmountAvailable
         );
     }
 
@@ -418,12 +427,24 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     }
 
     public TransactionFixture withRefundSummary(RefundSummary refundSummary) {
-        this.refundSummary = refundSummary;
+        this.refundStatus = refundSummary.getStatus();
+        this.refundAmountAvailable = refundSummary.getAmountAvailable();
+        this.refundAmountSubmitted = refundSummary.getAmountSubmitted();
         return this;
     }
 
     public TransactionFixture withTotalAmount(long value) {
         this.totalAmount = value;
+        return this;
+    }
+
+    public TransactionFixture withSettlementSubmittedTime(ZonedDateTime time) {
+        this.settlementSubmittedTime = time;
+        return this;
+    }
+
+    public TransactionFixture withSettledTime(ZonedDateTime time) {
+        this.settledTime = time;
         return this;
     }
 }

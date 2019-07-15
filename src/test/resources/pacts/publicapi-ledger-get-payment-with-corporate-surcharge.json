@@ -59,8 +59,8 @@
             "amount_submitted": 0
           },
           "settlement_summary": {
-            "capture_submit_time": null,
-            "captured_date": null
+            "capture_submit_time": "2018-10-16T10:46:03.121Z",
+            "captured_date": "2018-10-16"
           },
           "delayed_capture": false
         },
@@ -91,6 +91,12 @@
             },
             "$.created_date": {
               "matchers": [{ "date": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" }]
+            },
+            "$.settlement_summary.capture_submit_time": {
+              "matchers": [{ "date": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" }]
+            },
+            "$.settlement_summary.captured_date": {
+              "matchers": [{ "date": "yyyy-MM-dd" }]
             },
             "$.refund_summary.amount_available": {
               "matchers": [{"match": "type"}]
