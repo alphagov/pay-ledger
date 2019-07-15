@@ -134,7 +134,7 @@ public class Payment extends Transaction{
 
     public static Payment fromTransactionEntity(TransactionEntity entity) {
         JsonObject transactionDetail = new JsonParser().parse(entity.getTransactionDetails()).getAsJsonObject();
-        Address billingAddress = new Address(
+        Address billingAddress = Address.from(
                     safeGetAsString(transactionDetail, "address_line1"),
                     safeGetAsString(transactionDetail, "address_line2"),
                     safeGetAsString(transactionDetail, "address_postcode"),
@@ -143,7 +143,7 @@ public class Payment extends Transaction{
                     safeGetAsString(transactionDetail, "address_country")
             );
 
-        CardDetails cardDetails = new CardDetails(entity.getCardholderName(), billingAddress, entity.getCardBrand(),
+        CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), billingAddress, entity.getCardBrand(),
                 entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
                 safeGetAsString(transactionDetail, "card_expiry_date"));
 
