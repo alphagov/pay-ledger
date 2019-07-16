@@ -1,10 +1,12 @@
 package uk.gov.pay.ledger.transaction.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Address {
 
@@ -23,6 +25,19 @@ public class Address {
         this.addressCity = addressCity;
         this.addressCounty = addressCounty;
         this.addressCountry = addressCountry;
+    }
+
+    public static Address from(String addressLine1, String addressLine2, String addressPostcode, String addressCity, String addressCounty, String addressCountry) {
+        if (addressLine1 == null &&
+                addressLine2 == null &&
+                addressPostcode == null &&
+                addressCity == null &&
+                addressCounty == null &&
+                addressCountry == null) {
+            return null;
+        }
+
+        return new Address(addressLine1, addressLine2, addressPostcode, addressCity, addressCounty, addressCountry);
     }
 
     @JsonProperty("line1")
