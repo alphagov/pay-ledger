@@ -5,29 +5,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.Optional;
 
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 
 public class SettlementSummary {
-    private ZonedDateTime captureSubmitTime, capturedTime;
+    private ZonedDateTime settlementSubmittedTime;
+    private ZonedDateTime settledTime;
 
     public SettlementSummary(ZonedDateTime settlementSubmittedTime, ZonedDateTime settledTime) {
-        captureSubmitTime = settlementSubmittedTime;
-        capturedTime = settledTime;
-    }
-
-    public static SettlementSummary ofValue(ZonedDateTime settlementSubmittedTime, ZonedDateTime settledTime) {
-        return new SettlementSummary(settlementSubmittedTime, settledTime);
+        this.settlementSubmittedTime = settlementSubmittedTime;
+        this.settledTime = settledTime;
     }
 
     @JsonProperty("capture_submit_time")
-    public String getCaptureSubmitTime() {
-        return (captureSubmitTime != null) ? ISO_INSTANT_MILLISECOND_PRECISION.format(captureSubmitTime) : null;
+    public Optional<String> getSettlementSubmittedTime() {
+        return Optional.ofNullable(settlementSubmittedTime)
+                .map(t -> ISO_INSTANT_MILLISECOND_PRECISION.format(t));
     }
 
     @JsonProperty("captured_date")
-    public String getCapturedDate() {
-        return (capturedTime != null) ? capturedTime.format(DateTimeFormatter.ISO_LOCAL_DATE) : null;
+    public Optional<String> getCapturedDate() {
+        return Optional.ofNullable(settledTime)
+                .map(t -> t.format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
 
     @Override
@@ -37,23 +37,23 @@ public class SettlementSummary {
 
         SettlementSummary that = (SettlementSummary) o;
 
-        if (!Objects.equals(captureSubmitTime, that.captureSubmitTime))
+        if (!Objects.equals(settlementSubmittedTime, that.settlementSubmittedTime))
             return false;
-        return Objects.equals(capturedTime, that.capturedTime);
+        return Objects.equals(settledTime, that.settledTime);
     }
 
     @Override
     public int hashCode() {
-        int result = captureSubmitTime != null ? captureSubmitTime.hashCode() : 0;
-        result = 31 * result + (capturedTime != null ? capturedTime.hashCode() : 0);
+        int result = settlementSubmittedTime != null ? settlementSubmittedTime.hashCode() : 0;
+        result = 31 * result + (settledTime != null ? settledTime.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "SettlementSummary{" +
-                ", captureSubmitTime=" + captureSubmitTime +
-                ", capturedTime=" + capturedTime +
+                ", settlementSubmittedTime=" + settlementSubmittedTime +
+                ", settledTime=" + settledTime +
                 '}';
     }
 }

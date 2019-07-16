@@ -35,13 +35,13 @@ public class TransactionService {
 
     public Optional<TransactionView> getTransaction(String transactionExternalId, UriInfo uriInfo) {
             return transactionDao.findTransactionByExternalId(transactionExternalId)
-                    .map(entity -> decorateWithLinks(TransactionView.from(paymentFactory.fromTransactionEntity(entity)), uriInfo));
+                    .map(entity -> decorateWithLinks(TransactionView.from(paymentFactory.createTransactionEntity(entity)), uriInfo));
     }
 
     public TransactionSearchResponse searchTransactions(TransactionSearchParams searchParams, UriInfo uriInfo) {
         List<Payment> transactionList = transactionDao.searchTransactions(searchParams)
                 .stream()
-                .map(paymentFactory::fromTransactionEntity)
+                .map(paymentFactory::createTransactionEntity)
                 .collect(Collectors.toList());
         Long total = transactionDao.getTotalForSearch(searchParams);
         PaginationBuilder paginationBuilder = new PaginationBuilder(searchParams, uriInfo);

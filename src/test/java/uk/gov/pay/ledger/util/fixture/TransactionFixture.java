@@ -92,7 +92,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1L).plusMinutes(i))
                     .insert(jdbi)
                     .toEntity();
-            transactionList.add(new PaymentFactory(Jackson.newObjectMapper()).fromTransactionEntity(entity));
+            transactionList.add(new PaymentFactory(Jackson.newObjectMapper()).createTransactionEntity(entity));
         }
         return transactionList;
     }

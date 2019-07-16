@@ -5,6 +5,7 @@ import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.State;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactBrokerAuth;
+import au.com.dius.pact.provider.junit.loader.PactFilter;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
@@ -28,6 +29,11 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 @PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
         consumers = {"publicapi"})
+@PactFilter({"a transaction with corporate surcharge exists",
+        "a transaction with delayed capture true exists",
+        "a transaction with fee and net_amount exists",
+        "a transaction with a gateway transaction id exists",
+        "a transaction with metadata exists"})
 public class GetTransactionContractTest {
     @ClassRule
     public static AppWithPostgresAndSqsRule app = new AppWithPostgresAndSqsRule();

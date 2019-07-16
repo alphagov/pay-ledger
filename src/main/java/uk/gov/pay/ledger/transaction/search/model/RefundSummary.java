@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.transaction.search.model;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
 import java.util.Objects;
 
@@ -22,6 +23,10 @@ public class RefundSummary {
         this.status = status;
         this.amountAvailable = amountAvailable;
         this.amountSubmitted = amountSubmitted;
+    }
+
+    public static RefundSummary from(TransactionEntity entity) {
+        return new RefundSummary(entity.getRefundStatus(), entity.getRefundAmountAvailable(), entity.getRefundAmountSubmitted());
     }
 
     public String getUserExternalId() {

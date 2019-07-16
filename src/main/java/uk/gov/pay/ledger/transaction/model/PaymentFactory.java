@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.lang.String.format;
-
 public class PaymentFactory {
 
     private static Logger LOGGER = LoggerFactory.getLogger(PaymentFactory.class);
@@ -27,7 +25,7 @@ public class PaymentFactory {
         this.objectMapper = objectMapper;
     }
 
-    public Payment fromTransactionEntity(TransactionEntity entity) {
+    public Payment createTransactionEntity(TransactionEntity entity) {
         try {
             JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
             Address billingAddress = Address.from(
@@ -48,8 +46,8 @@ public class PaymentFactory {
                 metadata = objectMapper.readValue(entity.getExternalMetadata(), new TypeReference<Map<String, Object>>() {});
             }
 
-            RefundSummary refundSummary = RefundSummary.ofValue(entity.getRefundStatus(), entity.getRefundAmountAvailable(), entity.getRefundAmountSubmitted());
-            SettlementSummary settlementSummary = SettlementSummary.ofValue(entity.getSettlementSubmittedTime(), entity.getSettledTime());
+            RefundSummary refundSummary = RefundSummary.from(entity);
+            SettlementSummary settlementSummary = new SettlementSummary(entity.getSettlementSubmittedTime(), entity.getSettledTime());
 
             return new Payment(entity.getGatewayAccountId(), entity.getAmount(), entity.getReference(), entity.getDescription(),
                     TransactionState.from(entity.getState()), safeGetAsString(transactionDetails, "language"),
@@ -60,9 +58,10 @@ public class PaymentFactory {
                     safeGetAsLong(transactionDetails, "corporate_surcharge"), safeGetAsLong(transactionDetails, "fee"),
                     entity.getNetAmount(), refundSummary, entity.getTotalAmount(), settlementSummary);
         } catch (IOException e) {
-            LOGGER.error(format("Error during the parsing transaction entity data {}", entity.getExternalId()), e);
-            throw new RuntimeException(e);
+            LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
         }
+
+        return null;
     }
 
     private static Long safeGetAsLong(JsonNode object, String propertyName) {

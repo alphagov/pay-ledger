@@ -8,6 +8,7 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -75,7 +76,7 @@ public class PaymentFactoryTest {
 
     @Test
     public void createsPaymentFromTransactionEntityWithFullData() {
-        var payment = paymentFactory.fromTransactionEntity(fullDataObject);
+        var payment = paymentFactory.createTransactionEntity(fullDataObject);
 
         assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
         assertThat(payment.getAmount(), is(amount));
@@ -113,13 +114,13 @@ public class PaymentFactoryTest {
         assertThat(payment.getRefundSummary().getAmountAvailable(), is(refundAmountAvailable));
         assertThat(payment.getRefundSummary().getAmountSubmitted(), is(refundAmountSubmitted));
         assertThat(payment.getSettlementSummary(), notNullValue());
-        assertThat(payment.getSettlementSummary().getCapturedDate(), is("2017-09-09"));
-        assertThat(payment.getSettlementSummary().getCaptureSubmitTime(), is("2017-09-09T08:35:45.695Z"));
+        assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.of("2017-09-09")));
+        assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.of("2017-09-09T08:35:45.695Z")));
     }
 
     @Test
     public void createsPaymentFromTransactionEntityWithMinimalData() {
-        var payment = paymentFactory.fromTransactionEntity(minimalDataObject);
+        var payment = paymentFactory.createTransactionEntity(minimalDataObject);
 
         assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
         assertThat(payment.getAmount(), is(amount));
@@ -151,7 +152,7 @@ public class PaymentFactoryTest {
         assertThat(payment.getRefundSummary().getAmountAvailable(), is(refundAmountAvailable));
         assertThat(payment.getRefundSummary().getAmountSubmitted(), is(refundAmountSubmitted));
         assertThat(payment.getSettlementSummary(), notNullValue());
-        assertThat(payment.getSettlementSummary().getCapturedDate(), is("2017-09-09"));
-        assertThat(payment.getSettlementSummary().getCaptureSubmitTime(), is("2017-09-09T08:35:45.695Z"));
+        assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.of("2017-09-09")));
+        assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.of("2017-09-09T08:35:45.695Z")));
     }
 }

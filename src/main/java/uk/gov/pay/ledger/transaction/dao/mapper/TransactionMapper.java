@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 public class TransactionMapper implements RowMapper<TransactionEntity> {
 
@@ -22,7 +23,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 rs.getString("reference"),
                 rs.getString("description"),
                 rs.getString("state"),
-                rs.getString( "email"),
+                rs.getString("email"),
                 rs.getString("cardholder_name"),
                 rs.getString("external_metadata"),
                 getZonedDateTime(rs, "created_date"),
@@ -44,6 +45,8 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
     private ZonedDateTime getZonedDateTime(ResultSet rs, String columnLabel) throws SQLException {
         Timestamp timestamp = rs.getTimestamp(columnLabel);
 
-        return timestamp != null ? ZonedDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC) : null;
+        return Optional.ofNullable(timestamp)
+                .map(t -> ZonedDateTime.ofInstant(t.toInstant(), ZoneOffset.UTC))
+                .orElse(null);
     }
 }
