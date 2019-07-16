@@ -3,7 +3,8 @@ package uk.gov.pay.ledger.pact;
 import au.com.dius.pact.provider.junit.PactRunner;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.State;
-import au.com.dius.pact.provider.junit.loader.PactFolder;
+import au.com.dius.pact.provider.junit.loader.PactBroker;
+import au.com.dius.pact.provider.junit.loader.PactBrokerAuth;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
@@ -24,7 +25,9 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 
 @RunWith(PactRunner.class)
 @Provider("ledger")
-@PactFolder("/Users/mariajankowiak/repostitories/pay/pay-ledger/src/test/resources/pacts")
+@PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
+        authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
+        consumers = {"publicapi"})
 public class GetTransactionContractTest {
     @ClassRule
     public static AppWithPostgresAndSqsRule app = new AppWithPostgresAndSqsRule();
