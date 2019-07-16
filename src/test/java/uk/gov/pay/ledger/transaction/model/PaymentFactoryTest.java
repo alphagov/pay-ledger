@@ -137,13 +137,7 @@ public class PaymentFactoryTest {
         assertThat(payment.getCardDetails().getFirstDigitsCardNumber(), is(firstDigitsCardNumber));
         assertThat(payment.getCardDetails().getCardHolderName(), is(cardholderName));
         assertThat(payment.getCardDetails().getCardBrand(), is(cardBrand));
-        assertThat(payment.getCardDetails().getBillingAddress(), notNullValue());
-        assertThat(payment.getCardDetails().getBillingAddress().getAddressLine1(), nullValue());
-        assertThat(payment.getCardDetails().getBillingAddress().getAddressLine2(), nullValue());
-        assertThat(payment.getCardDetails().getBillingAddress().getAddressPostCode(), nullValue());
-        assertThat(payment.getCardDetails().getBillingAddress().getAddressCity(), nullValue());
-        assertThat(payment.getCardDetails().getBillingAddress().getAddressCounty(), nullValue());
-        assertThat(payment.getCardDetails().getBillingAddress().getAddressCountry(), nullValue());
+        assertThat(payment.getCardDetails().getBillingAddress(), nullValue());
         assertThat(payment.getDelayedCapture(), is(false));
         assertThat(payment.getExternalMetadata(), nullValue());
         assertThat(payment.getEventCount(), is(eventCount));

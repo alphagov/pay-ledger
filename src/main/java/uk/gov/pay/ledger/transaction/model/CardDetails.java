@@ -27,6 +27,20 @@ public class CardDetails {
         this.expiryDate = cardExpiryDate;
     }
 
+    public static CardDetails from(String cardholderName, Address billingAddress, String cardBrand,
+                                   String lastDigitsCardNumber, String firstDigitsCardNumber, String cardExpiryDate) {
+        if(cardholderName == null &&
+                billingAddress == null &&
+                cardBrand == null &&
+                lastDigitsCardNumber == null &&
+                firstDigitsCardNumber == null &&
+                cardExpiryDate == null) {
+            return null;
+        }
+
+        return new CardDetails(cardholderName, billingAddress, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber, cardExpiryDate);
+    }
+
     @JsonProperty("cardholder_name")
     public String getCardHolderName() {
         return cardHolderName;

@@ -30,7 +30,7 @@ public class PaymentFactory {
     public Payment fromTransactionEntity(TransactionEntity entity) {
         try {
             JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
-            Address billingAddress = new Address(
+            Address billingAddress = Address.from(
                     safeGetAsString(transactionDetails, "address_line1"),
                     safeGetAsString(transactionDetails, "address_line2"),
                     safeGetAsString(transactionDetails, "address_postcode"),
@@ -39,7 +39,7 @@ public class PaymentFactory {
                     safeGetAsString(transactionDetails, "address_country")
             );
 
-            CardDetails cardDetails = new CardDetails(entity.getCardholderName(), billingAddress, entity.getCardBrand(),
+            CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), billingAddress, entity.getCardBrand(),
                     entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
                     safeGetAsString(transactionDetails, "card_expiry_date"));
 
