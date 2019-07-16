@@ -29,8 +29,6 @@ public class PaymentFactory {
 
     public Payment fromTransactionEntity(TransactionEntity entity) {
         try {
-            Map<String, Object> metadata = null;
-
             JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
             Address billingAddress = new Address(
                     safeGetAsString(transactionDetails, "address_line1"),
@@ -45,6 +43,7 @@ public class PaymentFactory {
                     entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
                     safeGetAsString(transactionDetails, "card_expiry_date"));
 
+            Map<String, Object> metadata = null;
             if(entity.getExternalMetadata() != null) {
                 metadata = objectMapper.readValue(entity.getExternalMetadata(), new TypeReference<Map<String, Object>>() {});
             }

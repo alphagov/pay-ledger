@@ -24,24 +24,8 @@ public class RefundSummary {
         this.amountSubmitted = amountSubmitted;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setAmountAvailable(Long amountAvailable) {
-        this.amountAvailable = amountAvailable;
-    }
-
-    public void setAmountSubmitted(Long amountSubmitted) {
-        this.amountSubmitted = amountSubmitted;
-    }
-
     public String getUserExternalId() {
         return userExternalId;
-    }
-
-    public void setUserExternalId(String userExternalId) {
-        this.userExternalId = userExternalId;
     }
 
     public Long getAmountAvailable() {

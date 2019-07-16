@@ -2,7 +2,6 @@ package uk.gov.pay.ledger.transaction.search.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -28,7 +27,7 @@ public class SettlementSummary {
 
     @JsonProperty("captured_date")
     public String getCapturedDate() {
-        return (capturedTime != null) ? capturedTime.withZoneSameInstant(ZoneOffset.UTC).toLocalDate().format(DateTimeFormatter.ISO_DATE) : null;
+        return (capturedTime != null) ? capturedTime.format(DateTimeFormatter.ISO_LOCAL_DATE) : null;
     }
 
     @Override

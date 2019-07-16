@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
-import uk.gov.pay.ledger.transaction.model.Link;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -81,7 +80,8 @@ public class TransactionView {
 
     public static TransactionView from(Payment transaction) {
         return new TransactionView(transaction.getId(), transaction.getGatewayAccountId(),
-                transaction.getAmount(), transaction.getTotalAmount(), transaction.getCorporateCardSurcharge(), transaction.getFee(), transaction.getNetAmount(), transaction.getState(),
+                transaction.getAmount(), transaction.getTotalAmount(), transaction.getCorporateCardSurcharge(),
+                transaction.getFee(), transaction.getNetAmount(), transaction.getState(),
                 transaction.getDescription(), transaction.getReference(), transaction.getLanguage(),
                 transaction.getExternalId(), transaction.getReturnUrl(), transaction.getEmail(),
                 transaction.getPaymentProvider(), transaction.getCreatedDate(), transaction.getCardDetails(),
@@ -90,9 +90,7 @@ public class TransactionView {
     }
 
     public TransactionView addLink(Link link) {
-        if (link != null) {
-            links.add(link);
-        }
+        links.add(link);
         return this;
     }
 

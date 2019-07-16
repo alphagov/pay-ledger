@@ -5,7 +5,7 @@ import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.model.Link;
+import uk.gov.pay.ledger.transaction.search.model.Link;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.PaymentFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;

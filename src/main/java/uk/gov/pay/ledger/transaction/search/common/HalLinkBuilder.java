@@ -1,6 +1,6 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
-import uk.gov.pay.ledger.transaction.model.Link;
+import uk.gov.pay.ledger.transaction.search.model.Link;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;

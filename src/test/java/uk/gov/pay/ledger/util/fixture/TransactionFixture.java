@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.util.fixture;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import io.dropwizard.jackson.Jackson;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -23,7 +22,6 @@ import java.util.Optional;
 
 public class TransactionFixture implements DbFixture<TransactionFixture, TransactionEntity> {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
     private Long id = RandomUtils.nextLong(1, 99999);
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private String externalId = RandomStringUtils.randomAlphanumeric(20);

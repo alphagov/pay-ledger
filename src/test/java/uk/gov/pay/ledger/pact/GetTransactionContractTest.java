@@ -97,19 +97,6 @@ public class GetTransactionContractTest {
                 .insert(app.getJdbi());
     }
 
-    @State("a transaction with delayed capture true and awaiting capture request status exists")
-    public void createTransactionWithAwaitingCapture(Map<String, String> params) {
-        String transactionExternalId = params.get("charge_id");
-
-        aTransactionFixture()
-                .withExternalId(transactionExternalId)
-                .withState(TransactionState.SUBMITTED)
-                .withDelayedCapture(true)
-                .withRefundSummary(RefundSummary.ofValue("unavailable", 100L, 0L))
-                .withAmount(100L)
-                .insert(app.getJdbi());
-    }
-
     @State("a transaction with delayed capture true exists")
     public void createTransactionWithDelayedCapture(Map<String, String> params) {
         String transactionExternalId = params.get("charge_id");
