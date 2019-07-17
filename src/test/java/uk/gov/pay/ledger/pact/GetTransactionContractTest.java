@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.pact;
 
+import au.com.dius.pact.provider.junit.IgnoreNoPactsToVerify;
 import au.com.dius.pact.provider.junit.PactRunner;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.State;
@@ -34,6 +35,7 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
         "a transaction with fee and net_amount exists",
         "a transaction with a gateway transaction id exists",
         "a transaction with metadata exists"})
+@IgnoreNoPactsToVerify
 public class GetTransactionContractTest {
     @ClassRule
     public static AppWithPostgresAndSqsRule app = new AppWithPostgresAndSqsRule();
