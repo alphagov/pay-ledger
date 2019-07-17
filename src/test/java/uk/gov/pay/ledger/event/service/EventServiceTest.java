@@ -10,7 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
-import uk.gov.pay.ledger.event.model.SalientEventType;
+import uk.gov.pay.ledger.event.model.EventType;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 
@@ -63,7 +63,7 @@ public class EventServiceTest {
         EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
 
         assertThat(eventDigest.getMostRecentEventTimestamp(), is(latestEventTime));
-        assertThat(eventDigest.getMostRecentSalientEventType(), is(SalientEventType.PAYMENT_CREATED));
+        assertThat(eventDigest.getMostRecentEventType(), is(EventType.PAYMENT_CREATED));
     }
 
     @Test
@@ -93,7 +93,7 @@ public class EventServiceTest {
 
         EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
 
-        assertThat(eventDigest.getMostRecentSalientEventType(), is(SalientEventType.PAYMENT_CREATED));
+        assertThat(eventDigest.getMostRecentEventType(), is(EventType.PAYMENT_CREATED));
     }
 
     @Test

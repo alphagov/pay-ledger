@@ -23,8 +23,8 @@ public class TransactionEntityFactoryTest {
     @Test
     public void fromShouldConvertEventDigestToTransactionEntity() {
         Event paymentCreatedEvent = aQueueEventFixture()
-                .withEventType(SalientEventType.PAYMENT_CREATED.name())
-                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
+                .withEventType(EventType.PAYMENT_CREATED.name())
+                .withDefaultEventDataForEventType(EventType.PAYMENT_CREATED.name())
                 .toEntity();
         Event paymentDetailsEvent = aQueueEventFixture()
                 .withEventType("PAYMENT_DETAILS_ENTERED")
