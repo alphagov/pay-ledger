@@ -26,7 +26,7 @@ public class TransactionEntityFactory {
         TransactionEntity entity = objectMapper.convertValue(eventDigest.getEventPayload(), TransactionEntity.class);
         entity.setTransactionDetails(transactionDetail);
         entity.setEventCount(eventDigest.getEventCount());
-        entity.setState(TransactionState.fromSalientEventType(eventDigest.getMostRecentSalientEventType()).getState());
+        entity.setState(TransactionState.fromSalientEventType(eventDigest.getMostRecentEventType()).getState());
         entity.setCreatedDate(eventDigest.getEventCreatedDate());
         entity.setExternalId(eventDigest.getResourceExternalId());
 

@@ -14,14 +14,14 @@ public class EventDigest {
     private final ZonedDateTime mostRecentEventTimestamp;
     private final ResourceType resourceType;
     private final String resourceExternalId;
-    private final SalientEventType mostRecentSalientEventType;
+    private final EventType mostRecentEventType;
     private Integer eventCount;
     private Map<String, Object> eventPayload;
     private final ZonedDateTime eventCreatedDate;
 
     private EventDigest(
             ZonedDateTime mostRecentEventTimestamp,
-            SalientEventType mostRecentSalientEventType,
+            EventType mostRecentEventType,
             ResourceType resourceType,
             String resourceExternalId,
             Integer eventCount,
@@ -29,7 +29,7 @@ public class EventDigest {
             ZonedDateTime eventCreatedDate
     ) {
         this.mostRecentEventTimestamp = mostRecentEventTimestamp;
-        this.mostRecentSalientEventType = mostRecentSalientEventType;
+        this.mostRecentEventType = mostRecentEventType;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
         this.eventCount = eventCount;
@@ -45,10 +45,10 @@ public class EventDigest {
                 .orElseThrow(() -> new RuntimeException("No events found"));
 
         var latestSalientEventType = events.stream()
-                .map(e -> SalientEventType.from(e.getEventType()))
+                .map(e -> EventType.from(e.getEventType()))
                 .flatMap(Optional::stream)
                 .findFirst()
-                .orElse(SalientEventType.PAYMENT_CREATED);
+                .orElse(EventType.PAYMENT_CREATED);
 
         var earliestDate = events.stream()
                 .map(event -> event.getEventDate())
@@ -93,8 +93,8 @@ public class EventDigest {
         return resourceExternalId;
     }
 
-    public SalientEventType getMostRecentSalientEventType() {
-        return mostRecentSalientEventType;
+    public EventType getMostRecentEventType() {
+        return mostRecentEventType;
     }
 
     public Map<String, Object> getEventPayload() {

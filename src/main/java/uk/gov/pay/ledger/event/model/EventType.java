@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.event.model;
 import java.util.Arrays;
 import java.util.Optional;
 
-public enum SalientEventType {
+public enum EventType {
     PAYMENT_CREATED,
     PAYMENT_STARTED,
     PAYMENT_EXPIRED,
@@ -32,8 +32,8 @@ public enum SalientEventType {
     CANCEL_BY_USER_FAILED,
     CANCELLED_BY_USER;
 
-    public static Optional<SalientEventType> from(String eventName) {
-        return Arrays.stream(SalientEventType.values())
+    public static Optional<EventType> from(String eventName) {
+        return Arrays.stream(EventType.values())
                 .filter(v -> v.name().equals(eventName))
                 .findFirst();
     }

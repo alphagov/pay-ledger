@@ -7,7 +7,6 @@ import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
-import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
