@@ -1,17 +1,17 @@
 package uk.gov.pay.ledger.util.fixture;
 
 import com.google.gson.JsonObject;
+import io.dropwizard.jackson.Jackson;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jetbrains.annotations.NotNull;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Payment;
-import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.model.PaymentFactory;
+import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZoneOffset;
@@ -22,7 +22,6 @@ import java.util.Optional;
 
 public class TransactionFixture implements DbFixture<TransactionFixture, TransactionEntity> {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
     private Long id = RandomUtils.nextLong(1, 99999);
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private String externalId = RandomStringUtils.randomAlphanumeric(20);
@@ -44,6 +43,16 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Boolean delayedCapture = false;
     private String returnUrl = "https://example.org/transactions";
     private String paymentProvider = "sandbox";
+    private String gatewayTransactionId;
+    private Long corporateCardSurcharge;
+    private Long fee;
+    private Long netAmount;
+    private Long totalAmount;
+    private ZonedDateTime settlementSubmittedTime;
+    private ZonedDateTime settledTime;
+    private String refundStatus = "available";
+    private Long refundAmountSubmitted = 0L;
+    private Long refundAmountAvailable = 100L;
 
 
     private TransactionFixture() {
@@ -83,7 +92,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1L).plusMinutes(i))
                     .insert(jdbi)
                     .toEntity();
-            transactionList.add(Payment.fromTransactionEntity(entity));
+            transactionList.add(new PaymentFactory(Jackson.newObjectMapper()).createTransactionEntity(entity));
         }
         return transactionList;
     }
@@ -99,6 +108,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withGatewayAccountId(String gatewayAccountId) {
         this.gatewayAccountId = gatewayAccountId;
+        return this;
+    }
+
+    public TransactionFixture withGatewayTransactionId(String gatewayTransactionId) {
+        this.gatewayTransactionId = gatewayTransactionId;
         return this;
     }
 
@@ -248,9 +262,16 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        event_count,\n" +
                                 "        card_brand,\n" +
                                 "        last_digits_card_number,\n" +
-                                "        first_digits_card_number\n" +
+                                "        first_digits_card_number,\n" +
+                                "        total_amount,\n" +
+                                "        net_amount,\n" +
+                                "        refund_status,\n" +
+                                "        refund_amount_submitted,\n" +
+                                "        refund_amount_available,\n" +
+                                "        settlement_submitted_time,\n" +
+                                "        settled_time\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         externalId,
                         gatewayAccountId,
@@ -266,7 +287,14 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         eventCount,
                         cardBrand,
                         lastDigitsCardNumber,
-                        firstDigitsCardNumber
+                        firstDigitsCardNumber,
+                        totalAmount,
+                        netAmount,
+                        refundStatus,
+                        refundAmountSubmitted,
+                        refundAmountAvailable,
+                        settlementSubmittedTime,
+                        settledTime
                 )
         );
         return this;
@@ -274,33 +302,38 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @NotNull
     private JsonObject getTransactionDetail() {
-        JsonObject transactionDetail = new JsonObject();
+        JsonObject transactionDetails = new JsonObject();
 
-        transactionDetail.addProperty("language", language);
-        transactionDetail.addProperty("return_url", returnUrl);
-        transactionDetail.addProperty("payment_provider", paymentProvider);
-        transactionDetail.addProperty("delayed_capture", delayedCapture);
+        transactionDetails.addProperty("language", language);
+        transactionDetails.addProperty("return_url", returnUrl);
+        transactionDetails.addProperty("payment_provider", paymentProvider);
+        transactionDetails.addProperty("delayed_capture", delayedCapture);
+        transactionDetails.addProperty("gateway_transaction_id", gatewayTransactionId);
+        transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
+        transactionDetails.addProperty("fee", fee);
         Optional.ofNullable(cardDetails)
                 .ifPresent(cd -> Optional.ofNullable(cd.getBillingAddress())
-                            .ifPresent(ba -> {
-                                transactionDetail.addProperty("address_line1", ba.getAddressLine1());
-                                transactionDetail.addProperty("address_line2", ba.getAddressLine2());
-                                transactionDetail.addProperty("address_postcode", ba.getAddressPostCode());
-                                transactionDetail.addProperty("address_city", ba.getAddressCity());
-                                transactionDetail.addProperty("address_county", ba.getAddressCounty());
-                                transactionDetail.addProperty("address_country", ba.getAddressCountry());
-                            }));
+                        .ifPresent(ba -> {
+                            transactionDetails.addProperty("address_line1", ba.getAddressLine1());
+                            transactionDetails.addProperty("address_line2", ba.getAddressLine2());
+                            transactionDetails.addProperty("address_postcode", ba.getAddressPostCode());
+                            transactionDetails.addProperty("address_city", ba.getAddressCity());
+                            transactionDetails.addProperty("address_county", ba.getAddressCounty());
+                            transactionDetails.addProperty("address_country", ba.getAddressCountry());
+                        }));
 
-        return transactionDetail;
+        return transactionDetails;
     }
 
     @Override
     public TransactionEntity toEntity() {
         return new TransactionEntity(id, gatewayAccountId, externalId, amount,
                 reference, description, state.getState(),
-                email,  cardholderName, externalMetadata, createdDate,
-                transactionDetails, eventCount, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber
-                );
+                email, cardholderName, externalMetadata, createdDate,
+                transactionDetails, eventCount, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber,
+                netAmount, totalAmount, settlementSubmittedTime, settledTime, refundStatus,
+                refundAmountSubmitted, refundAmountAvailable
+        );
     }
 
     public String getExternalId() {
@@ -360,7 +393,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     }
 
 
-
     public TransactionFixture withDefaultCardDetails(boolean includeCardDetails) {
         if (includeCardDetails) {
             Address billingAddress = new Address("line1", "line2", "AB1 2CD",
@@ -374,5 +406,43 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withDefaultCardDetails() {
         return this.withDefaultCardDetails(true);
+    }
+
+
+    public TransactionFixture withCorporateCardSurcharge(long value) {
+        this.corporateCardSurcharge = value;
+        return this;
+    }
+
+    public TransactionFixture withFee(long value) {
+        this.fee = value;
+        return this;
+    }
+
+    public TransactionFixture withNetAmount(long value) {
+        this.netAmount = value;
+        return this;
+    }
+
+    public TransactionFixture withRefundSummary(RefundSummary refundSummary) {
+        this.refundStatus = refundSummary.getStatus();
+        this.refundAmountAvailable = refundSummary.getAmountAvailable();
+        this.refundAmountSubmitted = refundSummary.getAmountSubmitted();
+        return this;
+    }
+
+    public TransactionFixture withTotalAmount(long value) {
+        this.totalAmount = value;
+        return this;
+    }
+
+    public TransactionFixture withSettlementSubmittedTime(ZonedDateTime time) {
+        this.settlementSubmittedTime = time;
+        return this;
+    }
+
+    public TransactionFixture withSettledTime(ZonedDateTime time) {
+        this.settledTime = time;
+        return this;
     }
 }

@@ -14,6 +14,7 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -24,6 +25,10 @@ public class TransactionView {
     private Long id;
     private String gatewayAccountId;
     private Long amount;
+    private Long totalAmount;
+    private Long corporateCardSurcharge;
+    private Long fee;
+    private Long netAmount;
     private TransactionState state;
     private String description;
     private String reference;
@@ -37,16 +42,24 @@ public class TransactionView {
     private CardDetails cardDetails;
     private Boolean delayedCapture;
     private String gatewayTransactionId;
+    private RefundSummary refundSummary;
+    private SettlementSummary settlementSummary;
+    private Map<String, Object> metadata;
     private List<Link> links = new ArrayList<>();
 
     //todo: replace with builder
-    private TransactionView(Long id, String gatewayAccountId, Long amount, TransactionState state,
-                           String description, String reference, String language, String externalId,
-                           String returnUrl, String email, String paymentProvider, ZonedDateTime createdDate,
-                           CardDetails cardDetails, Boolean delayedCapture, String gatewayTransactionId) {
+    private TransactionView(Long id, String gatewayAccountId, Long amount, Long totalAmount, Long corporateCardSurcharge, Long fee, Long netAmount, TransactionState state,
+                            String description, String reference, String language, String externalId,
+                            String returnUrl, String email, String paymentProvider, ZonedDateTime createdDate,
+                            CardDetails cardDetails, Boolean delayedCapture, String gatewayTransactionId,
+                            RefundSummary refundSummary, SettlementSummary settlementSummary, Map<String, Object> metadata) {
         this.id = id;
         this.gatewayAccountId = gatewayAccountId;
         this.amount = amount;
+        this.totalAmount = totalAmount;
+        this.corporateCardSurcharge = corporateCardSurcharge;
+        this.fee = fee;
+        this.netAmount = netAmount;
         this.state = state;
         this.description = description;
         this.reference = reference;
@@ -59,6 +72,9 @@ public class TransactionView {
         this.cardDetails = cardDetails;
         this.delayedCapture = delayedCapture;
         this.gatewayTransactionId = gatewayTransactionId;
+        this.refundSummary = refundSummary;
+        this.settlementSummary = settlementSummary;
+        this.metadata = metadata;
     }
 
     public TransactionView() {
@@ -66,11 +82,13 @@ public class TransactionView {
 
     public static TransactionView from(Payment transaction) {
         return new TransactionView(transaction.getId(), transaction.getGatewayAccountId(),
-                transaction.getAmount(), transaction.getState(),
+                transaction.getAmount(), transaction.getTotalAmount(), transaction.getCorporateCardSurcharge(),
+                transaction.getFee(), transaction.getNetAmount(), transaction.getState(),
                 transaction.getDescription(), transaction.getReference(), transaction.getLanguage(),
                 transaction.getExternalId(), transaction.getReturnUrl(), transaction.getEmail(),
                 transaction.getPaymentProvider(), transaction.getCreatedDate(), transaction.getCardDetails(),
-                transaction.getDelayedCapture(), transaction.getGatewayTransactionId());
+                transaction.getDelayedCapture(), transaction.getGatewayTransactionId(), transaction.getRefundSummary(),
+                transaction.getSettlementSummary(), transaction.getExternalMetadata());
     }
 
     public TransactionView addLink(Link link) {
@@ -154,5 +172,33 @@ public class TransactionView {
     @Override
     public int hashCode() {
         return Objects.hash(externalId);
+    }
+
+    public RefundSummary getRefundSummary() {
+        return refundSummary;
+    }
+
+    public SettlementSummary getSettlementSummary() {
+        return settlementSummary;
+    }
+
+    public Map<String, Object> getMetadata() {
+        return metadata;
+    }
+
+    public Long getCorporateCardSurcharge() {
+        return corporateCardSurcharge;
+    }
+
+    public Long getTotalAmount() {
+        return totalAmount;
+    }
+
+    public Long getFee() {
+        return fee;
+    }
+
+    public Long getNetAmount() {
+        return netAmount;
     }
 }

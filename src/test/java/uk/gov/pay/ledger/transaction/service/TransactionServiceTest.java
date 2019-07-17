@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.jackson.Jackson;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.model.PaymentFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
@@ -40,8 +42,10 @@ public class TransactionServiceTest {
 
     @Before
     public void setUp() {
-        TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(Jackson.newObjectMapper());
-        transactionService = new TransactionService(mockTransactionDao, transactionEntityFactory);
+        ObjectMapper objectMapper = Jackson.newObjectMapper();
+        TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(objectMapper);
+        PaymentFactory paymentFactory = new PaymentFactory(objectMapper);
+        transactionService = new TransactionService(mockTransactionDao, transactionEntityFactory, paymentFactory);
         searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
 

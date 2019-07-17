@@ -6,8 +6,10 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 public class TransactionMapper implements RowMapper<TransactionEntity> {
 
@@ -21,15 +23,30 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 rs.getString("reference"),
                 rs.getString("description"),
                 rs.getString("state"),
-                rs.getString( "email"),
+                rs.getString("email"),
                 rs.getString("cardholder_name"),
                 rs.getString("external_metadata"),
-                ZonedDateTime.ofInstant(rs.getTimestamp("created_date").toInstant(), ZoneOffset.UTC),
+                getZonedDateTime(rs, "created_date"),
                 rs.getString("transaction_details"),
                 rs.getInt("event_count"),
                 rs.getString("card_brand"),
                 rs.getString("last_digits_card_number"),
-                rs.getString("first_digits_card_number")
+                rs.getString("first_digits_card_number"),
+                rs.getLong("net_amount"),
+                rs.getLong("total_amount"),
+                getZonedDateTime(rs, "settlement_submitted_time"),
+                getZonedDateTime(rs, "settled_time"),
+                rs.getString("refund_status"),
+                rs.getLong("refund_amount_submitted"),
+                rs.getLong("refund_amount_available")
         );
+    }
+
+    private ZonedDateTime getZonedDateTime(ResultSet rs, String columnLabel) throws SQLException {
+        Timestamp timestamp = rs.getTimestamp(columnLabel);
+
+        return Optional.ofNullable(timestamp)
+                .map(t -> ZonedDateTime.ofInstant(t.toInstant(), ZoneOffset.UTC))
+                .orElse(null);
     }
 }

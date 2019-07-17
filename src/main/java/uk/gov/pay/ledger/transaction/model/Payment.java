@@ -6,13 +6,13 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
-import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
+import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Payment extends Transaction{
@@ -29,10 +29,16 @@ public class Payment extends Transaction{
     private ZonedDateTime createdDate;
     private CardDetails cardDetails;
     private Boolean delayedCapture;
-    private String externalMetaData;
+    private Map<String, Object> externalMetaData;
     @JsonIgnore
     private Integer eventCount;
     private String gatewayTransactionId;
+    private Long corporateCardSurcharge;
+    private Long fee;
+    private Long netAmount;
+    private Long totalAmount;
+    private RefundSummary refundSummary;
+    private SettlementSummary settlementSummary;
 
     public Payment() {
 
@@ -42,9 +48,16 @@ public class Payment extends Transaction{
                    String reference, String description, TransactionState state,
                    String language, String externalId, String returnUrl,
                    String email, String paymentProvider, ZonedDateTime createdDate,
-                   CardDetails cardDetails, Boolean delayedCapture, String externalMetaData,
-                   Integer eventCount, String gatewayTransactionId) {
+                   CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
+                   Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
+                   Long netAmount, Long totalAmount, RefundSummary refundSummary, SettlementSummary settlementSummary) {
         super(id, gatewayAccountId, amount, externalId);
+        this.corporateCardSurcharge = corporateCardSurcharge;
+        this.fee = fee;
+        this.netAmount = netAmount;
+        this.totalAmount = totalAmount;
+        this.refundSummary = refundSummary;
+        this.settlementSummary = settlementSummary;
         this.id = id;
         this.gatewayAccountId = gatewayAccountId;
         this.amount = amount;
@@ -68,10 +81,13 @@ public class Payment extends Transaction{
                    String reference, String description, TransactionState state,
                    String language, String externalId, String returnUrl,
                    String email, String paymentProvider, ZonedDateTime createdDate,
-                   CardDetails cardDetails, Boolean delayedCapture, String externalMetaData, Integer eventCount) {
+                   CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
+                   Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
+                   Long netAmount, RefundSummary refundSummary, Long totalAmount, SettlementSummary settlementSummary) {
 
         this(null, gatewayAccountId, amount, reference, description, state, language, externalId, returnUrl, email,
-                paymentProvider, createdDate, cardDetails, delayedCapture, externalMetaData, eventCount, null);
+                paymentProvider, createdDate, cardDetails, delayedCapture, externalMetaData, eventCount,
+                gatewayTransactionId, corporateCardSurcharge, fee, netAmount, totalAmount, refundSummary, settlementSummary);
     }
 
     public String getReference() {
@@ -120,7 +136,7 @@ public class Payment extends Transaction{
         return delayedCapture;
     }
 
-    public String getExternalMetadata() {
+    public Map<String, Object> getExternalMetadata() {
         return externalMetaData;
     }
 
@@ -132,26 +148,27 @@ public class Payment extends Transaction{
         return gatewayTransactionId;
     }
 
-    public static Payment fromTransactionEntity(TransactionEntity entity) {
-        JsonObject transactionDetail = new JsonParser().parse(entity.getTransactionDetails()).getAsJsonObject();
-        Address billingAddress = Address.from(
-                    safeGetAsString(transactionDetail, "address_line1"),
-                    safeGetAsString(transactionDetail, "address_line2"),
-                    safeGetAsString(transactionDetail, "address_postcode"),
-                    safeGetAsString(transactionDetail, "address_city"),
-                    safeGetAsString(transactionDetail, "address_county"),
-                    safeGetAsString(transactionDetail, "address_country")
-            );
+    public Long getCorporateCardSurcharge() {
+        return corporateCardSurcharge;
+    }
 
-        CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), billingAddress, entity.getCardBrand(),
-                entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
-                safeGetAsString(transactionDetail, "card_expiry_date"));
+    public Long getFee() {
+        return fee;
+    }
 
-        return new Payment(entity.getGatewayAccountId(), entity.getAmount(), entity.getReference(), entity.getDescription(),
-                TransactionState.from(entity.getState()), safeGetAsString(transactionDetail, "language"),
-                entity.getExternalId(), safeGetAsString(transactionDetail, "return_url"), entity.getEmail(),
-                safeGetAsString(transactionDetail, "payment_provider"), entity.getCreatedDate(),
-                cardDetails, Boolean.valueOf(safeGetAsString(transactionDetail, "delayed_capture")),
-                entity.getExternalMetadata(), entity.getEventCount());
+    public Long getNetAmount() {
+        return netAmount;
+    }
+
+    public RefundSummary getRefundSummary() {
+        return refundSummary;
+    }
+
+    public Long getTotalAmount() {
+        return totalAmount;
+    }
+
+    public SettlementSummary getSettlementSummary() {
+        return settlementSummary;
     }
 }
