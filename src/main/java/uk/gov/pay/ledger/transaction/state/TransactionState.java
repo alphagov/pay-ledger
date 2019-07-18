@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.transaction.state;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.EventType;
 
 import java.util.Map;
@@ -27,6 +29,7 @@ public enum TransactionState {
     private final boolean finished;
     private final String code;
     private final String message;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionState.class);
 
     TransactionState(String value, boolean finished) {
         this.value = value;
@@ -88,6 +91,9 @@ public enum TransactionState {
 
     public static TransactionState from(String transactionState) {
         return stream(values()).filter(v -> v.getState().equals(transactionState)).findFirst()
-                .orElseGet(null);
+                .orElseGet(() -> {
+                    LOGGER.warn("Unknown transaction state {}", transactionState);
+                    return null;
+                });
     }
 }
