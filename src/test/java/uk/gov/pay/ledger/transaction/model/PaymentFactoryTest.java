@@ -61,15 +61,55 @@ public class PaymentFactoryTest {
 
     @Before
     public void setUp() {
-        fullDataObject = new TransactionEntity(id, gatewayAccountId, externalId, amount, reference, description, state,
-                email, cardholderName, fullExternalMetadata, createdDate, fullTransactionDetails, eventCount, cardBrand,
-                lastDigitsCardNumber, firstDigitsCardNumber, netAmount, totalAmount, settlementSubmittedTime, settledTime,
-                refundStatus, refundAmountSubmitted, refundAmountAvailable);
+        fullDataObject = TransactionEntity.builder()
+                .id(id)
+                .gatewayAccountId(gatewayAccountId)
+                .externalId(externalId)
+                .amount(amount)
+                .reference(reference)
+                .description(description)
+                .state(state)
+                .email(email)
+                .cardholderName(cardholderName)
+                .externalMetadata(fullExternalMetadata)
+                .createdDate(createdDate)
+                .transactionDetails(fullTransactionDetails)
+                .eventCount(eventCount)
+                .cardBrand(cardBrand)
+                .lastDigitsCardNumber(lastDigitsCardNumber)
+                .firstDigitsCardNumber(firstDigitsCardNumber)
+                .netAmount(netAmount)
+                .totalAmount(totalAmount)
+                .settlementSubmittedTime(settlementSubmittedTime)
+                .settledTime(settledTime)
+                .refundStatus(refundStatus)
+                .refundAmountSubmitted(refundAmountSubmitted)
+                .refundAmountAvailable(refundAmountAvailable)
+                .build();
 
-        minimalDataObject = new TransactionEntity(id, gatewayAccountId, externalId, amount, reference, description, state,
-                email, cardholderName, null, createdDate, null, eventCount, cardBrand,
-                lastDigitsCardNumber, firstDigitsCardNumber, netAmount, totalAmount, settlementSubmittedTime,
-                settledTime, refundStatus, refundAmountSubmitted, refundAmountAvailable);
+        minimalDataObject = TransactionEntity.builder()
+                .id(id)
+                .gatewayAccountId(gatewayAccountId)
+                .externalId(externalId)
+                .amount(amount)
+                .reference(reference)
+                .description(description)
+                .state(state)
+                .email(email)
+                .cardholderName(cardholderName)
+                .createdDate(createdDate)
+                .eventCount(eventCount)
+                .cardBrand(cardBrand)
+                .lastDigitsCardNumber(lastDigitsCardNumber)
+                .firstDigitsCardNumber(firstDigitsCardNumber)
+                .netAmount(netAmount)
+                .totalAmount(totalAmount)
+                .settlementSubmittedTime(settlementSubmittedTime)
+                .settledTime(settledTime)
+                .refundStatus(refundStatus)
+                .refundAmountSubmitted(refundAmountSubmitted)
+                .refundAmountAvailable(refundAmountAvailable)
+                .build();
 
         paymentFactory = new PaymentFactory(Jackson.newObjectMapper());
     }
