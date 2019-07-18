@@ -15,31 +15,31 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
 
     @Override
     public TransactionEntity map(ResultSet rs, StatementContext ctx) throws SQLException {
-        return new TransactionEntity(
-                rs.getLong("id"),
-                rs.getString("gateway_account_id"),
-                rs.getString("external_id"),
-                rs.getLong("amount"),
-                rs.getString("reference"),
-                rs.getString("description"),
-                rs.getString("state"),
-                rs.getString("email"),
-                rs.getString("cardholder_name"),
-                rs.getString("external_metadata"),
-                getZonedDateTime(rs, "created_date"),
-                rs.getString("transaction_details"),
-                rs.getInt("event_count"),
-                rs.getString("card_brand"),
-                rs.getString("last_digits_card_number"),
-                rs.getString("first_digits_card_number"),
-                rs.getLong("net_amount"),
-                rs.getLong("total_amount"),
-                getZonedDateTime(rs, "settlement_submitted_time"),
-                getZonedDateTime(rs, "settled_time"),
-                rs.getString("refund_status"),
-                rs.getLong("refund_amount_submitted"),
-                rs.getLong("refund_amount_available")
-        );
+        return new TransactionEntity.Builder()
+                .withId(rs.getLong("id"))
+                .withGatewayAccountId(rs.getString("gateway_account_id"))
+                .withExternalId(rs.getString("external_id"))
+                .withAmount(rs.getLong("amount"))
+                .withReference(rs.getString("reference"))
+                .withDescription(rs.getString("description"))
+                .withState(rs.getString("state"))
+                .withEmail(rs.getString("email"))
+                .withCardholderName(rs.getString("cardholder_name"))
+                .withExternalMetadata(rs.getString("external_metadata"))
+                .withCreatedDate(getZonedDateTime(rs, "created_date"))
+                .withTransactionDetails(rs.getString("transaction_details"))
+                .withEventCount(rs.getInt("event_count"))
+                .withCardBrand(rs.getString("card_brand"))
+                .withLastDigitsCardNumber(rs.getString("last_digits_card_number"))
+                .withFirstDigitsCardNumber(rs.getString("first_digits_card_number"))
+                .withNetAmount(rs.getLong("net_amount"))
+                .withTotalAmount(rs.getLong("total_amount"))
+                .withSettlementSubmittedTime(getZonedDateTime(rs, "settlement_submitted_time"))
+                .withSettledTime(getZonedDateTime(rs, "settled_time"))
+                .withRefundStatus(rs.getString("refund_status"))
+                .withRefundAmountSubmitted(rs.getLong("refund_amount_submitted"))
+                .withRefundAmountAvailable(rs.getLong("refund_amount_available"))
+                .build();
     }
 
     private ZonedDateTime getZonedDateTime(ResultSet rs, String columnLabel) throws SQLException {

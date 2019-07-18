@@ -327,13 +327,31 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public TransactionEntity toEntity() {
-        return new TransactionEntity(id, gatewayAccountId, externalId, amount,
-                reference, description, state.getState(),
-                email, cardholderName, externalMetadata, createdDate,
-                transactionDetails, eventCount, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber,
-                netAmount, totalAmount, settlementSubmittedTime, settledTime, refundStatus,
-                refundAmountSubmitted, refundAmountAvailable
-        );
+        return new TransactionEntity.Builder()
+                .withId(id)
+                .withGatewayAccountId(gatewayAccountId)
+                .withExternalId(externalId)
+                .withAmount(amount)
+                .withReference(reference)
+                .withDescription(description)
+                .withState(state.getState())
+                .withEmail(email)
+                .withCardholderName(cardholderName)
+                .withExternalMetadata(externalMetadata)
+                .withCreatedDate(createdDate)
+                .withTransactionDetails(transactionDetails)
+                .withEventCount(eventCount)
+                .withCardBrand(cardBrand)
+                .withLastDigitsCardNumber(lastDigitsCardNumber)
+                .withFirstDigitsCardNumber(firstDigitsCardNumber)
+                .withNetAmount(netAmount)
+                .withTotalAmount(totalAmount)
+                .withSettlementSubmittedTime(settlementSubmittedTime)
+                .withSettledTime(settledTime)
+                .withRefundStatus(refundStatus)
+                .withRefundAmountSubmitted(refundAmountSubmitted)
+                .withRefundAmountAvailable(refundAmountAvailable)
+                .build();
     }
 
     public String getExternalId() {
