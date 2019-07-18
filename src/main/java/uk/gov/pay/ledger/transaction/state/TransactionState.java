@@ -88,6 +88,6 @@ public enum TransactionState {
 
     public static TransactionState from(String transactionState) {
         return stream(values()).filter(v -> v.getState().equals(transactionState)).findFirst()
-                .orElseGet(null);
+                .orElse(null);
     }
 }
