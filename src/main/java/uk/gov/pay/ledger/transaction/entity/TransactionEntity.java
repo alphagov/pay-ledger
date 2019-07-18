@@ -219,117 +219,117 @@ public class TransactionEntity {
             return new TransactionEntity(this);
         }
 
-        public Builder id(Long id) {
+        public Builder withId(Long id) {
             this.id = id;
             return this;
         }
 
-        public Builder gatewayAccountId(String gatewayAccountId) {
+        public Builder withGatewayAccountId(String gatewayAccountId) {
             this.gatewayAccountId = gatewayAccountId;
             return this;
         }
 
-        public Builder externalId(String externalId) {
+        public Builder withExternalId(String externalId) {
             this.externalId = externalId;
             return this;
         }
 
-        public Builder amount(Long amount) {
+        public Builder withAmount(Long amount) {
             this.amount = amount;
             return this;
         }
 
-        public Builder reference(String reference) {
+        public Builder withReference(String reference) {
             this.reference = reference;
             return this;
         }
 
-        public Builder description(String description) {
+        public Builder withDescription(String description) {
             this.description = description;
             return this;
         }
 
-        public Builder state(String state) {
+        public Builder withState(String state) {
             this.state = state;
             return this;
         }
 
-        public Builder email(String email) {
+        public Builder withEmail(String email) {
             this.email = email;
             return this;
         }
 
-        public Builder cardholderName(String cardholderName) {
+        public Builder withCardholderName(String cardholderName) {
             this.cardholderName = cardholderName;
             return this;
         }
 
-        public Builder externalMetadata(String externalMetadata) {
+        public Builder withExternalMetadata(String externalMetadata) {
             this.externalMetadata = externalMetadata;
             return this;
         }
 
-        public Builder createdDate(ZonedDateTime createdDate) {
+        public Builder withCreatedDate(ZonedDateTime createdDate) {
             this.createdDate = createdDate;
             return this;
         }
 
-        public Builder transactionDetails(String transactionDetails) {
+        public Builder withTransactionDetails(String transactionDetails) {
             this.transactionDetails = transactionDetails;
             return this;
         }
 
-        public Builder eventCount(Integer eventCount) {
+        public Builder withEventCount(Integer eventCount) {
             this.eventCount = eventCount;
             return this;
         }
 
-        public Builder cardBrand(String cardBrand) {
+        public Builder withCardBrand(String cardBrand) {
             this.cardBrand = cardBrand;
             return this;
         }
 
-        public Builder lastDigitsCardNumber(String lastDigitsCardNumber) {
+        public Builder withLastDigitsCardNumber(String lastDigitsCardNumber) {
             this.lastDigitsCardNumber = lastDigitsCardNumber;
             return this;
         }
 
-        public Builder firstDigitsCardNumber(String firstDigitsCardNumber) {
+        public Builder withFirstDigitsCardNumber(String firstDigitsCardNumber) {
             this.firstDigitsCardNumber = firstDigitsCardNumber;
             return this;
         }
 
-        public Builder netAmount(Long netAmount) {
+        public Builder withNetAmount(Long netAmount) {
             this.netAmount = netAmount;
             return this;
         }
 
-        public Builder totalAmount(Long totalAmount) {
+        public Builder withTotalAmount(Long totalAmount) {
             this.totalAmount = totalAmount;
             return this;
         }
 
-        public Builder settlementSubmittedTime(ZonedDateTime settlementSubmittedTime) {
+        public Builder withSettlementSubmittedTime(ZonedDateTime settlementSubmittedTime) {
             this.settlementSubmittedTime = settlementSubmittedTime;
             return this;
         }
 
-        public Builder settledTime(ZonedDateTime settledTime) {
+        public Builder withSettledTime(ZonedDateTime settledTime) {
             this.settledTime = settledTime;
             return this;
         }
 
-        public Builder refundStatus(String refundStatus) {
+        public Builder withRefundStatus(String refundStatus) {
             this.refundStatus = refundStatus;
             return this;
         }
 
-        public Builder refundAmountSubmitted(Long refundAmountSubmitted) {
+        public Builder withRefundAmountSubmitted(Long refundAmountSubmitted) {
             this.refundAmountSubmitted = refundAmountSubmitted;
             return this;
         }
 
-        public Builder refundAmountAvailable(Long refundAmountAvailable) {
+        public Builder withRefundAmountAvailable(Long refundAmountAvailable) {
             this.refundAmountAvailable = refundAmountAvailable;
             return this;
         }
