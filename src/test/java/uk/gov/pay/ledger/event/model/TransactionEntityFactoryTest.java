@@ -55,7 +55,22 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getNetAmount(), is(((Integer)eventDigest.getEventPayload().get("net_amount")).longValue()));
         assertThat(transactionEntity.getTotalAmount(), is(((Integer)eventDigest.getEventPayload().get("total_amount")).longValue()));
 
-        var expectedTransactionDetails = String.format("{\"language\":\"en\",\"payment_provider\":\"sandbox\",\"expiry_date\":\"11/21\",\"address_line1\":\"12 Rouge Avenue\",\"address_line2\":null,\"address_postcode\":\"N1 3QU\",\"address_city\":\"London\",\"address_county\":null,\"address_country\":\"GB\",\"wallet\":null,\"delayed_capture\":false,\"return_url\":\"https://example.org\",\"gateway_transaction_id\":\"%s\"}",
+        var expectedTransactionDetails = String.format("{" +
+                        "\"language\":\"en\"," +
+                        "\"payment_provider\":\"sandbox\"," +
+                        "\"expiry_date\":\"11/21\"," +
+                        "\"address_line1\":\"12 Rouge Avenue\"," +
+                        "\"address_line2\":null," +
+                        "\"address_postcode\":\"N1 3QU\"," +
+                        "\"address_city\":\"London\"," +
+                        "\"address_county\":null," +
+                        "\"address_country\":\"GB\"," +
+                        "\"wallet\":null," +
+                        "\"delayed_capture\":false," +
+                        "\"return_url\":\"https://example.org\"," +
+                        "\"gateway_transaction_id\":\"%s\"," +
+                        "\"corporate_surcharge\":69" +
+                        "}",
                 eventDigest.getEventPayload().get("gateway_transaction_id"));
 
         assertThat(transactionEntity.getTransactionDetails(), is(expectedTransactionDetails));
