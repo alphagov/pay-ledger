@@ -29,6 +29,7 @@ public class TransactionEntityFactory {
         entity.setState(TransactionState.fromSalientEventType(eventDigest.getMostRecentEventType()).getState());
         entity.setCreatedDate(eventDigest.getEventCreatedDate());
         entity.setExternalId(eventDigest.getResourceExternalId());
+        entity.setTransactionType(eventDigest.getResourceType().toString());
 
         return entity;
     }

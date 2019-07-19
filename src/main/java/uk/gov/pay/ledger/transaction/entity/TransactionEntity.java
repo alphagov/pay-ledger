@@ -41,6 +41,9 @@ public class TransactionEntity {
     @JsonProperty("total_amount")
     private Long totalAmount;
 
+    @JsonProperty("transaction_type")
+    private String transactionType;
+
     private ZonedDateTime settlementSubmittedTime;
     private ZonedDateTime settledTime;
     private String refundStatus;
@@ -74,6 +77,7 @@ public class TransactionEntity {
         this.refundStatus = builder.refundStatus;
         this.refundAmountSubmitted = builder.refundAmountSubmitted;
         this.refundAmountAvailable = builder.refundAmountAvailable;
+        this.transactionType = builder.transactionType;
     }
 
     public Long getId() {
@@ -160,6 +164,10 @@ public class TransactionEntity {
         this.externalId = externalId;
     }
 
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
+    }
+
     public Long getNetAmount() {
         return netAmount;
     }
@@ -188,6 +196,10 @@ public class TransactionEntity {
         return refundAmountAvailable;
     }
 
+    public String getTransactionType() {
+        return transactionType;
+    }
+
     public static class Builder {
         private Long id;
         private String gatewayAccountId;
@@ -212,6 +224,7 @@ public class TransactionEntity {
         private String refundStatus;
         private Long refundAmountSubmitted;
         private Long refundAmountAvailable;
+        private String transactionType;
 
         public Builder() {
         }
@@ -332,6 +345,11 @@ public class TransactionEntity {
 
         public Builder withRefundAmountAvailable(Long refundAmountAvailable) {
             this.refundAmountAvailable = refundAmountAvailable;
+            return this;
+        }
+
+        public Builder withTransactionType(String transactionType) {
+            this.transactionType = transactionType;
             return this;
         }
     }
