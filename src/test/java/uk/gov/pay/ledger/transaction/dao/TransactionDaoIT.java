@@ -23,6 +23,8 @@ public class TransactionDaoIT {
     public void shouldInsertTransaction() {
         TransactionFixture fixture = aTransactionFixture()
                     .withDefaultCardDetails()
+                    .withNetAmount(55)
+                    .withTotalAmount(105)
                     .withDefaultTransactionDetails();
         TransactionEntity transactionEntity = fixture.toEntity();
 
@@ -49,6 +51,8 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getCardBrand(), is(transactionEntity.getCardBrand()));
         assertThat(retrievedTransaction.getLastDigitsCardNumber(), is(transactionEntity.getLastDigitsCardNumber()));
         assertThat(retrievedTransaction.getFirstDigitsCardNumber(), is(transactionEntity.getFirstDigitsCardNumber()));
+        assertThat(retrievedTransaction.getNetAmount(), is(transactionEntity.getNetAmount()));
+        assertThat(retrievedTransaction.getTotalAmount(), is(transactionEntity.getTotalAmount()));
     }
 
     @Test
