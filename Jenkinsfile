@@ -39,7 +39,7 @@ pipeline {
           ) {
               sh 'mvn -version'
               sh "mvn clean package pact:publish -DrunContractTests=true -DPACT_BROKER_URL=https://pact-broker-test.cloudapps.digital -DPACT_CONSUMER_VERSION=${commit}" +
-                      " -DPACT_BROKER_USERNAME=${PACT_BROKER_USERNAME} -DPACT_BROKER_PASSWORD=${PACT_BROKER_PASSWORD} -DPACT_CONSUMER_TAG=${branchName}"
+                      " -DPACT_BROKER_USERNAME=${PACT_BROKER_USERNAME} -DPACT_BROKER_PASSWORD=${PACT_BROKER_PASSWORD} -DPACT_CONSUMER_TAG=${branchName} -Dpact.verifier.publishResults=true"
           }
           postSuccessfulMetrics("ledger.maven-build", stepBuildTime)
         }
