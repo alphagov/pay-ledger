@@ -21,7 +21,7 @@ public class TransactionEntityFactory {
         this.objectMapper = objectMapper;
     }
 
-    public TransactionEntity from(EventDigest eventDigest) {
+    public TransactionEntity create(EventDigest eventDigest) {
         String transactionDetail = convertToTransactionDetails(eventDigest.getEventPayload());
         TransactionEntity entity = objectMapper.convertValue(eventDigest.getEventPayload(), TransactionEntity.class);
         entity.setTransactionDetails(transactionDetail);

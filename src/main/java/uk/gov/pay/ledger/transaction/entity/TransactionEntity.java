@@ -36,10 +36,11 @@ public class TransactionEntity {
     private String lastDigitsCardNumber;
     @JsonProperty("first_digits_card_number")
     private String firstDigitsCardNumber;
-
-
+    @JsonProperty("net_amount")
     private Long netAmount;
+    @JsonProperty("total_amount")
     private Long totalAmount;
+
     private ZonedDateTime settlementSubmittedTime;
     private ZonedDateTime settledTime;
     private String refundStatus;
