@@ -40,7 +40,8 @@ public class TransactionEntity {
     private Long netAmount;
     @JsonProperty("total_amount")
     private Long totalAmount;
-
+    @JsonProperty("fee")
+    private Long fee;
     @JsonProperty("transaction_type")
     private String transactionType;
 
@@ -77,6 +78,7 @@ public class TransactionEntity {
         this.refundStatus = builder.refundStatus;
         this.refundAmountSubmitted = builder.refundAmountSubmitted;
         this.refundAmountAvailable = builder.refundAmountAvailable;
+        this.fee = builder.fee;
         this.transactionType = builder.transactionType;
     }
 
@@ -196,11 +198,16 @@ public class TransactionEntity {
         return refundAmountAvailable;
     }
 
+    public Long getFee() {
+        return fee;
+    }
+
     public String getTransactionType() {
         return transactionType;
     }
 
     public static class Builder {
+        public Long fee;
         private Long id;
         private String gatewayAccountId;
         private String externalId;
@@ -345,6 +352,11 @@ public class TransactionEntity {
 
         public Builder withRefundAmountAvailable(Long refundAmountAvailable) {
             this.refundAmountAvailable = refundAmountAvailable;
+            return this;
+        }
+
+        public Builder withFee(Long fee) {
+            this.fee = fee;
             return this;
         }
 

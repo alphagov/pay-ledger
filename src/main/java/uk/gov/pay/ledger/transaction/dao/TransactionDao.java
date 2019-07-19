@@ -31,12 +31,12 @@ public class TransactionDao {
             "INSERT INTO transaction(" +
                 "external_id,gateway_account_id,amount,description,reference,state,email,cardholder_name," +
                 "external_metadata,created_date,transaction_details,event_count,card_brand, " +
-                "last_digits_card_number,first_digits_card_number,net_amount,total_amount, type" +
+                "last_digits_card_number,first_digits_card_number,net_amount,total_amount,fee,type" +
             ") " +
             "VALUES (" +
                 ":externalId,:gatewayAccountId,:amount,:description,:reference,:state,:email,:cardholderName," +
                 "CAST(:externalMetadata as jsonb),:createdDate,CAST(:transactionDetails as jsonb), :eventCount," +
-                ":cardBrand,:lastDigitsCardNumber,:firstDigitsCardNumber,:netAmount,:totalAmount," +
+                ":cardBrand,:lastDigitsCardNumber,:firstDigitsCardNumber,:netAmount,:totalAmount,:fee," +
                 ":transactionType::transaction_type" +
             ")" +
             "ON CONFLICT (external_id) " +
@@ -58,6 +58,7 @@ public class TransactionDao {
                 "first_digits_card_number = EXCLUDED.first_digits_card_number," +
                 "net_amount = EXCLUDED.net_amount," +
                 "total_amount = EXCLUDED.total_amount," +
+                "fee = EXCLUDED.fee," +
                 "type = EXCLUDED.type " +
             "WHERE EXCLUDED.event_count > transaction.event_count;";
 

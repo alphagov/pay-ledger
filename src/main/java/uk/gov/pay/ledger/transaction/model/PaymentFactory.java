@@ -55,7 +55,7 @@ public class PaymentFactory {
                     safeGetAsString(transactionDetails, "payment_provider"), entity.getCreatedDate(),
                     cardDetails, Boolean.valueOf(safeGetAsString(transactionDetails, "delayed_capture")),
                     metadata, entity.getEventCount(), safeGetAsString(transactionDetails, "gateway_transaction_id"),
-                    safeGetAsLong(transactionDetails, "corporate_surcharge"), safeGetAsLong(transactionDetails, "fee"),
+                    safeGetAsLong(transactionDetails, "corporate_surcharge"), entity.getFee(),
                     entity.getNetAmount(), refundSummary, entity.getTotalAmount(), settlementSummary);
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
