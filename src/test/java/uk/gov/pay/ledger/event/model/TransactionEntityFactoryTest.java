@@ -32,7 +32,7 @@ public class TransactionEntityFactoryTest {
                 .toEntity();
         EventDigest eventDigest = EventDigest.fromEventList(List.of(paymentCreatedEvent, paymentDetailsEvent));
 
-        TransactionEntity transactionEntity = transactionEntityFactory.from(eventDigest);
+        TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
 
         assertThat(transactionEntity.getExternalId(), is(eventDigest.getResourceExternalId()));
         assertThat(transactionEntity.getState(), is("created"));

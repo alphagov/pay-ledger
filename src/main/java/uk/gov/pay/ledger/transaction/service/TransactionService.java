@@ -79,7 +79,7 @@ public class TransactionService {
     }
 
     public void upsertTransactionFor(EventDigest eventDigest) {
-        TransactionEntity transaction = transactionEntityFactory.from(eventDigest);
+        TransactionEntity transaction = transactionEntityFactory.create(eventDigest);
         transactionDao.upsert(transaction);
     }
 }
