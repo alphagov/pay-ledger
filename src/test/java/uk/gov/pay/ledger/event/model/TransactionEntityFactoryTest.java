@@ -25,14 +25,17 @@ public class TransactionEntityFactoryTest {
         Event paymentCreatedEvent = aQueueEventFixture()
                 .withEventType(EventType.PAYMENT_CREATED.name())
                 .withDefaultEventDataForEventType(EventType.PAYMENT_CREATED.name())
+                .withResourceType(ResourceType.PAYMENT)
                 .toEntity();
         Event paymentDetailsEvent = aQueueEventFixture()
                 .withEventType("PAYMENT_DETAILS_ENTERED")
                 .withDefaultEventDataForEventType("PAYMENT_DETAILS_ENTERED")
+                .withResourceType(ResourceType.PAYMENT)
                 .toEntity();
         Event captureConfirmedEvent = aQueueEventFixture()
                 .withEventType("CAPTURE_CONFIRMED")
                 .withEventData("{\"net_amount\": 55, \"total_amount\": 105}")
+                .withResourceType(ResourceType.PAYMENT)
                 .toEntity();
         EventDigest eventDigest = EventDigest.fromEventList(List.of(paymentCreatedEvent, paymentDetailsEvent, captureConfirmedEvent));
 
@@ -54,6 +57,7 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getExternalMetadata(), is(eventDigest.getEventPayload().get("external_metadata")));
         assertThat(transactionEntity.getNetAmount(), is(((Integer)eventDigest.getEventPayload().get("net_amount")).longValue()));
         assertThat(transactionEntity.getTotalAmount(), is(((Integer)eventDigest.getEventPayload().get("total_amount")).longValue()));
+        assertThat(transactionEntity.getTransactionType(), is("PAYMENT"));
 
         var expectedTransactionDetails = String.format("{\"language\":\"en\",\"payment_provider\":\"sandbox\",\"expiry_date\":\"11/21\",\"address_line1\":\"12 Rouge Avenue\",\"address_line2\":null,\"address_postcode\":\"N1 3QU\",\"address_city\":\"London\",\"address_county\":null,\"address_country\":\"GB\",\"wallet\":null,\"delayed_capture\":false,\"return_url\":\"https://example.org\",\"gateway_transaction_id\":\"%s\"}",
                 eventDigest.getEventPayload().get("gateway_transaction_id"));
