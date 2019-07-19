@@ -78,6 +78,7 @@ public class TransactionService {
         return transactionView;
     }
 
+    // @TODO(sfount) handling writing invalid transaction should be tested at `EventMessageHandler` integration level
     public void upsertTransactionFor(EventDigest eventDigest) {
         TransactionEntity transaction = transactionEntityFactory.create(eventDigest);
         transactionDao.upsert(transaction);

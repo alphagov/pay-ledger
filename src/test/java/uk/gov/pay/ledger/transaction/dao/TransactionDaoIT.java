@@ -25,6 +25,7 @@ public class TransactionDaoIT {
                     .withDefaultCardDetails()
                     .withNetAmount(55)
                     .withTotalAmount(105)
+                    .withTransactionType("PAYMENT")
                     .withDefaultTransactionDetails();
         TransactionEntity transactionEntity = fixture.toEntity();
 
@@ -53,6 +54,7 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getFirstDigitsCardNumber(), is(transactionEntity.getFirstDigitsCardNumber()));
         assertThat(retrievedTransaction.getNetAmount(), is(transactionEntity.getNetAmount()));
         assertThat(retrievedTransaction.getTotalAmount(), is(transactionEntity.getTotalAmount()));
+        assertThat(retrievedTransaction.getTransactionType(), is(transactionEntity.getTransactionType()));
     }
 
     @Test
