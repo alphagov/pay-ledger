@@ -18,6 +18,7 @@ public class EventMapper implements RowMapper<Event> {
                 resultSet.getString("sqs_message_id"),
                 ResourceType.valueOf(resultSet.getString("resource_type_name").toUpperCase()),
                 resultSet.getString("resource_external_id"),
+                resultSet.getString("parent_resource_external_id"),
                 ZonedDateTime.ofInstant(resultSet.getTimestamp("event_date").toInstant(), ZoneOffset.UTC),
                 resultSet.getString("event_type"),
                 resultSet.getString("event_data")
