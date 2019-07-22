@@ -1,0 +1,8 @@
+--liquibase formatted sql
+
+--changeset uk.gov.pay:make_type_as_required_field_in_transaction_table
+
+UPDATE transaction set type = 'PAYMENT' where type is null;
+
+ALTER TABLE transaction
+    alter column type set not null;
