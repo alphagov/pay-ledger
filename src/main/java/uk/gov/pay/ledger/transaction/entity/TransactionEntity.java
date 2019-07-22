@@ -15,6 +15,8 @@ public class TransactionEntity {
     private String gatewayAccountId;
     @JsonIgnore
     private String externalId;
+    @JsonIgnore
+    private String parentExternalId;
     private Long amount;
     private String reference;
     private String description;
@@ -58,6 +60,7 @@ public class TransactionEntity {
         this.id = builder.id;
         this.gatewayAccountId = builder.gatewayAccountId;
         this.externalId = builder.externalId;
+        this.parentExternalId = builder.parentExternalId;
         this.amount = builder.amount;
         this.reference = builder.reference;
         this.description = builder.description;
@@ -92,6 +95,10 @@ public class TransactionEntity {
 
     public String getExternalId() {
         return externalId;
+    }
+
+    public String getParentExternalId() {
+        return parentExternalId;
     }
 
     public Long getAmount() {
@@ -166,6 +173,10 @@ public class TransactionEntity {
         this.externalId = externalId;
     }
 
+    public void setParentExternalId(String parentExternalId) {
+        this.parentExternalId = parentExternalId;
+    }
+
     public void setTransactionType(String transactionType) {
         this.transactionType = transactionType;
     }
@@ -211,6 +222,7 @@ public class TransactionEntity {
         private Long id;
         private String gatewayAccountId;
         private String externalId;
+        private String parentExternalId;
         private Long amount;
         private String reference;
         private String description;
@@ -252,6 +264,11 @@ public class TransactionEntity {
 
         public Builder withExternalId(String externalId) {
             this.externalId = externalId;
+            return this;
+        }
+
+        public Builder withParentExternalId(String parentExternalId) {
+            this.parentExternalId = parentExternalId;
             return this;
         }
 

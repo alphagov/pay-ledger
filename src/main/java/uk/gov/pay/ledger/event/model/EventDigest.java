@@ -14,6 +14,7 @@ public class EventDigest {
     private final ZonedDateTime mostRecentEventTimestamp;
     private final ResourceType resourceType;
     private final String resourceExternalId;
+    private final String parentResourceExternalId;
     private final EventType mostRecentEventType;
     private Integer eventCount;
     private Map<String, Object> eventPayload;
@@ -24,6 +25,7 @@ public class EventDigest {
             EventType mostRecentEventType,
             ResourceType resourceType,
             String resourceExternalId,
+            String parentResourceExternalId,
             Integer eventCount,
             Map<String, Object> eventPayload,
             ZonedDateTime eventCreatedDate
@@ -32,6 +34,7 @@ public class EventDigest {
         this.mostRecentEventType = mostRecentEventType;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
+        this.parentResourceExternalId = parentResourceExternalId;
         this.eventCount = eventCount;
         this.eventPayload = eventPayload;
         this.eventCreatedDate = eventCreatedDate;
@@ -59,6 +62,7 @@ public class EventDigest {
                 latestSalientEventType,
                 latestEvent.getResourceType(),
                 latestEvent.getResourceExternalId(),
+                latestEvent.getParentResourceExternalId(),
                 events.size(),
                 eventPayload,
                 earliestDate
@@ -91,6 +95,10 @@ public class EventDigest {
 
     public String getResourceExternalId() {
         return resourceExternalId;
+    }
+
+    public String getParentResourceExternalId() {
+        return parentResourceExternalId;
     }
 
     public EventType getMostRecentEventType() {

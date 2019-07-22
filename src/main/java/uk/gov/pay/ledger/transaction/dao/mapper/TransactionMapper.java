@@ -19,6 +19,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withId(rs.getLong("id"))
                 .withGatewayAccountId(rs.getString("gateway_account_id"))
                 .withExternalId(rs.getString("external_id"))
+                .withParentExternalId(rs.getString("parent_external_id"))
                 .withAmount(rs.getLong("amount"))
                 .withReference(rs.getString("reference"))
                 .withDescription(rs.getString("description"))
