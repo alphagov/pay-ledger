@@ -28,6 +28,7 @@ public class EventMessage {
                 getQueueMessageId(),
                 eventDto.getResourceType(),
                 eventDto.getExternalId(),
+                eventDto.getParentExternalId(),
                 eventDto.getEventDate(),
                 eventDto.getEventType(),
                 eventDto.getEventData()

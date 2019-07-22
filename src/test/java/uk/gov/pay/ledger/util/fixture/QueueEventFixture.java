@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
@@ -19,6 +20,7 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
     private String sqsMessageId;
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
+    private String parentResourceExternalId = StringUtils.EMPTY;
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
     private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
@@ -38,6 +40,11 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
 
     public QueueEventFixture withResourceExternalId(String resourceExternalId) {
         this.resourceExternalId = resourceExternalId;
+        return this;
+    }
+
+    public QueueEventFixture withParentResourceExternalId(String parentResourceExternalId) {
+        this.parentResourceExternalId = parentResourceExternalId;
         return this;
     }
 
@@ -103,7 +110,7 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
 
     @Override
     public Event toEntity() {
-        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, eventDate, eventType, eventData);
+        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData);
     }
 
     public String getSqsMessageId() {
@@ -135,12 +142,14 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
         String messageBody = String.format("{" +
                         "\"timestamp\": \"%s\"," +
                         "\"resource_external_id\": \"%s\"," +
+                        "\"parent_resource_external_id\": \"%s\"," +
                         "\"event_type\":\"%s\"," +
                         "\"resource_type\": \"%s\"," +
                         "\"event_details\": %s" +
                         "}",
                 eventDate.toString(),
                 resourceExternalId,
+                parentResourceExternalId,
                 eventType,
                 resourceType.toString().toLowerCase(),
                 eventData

@@ -17,6 +17,7 @@ public class Event {
     private String sqsMessageId;
     private ResourceType resourceType;
     private String resourceExternalId;
+    private String parentResourceExternalId;
     @JsonSerialize(using = MicrosecondPrecisionDateTimeSerializer.class)
     private ZonedDateTime eventDate;
     private String eventType;
@@ -25,19 +26,20 @@ public class Event {
     public Event() { }
 
     public Event(Long id, String sqsMessageId, ResourceType resourceType, String resourceExternalId,
-                 ZonedDateTime eventDate, String eventType, String eventData) {
+                 String parentResourceExternalId, ZonedDateTime eventDate, String eventType, String eventData) {
         this.id = id;
         this.sqsMessageId = sqsMessageId;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
+        this.parentResourceExternalId = parentResourceExternalId;
         this.eventDate = eventDate;
         this.eventType = eventType;
         this.eventData = eventData;
     }
 
-    public Event(String queueMessageId, ResourceType resourceType, String resourceExternalId, ZonedDateTime eventDate,
+    public Event(String queueMessageId, ResourceType resourceType, String resourceExternalId, String parentResourceExternalId, ZonedDateTime eventDate,
                  String eventType, String eventData) {
-        this(null, queueMessageId, resourceType, resourceExternalId, eventDate, eventType, eventData);
+        this(null, queueMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData);
     }
 
     public Long getId() {
@@ -54,6 +56,10 @@ public class Event {
 
     public String getResourceExternalId() {
         return resourceExternalId;
+    }
+
+    public String getParentResourceExternalId() {
+        return parentResourceExternalId;
     }
 
     public ZonedDateTime getEventDate() {
@@ -75,6 +81,7 @@ public class Event {
                 ", sqsMessageId='" + sqsMessageId + '\'' +
                 ", resourceType=" + resourceType +
                 ", resourceExternalId='" + resourceExternalId + '\'' +
+                ", parentResourceExternalId='" + parentResourceExternalId + '\'' +
                 ", eventDate=" + eventDate +
                 ", eventType=" + eventType +
                 ", eventData='" + eventData + '\'' +
