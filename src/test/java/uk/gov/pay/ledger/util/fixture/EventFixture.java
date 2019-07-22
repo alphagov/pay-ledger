@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.util.fixture;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
@@ -14,6 +15,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
     private String sqsMessageId = RandomStringUtils.randomAlphanumeric(50);
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
+    private String parentResourceExternalId = StringUtils.EMPTY;
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
     private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
@@ -45,6 +47,11 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         return this;
     }
 
+    public EventFixture withParentResourceExternalId(String parentResourceExternalId) {
+        this.parentResourceExternalId = parentResourceExternalId;
+        return this;
+    }
+
     public EventFixture withEventDate(ZonedDateTime eventDate) {
         this.eventDate = eventDate;
         return this;
@@ -70,15 +77,17 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
                                 "        sqs_message_id, \n" +
                                 "        resource_type_id, \n" +
                                 "        resource_external_id,\n" +
+                                "        parent_resource_external_id,\n" +
                                 "        event_date,\n" +
                                 "        event_type,\n" +
                                 "        event_data\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, (SELECT rt.id FROM resource_type rt WHERE upper(rt.name) = ?), ?, ?, ?, CAST(? as jsonb))\n",
+                                "   VALUES(?, ?, (SELECT rt.id FROM resource_type rt WHERE upper(rt.name) = ?), ?, ?, ?, ?, CAST(? as jsonb))\n",
                         id,
                         sqsMessageId,
                         resourceType,
                         resourceExternalId,
+                        parentResourceExternalId,
                         eventDate,
                         eventType,
                         eventData
@@ -89,7 +98,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
 
     @Override
     public Event toEntity() {
-        return new Event(id, sqsMessageId, resourceType, resourceExternalId, eventDate, eventType, eventData);
+        return new Event(id, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData);
     }
 
     public Long getId() {
@@ -125,6 +134,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         sqsMessageId = event.getSqsMessageId();
         resourceType = event.getResourceType();
         resourceExternalId = event.getResourceExternalId();
+        parentResourceExternalId = event.getParentResourceExternalId();
         eventDate = event.getEventDate();
         eventType = event.getEventType().toString();
         eventData = event.getEventData();

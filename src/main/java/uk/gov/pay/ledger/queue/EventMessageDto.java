@@ -19,6 +19,9 @@ public class EventMessageDto {
     @JsonProperty("resource_external_id")
     private String externalId;
 
+    @JsonProperty("parent_resource_external_id")
+    private String parentExternalId;
+
     @JsonProperty("event_type")
     public String eventType;
 
@@ -46,5 +49,9 @@ public class EventMessageDto {
 
     public String getExternalId() {
         return externalId;
+    }
+
+    public String getParentExternalId() {
+        return parentExternalId;
     }
 }

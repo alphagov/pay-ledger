@@ -48,6 +48,7 @@ public class EventDaoIT {
     public void shouldInsertEvent() throws IOException {
         Event event = anEventFixture()
                 .withEventDate(CREATED_AT)
+                .withParentResourceExternalId("parent-resource-id")
                 .toEntity();
 
         eventDao.insertEventWithResourceTypeId(event);
@@ -57,6 +58,7 @@ public class EventDaoIT {
         assertThat(result.get("sqs_message_id"), is(event.getSqsMessageId()));
         assertThat(result.get("resource_type_id"), is(resourceTypeId));
         assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
+        assertThat(result.get("parent_resource_external_id"), is(event.getParentResourceExternalId()));
         assertThat((Timestamp) result.get("event_date"), isDate(CREATED_AT));
         assertThat(result.get("event_type").toString(), is(event.getEventType().toString()));
         assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
