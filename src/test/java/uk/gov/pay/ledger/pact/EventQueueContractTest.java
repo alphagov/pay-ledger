@@ -12,6 +12,7 @@ import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.QueueEventFixture;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -35,6 +36,8 @@ public class EventQueueContractTest {
     public MessagePact createPaymentCreatedEventPact(MessagePactBuilder builder) {
         QueueEventFixture paymentCreatedEventFixture = QueueEventFixture.aQueueEventFixture()
                 .withResourceExternalId("externalId")
+                .withEventDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
+                .withGatewayAccountId("gateway_account_id")
                 .withDefaultEventDataForEventType("PAYMENT_CREATED");
 
         Map<String, String> metadata = new HashMap<String, String>();
