@@ -53,8 +53,8 @@ public class PaymentFactory {
                     TransactionState.from(entity.getState()), safeGetAsString(transactionDetails, "language"),
                     entity.getExternalId(), safeGetAsString(transactionDetails, "return_url"), entity.getEmail(),
                     safeGetAsString(transactionDetails, "payment_provider"), entity.getCreatedDate(),
-                    cardDetails, Boolean.valueOf(safeGetAsString(transactionDetails, "delayed_capture")),
-                    metadata, entity.getEventCount(), safeGetAsString(transactionDetails, "gateway_transaction_id"),
+                    cardDetails, safeGetAsBoolean(transactionDetails, "delayed_capture", false), metadata,
+                    entity.getEventCount(), safeGetAsString(transactionDetails, "gateway_transaction_id"),
                     safeGetAsLong(transactionDetails, "corporate_surcharge"), entity.getFee(),
                     entity.getNetAmount(), refundSummary, entity.getTotalAmount(), settlementSummary);
         } catch (IOException e) {
@@ -66,13 +66,19 @@ public class PaymentFactory {
 
     private static Long safeGetAsLong(JsonNode object, String propertyName) {
         return safeGetJsonElement(object, propertyName)
-                .map(JsonNode::asLong)
+                .map(JsonNode::longValue)
                 .orElse(null);
+    }
+
+    private static Boolean safeGetAsBoolean(JsonNode object, String propertyName, Boolean defaultValue) {
+        return safeGetJsonElement(object, propertyName)
+                .map(JsonNode::booleanValue)
+                .orElse(defaultValue);
     }
 
     private static String safeGetAsString(JsonNode object, String propertyName) {
         return safeGetJsonElement(object, propertyName)
-                .map(JsonNode::asText)
+                .map(JsonNode::textValue)
                 .orElse(null);
     }
 
