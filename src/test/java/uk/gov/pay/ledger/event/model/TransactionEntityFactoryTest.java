@@ -34,7 +34,7 @@ public class TransactionEntityFactoryTest {
                 .toEntity();
         Event captureConfirmedEvent = aQueueEventFixture()
                 .withEventType("CAPTURE_CONFIRMED")
-                .withEventData("{\"net_amount\": 55, \"total_amount\": 105}")
+                .withEventData("{\"net_amount\": 55, \"total_amount\": 105, \"fee\": 33}")
                 .withResourceType(ResourceType.PAYMENT)
                 .toEntity();
         EventDigest eventDigest = EventDigest.fromEventList(List.of(paymentCreatedEvent, paymentDetailsEvent, captureConfirmedEvent));
@@ -57,6 +57,7 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getExternalMetadata(), is(eventDigest.getEventPayload().get("external_metadata")));
         assertThat(transactionEntity.getNetAmount(), is(((Integer)eventDigest.getEventPayload().get("net_amount")).longValue()));
         assertThat(transactionEntity.getTotalAmount(), is(((Integer)eventDigest.getEventPayload().get("total_amount")).longValue()));
+        assertThat(transactionEntity.getFee(), is(((Integer)eventDigest.getEventPayload().get("fee")).longValue()));
         assertThat(transactionEntity.getTransactionType(), is("PAYMENT"));
 
         var expectedTransactionDetails = String.format("{\"language\":\"en\",\"payment_provider\":\"sandbox\",\"expiry_date\":\"11/21\",\"address_line1\":\"12 Rouge Avenue\",\"address_line2\":null,\"address_postcode\":\"N1 3QU\",\"address_city\":\"London\",\"address_county\":null,\"address_country\":\"GB\",\"wallet\":null,\"delayed_capture\":false,\"return_url\":\"https://example.org\",\"gateway_transaction_id\":\"%s\"}",

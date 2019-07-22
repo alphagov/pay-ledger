@@ -58,6 +58,7 @@ public class PaymentFactoryTest {
     private String refundStatus = "available";
     private Long refundAmountSubmitted = 0L;
     private Long refundAmountAvailable = 99L;
+    private Long fee = 66L;
 
     @Before
     public void setUp() {
@@ -85,6 +86,7 @@ public class PaymentFactoryTest {
                 .withRefundStatus(refundStatus)
                 .withRefundAmountSubmitted(refundAmountSubmitted)
                 .withRefundAmountAvailable(refundAmountAvailable)
+                .withFee(fee)
                 .build();
 
         minimalDataObject = new TransactionEntity.Builder()
@@ -146,7 +148,7 @@ public class PaymentFactoryTest {
         assertThat(payment.getEventCount(), is(eventCount));
         assertThat(payment.getGatewayTransactionId(), is("gti_12334"));
         assertThat(payment.getCorporateCardSurcharge(), is(12L));
-        assertThat(payment.getFee(), is(5L));
+        assertThat(payment.getFee(), is(fee));
         assertThat(payment.getNetAmount(), is(netAmount));
         assertThat(payment.getTotalAmount(), is(totalAmount));
         assertThat(payment.getRefundSummary(), notNullValue());

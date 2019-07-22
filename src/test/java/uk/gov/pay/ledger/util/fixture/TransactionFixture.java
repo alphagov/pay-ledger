@@ -271,6 +271,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        first_digits_card_number,\n" +
                                 "        total_amount,\n" +
                                 "        net_amount,\n" +
+                                "        fee,\n" +
                                 "        refund_status,\n" +
                                 "        refund_amount_submitted,\n" +
                                 "        refund_amount_available,\n" +
@@ -278,7 +279,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        settled_time,\n" +
                                 "        type\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
                         id,
                         externalId,
                         gatewayAccountId,
@@ -297,6 +298,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         firstDigitsCardNumber,
                         totalAmount,
                         netAmount,
+                        fee,
                         refundStatus,
                         refundAmountSubmitted,
                         refundAmountAvailable,
@@ -318,7 +320,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("delayed_capture", delayedCapture);
         transactionDetails.addProperty("gateway_transaction_id", gatewayTransactionId);
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
-        transactionDetails.addProperty("fee", fee);
         Optional.ofNullable(cardDetails)
                 .ifPresent(cd -> Optional.ofNullable(cd.getBillingAddress())
                         .ifPresent(ba -> {
@@ -359,6 +360,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withRefundStatus(refundStatus)
                 .withRefundAmountSubmitted(refundAmountSubmitted)
                 .withRefundAmountAvailable(refundAmountAvailable)
+                .withFee(fee)
                 .withTransactionType(transactionType)
                 .build();
     }

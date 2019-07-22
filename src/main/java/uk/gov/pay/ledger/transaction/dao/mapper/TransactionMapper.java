@@ -39,6 +39,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withRefundStatus(rs.getString("refund_status"))
                 .withRefundAmountSubmitted(rs.getLong("refund_amount_submitted"))
                 .withRefundAmountAvailable(rs.getLong("refund_amount_available"))
+                .withFee(rs.getLong("fee"))
                 .withTransactionType(rs.getString("type"))
                 .build();
     }
