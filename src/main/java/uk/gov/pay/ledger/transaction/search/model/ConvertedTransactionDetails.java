@@ -34,4 +34,6 @@ public class ConvertedTransactionDetails {
     private String returnUrl;
     @JsonProperty("gateway_transaction_id")
     private String gatewayTransactionId;
+    @JsonProperty("corporate_surcharge")
+    private Long corporate_surcharge;
 }

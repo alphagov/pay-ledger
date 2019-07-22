@@ -72,6 +72,8 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
                                 .put("return_url", "https://example.org")
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("payment_provider", "sandbox")
+                                .put("corporate_surcharge", 69)
+                                .put("total_amount", 1069)
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":
