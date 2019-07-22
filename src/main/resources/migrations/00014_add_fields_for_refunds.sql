@@ -7,6 +7,6 @@ CREATE type transaction_type as enum ('PAYMENT', 'REFUND');
 ALTER TABLE transaction
     ADD COLUMN gateway_transaction_id text,
     ADD COLUMN type transaction_type ,
-    ADD COLUMN origin_transaction_id VARCHAR(26) references transaction(external_id);
+    ADD COLUMN parent_transaction_id VARCHAR(26) references transaction(external_id);
 
-CREATE index transaction_origin_id_idx on transaction(origin_transaction_id);
+CREATE index transaction_parent_tx_id_idx on transaction(parent_transaction_id);
