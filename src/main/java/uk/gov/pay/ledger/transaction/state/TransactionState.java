@@ -82,10 +82,12 @@ public enum TransactionState {
                     Map.entry(EventType.CANCELLED_BY_EXTERNAL_SERVICE, CANCELLED),
                     Map.entry(EventType.CANCEL_BY_USER_SUBMITTED, FAILED_CANCELLED),
                     Map.entry(EventType.CANCEL_BY_USER_FAILED, FAILED_CANCELLED),
-                    Map.entry(EventType.CANCELLED_BY_USER, FAILED_CANCELLED)
+                    Map.entry(EventType.CANCELLED_BY_USER, FAILED_CANCELLED),
+                    Map.entry(EventType.REFUND_CREATED_BY_SERVICE, CREATED),
+                    Map.entry(EventType.REFUND_CREATED_BY_USER, CREATED)
             );
 
-    public static TransactionState fromSalientEventType(EventType eventType) {
+    public static TransactionState fromEventType(EventType eventType) {
         return EVENT_TYPE_TRANSACTION_STATE_MAP.get(eventType);
     }
 
