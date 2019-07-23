@@ -30,7 +30,13 @@ public enum EventType {
     CANCELLED_BY_EXTERNAL_SERVICE,
     CANCEL_BY_USER_SUBMITTED,
     CANCEL_BY_USER_FAILED,
-    CANCELLED_BY_USER;
+    CANCELLED_BY_USER,
+
+    REFUND_CREATED_BY_USER,
+    REFUND_CREATED_BY_SERVICE,
+    REFUND_SUBMITTED,
+    REFUND_SUCCEEDED,
+    REFUND_ERROR;
 
     public static Optional<EventType> from(String eventName) {
         return Arrays.stream(EventType.values())

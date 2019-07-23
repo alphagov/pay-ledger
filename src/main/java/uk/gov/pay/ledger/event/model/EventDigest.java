@@ -51,7 +51,7 @@ public class EventDigest {
                 .map(e -> EventType.from(e.getEventType()))
                 .flatMap(Optional::stream)
                 .findFirst()
-                .orElse(EventType.PAYMENT_CREATED);
+                .orElseThrow(() -> new RuntimeException("No supported event types found"));
 
         var earliestDate = events.stream()
                 .map(event -> event.getEventDate())

@@ -77,4 +77,30 @@ public class TransactionEntityFactoryTest {
 
         assertThat(transactionEntity.getTransactionDetails(), is(expectedTransactionDetails));
     }
+
+    @Test
+    public void fromShouldConvertEventDigestToTransactionForChildResource() {
+        String parentResourceExternalId = "parent-resource-external-id";
+        Event refundCreatedEvent = aQueueEventFixture()
+                .withEventType("REFUND_CREATED_BY_USER")
+                .withResourceExternalId("resource-external-id")
+                .withParentResourceExternalId(parentResourceExternalId)
+                .withResourceType(ResourceType.REFUND)
+                .toEntity();
+        Event refundSubmittedEvent = aQueueEventFixture()
+                .withEventType("REFUND_SUBMITTED")
+                .withResourceExternalId("resource-external-id")
+                .withParentResourceExternalId(parentResourceExternalId)
+                .withResourceType(ResourceType.REFUND)
+                .toEntity();
+        EventDigest eventDigest = EventDigest.fromEventList(List.of(refundCreatedEvent, refundSubmittedEvent));
+
+        TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
+
+        assertThat(transactionEntity.getTransactionType(), is(eventDigest.getResourceType().toString()));
+        assertThat(transactionEntity.getTransactionType(), is("REFUND"));
+        assertThat(transactionEntity.getParentExternalId(), is(eventDigest.getParentResourceExternalId()));
+        assertThat(transactionEntity.getParentExternalId(), is(parentResourceExternalId));
+        assertThat(transactionEntity.getState(), is("submitted"));
+    }
 }

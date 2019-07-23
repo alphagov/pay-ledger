@@ -23,7 +23,8 @@ public enum TransactionState {
     FAILED_EXPIRED("timedout", true),
     FAILED_CANCELLED("cancelled", true),
     CANCELLED("cancelled", true),
-    ERROR_GATEWAY("error", true);
+    ERROR_GATEWAY("error", true),
+    ERROR("error", true);
 
     private final String value;
     private final boolean finished;
@@ -82,10 +83,15 @@ public enum TransactionState {
                     Map.entry(EventType.CANCELLED_BY_EXTERNAL_SERVICE, CANCELLED),
                     Map.entry(EventType.CANCEL_BY_USER_SUBMITTED, FAILED_CANCELLED),
                     Map.entry(EventType.CANCEL_BY_USER_FAILED, FAILED_CANCELLED),
-                    Map.entry(EventType.CANCELLED_BY_USER, FAILED_CANCELLED)
+                    Map.entry(EventType.CANCELLED_BY_USER, FAILED_CANCELLED),
+                    Map.entry(EventType.REFUND_CREATED_BY_SERVICE, SUBMITTED),
+                    Map.entry(EventType.REFUND_CREATED_BY_USER, SUBMITTED),
+                    Map.entry(EventType.REFUND_SUBMITTED, SUBMITTED),
+                    Map.entry(EventType.REFUND_SUCCEEDED, SUCCESS),
+                    Map.entry(EventType.REFUND_ERROR, ERROR)
             );
 
-    public static TransactionState fromSalientEventType(EventType eventType) {
+    public static TransactionState fromEventType(EventType eventType) {
         return EVENT_TYPE_TRANSACTION_STATE_MAP.get(eventType);
     }
 
