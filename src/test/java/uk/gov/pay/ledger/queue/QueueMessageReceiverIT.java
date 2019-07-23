@@ -84,4 +84,35 @@ public class QueueMessageReceiverIT {
                 .body("charge_id", is(resourceExternalId2))
                 .body("state.status", is("created"));
     }
+
+    @Test
+    public void shouldHandleRefundEvent() throws InterruptedException {
+        final String resourceExternalId = "rexid";
+        final String parentResourceExternalId = "parentRexId";
+        aQueueEventFixture()
+                .withResourceExternalId(parentResourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(100);
+        aQueueEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withParentResourceExternalId(parentResourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("REFUND_CREATED_BY_SERVICE")
+                .withResourceType(ResourceType.REFUND)
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
+
+        //todo: replace with refunds endpoint when available
+        given().port(rule.getAppRule().getLocalPort())
+                .contentType(JSON)
+                .get("/v1/transaction/" + resourceExternalId)
+                .then()
+                .statusCode(200)
+                .body("charge_id", is(resourceExternalId))
+                .body("state.status", is("submitted"));
+    }
 }
