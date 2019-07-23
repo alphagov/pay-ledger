@@ -101,6 +101,14 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
                                 .put("gateway_transaction_id", gatewayAccountId)
                                 .build());
                 break;
+            case "CAPTURE_CONFIRMED":
+                eventData = new GsonBuilder().create()
+                        .toJson(ImmutableMap.builder()
+                                .put("gateway_event_date", eventDate.toString())
+                                .put("fee", 5)
+                                .put("net_amount", 1069)
+                                .build());
+                break;
             default:
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.of("event_data", "event_data"));
