@@ -101,5 +101,6 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getTransactionType(), is("REFUND"));
         assertThat(transactionEntity.getParentExternalId(), is(eventDigest.getParentResourceExternalId()));
         assertThat(transactionEntity.getParentExternalId(), is(parentResourceExternalId));
+        assertThat(transactionEntity.getState(), is("submitted"));
     }
 }
