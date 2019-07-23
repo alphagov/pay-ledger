@@ -20,7 +20,7 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
     private String sqsMessageId;
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
-    private String parentResourceExternalId = StringUtils.EMPTY;
+    private String parentResourceExternalId;
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
     private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
