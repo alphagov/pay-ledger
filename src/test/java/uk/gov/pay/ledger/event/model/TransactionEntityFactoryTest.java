@@ -65,12 +65,9 @@ public class TransactionEntityFactoryTest {
                         "\"payment_provider\":\"sandbox\"," +
                         "\"expiry_date\":\"11/21\"," +
                         "\"address_line1\":\"12 Rouge Avenue\"," +
-                        "\"address_line2\":null," +
                         "\"address_postcode\":\"N1 3QU\"," +
                         "\"address_city\":\"London\"," +
-                        "\"address_county\":null," +
                         "\"address_country\":\"GB\"," +
-                        "\"wallet\":null," +
                         "\"delayed_capture\":false," +
                         "\"return_url\":\"https://example.org\"," +
                         "\"gateway_transaction_id\":\"%s\"," +
