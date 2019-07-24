@@ -59,7 +59,7 @@ public class EventDigest {
         var latestSalientEventType = EventType.from(latestSalientEvent.getEventType()).get();
 
         var earliestDate = events.stream()
-                .map(event -> event.getEventDate())
+                .map(Event::getEventDate)
                 .min(ZonedDateTime::compareTo).get();
 
         return new EventDigest(

@@ -2,7 +2,9 @@ package uk.gov.pay.ledger.event.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
 import java.io.IOException;
@@ -14,6 +16,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
 
 public class TransactionEntityFactoryTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     private TransactionEntityFactory transactionEntityFactory;
 
@@ -110,5 +115,35 @@ public class TransactionEntityFactoryTest {
 
         Map<String, String> transactionDetails = objectMapper.readValue(transactionEntity.getTransactionDetails(), Map.class);
         assertThat(transactionDetails.get("refunded_by"), is("refunded-by-id"));
+    }
+
+    @Test
+    public void fromShouldRejectEventDigestWithoutStateTransitionEvents() throws Exception {
+        Event firstNonSalientEvent = aQueueEventFixture()
+                .withEventType("FIRST_NON_STATE_TRANSITION_EVENT")
+                .withResourceType(ResourceType.PAYMENT)
+                .toEntity();
+
+        Event secondNonSalientEvent = aQueueEventFixture()
+                .withEventType("SECOND_NON_STATE_TRANSITION_EVENT")
+                .withResourceType(ResourceType.PAYMENT)
+                .toEntity();
+
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("No supported external state transition events found for digest");
+        EventDigest.fromEventList(List.of(firstNonSalientEvent, secondNonSalientEvent));
+    }
+
+    @Test
+    public void fromShouldGetLatestEventDigestState() {
+        Event paymentCreatedEvent = aQueueEventFixture().withEventType("PAYMENT_CREATED").toEntity();
+        Event nonSalientEvent = aQueueEventFixture().withEventType("NON_STATE_TRANSITION_EVENT").toEntity();
+        Event paymentStartedEvent = aQueueEventFixture().withEventType("PAYMENT_STARTED").toEntity();
+        Event secondNonSalientEvent = aQueueEventFixture().withEventType("SECOND_NON_STATE_TRANSITION_EVENT").toEntity();
+
+        EventDigest eventDigest = EventDigest.fromEventList(List.of(secondNonSalientEvent, paymentStartedEvent, nonSalientEvent, paymentCreatedEvent));
+        TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
+
+        assertThat(transactionEntity.getState(), is("started"));
     }
 }
