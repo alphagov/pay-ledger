@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         TransactionsApiContractTest.class,
         EventQueueContractTest.class,
+        RefundCreatedByUserContractTest.class,
         GetTransactionContractTest.class
 })
 public class ContractTestSuite {

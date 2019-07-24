@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static org.awaitility.Awaitility.await;
 
-public class EventQueueContractTest {
+public class RefundCreatedByUserContractTest {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -34,18 +34,20 @@ public class EventQueueContractTest {
     private byte[] currentMessage;
 
     @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createPaymentCreatedEventPact(MessagePactBuilder builder) {
+    public MessagePact createRefundCreatedByUserEvent(MessagePactBuilder builder) {
         QueueEventFixture paymentCreatedEventFixture = QueueEventFixture.aQueueEventFixture()
+                .withResourceType(ResourceType.REFUND)
+                .withEventType("REFUND_CREATED_BY_USER")
                 .withResourceExternalId("externalId")
                 .withEventDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
                 .withGatewayAccountId("gateway_account_id")
-                .withDefaultEventDataForEventType("PAYMENT_CREATED");
+                .withDefaultEventDataForEventType("REFUND_CREATED_BY_USER");
 
-        Map<String, String> metadata = new HashMap<String, String>();
+        Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         return builder
-                .expectsToReceive("a payment created message")
+                .expectsToReceive("a refund created message")
                 .withContent(paymentCreatedEventFixture.getAsPact())
                 .toPact();
     }

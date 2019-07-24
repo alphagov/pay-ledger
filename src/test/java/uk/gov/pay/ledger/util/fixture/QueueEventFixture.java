@@ -101,6 +101,13 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
                                 .put("gateway_transaction_id", gatewayAccountId)
                                 .build());
                 break;
+            case "REFUND_CREATED_BY_USER":
+                eventData = new GsonBuilder().create()
+                        .toJson(ImmutableMap.builder()
+                                .put("amount", 100)
+                                .put("refunded_by", "user_id")
+                                .build());
+                break;
             default:
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.of("event_data", "event_data"));
@@ -161,32 +168,32 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
     }
 
     public PactDslJsonBody getAsPact() {
+        PactDslJsonBody event = new PactDslJsonBody();
+
+        event.stringType("event_type", eventType);
+        event.stringType("timestamp", eventDate.toString());
+        event.stringType("resource_external_id", resourceExternalId);
+        event.stringType("resource_type", resourceType.toString().toLowerCase());
+
         PactDslJsonBody eventDetails = new PactDslJsonBody();
-
-        eventDetails.stringType("event_type", eventType);
-        eventDetails.stringType("timestamp", eventDate.toString());
-        eventDetails.stringType("resource_external_id", resourceExternalId);
-        eventDetails.stringType("resource_type", resourceType.toString().toLowerCase());
-
-        PactDslJsonBody paymentCreatedEventDetails = new PactDslJsonBody();
         new JsonParser().parse(eventData).getAsJsonObject().entrySet()
                 .forEach(e -> {
                     try {
                         JsonPrimitive value = ((JsonPrimitive) e.getValue());
                         if (value.isNumber()) {
-                            paymentCreatedEventDetails.integerType(e.getKey(), value.getAsInt());
+                            eventDetails.integerType(e.getKey(), value.getAsInt());
                         } else if (value.isBoolean()) {
-                            paymentCreatedEventDetails.booleanType(e.getKey(), value.getAsBoolean());
+                            eventDetails.booleanType(e.getKey(), value.getAsBoolean());
                         } else {
-                            paymentCreatedEventDetails.stringType(e.getKey(), value.getAsString());
+                            eventDetails.stringType(e.getKey(), value.getAsString());
                         }
                     } catch (Exception ex) {
-                        paymentCreatedEventDetails.stringType(e.getKey(), e.getValue().getAsString());
+                        eventDetails.stringType(e.getKey(), e.getValue().getAsString());
                     }
                 });
 
-        eventDetails.object("event_details", paymentCreatedEventDetails);
+        event.object("event_details", eventDetails);
 
-        return eventDetails;
+        return event;
     }
 }
