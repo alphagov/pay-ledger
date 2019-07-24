@@ -8,7 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConvertedTransactionDetails {
 
-    public ConvertedTransactionDetails() {}
+    public ConvertedTransactionDetails() {
+    }
 
     @JsonProperty("language")
     private String language;
@@ -37,5 +38,7 @@ public class ConvertedTransactionDetails {
     @JsonProperty("gateway_transaction_id")
     private String gatewayTransactionId;
     @JsonProperty("corporate_surcharge")
-    private Long corporate_surcharge;
+    private Long corporateSurcharge;
+    @JsonProperty("refunded_by")
+    private String refundedBy;
 }
