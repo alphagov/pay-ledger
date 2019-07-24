@@ -299,7 +299,7 @@ public class TransactionServiceTest {
                 .thenReturn(transactionEntityList);
 
         Event event1ForStateSubmitted = EventFixture.anEventFixture()
-                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .withEventType("AUTHORISATION_SUCCEEDED")
                 .withEventDate(ZonedDateTime.now())
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
         Event event2ForStateSubmitted = EventFixture.anEventFixture()

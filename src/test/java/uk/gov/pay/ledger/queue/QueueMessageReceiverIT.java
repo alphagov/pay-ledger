@@ -30,7 +30,7 @@ public class QueueMessageReceiverIT {
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
-                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .withEventType("AUTHORISATION_SUCCEEDED")
                 .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
                 .insert(rule.getSqsClient());
 
@@ -64,7 +64,7 @@ public class QueueMessageReceiverIT {
                 .withResourceType(ResourceType.SERVICE) // throws PSQL exception. change to UNKNOWN when 'service' events are allowed
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
-                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .withEventType("AUTHORISATION_SUCCEEDED")
                 .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
                 .insert(rule.getSqsClient());
 
@@ -101,7 +101,7 @@ public class QueueMessageReceiverIT {
         aQueuePaymentEventFixture()
                 .withResourceExternalId(parentResourceExternalId)
                 .withEventDate(CREATED_AT)
-                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .withEventType("AUTHORISATION_SUCCEEDED")
                 .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
                 .insert(rule.getSqsClient());
 
@@ -134,7 +134,7 @@ public class QueueMessageReceiverIT {
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
-                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .withEventType("AUTHORISATION_SUCCEEDED")
                 .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
                 .insert(rule.getSqsClient());
 
