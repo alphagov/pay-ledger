@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.event.model.EventType;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 
 import java.util.Map;
 
@@ -57,44 +57,43 @@ public enum TransactionState {
         return message;
     }
 
-    private static final Map<EventType, TransactionState> EVENT_TYPE_TRANSACTION_STATE_MAP =
+    private static final Map<SalientEventType, TransactionState> EVENT_TYPE_TRANSACTION_STATE_MAP =
             Map.ofEntries(
-                    Map.entry(EventType.PAYMENT_CREATED, CREATED),
-                    Map.entry(EventType.PAYMENT_STARTED, STARTED),
-                    Map.entry(EventType.PAYMENT_EXPIRED, FAILED_EXPIRED),
-                    Map.entry(EventType.PAYMENT_DETAILS_ENTERED, STARTED),
-                    Map.entry(EventType.AUTHORISATION_SUCCESSFUL, SUBMITTED),
-                    Map.entry(EventType.AUTHORISATION_REJECTED, FAILED_REJECTED),
-                    Map.entry(EventType.AUTHORISATION_SUCCEEDED, SUCCESS),
-                    Map.entry(EventType.AUTHORISATION_CANCELLED, FAILED_CANCELLED),
-                    Map.entry(EventType.GATEWAY_ERROR_DURING_AUTHORISATION, ERROR_GATEWAY),
-                    Map.entry(EventType.GATEWAY_TIMEOUT_DURING_AUTHORISATION, ERROR_GATEWAY),
-                    Map.entry(EventType.UNEXPECTED_GATEWAY_ERROR_DURING_AUTHORISATION, ERROR_GATEWAY),
-                    Map.entry(EventType.GATEWAY_REQUIRES_3DS_AUTHORISATION, STARTED),
-                    Map.entry(EventType.CAPTURE_CONFIRMED, SUCCESS),
-                    Map.entry(EventType.CAPTURE_SUBMITTED, SUCCESS),
-                    Map.entry(EventType.CAPTURE_ERRORED, ERROR_GATEWAY),
-                    Map.entry(EventType.CAPTURE_ABANDONED_AFTER_TOO_MANY_RETRIES, ERROR_GATEWAY),
-                    Map.entry(EventType.USER_APPROVED_FOR_CAPTURE, SUCCESS),
-                    Map.entry(EventType.USER_APPROVED_FOR_CAPTURE_AWAITING_SERVICE_APPROVAL, SUBMITTED),
-                    Map.entry(EventType.SERVICE_APPROVED_FOR_CAPTURE, SUCCESS),
-                    Map.entry(EventType.CANCEL_BY_EXPIRATION_SUBMITTED, FAILED_EXPIRED),
-                    Map.entry(EventType.CANCEL_BY_EXPIRATION_FAILED, FAILED_EXPIRED),
-                    Map.entry(EventType.CANCELLED_BY_EXPIRATION, FAILED_EXPIRED),
-                    Map.entry(EventType.CANCEL_BY_EXTERNAL_SERVICE_SUBMITTED, CANCELLED),
-                    Map.entry(EventType.CANCELLED_BY_EXTERNAL_SERVICE, CANCELLED),
-                    Map.entry(EventType.CANCEL_BY_USER_SUBMITTED, FAILED_CANCELLED),
-                    Map.entry(EventType.CANCEL_BY_USER_FAILED, FAILED_CANCELLED),
-                    Map.entry(EventType.CANCELLED_BY_USER, FAILED_CANCELLED),
-                    Map.entry(EventType.REFUND_CREATED_BY_SERVICE, SUBMITTED),
-                    Map.entry(EventType.REFUND_CREATED_BY_USER, SUBMITTED),
-                    Map.entry(EventType.REFUND_SUBMITTED, SUBMITTED),
-                    Map.entry(EventType.REFUND_SUCCEEDED, SUCCESS),
-                    Map.entry(EventType.REFUND_ERROR, ERROR)
+                    Map.entry(SalientEventType.PAYMENT_CREATED, CREATED),
+                    Map.entry(SalientEventType.PAYMENT_STARTED, STARTED),
+                    Map.entry(SalientEventType.PAYMENT_EXPIRED, FAILED_EXPIRED),
+                    Map.entry(SalientEventType.AUTHORISATION_SUCCESSFUL, SUBMITTED),
+                    Map.entry(SalientEventType.AUTHORISATION_REJECTED, FAILED_REJECTED),
+                    Map.entry(SalientEventType.AUTHORISATION_SUCCEEDED, SUCCESS),
+                    Map.entry(SalientEventType.AUTHORISATION_CANCELLED, FAILED_CANCELLED),
+                    Map.entry(SalientEventType.GATEWAY_ERROR_DURING_AUTHORISATION, ERROR_GATEWAY),
+                    Map.entry(SalientEventType.GATEWAY_TIMEOUT_DURING_AUTHORISATION, ERROR_GATEWAY),
+                    Map.entry(SalientEventType.UNEXPECTED_GATEWAY_ERROR_DURING_AUTHORISATION, ERROR_GATEWAY),
+                    Map.entry(SalientEventType.GATEWAY_REQUIRES_3DS_AUTHORISATION, STARTED),
+                    Map.entry(SalientEventType.CAPTURE_CONFIRMED, SUCCESS),
+                    Map.entry(SalientEventType.CAPTURE_SUBMITTED, SUCCESS),
+                    Map.entry(SalientEventType.CAPTURE_ERRORED, ERROR_GATEWAY),
+                    Map.entry(SalientEventType.CAPTURE_ABANDONED_AFTER_TOO_MANY_RETRIES, ERROR_GATEWAY),
+                    Map.entry(SalientEventType.USER_APPROVED_FOR_CAPTURE, SUCCESS),
+                    Map.entry(SalientEventType.USER_APPROVED_FOR_CAPTURE_AWAITING_SERVICE_APPROVAL, SUBMITTED),
+                    Map.entry(SalientEventType.SERVICE_APPROVED_FOR_CAPTURE, SUCCESS),
+                    Map.entry(SalientEventType.CANCEL_BY_EXPIRATION_SUBMITTED, FAILED_EXPIRED),
+                    Map.entry(SalientEventType.CANCEL_BY_EXPIRATION_FAILED, FAILED_EXPIRED),
+                    Map.entry(SalientEventType.CANCELLED_BY_EXPIRATION, FAILED_EXPIRED),
+                    Map.entry(SalientEventType.CANCEL_BY_EXTERNAL_SERVICE_SUBMITTED, CANCELLED),
+                    Map.entry(SalientEventType.CANCELLED_BY_EXTERNAL_SERVICE, CANCELLED),
+                    Map.entry(SalientEventType.CANCEL_BY_USER_SUBMITTED, FAILED_CANCELLED),
+                    Map.entry(SalientEventType.CANCEL_BY_USER_FAILED, FAILED_CANCELLED),
+                    Map.entry(SalientEventType.CANCELLED_BY_USER, FAILED_CANCELLED),
+                    Map.entry(SalientEventType.REFUND_CREATED_BY_SERVICE, SUBMITTED),
+                    Map.entry(SalientEventType.REFUND_CREATED_BY_USER, SUBMITTED),
+                    Map.entry(SalientEventType.REFUND_SUBMITTED, SUBMITTED),
+                    Map.entry(SalientEventType.REFUND_SUCCEEDED, SUCCESS),
+                    Map.entry(SalientEventType.REFUND_ERROR, ERROR)
             );
 
-    public static TransactionState fromEventType(EventType eventType) {
-        return EVENT_TYPE_TRANSACTION_STATE_MAP.get(eventType);
+    public static TransactionState fromEventType(SalientEventType salientEventType) {
+        return EVENT_TYPE_TRANSACTION_STATE_MAP.get(salientEventType);
     }
 
     public static TransactionState from(String transactionState) {

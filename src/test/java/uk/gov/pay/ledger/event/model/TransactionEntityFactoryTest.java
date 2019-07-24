@@ -32,8 +32,8 @@ public class TransactionEntityFactoryTest {
     @Test
     public void fromShouldConvertEventDigestToTransactionEntity() {
         Event paymentCreatedEvent = aQueueEventFixture()
-                .withEventType(EventType.PAYMENT_CREATED.name())
-                .withDefaultEventDataForEventType(EventType.PAYMENT_CREATED.name())
+                .withEventType(SalientEventType.PAYMENT_CREATED.name())
+                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withResourceType(ResourceType.PAYMENT)
                 .toEntity();
         Event paymentDetailsEvent = aQueueEventFixture()
@@ -118,7 +118,7 @@ public class TransactionEntityFactoryTest {
     }
 
     @Test
-    public void fromShouldRejectEventDigestWithoutStateTransitionEvents() throws Exception {
+    public void fromShouldRejectEventDigestWithoutAnySalientEvents() throws Exception {
         Event firstNonSalientEvent = aQueueEventFixture()
                 .withEventType("FIRST_NON_STATE_TRANSITION_EVENT")
                 .withResourceType(ResourceType.PAYMENT)
@@ -135,7 +135,7 @@ public class TransactionEntityFactoryTest {
     }
 
     @Test
-    public void fromShouldGetLatestEventDigestState() {
+    public void fromShouldCorrectlySetStateForMostRecentSalientEventType() {
         Event paymentCreatedEvent = aQueueEventFixture().withEventType("PAYMENT_CREATED").toEntity();
         Event nonSalientEvent = aQueueEventFixture().withEventType("NON_STATE_TRANSITION_EVENT").toEntity();
         Event paymentStartedEvent = aQueueEventFixture().withEventType("PAYMENT_STARTED").toEntity();

@@ -2,7 +2,7 @@ package uk.gov.pay.ledger.queue;
 
 import org.junit.ClassRule;
 import org.junit.Test;
-import uk.gov.pay.ledger.event.model.EventType;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 
@@ -34,8 +34,8 @@ public class QueueMessageReceiverIT {
         aQueueEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT.minusMinutes(1))
-                .withEventType(EventType.PAYMENT_CREATED.name())
-                .withDefaultEventDataForEventType(EventType.PAYMENT_CREATED.name())
+                .withEventType(SalientEventType.PAYMENT_CREATED.name())
+                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
                 .insert(rule.getSqsClient());
 
         Thread.sleep(500);
@@ -64,8 +64,8 @@ public class QueueMessageReceiverIT {
                 .withResourceExternalId(resourceExternalId2)
                 .withResourceType(ResourceType.PAYMENT)
                 .withEventDate(CREATED_AT.minusMinutes(1))
-                .withEventType(EventType.PAYMENT_CREATED.name())
-                .withDefaultEventDataForEventType(EventType.PAYMENT_CREATED.name())
+                .withEventType(SalientEventType.PAYMENT_CREATED.name())
+                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
                 .insert(rule.getSqsClient());
 
         Thread.sleep(500);
