@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,13 +32,16 @@ public class EventQueueContractTest {
     );
 
     private byte[] currentMessage;
+    private String externalId = "externalId";
+    private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
+    private String gatewayAccountId = "gateway_account_id";
 
     @Pact(provider = "connector", consumer = "ledger")
     public MessagePact createPaymentCreatedEventPact(MessagePactBuilder builder) {
         QueueEventFixture paymentCreatedEventFixture = QueueEventFixture.aQueueEventFixture()
-                .withResourceExternalId("externalId")
-                .withEventDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
-                .withGatewayAccountId("gateway_account_id")
+                .withResourceExternalId(externalId)
+                .withEventDate(eventDate)
+                .withGatewayAccountId(gatewayAccountId)
                 .withDefaultEventDataForEventType("PAYMENT_CREATED");
 
         Map<String, String> metadata = new HashMap<String, String>();
@@ -46,6 +50,28 @@ public class EventQueueContractTest {
         return builder
                 .expectsToReceive("a payment created message")
                 .withContent(paymentCreatedEventFixture.getAsPact())
+                .toPact();
+    }
+
+    @Pact(provider = "connector", consumer = "ledger")
+    public MessagePact createCaptureConfirmedEventPact(MessagePactBuilder builder) {
+        String eventType = "CAPTURE_CONFIRMED";
+        QueueEventFixture captureConfirmedEvent = QueueEventFixture.aQueueEventFixture()
+                .withResourceExternalId(externalId)
+                .withEventDate(eventDate)
+                .withGatewayAccountId(gatewayAccountId)
+                .withEventType(eventType)
+                .withDefaultEventDataForEventType(eventType);
+
+        Map<String, String> metadata = new HashMap<String, String>();
+        metadata.put("contentType", "application/json");
+
+        PactDslJsonBody pactBody = captureConfirmedEvent.getAsPact();
+
+        return builder
+                .expectsToReceive("a capture confirmed message")
+                .withMetadata(metadata)
+                .withContent(pactBody)
                 .toPact();
     }
 
