@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.search.model.ConvertedTransactionDetails;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -14,6 +17,8 @@ import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixtur
 public class TransactionEntityFactoryTest {
 
     private TransactionEntityFactory transactionEntityFactory;
+
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
     public void setUp() {
@@ -79,13 +84,14 @@ public class TransactionEntityFactoryTest {
     }
 
     @Test
-    public void fromShouldConvertEventDigestToTransactionForChildResource() {
+    public void fromShouldConvertEventDigestToTransactionForChildResource() throws IOException {
         String parentResourceExternalId = "parent-resource-external-id";
         Event refundCreatedEvent = aQueueEventFixture()
                 .withEventType("REFUND_CREATED_BY_USER")
                 .withResourceExternalId("resource-external-id")
                 .withParentResourceExternalId(parentResourceExternalId)
                 .withResourceType(ResourceType.REFUND)
+                .withEventData("{\"refunded_by\": \"refunded-by-id\", \"amount\": 1000}")
                 .toEntity();
         Event refundSubmittedEvent = aQueueEventFixture()
                 .withEventType("REFUND_SUBMITTED")
@@ -102,5 +108,9 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getParentExternalId(), is(eventDigest.getParentResourceExternalId()));
         assertThat(transactionEntity.getParentExternalId(), is(parentResourceExternalId));
         assertThat(transactionEntity.getState(), is("submitted"));
+        assertThat(transactionEntity.getAmount(), is(1000L));
+
+        Map<String, String> transactionDetails = objectMapper.readValue(transactionEntity.getTransactionDetails(), Map.class);
+        assertThat(transactionDetails.get("refunded_by"), is("refunded-by-id"));
     }
 }
