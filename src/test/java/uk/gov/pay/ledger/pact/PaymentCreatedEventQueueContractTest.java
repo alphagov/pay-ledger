@@ -7,19 +7,24 @@ import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
+import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
-import uk.gov.pay.ledger.util.DatabaseTestHelper;
+import uk.gov.pay.ledger.transaction.dao.TransactionDao;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.util.fixture.QueueEventFixture;
 
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class PaymentCreatedEventQueueContractTest {
     @Rule
@@ -57,19 +62,22 @@ public class PaymentCreatedEventQueueContractTest {
     public void test() throws Exception {
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
 
-        DatabaseTestHelper dbHelper = DatabaseTestHelper.aDatabaseTestHelper(appRule.getJdbi());
-        await().atMost(1, TimeUnit.SECONDS).until(
-                () -> {
-                    Map<String, Object> event;
-                    try {
-                        event = dbHelper.getEventByExternalId("externalId");
-                        return "externalId".equals(event.get("resource_external_id"));
+        TransactionDao transactionDao = new TransactionDao(appRule.getJdbi());
+        EventDao eventDao = appRule.getJdbi().onDemand(EventDao.class);
 
-                    } catch (NoSuchElementException e) {
-                        return false;
-                    }
-                }
+        await().atMost(1, TimeUnit.SECONDS).until(
+                () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
         );
+
+        Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
+        assertThat(transaction.isPresent(), is(true));
+        assertThat(transaction.get().getExternalId(), is(externalId));
+        assertThat(transaction.get().getAmount(), is(1000L));
+        assertThat(transaction.get().getDescription(), is("a description"));
+        assertThat(transaction.get().getReference(), is("aref"));
+        assertThat(transaction.get().getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"return_url\": \"https://example.org\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"payment_provider\": \"sandbox\""));
     }
 
     public void setMessage(byte[] messageContents) {

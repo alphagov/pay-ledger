@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.search.model.ConvertedTransactionDetails;
 
 import java.io.IOException;
 import java.util.List;
@@ -75,8 +74,7 @@ public class TransactionEntityFactoryTest {
                         "\"address_country\":\"GB\"," +
                         "\"delayed_capture\":false," +
                         "\"return_url\":\"https://example.org\"," +
-                        "\"gateway_transaction_id\":\"%s\"," +
-                        "\"corporate_surcharge\":69" +
+                        "\"gateway_transaction_id\":\"%s\"" +
                         "}",
                 eventDigest.getEventPayload().get("gateway_transaction_id"));
 
