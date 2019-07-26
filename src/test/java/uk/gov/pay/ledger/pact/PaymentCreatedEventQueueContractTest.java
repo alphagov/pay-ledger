@@ -4,7 +4,6 @@ import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static org.awaitility.Awaitility.await;
 
-public class EventQueueContractTest {
+public class PaymentCreatedEventQueueContractTest {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -50,28 +49,6 @@ public class EventQueueContractTest {
         return builder
                 .expectsToReceive("a payment created message")
                 .withContent(paymentCreatedEventFixture.getAsPact())
-                .toPact();
-    }
-
-    @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createCaptureConfirmedEventPact(MessagePactBuilder builder) {
-        String eventType = "CAPTURE_CONFIRMED";
-        QueueEventFixture captureConfirmedEvent = QueueEventFixture.aQueueEventFixture()
-                .withResourceExternalId(externalId)
-                .withEventDate(eventDate)
-                .withGatewayAccountId(gatewayAccountId)
-                .withEventType(eventType)
-                .withDefaultEventDataForEventType(eventType);
-
-        Map<String, String> metadata = new HashMap<String, String>();
-        metadata.put("contentType", "application/json");
-
-        PactDslJsonBody pactBody = captureConfirmedEvent.getAsPact();
-
-        return builder
-                .expectsToReceive("a capture confirmed message")
-                .withMetadata(metadata)
-                .withContent(pactBody)
                 .toPact();
     }
 
