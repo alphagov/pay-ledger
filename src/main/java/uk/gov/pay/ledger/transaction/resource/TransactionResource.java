@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.transaction.resource;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
@@ -39,10 +40,9 @@ public class TransactionResource {
     @Path("/{transactionExternalId}")
     @GET
     @Timed
-    public TransactionView getById(
-            @PathParam("transactionExternalId") String transactionExternalId,
-            @QueryParam("account_id") String gatewayAccountId,
-            @Context UriInfo uriInfo) {
+    public TransactionView getById(@PathParam("transactionExternalId") String transactionExternalId,
+                                   @QueryParam("gatewayAccountId") @NotEmpty String gatewayAccountId,
+                                   @Context UriInfo uriInfo) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
         return transactionService.getTransaction(transactionExternalId, uriInfo)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
