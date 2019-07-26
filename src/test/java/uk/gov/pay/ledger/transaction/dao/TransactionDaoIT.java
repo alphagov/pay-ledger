@@ -60,6 +60,43 @@ public class TransactionDaoIT {
     }
 
     @Test
+    public void shouldRetrieveTransactionByExternalIdAndGatewayAccountId() {
+        TransactionFixture fixture = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withTransactionType("PAYMENT")
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+        TransactionEntity transactionEntity = fixture.toEntity();
+
+        TransactionEntity transaction = transactionDao
+                .findTransactionByExternalIdAndGatewayAccountId(
+                        transactionEntity.getExternalId(),
+                        transactionEntity.getGatewayAccountId()
+                ).get();
+
+        assertThat(transaction.getId(), notNullValue());
+        assertThat(transaction.getGatewayAccountId(), is(transactionEntity.getGatewayAccountId()));
+        assertThat(transaction.getExternalId(), is(transactionEntity.getExternalId()));
+        assertThat(transaction.getAmount(), is(transactionEntity.getAmount()));
+        assertThat(transaction.getReference(), is(transactionEntity.getReference()));
+        assertThat(transaction.getDescription(), is(transactionEntity.getDescription()));
+        assertThat(transaction.getState(), is(transactionEntity.getState()));
+        assertThat(transaction.getEmail(), is(transactionEntity.getEmail()));
+        assertThat(transaction.getCardholderName(), is(transactionEntity.getCardholderName()));
+        assertThat(transaction.getExternalMetadata(), is(transactionEntity.getExternalMetadata()));
+        assertThat(transaction.getCreatedDate(), is(transactionEntity.getCreatedDate()));
+        assertThat(transaction.getTransactionDetails().contains(fixture.getLanguage()), is(true));
+        assertThat(transaction.getTransactionDetails().contains(fixture.getReturnUrl()), is(true));
+        assertThat(transaction.getTransactionDetails().contains(fixture.getPaymentProvider()), is(true));
+        assertThat(transaction.getTransactionDetails().contains(fixture.getCardDetails().getBillingAddress().getAddressLine1()), is(true));
+        assertThat(transaction.getEventCount(), is(transactionEntity.getEventCount()));
+        assertThat(transaction.getCardBrand(), is(transactionEntity.getCardBrand()));
+        assertThat(transaction.getLastDigitsCardNumber(), is(transactionEntity.getLastDigitsCardNumber()));
+        assertThat(transaction.getFirstDigitsCardNumber(), is(transactionEntity.getFirstDigitsCardNumber()));
+        assertThat(transaction.getTransactionType(), is(transactionEntity.getTransactionType()));
+    }
+
+    @Test
     public void shouldUpsertTransaction() {
         TransactionEntity transaction = aTransactionFixture()
                 .withState(TransactionState.CREATED)
