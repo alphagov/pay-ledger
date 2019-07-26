@@ -8,8 +8,11 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
+import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
+import uk.gov.pay.ledger.transaction.dao.TransactionDao;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.QueueEventFixture;
 
@@ -17,10 +20,15 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 
 public class CaptureConfirmedEventQueueContractTest {
     @Rule
@@ -63,19 +71,29 @@ public class CaptureConfirmedEventQueueContractTest {
     public void test() throws Exception {
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
 
-        DatabaseTestHelper dbHelper = DatabaseTestHelper.aDatabaseTestHelper(appRule.getJdbi());
+        TransactionDao transactionDao = new TransactionDao(appRule.getJdbi());
+        EventDao eventDao = appRule.getJdbi().onDemand(EventDao.class);
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> {
-                    Map<String, Object> event;
+                    Optional<TransactionEntity> event;
                     try {
-                        event = dbHelper.getEventByExternalId("externalId");
-                        return "externalId".equals(event.get("resource_external_id"));
+                        event = transactionDao.findTransactionByExternalId(externalId);
+                        return event.isPresent();
 
                     } catch (NoSuchElementException e) {
                         return false;
                     }
                 }
         );
+
+        var transaction = transactionDao.findTransactionByExternalId(externalId);
+        assertThat(transaction.isPresent(), is(true));
+        assertThat(transaction.get().getExternalId(), is(externalId));
+        assertThat(transaction.get().getFee(), is(5L));
+        assertThat(transaction.get().getNetAmount(), is(1069L));
+
+        var event = eventDao.getEventsByResourceExternalId(externalId).get(0);
+        assertThat(event.getEventData(), containsStringIgnoringCase("\"gateway_event_date\": \"2018-03-12T16:25:01.123456Z\""));
     }
 
     public void setMessage(byte[] messageContents) {
