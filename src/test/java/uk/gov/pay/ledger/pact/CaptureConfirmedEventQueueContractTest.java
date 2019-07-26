@@ -14,7 +14,7 @@ import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.util.fixture.QueueEventFixture;
+import uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture;
 
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public class CaptureConfirmedEventQueueContractTest {
     @Pact(provider = "connector", consumer = "ledger")
     public MessagePact createCaptureConfirmedEventPact(MessagePactBuilder builder) {
         String eventType = "CAPTURE_CONFIRMED";
-        QueueEventFixture captureConfirmedEvent = QueueEventFixture.aQueueEventFixture()
+        QueuePaymentEventFixture captureConfirmedEvent = QueuePaymentEventFixture.aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
                 .withGatewayAccountId(gatewayAccountId)
