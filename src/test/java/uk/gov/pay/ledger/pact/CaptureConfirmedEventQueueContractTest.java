@@ -9,11 +9,11 @@ import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.dao.EventDao;
+import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.QueueEventFixture;
 
 import java.time.ZonedDateTime;
@@ -86,13 +86,13 @@ public class CaptureConfirmedEventQueueContractTest {
                 }
         );
 
-        var transaction = transactionDao.findTransactionByExternalId(externalId);
+        Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
         assertThat(transaction.isPresent(), is(true));
         assertThat(transaction.get().getExternalId(), is(externalId));
         assertThat(transaction.get().getFee(), is(5L));
         assertThat(transaction.get().getNetAmount(), is(1069L));
 
-        var event = eventDao.getEventsByResourceExternalId(externalId).get(0);
+        Event event = eventDao.getEventsByResourceExternalId(externalId).get(0);
         assertThat(event.getEventData(), containsStringIgnoringCase("\"gateway_event_date\": \"2018-03-12T16:25:01.123456Z\""));
     }
 
