@@ -19,13 +19,12 @@ import uk.gov.pay.ledger.util.fixture.QueueEventFixture;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -73,17 +72,9 @@ public class CaptureConfirmedEventQueueContractTest {
 
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi());
         EventDao eventDao = appRule.getJdbi().onDemand(EventDao.class);
-        await().atMost(1, TimeUnit.SECONDS).until(
-                () -> {
-                    Optional<TransactionEntity> event;
-                    try {
-                        event = transactionDao.findTransactionByExternalId(externalId);
-                        return event.isPresent();
 
-                    } catch (NoSuchElementException e) {
-                        return false;
-                    }
-                }
+        await().atMost(1, TimeUnit.SECONDS).until(
+                () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
         );
 
         Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
@@ -93,7 +84,7 @@ public class CaptureConfirmedEventQueueContractTest {
         assertThat(transaction.get().getNetAmount(), is(1069L));
 
         Event event = eventDao.getEventsByResourceExternalId(externalId).get(0);
-        assertThat(event.getEventData(), containsStringIgnoringCase("\"gateway_event_date\": \"2018-03-12T16:25:01.123456Z\""));
+        assertThat(event.getEventData(), containsString("\"gateway_event_date\": \"2018-03-12T16:25:01.123456Z\""));
     }
 
     public void setMessage(byte[] messageContents) {
