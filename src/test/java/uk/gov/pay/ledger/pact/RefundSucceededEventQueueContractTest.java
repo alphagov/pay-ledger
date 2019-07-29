@@ -6,7 +6,6 @@ import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
-import com.google.gson.JsonParser;
 import org.junit.Rule;
 import org.junit.Test;
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
@@ -14,11 +13,12 @@ import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
-import uk.gov.pay.ledger.util.DatabaseTestHelper;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.util.fixture.QueueRefundEventFixture;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static io.dropwizard.testing.ConfigOverride.config;
@@ -47,7 +47,7 @@ public class RefundSucceededEventQueueContractTest {
 
     @Pact(provider = "connector", consumer = "ledger")
     public MessagePact createRefundSucceededEventPact(MessagePactBuilder builder) {
-        Map<String, String> metadata = new HashMap();
+        Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         PactDslJsonBody pactBody = refundFixture.getAsPact();
@@ -61,28 +61,25 @@ public class RefundSucceededEventQueueContractTest {
 
     @Test
     @PactVerification({"connector"})
-    public void test() throws Exception {
-        aTransactionFixture()
+    public void test() {
+        aTransactionFixture()  // adds parent payment transaction for refund to be inserted
                 .withExternalId(refundFixture.getParentResourceExternalId())
+                .withTransactionType("PAYMENT")
                 .insert(appRule.getJdbi());
 
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
-
-        DatabaseTestHelper dbHelper = DatabaseTestHelper.aDatabaseTestHelper(appRule.getJdbi());
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi());
 
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> transactionDao.findTransactionByExternalId(refundFixture.getResourceExternalId()).isPresent()
         );
 
-        Map<String, Object> event = dbHelper.getEventByExternalId(refundFixture.getResourceExternalId());
+        Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(refundFixture.getResourceExternalId());
 
-        assertThat(event.get("resource_external_id"), is(refundFixture.getResourceExternalId()));
-        assertThat(event.get("parent_resource_external_id"), is(refundFixture.getParentResourceExternalId()));
-
-        String eventReference = new JsonParser().parse(event.get("event_data").toString())
-                .getAsJsonObject().get("reference").getAsString();
-        assertThat(eventReference, is(refundFixture.getReference()));
+        assertThat(transaction.get().getExternalId(), is(refundFixture.getResourceExternalId()));
+        assertThat(transaction.get().getParentExternalId(), is(refundFixture.getParentResourceExternalId()));
+        assertThat(transaction.get().getCreatedDate(),is(refundFixture.getEventDate()));
+        assertThat(transaction.get().getReference(), is(refundFixture.getReference()));
     }
 
     public void setMessage(byte[] messageContents) {
