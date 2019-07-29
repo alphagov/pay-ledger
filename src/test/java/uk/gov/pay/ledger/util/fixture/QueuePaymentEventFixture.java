@@ -91,8 +91,9 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("address_city", "London")
                                 .put("address_country", "GB")
                                 .put("card_brand", "visa")
-                                .put("delayed_capture", false)
                                 .put("gateway_transaction_id", gatewayAccountId)
+                                .put("corporate_surcharge", 5)
+                                .put("total_amount", 1005)
                                 .build());
                 break;
             case "CAPTURE_CONFIRMED":
