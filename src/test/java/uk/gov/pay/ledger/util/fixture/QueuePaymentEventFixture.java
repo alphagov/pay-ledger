@@ -76,6 +76,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("return_url", "https://example.org")
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("payment_provider", "sandbox")
+                                .put("delayed_capture", false)
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":

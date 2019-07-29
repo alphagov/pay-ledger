@@ -77,6 +77,7 @@ public class TransactionEntityFactoryTest {
                         "\"address_postcode\":\"N1 3QU\"," +
                         "\"address_city\":\"London\"," +
                         "\"address_country\":\"GB\"," +
+                        "\"delayed_capture\":false," +
                         "\"return_url\":\"https://example.org\"," +
                         "\"gateway_transaction_id\":\"%s\"," +
                         "\"corporate_surcharge\":5" +
