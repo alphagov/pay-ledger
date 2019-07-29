@@ -45,7 +45,7 @@ public class TransactionResourceIT {
 
         given().port(port)
                 .contentType(JSON)
-                .get("/v1/transaction/" + transactionFixture.getExternalId())
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)

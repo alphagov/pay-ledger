@@ -41,10 +41,10 @@ public class TransactionResource {
     @GET
     @Timed
     public TransactionView getById(@PathParam("transactionExternalId") String transactionExternalId,
-                                   @QueryParam("gatewayAccountId") @NotEmpty String gatewayAccountId,
+                                   @QueryParam("account_id") @NotEmpty String gatewayAccountId,
                                    @Context UriInfo uriInfo) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
-        return transactionService.getTransaction(transactionExternalId, uriInfo)
+        return transactionService.getTransactionForGatewayAccount(gatewayAccountId, transactionExternalId, uriInfo)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
 

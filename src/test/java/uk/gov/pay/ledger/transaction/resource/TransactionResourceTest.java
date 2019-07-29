@@ -32,7 +32,7 @@ public class TransactionResourceTest {
     public void shouldReturn404IfTransactionDoesNotExist() {
         Response response = resources
                 .target("/v1/transaction/non-existent-id")
-                .queryParam("gatewayAccountId", 1)
+                .queryParam("account_id", 1)
                 .request()
                 .get();
 

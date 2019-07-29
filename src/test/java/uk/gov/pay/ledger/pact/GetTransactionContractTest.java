@@ -55,10 +55,12 @@ public class GetTransactionContractTest {
     @State("a transaction with metadata exists")
     public void createTransactionWithMetadata(Map<String, String> params) {
         String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
         String metadata = params.get("metadata");
 
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
                 .withState(TransactionState.CREATED)
                 .withAmount(100L)
                 .withExternalMetadata(metadata)
@@ -68,10 +70,12 @@ public class GetTransactionContractTest {
     @State("a transaction with a gateway transaction id exists")
     public void createTransactionWithGatewayId(Map<String, String> params) {
         String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
         String gatewayTransactionId = params.get("gateway_transaction_id");
 
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
                 .withState(TransactionState.CREATED)
                 .withAmount(100L)
                 .withGatewayTransactionId(gatewayTransactionId)
@@ -81,9 +85,11 @@ public class GetTransactionContractTest {
     @State("a transaction with corporate surcharge exists")
     public void createTransactionWithCorporateSurcharge(Map<String, String> params) {
         String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
 
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
                 .withState(TransactionState.CREATED)
                 .withAmount(2000L)
                 .withCorporateCardSurcharge(250L)
@@ -96,9 +102,11 @@ public class GetTransactionContractTest {
     @State("a transaction with fee and net_amount exists")
     public void createTransactionWithFeeAndNetAmount(Map<String, String> params) {
         String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
 
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
                 .withState(TransactionState.CREATED)
                 .withAmount(100L)
                 .withFee(5L)
@@ -109,9 +117,11 @@ public class GetTransactionContractTest {
     @State("a transaction with delayed capture true exists")
     public void createTransactionWithDelayedCapture(Map<String, String> params) {
         String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
 
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
                 .withState(TransactionState.CREATED)
                 .withDelayedCapture(true)
                 .withRefundSummary(RefundSummary.ofValue("pending", 100L, 0L))
