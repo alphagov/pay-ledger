@@ -3,11 +3,10 @@ package uk.gov.pay.ledger.event.model;
 import java.util.Arrays;
 import java.util.Optional;
 
-public enum EventType {
+public enum SalientEventType {
     PAYMENT_CREATED,
     PAYMENT_STARTED,
     PAYMENT_EXPIRED,
-    PAYMENT_DETAILS_ENTERED,
     AUTHORISATION_SUCCESSFUL,
     AUTHORISATION_REJECTED,
     AUTHORISATION_SUCCEEDED,
@@ -39,8 +38,8 @@ public enum EventType {
     REFUND_SUCCEEDED,
     REFUND_ERROR;
 
-    public static Optional<EventType> from(String eventName) {
-        return Arrays.stream(EventType.values())
+    public static Optional<SalientEventType> from(String eventName) {
+        return Arrays.stream(SalientEventType.values())
                 .filter(v -> v.name().equals(eventName))
                 .findFirst();
     }

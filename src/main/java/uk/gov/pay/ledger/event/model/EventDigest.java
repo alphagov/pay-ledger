@@ -15,14 +15,14 @@ public class EventDigest {
     private final ResourceType resourceType;
     private final String resourceExternalId;
     private final String parentResourceExternalId;
-    private final EventType mostRecentEventType;
+    private final SalientEventType mostRecentSalientEventType;
     private Integer eventCount;
     private Map<String, Object> eventPayload;
     private final ZonedDateTime eventCreatedDate;
 
     private EventDigest(
             ZonedDateTime mostRecentEventTimestamp,
-            EventType mostRecentEventType,
+            SalientEventType mostRecentSalientEventType,
             ResourceType resourceType,
             String resourceExternalId,
             String parentResourceExternalId,
@@ -31,7 +31,7 @@ public class EventDigest {
             ZonedDateTime eventCreatedDate
     ) {
         this.mostRecentEventTimestamp = mostRecentEventTimestamp;
-        this.mostRecentEventType = mostRecentEventType;
+        this.mostRecentSalientEventType = mostRecentSalientEventType;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
         this.parentResourceExternalId = parentResourceExternalId;
@@ -48,13 +48,13 @@ public class EventDigest {
                 .orElseThrow(() -> new RuntimeException("No events found"));
 
         var latestSalientEventType = events.stream()
-                .map(e -> EventType.from(e.getEventType()))
+                .map(e -> SalientEventType.from(e.getEventType()))
                 .flatMap(Optional::stream)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No supported event types found"));
+                .orElseThrow(() -> new RuntimeException("No supported external state transition events found for digest"));
 
         var earliestDate = events.stream()
-                .map(event -> event.getEventDate())
+                .map(Event::getEventDate)
                 .min(ZonedDateTime::compareTo).get();
 
         return new EventDigest(
@@ -101,8 +101,8 @@ public class EventDigest {
         return parentResourceExternalId;
     }
 
-    public EventType getMostRecentEventType() {
-        return mostRecentEventType;
+    public SalientEventType getMostRecentSalientEventType() {
+        return mostRecentSalientEventType;
     }
 
     public Map<String, Object> getEventPayload() {
