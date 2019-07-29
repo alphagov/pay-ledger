@@ -78,6 +78,7 @@ public class PaymentCreatedEventQueueContractTest {
         assertThat(transaction.get().getGatewayAccountId(), is(gatewayAccountId));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"return_url\": \"https://example.org\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"payment_provider\": \"sandbox\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"language\": \"en\""));
     }
 
     public void setMessage(byte[] messageContents) {
