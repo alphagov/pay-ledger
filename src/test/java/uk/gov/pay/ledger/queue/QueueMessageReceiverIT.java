@@ -12,7 +12,7 @@ import static io.dropwizard.testing.ConfigOverride.config;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
-import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
+import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 public class QueueMessageReceiverIT {
 
@@ -24,14 +24,14 @@ public class QueueMessageReceiverIT {
     @Test
     public void shouldHandleOutOfOrderEvents() throws InterruptedException {
         final String resourceExternalId = "rexid";
-        aQueueEventFixture()
+        aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
                 .withEventType("AUTHORISATION_SUCCESSFUL")
                 .insert(rule.getSqsClient());
 
         // A created event with an earlier timestamp, sent later
-        aQueueEventFixture()
+        aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT.minusMinutes(1))
                 .withEventType(SalientEventType.PAYMENT_CREATED.name())
@@ -53,14 +53,14 @@ public class QueueMessageReceiverIT {
     public void shouldContinueToHandleMessagesFromQueueForDownstreamExceptions() throws InterruptedException {
         final String resourceExternalId = "rexid";
         final String resourceExternalId2 = "rexid2";
-        aQueueEventFixture()
+        aQueuePaymentEventFixture()
                 .withResourceType(ResourceType.SERVICE) // throws PSQL exception. change to UNKNOWN when 'service' events are allowed
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
                 .withEventType("AUTHORISATION_SUCCESSFUL")
                 .insert(rule.getSqsClient());
 
-        aQueueEventFixture()
+        aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId2)
                 .withResourceType(ResourceType.PAYMENT)
                 .withEventDate(CREATED_AT.minusMinutes(1))
@@ -89,14 +89,14 @@ public class QueueMessageReceiverIT {
     public void shouldHandleRefundEvent() throws InterruptedException {
         final String resourceExternalId = "rexid";
         final String parentResourceExternalId = "parentRexId";
-        aQueueEventFixture()
+        aQueuePaymentEventFixture()
                 .withResourceExternalId(parentResourceExternalId)
                 .withEventDate(CREATED_AT)
                 .withEventType("AUTHORISATION_SUCCESSFUL")
                 .insert(rule.getSqsClient());
 
         Thread.sleep(100);
-        aQueueEventFixture()
+        aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withParentResourceExternalId(parentResourceExternalId)
                 .withEventDate(CREATED_AT)

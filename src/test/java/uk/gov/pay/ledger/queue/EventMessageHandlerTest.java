@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
+import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventMessageHandlerTest {
@@ -56,7 +56,7 @@ public class EventMessageHandlerTest {
 
     @Test
     public void shouldMarkMessageAsProcessed_WhenEventIsProcessedSuccessfully() throws QueueException {
-        Event event = aQueueEventFixture()
+        Event event = aQueuePaymentEventFixture()
                 .toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(createEventResponse.isSuccessful()).thenReturn(true);

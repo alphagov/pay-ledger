@@ -24,7 +24,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
+import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 @Ignore
 public class EventQueueIT {
@@ -40,7 +40,7 @@ public class EventQueueIT {
 
     @Test
     public void shouldGetEventMessageDtoFromTheQueue() throws QueueException {
-        Event event = aQueueEventFixture()
+        Event event = aQueuePaymentEventFixture()
                 .insert(client)
                 .toEntity();
 
@@ -58,7 +58,7 @@ public class EventQueueIT {
 
     @Test
     public void shouldGetEventMessageFromTheQueue() throws QueueException {
-        Event event = aQueueEventFixture()
+        Event event = aQueuePaymentEventFixture()
                 .insert(client)
                 .toEntity();
 

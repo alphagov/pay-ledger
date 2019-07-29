@@ -6,7 +6,7 @@ import org.junit.rules.ExpectedException;
 
 import java.util.List;
 
-import static uk.gov.pay.ledger.util.fixture.QueueEventFixture.aQueueEventFixture;
+import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 public class EventDigestTest {
     @Rule
@@ -14,12 +14,12 @@ public class EventDigestTest {
 
     @Test
     public void fromEventList_ShouldRejectEventDigestWithoutAnySalientEvents() {
-        Event firstNonSalientEvent = aQueueEventFixture()
+        Event firstNonSalientEvent = aQueuePaymentEventFixture()
                 .withEventType("FIRST_NON_STATE_TRANSITION_EVENT")
                 .withResourceType(ResourceType.PAYMENT)
                 .toEntity();
 
-        Event secondNonSalientEvent = aQueueEventFixture()
+        Event secondNonSalientEvent = aQueuePaymentEventFixture()
                 .withEventType("SECOND_NON_STATE_TRANSITION_EVENT")
                 .withResourceType(ResourceType.PAYMENT)
                 .toEntity();

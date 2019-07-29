@@ -12,7 +12,7 @@ import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.util.fixture.QueueEventFixture;
+import uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture;
 
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public class PaymentCreatedEventQueueContractTest {
 
     @Pact(provider = "connector", consumer = "ledger")
     public MessagePact createPaymentCreatedEventPact(MessagePactBuilder builder) {
-        QueueEventFixture paymentCreatedEventFixture = QueueEventFixture.aQueueEventFixture()
+        QueuePaymentEventFixture paymentCreatedEventFixture = QueuePaymentEventFixture.aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
                 .withGatewayAccountId(gatewayAccountId)

@@ -2,21 +2,17 @@ package uk.gov.pay.ledger.util.fixture;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
-import uk.gov.pay.ledger.rule.SqsTestDocker;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event> {
+public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventFixture, Event> {
     private String sqsMessageId;
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
@@ -26,49 +22,49 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
     private String eventData = "{\"event_data\": \"event data\"}";
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(5);
 
-    private QueueEventFixture() {
+    private QueuePaymentEventFixture() {
     }
 
-    public static QueueEventFixture aQueueEventFixture() {
-        return new QueueEventFixture();
+    public static QueuePaymentEventFixture aQueuePaymentEventFixture() {
+        return new QueuePaymentEventFixture();
     }
 
-    public QueueEventFixture withResourceType(ResourceType resourceType) {
+    public QueuePaymentEventFixture withResourceType(ResourceType resourceType) {
         this.resourceType = resourceType;
         return this;
     }
 
-    public QueueEventFixture withResourceExternalId(String resourceExternalId) {
+    public QueuePaymentEventFixture withResourceExternalId(String resourceExternalId) {
         this.resourceExternalId = resourceExternalId;
         return this;
     }
 
-    public QueueEventFixture withParentResourceExternalId(String parentResourceExternalId) {
+    public QueuePaymentEventFixture withParentResourceExternalId(String parentResourceExternalId) {
         this.parentResourceExternalId = parentResourceExternalId;
         return this;
     }
 
-    public QueueEventFixture withEventDate(ZonedDateTime eventDate) {
+    public QueuePaymentEventFixture withEventDate(ZonedDateTime eventDate) {
         this.eventDate = eventDate;
         return this;
     }
 
-    public QueueEventFixture withEventType(String eventType) {
+    public QueuePaymentEventFixture withEventType(String eventType) {
         this.eventType = eventType;
         return this;
     }
 
-    public QueueEventFixture withEventData(String eventData) {
+    public QueuePaymentEventFixture withEventData(String eventData) {
         this.eventData = eventData;
         return this;
     }
 
-    public QueueEventFixture withGatewayAccountId(String gatewayAccountId) {
+    public QueuePaymentEventFixture withGatewayAccountId(String gatewayAccountId) {
         this.gatewayAccountId = gatewayAccountId;
         return this;
     }
 
-    public QueueEventFixture withDefaultEventDataForEventType(String eventType) {
+    public QueuePaymentEventFixture withDefaultEventDataForEventType(String eventType) {
         switch (eventType) {
             case "PAYMENT_CREATED":
                 eventData = new GsonBuilder().create()
@@ -144,55 +140,14 @@ public class QueueEventFixture implements QueueFixture<QueueEventFixture, Event>
     }
 
     @Override
-    public QueueEventFixture insert(AmazonSQS sqsClient) {
-        String messageBody = String.format("{" +
-                        "\"timestamp\": \"%s\"," +
-                        "\"resource_external_id\": \"%s\"," +
-                        (parentResourceExternalId.isEmpty() ? "%s" : "\"parent_resource_external_id\": \"%s\",") +
-                        "\"event_type\":\"%s\"," +
-                        "\"resource_type\": \"%s\"," +
-                        "\"event_details\": %s" +
-                        "}",
-                eventDate.toString(),
-                resourceExternalId,
-                parentResourceExternalId,
-                eventType,
-                resourceType.toString().toLowerCase(),
-                eventData
-        );
-
-        SendMessageResult result = sqsClient.sendMessage(SqsTestDocker.getQueueUrl("event-queue"), messageBody);
-        this.sqsMessageId = result.getMessageId();
+    public QueuePaymentEventFixture insert(AmazonSQS sqsClient) {
+        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, resourceExternalId,
+                parentResourceExternalId, resourceType, eventData);
         return this;
     }
 
     public PactDslJsonBody getAsPact() {
-        PactDslJsonBody eventDetails = new PactDslJsonBody();
-
-        eventDetails.stringType("event_type", eventType);
-        eventDetails.stringType("timestamp", eventDate.toString());
-        eventDetails.stringType("resource_external_id", resourceExternalId);
-        eventDetails.stringType("resource_type", resourceType.toString().toLowerCase());
-
-        PactDslJsonBody paymentCreatedEventDetails = new PactDslJsonBody();
-        new JsonParser().parse(eventData).getAsJsonObject().entrySet()
-                .forEach(e -> {
-                    try {
-                        JsonPrimitive value = ((JsonPrimitive) e.getValue());
-                        if (value.isNumber()) {
-                            paymentCreatedEventDetails.integerType(e.getKey(), value.getAsInt());
-                        } else if (value.isBoolean()) {
-                            paymentCreatedEventDetails.booleanType(e.getKey(), value.getAsBoolean());
-                        } else {
-                            paymentCreatedEventDetails.stringType(e.getKey(), value.getAsString());
-                        }
-                    } catch (Exception ex) {
-                        paymentCreatedEventDetails.stringType(e.getKey(), e.getValue().getAsString());
-                    }
-                });
-
-        eventDetails.object("event_details", paymentCreatedEventDetails);
-
-        return eventDetails;
+       return QueueEventFixtureUtil.getAsPact(eventType, eventDate, resourceExternalId,
+               parentResourceExternalId, resourceType, eventData);
     }
 }

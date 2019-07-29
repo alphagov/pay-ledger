@@ -9,7 +9,10 @@ import org.junit.runners.Suite;
         TransactionsApiContractTest.class,
         PaymentCreatedEventQueueContractTest.class,
         CaptureConfirmedEventQueueContractTest.class,
-        GetTransactionContractTest.class
+        GetTransactionContractTest.class,
+        RefundCreatedByUserEventQueueContractTest.class,
+        RefundSubmittedEventQueueContractTest.class,
+        RefundSucceededEventQueueContractTest.class
 })
 public class ContractTestSuite {
 
