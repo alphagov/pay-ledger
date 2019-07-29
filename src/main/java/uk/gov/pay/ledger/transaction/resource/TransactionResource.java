@@ -15,6 +15,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -38,7 +39,10 @@ public class TransactionResource {
     @Path("/{transactionExternalId}")
     @GET
     @Timed
-    public TransactionView getById(@PathParam("transactionExternalId") String transactionExternalId, @Context UriInfo uriInfo) {
+    public TransactionView getById(
+            @PathParam("transactionExternalId") String transactionExternalId,
+            @QueryParam("account_id") String gatewayAccountId,
+            @Context UriInfo uriInfo) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
         return transactionService.getTransaction(transactionExternalId, uriInfo)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
