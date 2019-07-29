@@ -71,17 +71,18 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                         .toJson(ImmutableMap.builder()
                                 .put("amount", 1000)
                                 .put("description", "a description")
+                                .put("language", "en")
                                 .put("reference", "aref")
                                 .put("return_url", "https://example.org")
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("payment_provider", "sandbox")
+                                .put("delayed_capture", false)
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
                                 .put("email", "j.doe@example.org")
-                                .put("language", "en")
                                 .put("last_digits_card_number", "4242")
                                 .put("first_digits_card_number", "424242")
                                 .put("cardholder_name", "J citizen")
@@ -91,8 +92,9 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("address_city", "London")
                                 .put("address_country", "GB")
                                 .put("card_brand", "visa")
-                                .put("delayed_capture", false)
                                 .put("gateway_transaction_id", gatewayAccountId)
+                                .put("corporate_surcharge", 5)
+                                .put("total_amount", 1005)
                                 .build());
                 break;
             case "CAPTURE_CONFIRMED":
