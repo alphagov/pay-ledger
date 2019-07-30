@@ -17,7 +17,8 @@ public class RefundSummary {
 
     private Long amountSubmitted;
 
-    public RefundSummary() {}
+    public RefundSummary() {
+    }
 
     public RefundSummary(String status, Long amountAvailable, Long amountSubmitted) {
         this.status = status;
@@ -26,6 +27,12 @@ public class RefundSummary {
     }
 
     public static RefundSummary from(TransactionEntity entity) {
+        if (entity.getRefundStatus() == null &&
+                entity.getRefundAmountAvailable() == null &&
+                entity.getRefundAmountSubmitted() == null) {
+            return null;
+        }
+
         return new RefundSummary(entity.getRefundStatus(), entity.getRefundAmountAvailable(), entity.getRefundAmountSubmitted());
     }
 

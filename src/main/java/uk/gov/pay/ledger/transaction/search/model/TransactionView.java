@@ -124,6 +124,11 @@ public class TransactionView {
         return language;
     }
 
+    @JsonProperty("transaction_id")
+    public String getTransactionId() {
+        return externalId;
+    }
+
     @JsonProperty("charge_id")
     public String getExternalId() {
         return externalId;
