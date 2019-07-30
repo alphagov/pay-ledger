@@ -68,6 +68,7 @@ public class PaymentDetailsEnteredEventQueueContractTest {
 
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
+                        && transactionDao.findTransactionByExternalId(externalId).get().getEmail() != null
         );
 
         Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
