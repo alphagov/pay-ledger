@@ -2,7 +2,6 @@ package uk.gov.pay.ledger.event.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -16,6 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
@@ -165,5 +165,36 @@ public class EventDaoIT {
         List<Event> events = eventDao.getEventsByResourceExternalId("no_events_for_this_id");
 
         assertThat(events.size(), is(0));
+    }
+
+    @Test
+    public void findEventsForExternalIdsShouldFilterEventsByMultipleExternalIds() {
+        Event event1 = anEventFixture()
+                .withResourceExternalId("external-id-1")
+                .insert(rule.getJdbi())
+                .toEntity();
+        Event event2 = anEventFixture()
+                .withResourceExternalId("external-id-2")
+                .withEventDate(event1.getEventDate().plusDays(1))
+                .insert(rule.getJdbi())
+                .toEntity();
+        Event event3 = anEventFixture()
+                .withResourceExternalId("external-id-3")
+                .withEventDate(event2.getEventDate().plusDays(1))
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        List<Event> eventList = eventDao.findEventsForExternalIds(Set.of("external-id-1", "external-id-2"));
+
+        assertThat(eventList.size(), is(2));
+
+        assertThat(eventList.get(0).getResourceExternalId(), is(event1.getResourceExternalId()));
+        assertThat(eventList.get(1).getResourceExternalId(), is(event2.getResourceExternalId()));
+    }
+
+    @Test
+    public void findEventsForExternalIds_ShouldReturnEmptyListIfNoRecordsFound() {
+        List<Event> eventList = eventDao.findEventsForExternalIds(Set.of("some-ext-id-1", "some-ext-id-2"));
+        assertThat(eventList.size(), is(0));
     }
 }

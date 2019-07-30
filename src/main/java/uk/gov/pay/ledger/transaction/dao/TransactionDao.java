@@ -11,6 +11,7 @@ import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public class TransactionDao {
 
@@ -20,6 +21,10 @@ public class TransactionDao {
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
             "WHERE external_id = :externalId " +
             "and gateway_account_id = :gatewayAccountId";
+
+    private static final String FIND_TRANSACTIONS_BY_EXTERNAL_OR_PARENT_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
+            "WHERE (external_id = :externalId or parent_external_id = :externalId) " +
+            "  AND gateway_account_id = :gatewayAccountId";
 
     private static final String SEARCH_QUERY_STRING = "SELECT * FROM transaction t " +
             "WHERE t.gateway_account_id = :account_id " +
@@ -89,6 +94,16 @@ public class TransactionDao {
                         .bind("externalId", externalId)
                         .map(new TransactionMapper())
                         .findFirst());
+    }
+
+    public List<TransactionEntity> findTransactionByExternalOrParentIdAndGatewayAccountId(String externalId, String gatewayAccountId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery(FIND_TRANSACTIONS_BY_EXTERNAL_OR_PARENT_ID_AND_GATEWAY_ACCOUNT_ID)
+                        .bind("externalId", externalId)
+                        .bind("gatewayAccountId", gatewayAccountId)
+                        .map(new TransactionMapper())
+                        .stream().collect(Collectors.toList())
+                        );
     }
 
     public List<TransactionEntity> searchTransactions(TransactionSearchParams searchParams) {
