@@ -54,6 +54,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Long refundAmountSubmitted = 0L;
     private Long refundAmountAvailable = 100L;
     private String transactionType;
+    private String parentExternalId ;
 
 
     private TransactionFixture() {
@@ -121,6 +122,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         this.externalId = externalId;
         return this;
     }
+    public TransactionFixture withParentExternalId(String parentExternalId) {
+        this.parentExternalId = parentExternalId;
+        return this;
+    }
 
     public TransactionFixture withAmount(Long amount) {
         this.amount = amount;
@@ -178,6 +183,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     public TransactionFixture withTransactionDetails(String transactionDetails) {
         this.transactionDetails = transactionDetails;
         return this;
+    }
+
+    public String getTransactionType() {
+        return transactionType;
     }
 
     public Integer getEventCount() {
@@ -255,6 +264,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "    transaction(\n" +
                                 "        id,\n" +
                                 "        external_id,\n" +
+                                "        parent_external_id,\n" +
                                 "        gateway_account_id,\n" +
                                 "        amount,\n" +
                                 "        description,\n" +
@@ -279,9 +289,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        settled_time,\n" +
                                 "        type\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
                         id,
                         externalId,
+                        parentExternalId,
                         gatewayAccountId,
                         amount,
                         description,
@@ -340,6 +351,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withId(id)
                 .withGatewayAccountId(gatewayAccountId)
                 .withExternalId(externalId)
+                .withParentExternalId(parentExternalId)
                 .withAmount(amount)
                 .withReference(reference)
                 .withDescription(description)
