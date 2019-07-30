@@ -47,48 +47,59 @@ public class TransactionView {
     private Map<String, Object> metadata;
     private List<Link> links = new ArrayList<>();
 
-    //todo: replace with builder
-    private TransactionView(Long id, String gatewayAccountId, Long amount, Long totalAmount, Long corporateCardSurcharge, Long fee, Long netAmount, TransactionState state,
-                            String description, String reference, String language, String externalId,
-                            String returnUrl, String email, String paymentProvider, ZonedDateTime createdDate,
-                            CardDetails cardDetails, Boolean delayedCapture, String gatewayTransactionId,
-                            RefundSummary refundSummary, SettlementSummary settlementSummary, Map<String, Object> metadata) {
-        this.id = id;
-        this.gatewayAccountId = gatewayAccountId;
-        this.amount = amount;
-        this.totalAmount = totalAmount;
-        this.corporateCardSurcharge = corporateCardSurcharge;
-        this.fee = fee;
-        this.netAmount = netAmount;
-        this.state = state;
-        this.description = description;
-        this.reference = reference;
-        this.language = language;
-        this.externalId = externalId;
-        this.returnUrl = returnUrl;
-        this.email = email;
-        this.paymentProvider = paymentProvider;
-        this.createdDate = createdDate;
-        this.cardDetails = cardDetails;
-        this.delayedCapture = delayedCapture;
-        this.gatewayTransactionId = gatewayTransactionId;
-        this.refundSummary = refundSummary;
-        this.settlementSummary = settlementSummary;
-        this.metadata = metadata;
+    public TransactionView(Builder builder) {
+        this.id = builder.id;
+        this.gatewayAccountId = builder.gatewayAccountId;
+        this.amount = builder.amount;
+        this.totalAmount = builder.totalAmount;
+        this.corporateCardSurcharge = builder.corporateCardSurcharge;
+        this.fee = builder.fee;
+        this.netAmount = builder.netAmount;
+        this.state = builder.state;
+        this.description = builder.description;
+        this.reference = builder.reference;
+        this.language = builder.language;
+        this.externalId = builder.externalId;
+        this.returnUrl = builder.returnUrl;
+        this.email = builder.email;
+        this.paymentProvider = builder.paymentProvider;
+        this.createdDate = builder.createdDate;
+        this.cardDetails = builder.cardDetails;
+        this.delayedCapture = builder.delayedCapture;
+        this.gatewayTransactionId = builder.gatewayTransactionId;
+        this.refundSummary = builder.refundSummary;
+        this.settlementSummary = builder.settlementSummary;
+        this.metadata = builder.metadata;
     }
 
     public TransactionView() {
     }
 
     public static TransactionView from(Payment transaction) {
-        return new TransactionView(transaction.getId(), transaction.getGatewayAccountId(),
-                transaction.getAmount(), transaction.getTotalAmount(), transaction.getCorporateCardSurcharge(),
-                transaction.getFee(), transaction.getNetAmount(), transaction.getState(),
-                transaction.getDescription(), transaction.getReference(), transaction.getLanguage(),
-                transaction.getExternalId(), transaction.getReturnUrl(), transaction.getEmail(),
-                transaction.getPaymentProvider(), transaction.getCreatedDate(), transaction.getCardDetails(),
-                transaction.getDelayedCapture(), transaction.getGatewayTransactionId(), transaction.getRefundSummary(),
-                transaction.getSettlementSummary(), transaction.getExternalMetadata());
+        return new Builder()
+                .withId(transaction.getId())
+                .withGatewayAccountId(transaction.getGatewayAccountId())
+                .withAmount(transaction.getAmount())
+                .withTotalAmount(transaction.getTotalAmount())
+                .withCorporateCardSurcharge(transaction.getCorporateCardSurcharge())
+                .withFee(transaction.getFee())
+                .withNetAmount(transaction.getNetAmount())
+                .withState(transaction.getState())
+                .withDescription(transaction.getDescription())
+                .withReference(transaction.getReference())
+                .withLanguage(transaction.getLanguage())
+                .withExternalId(transaction.getExternalId())
+                .withReturnUrl(transaction.getReturnUrl())
+                .withEmail(transaction.getEmail())
+                .withPaymentProvider(transaction.getPaymentProvider())
+                .withCreatedDate(transaction.getCreatedDate())
+                .withCardDetails(transaction.getCardDetails())
+                .withDelayedCapture(transaction.getDelayedCapture())
+                .withGatewayTransactionId(transaction.getGatewayTransactionId())
+                .withRefundSummary(transaction.getRefundSummary())
+                .withSettlementSummary(transaction.getSettlementSummary())
+                .withMetadata(transaction.getExternalMetadata())
+                .build();
     }
 
     public TransactionView addLink(Link link) {
@@ -205,5 +216,148 @@ public class TransactionView {
 
     public Long getNetAmount() {
         return netAmount;
+    }
+
+    public static class Builder {
+        private Long id;
+        private String gatewayAccountId;
+        private Long amount;
+        private Long totalAmount;
+        private Long corporateCardSurcharge;
+        private Long fee;
+        private Long netAmount;
+        private TransactionState state;
+        private String description;
+        private String reference;
+        private String language;
+        private String externalId;
+        private String returnUrl;
+        private String email;
+        private String paymentProvider;
+        private ZonedDateTime createdDate;
+        private CardDetails cardDetails;
+        private Boolean delayedCapture;
+        private String gatewayTransactionId;
+        private RefundSummary refundSummary;
+        private SettlementSummary settlementSummary;
+        private Map<String, Object> metadata;
+        private List<Link> links = new ArrayList<>();
+
+        public Builder() {
+        }
+
+        public TransactionView build() {
+            return new TransactionView(this);
+        }
+
+        public Builder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withGatewayAccountId(String gatewayAccountId) {
+            this.gatewayAccountId = gatewayAccountId;
+            return this;
+        }
+
+        public Builder withAmount(Long amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public Builder withTotalAmount(Long totalAmount) {
+            this.totalAmount = totalAmount;
+            return this;
+        }
+
+        public Builder withCorporateCardSurcharge(Long corporateCardSurcharge) {
+            this.corporateCardSurcharge = corporateCardSurcharge;
+            return this;
+        }
+
+        public Builder withFee(Long fee) {
+            this.fee = fee;
+            return this;
+        }
+
+        public Builder withNetAmount(Long netAmount) {
+            this.netAmount = netAmount;
+            return this;
+        }
+
+        public Builder withState(TransactionState state) {
+            this.state = state;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder withReference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public Builder withLanguage(String language) {
+            this.language = language;
+            return this;
+        }
+
+        public Builder withExternalId(String externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
+        public Builder withReturnUrl(String returnUrl) {
+            this.returnUrl = returnUrl;
+            return this;
+        }
+
+        public Builder withEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder withPaymentProvider(String paymentProvider) {
+            this.paymentProvider = paymentProvider;
+            return this;
+        }
+
+        public Builder withCreatedDate(ZonedDateTime createdDate) {
+            this.createdDate = createdDate;
+            return this;
+        }
+
+        public Builder withCardDetails(CardDetails cardDetails) {
+            this.cardDetails = cardDetails;
+            return this;
+        }
+
+        public Builder withDelayedCapture(Boolean delayedCapture) {
+            this.delayedCapture = delayedCapture;
+            return this;
+        }
+
+        public Builder withGatewayTransactionId(String gatewayTransactionId) {
+            this.gatewayTransactionId = gatewayTransactionId;
+            return this;
+        }
+
+        public Builder withRefundSummary(RefundSummary refundSummary) {
+            this.refundSummary = refundSummary;
+            return this;
+        }
+
+        public Builder withSettlementSummary(SettlementSummary settlementSummary) {
+            this.settlementSummary = settlementSummary;
+            return this;
+        }
+
+        public Builder withMetadata(Map<String, Object> metadata) {
+            this.metadata = metadata;
+            return this;
+        }
     }
 }
