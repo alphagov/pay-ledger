@@ -23,8 +23,19 @@ public class TransactionResourceTest {
             .build();
 
     @Test
-    public void shouldReturn404IfTransactionDoesNotExist() {
+    public void shouldReturn400IfTransactionGatewayAccountIdIsNotProvided() {
         Response response = resources.target("/v1/transaction/non-existent-id").request().get();
+        assertThat(response.getStatus(), is(400));
+    }
+
+    @Test
+    public void shouldReturn404IfTransactionDoesNotExist() {
+        Response response = resources
+                .target("/v1/transaction/non-existent-id")
+                .queryParam("account_id", 1)
+                .request()
+                .get();
+
         assertThat(response.getStatus(), is(404));
     }
 }

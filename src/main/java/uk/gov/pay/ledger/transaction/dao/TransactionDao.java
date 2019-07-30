@@ -17,6 +17,10 @@ public class TransactionDao {
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID = "SELECT * FROM transaction " +
             "WHERE external_id = :externalId";
 
+    private static final String FIND_TRANSACTION_BY_EXTERNAL_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
+            "WHERE external_id = :externalId " +
+            "and gateway_account_id = :gatewayAccountId";
+
     private static final String SEARCH_QUERY_STRING = "SELECT * FROM transaction t " +
             "WHERE t.gateway_account_id = :account_id " +
             ":searchExtraFields " +
@@ -68,6 +72,15 @@ public class TransactionDao {
     @Inject
     public TransactionDao(Jdbi jdbi) {
         this.jdbi = jdbi;
+    }
+
+    public Optional<TransactionEntity> findTransactionByExternalIdAndGatewayAccountId(String externalId, String gatewayAccountId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery(FIND_TRANSACTION_BY_EXTERNAL_ID_AND_GATEWAY_ACCOUNT_ID)
+                        .bind("externalId", externalId)
+                        .bind("gatewayAccountId", gatewayAccountId)
+                        .map(new TransactionMapper())
+                        .findFirst());
     }
 
     public Optional<TransactionEntity> findTransactionByExternalId(String externalId) {

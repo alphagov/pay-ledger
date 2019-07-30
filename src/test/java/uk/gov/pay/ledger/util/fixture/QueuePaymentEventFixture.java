@@ -141,6 +141,10 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
         return eventData;
     }
 
+    public String getGatewayAccountId() {
+        return gatewayAccountId;
+    }
+
     @Override
     public QueuePaymentEventFixture insert(AmazonSQS sqsClient) {
         this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, resourceExternalId,

@@ -33,6 +33,11 @@ public class TransactionService {
         this.paymentFactory = paymentFactory;
     }
 
+    public Optional<TransactionView> getTransactionForGatewayAccount(String gatewayAccountId, String transactionExternalId, UriInfo uriInfo) {
+        return transactionDao.findTransactionByExternalIdAndGatewayAccountId(transactionExternalId, gatewayAccountId)
+                .map(entity -> decorateWithLinks(TransactionView.from(paymentFactory.createTransactionEntity(entity)), uriInfo));
+    }
+
     public Optional<TransactionView> getTransaction(String transactionExternalId, UriInfo uriInfo) {
             return transactionDao.findTransactionByExternalId(transactionExternalId)
                     .map(entity -> decorateWithLinks(TransactionView.from(paymentFactory.createTransactionEntity(entity)), uriInfo));
