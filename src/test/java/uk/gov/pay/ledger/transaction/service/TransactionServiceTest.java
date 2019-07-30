@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -34,6 +35,8 @@ public class TransactionServiceTest {
     @Mock
     private TransactionDao mockTransactionDao;
     @Mock
+    private EventDao mockEventDao;
+    @Mock
     private UriInfo mockUriInfo;
 
     private TransactionService transactionService;
@@ -45,7 +48,7 @@ public class TransactionServiceTest {
         ObjectMapper objectMapper = Jackson.newObjectMapper();
         TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(objectMapper);
         PaymentFactory paymentFactory = new PaymentFactory(objectMapper);
-        transactionService = new TransactionService(mockTransactionDao, transactionEntityFactory, paymentFactory);
+        transactionService = new TransactionService(mockTransactionDao, mockEventDao, transactionEntityFactory, paymentFactory);
         searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
 

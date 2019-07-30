@@ -1,34 +1,40 @@
 package uk.gov.pay.ledger.transaction.service;
 
 import com.google.inject.Inject;
+import uk.gov.pay.ledger.event.dao.EventDao;
+import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.search.model.Link;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.PaymentFactory;
+import uk.gov.pay.ledger.transaction.model.TransactionEvent;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.search.common.HalLinkBuilder;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
+import uk.gov.pay.ledger.transaction.search.model.Link;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TransactionService {
 
     private final TransactionDao transactionDao;
+    private final EventDao eventDao;
     private TransactionEntityFactory transactionEntityFactory;
     private PaymentFactory paymentFactory;
 
     @Inject
-    public TransactionService(TransactionDao transactionDao, TransactionEntityFactory transactionEntityFactory,
+    public TransactionService(TransactionDao transactionDao, EventDao eventDao, TransactionEntityFactory transactionEntityFactory,
                               PaymentFactory paymentFactory) {
         this.transactionDao = transactionDao;
+        this.eventDao = eventDao;
         this.transactionEntityFactory = transactionEntityFactory;
         this.paymentFactory = paymentFactory;
     }
@@ -87,5 +93,18 @@ public class TransactionService {
     public void upsertTransactionFor(EventDigest eventDigest) {
         TransactionEntity transaction = transactionEntityFactory.create(eventDigest);
         transactionDao.upsert(transaction);
+    }
+
+    public void findTransactionEvents(String externalId, String gatewayAccountId) {
+        List<TransactionEntity> transactionEntityList = transactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(externalId, gatewayAccountId);
+
+        Map<String, TransactionEntity> transactionEntityMap = transactionEntityList.stream()
+                .collect(Collectors.toMap(TransactionEntity::getExternalId, transactionEntity -> transactionEntity));
+
+        List<Event> eventList = eventDao.findEventsForExternalIds(transactionEntityMap.keySet());
+
+        List<TransactionEvent> events = eventList.stream()
+                .map(event -> TransactionEvent.from(transactionEntityMap.get(event.getResourceExternalId()), event))
+                .collect(Collectors.toList());
     }
 }
