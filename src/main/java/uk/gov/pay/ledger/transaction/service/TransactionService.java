@@ -127,6 +127,12 @@ public class TransactionService {
         return mapToTransactionEvent(transactionEntityMap, events);
     }
 
+    private List<TransactionEvent> mapToTransactionEvent(Map<String, TransactionEntity> transactionEntityMap, List<Event> eventList) {
+        return eventList.stream()
+                .map(event -> TransactionEvent.from(transactionEntityMap.get(event.getResourceExternalId()), event))
+                .collect(Collectors.toList());
+    }
+
     private List<TransactionEvent> removeDuplicates(List<TransactionEvent> transactionEvents) {
         // removes 1. events without mapping to transaction state
         // 2. duplicate events based on external_id,resource_type & state (gets the first created event based on event date)
@@ -142,9 +148,4 @@ public class TransactionService {
                 .collect(Collectors.toList());
     }
 
-    private List<TransactionEvent> mapToTransactionEvent(Map<String, TransactionEntity> transactionEntityMap, List<Event> eventList) {
-        return eventList.stream()
-                .map(event -> TransactionEvent.from(transactionEntityMap.get(event.getResourceExternalId()), event))
-                .collect(Collectors.toList());
-    }
 }
