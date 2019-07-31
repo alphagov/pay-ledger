@@ -1,7 +1,11 @@
 package uk.gov.pay.ledger.transaction.model;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import java.util.List;
 
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TransactionEventResponse {
 
     private final String transactionId;

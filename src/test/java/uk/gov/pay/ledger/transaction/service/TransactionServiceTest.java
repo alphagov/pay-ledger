@@ -248,7 +248,7 @@ public class TransactionServiceTest {
         assertThat(transactionEvent.getAmount(), is(amount));
         assertThat(transactionEvent.getData(), is(event.getEventData()));
         assertThat(transactionEvent.getEventType(), is(event.getEventType()));
-        assertThat(transactionEvent.getResourceType(), is(event.getResourceType()));
+        assertThat(transactionEvent.getResourceType(), is(event.getResourceType().toString().toUpperCase()));
         assertThat(transactionEvent.getTimestamp(), is(event.getEventDate()));
     }
 }

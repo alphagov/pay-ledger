@@ -4,11 +4,14 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.Payment;
+import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import javax.ws.rs.core.Response;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -28,6 +31,7 @@ public class TransactionResourceIT {
     private Integer port = rule.getAppRule().getLocalPort();
 
     private TransactionFixture transactionFixture;
+    private EventFixture eventFixture;
 
     @Before
     public void setUp() {
@@ -116,5 +120,46 @@ public class TransactionResourceIT {
                 .body("_links.last_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&cardholder_name=smith&first_digits_card_number=123456&last_digits_card_number=1234&card_brand=visa%2Cmastercard&state=submitted&page=5&display_size=2"))
                 .body("_links.prev_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&cardholder_name=smith&first_digits_card_number=123456&last_digits_card_number=1234&card_brand=visa%2Cmastercard&state=submitted&page=1&display_size=2"))
                 .body("_links.next_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_date=2000-01-01T10%3A15%3A30Z&to_date=2100-01-01T10%3A15%3A30Z&email=example.org&reference=reference&cardholder_name=smith&first_digits_card_number=123456&last_digits_card_number=1234&card_brand=visa%2Cmastercard&state=submitted&page=3&display_size=2"));
+    }
+
+    @Test
+    public void shouldReturnTransactionEventsCorrectly() {
+        transactionFixture = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails();
+        transactionFixture.insert(rule.getJdbi());
+
+        Event event = EventFixture.anEventFixture()
+                .withResourceExternalId(transactionFixture.getExternalId())
+                .withEventDate(ZonedDateTime.parse("2019-07-31T09:52:43.451Z"))
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "/event?gateway_account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("transaction_id", is(transactionFixture.getExternalId()))
+                .body("events[0].amount", is(transactionFixture.getAmount().intValue()))
+                .body("events[0].state.status", is("created"))
+                .body("events[0].state.finished", is(false))
+                .body("events[0].resource_type", is("PAYMENT"))
+                .body("events[0].event_type", is(event.getEventType()))
+                .body("events[0].timestamp", is("2019-07-31T09:52:43.451Z"))
+                .body("events[0].data", is(event.getEventData()));
+    }
+
+    @Test
+    public void shouldReturnBadRequestStatusIfNoTransactionEventsFound() {
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/some-external-id/event?gateway_account_id=some-gateway-id")
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .contentType(JSON)
+                .body("message", is("Transaction with id [some-external-id] not found"));
     }
 }

@@ -1,5 +1,10 @@
 package uk.gov.pay.ledger.transaction.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.SalientEventType;
@@ -8,13 +13,16 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
 
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TransactionEvent {
 
+    @JsonIgnore
     private final String externalId;
     private final Long amount;
     private final TransactionState state;
     private final ResourceType resourceType;
     private final String eventType;
+    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private final ZonedDateTime timestamp;
     private final String data;
 
@@ -51,8 +59,8 @@ public class TransactionEvent {
         return state;
     }
 
-    public ResourceType getResourceType() {
-        return resourceType;
+    public String getResourceType() {
+        return resourceType.toString().toUpperCase();
     }
 
     public String getEventType() {
