@@ -10,8 +10,10 @@ import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -22,7 +24,7 @@ public class AccountIdSupplierManagerTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private Supplier<Optional<TransactionView>> supplier;
+    private Function<String, Optional<TransactionView>> supplier;
 
     @Mock
     private Supplier<Optional<TransactionView>> privilegedSupplier;
@@ -34,7 +36,7 @@ public class AccountIdSupplierManagerTest {
 
         setUpAndGet(null, null);
 
-        verify(supplier, never()).get();
+        verify(supplier, never()).apply(any());
         verify(privilegedSupplier, never()).get();
     }
 
@@ -42,7 +44,7 @@ public class AccountIdSupplierManagerTest {
     public void givenAccountIdProvidedWhenRequiredUsesSupplier() {
         setUpAndGet(null, "some-id");
 
-        verify(supplier).get();
+        verify(supplier).apply("some-id");
         verify(privilegedSupplier, never()).get();
     }
 
@@ -50,7 +52,7 @@ public class AccountIdSupplierManagerTest {
     public void givenAccountIdProvidedWhenNotRequiredUsesSupplier() {
         setUpAndGet(true, "some-id");
 
-        verify(supplier).get();
+        verify(supplier).apply("some-id");
         verify(privilegedSupplier, never()).get();
     }
 
@@ -58,7 +60,7 @@ public class AccountIdSupplierManagerTest {
     public void givenAccountIdNotProvidedWhenNotRequiredUsesPrivilegedSupplier() {
         setUpAndGet(true, null);
 
-        verify(supplier, never()).get();
+        verify(supplier, never()).apply(any());
         verify(privilegedSupplier).get();
     }
 

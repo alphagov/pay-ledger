@@ -4,6 +4,7 @@ import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.lang.String.format;
@@ -17,7 +18,7 @@ public class AccountIdSupplierManager {
     private final String gatewayAccountId;
 
     private Supplier<Optional<TransactionView>> privilegedSupplier;
-    private Supplier<Optional<TransactionView>> supplier;
+    private Function<String, Optional<TransactionView>> supplier;
 
     public AccountIdSupplierManager(Boolean overrideAccountRestriction, String gatewayAccountId) {
         this.overrideAccountRestriction = Optional.ofNullable(overrideAccountRestriction).orElse(false);
@@ -33,7 +34,7 @@ public class AccountIdSupplierManager {
         return this;
     }
 
-    public AccountIdSupplierManager withSupplier(Supplier<Optional<TransactionView>> supplier) {
+    public AccountIdSupplierManager withSupplier(Function<String, Optional<TransactionView>> supplier) {
         this.supplier = supplier;
         return this;
     }
@@ -47,6 +48,6 @@ public class AccountIdSupplierManager {
             return privilegedSupplier.get();
         }
 
-        return supplier.get();
+        return supplier.apply(gatewayAccountId);
     }
 }

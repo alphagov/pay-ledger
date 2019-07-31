@@ -47,8 +47,8 @@ public class TransactionResource {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
 
         return AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId)
+                .withSupplier((accountId) -> transactionService.getTransactionForGatewayAccount(accountId, transactionExternalId, uriInfo))
                 .withPrivilegedSupplier(() -> transactionService.getTransaction(transactionExternalId, uriInfo))
-                .withSupplier(() -> transactionService.getTransactionForGatewayAccount(gatewayAccountId, transactionExternalId, uriInfo))
                 .validateAndGet()
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
