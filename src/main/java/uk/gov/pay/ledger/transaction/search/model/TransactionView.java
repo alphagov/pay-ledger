@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Payment;
+import uk.gov.pay.ledger.transaction.model.Refund;
+import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
@@ -45,6 +47,7 @@ public class TransactionView {
     private RefundSummary refundSummary;
     private SettlementSummary settlementSummary;
     private Map<String, Object> metadata;
+    private String refundedBy;
     private List<Link> links = new ArrayList<>();
 
     public TransactionView(Builder builder) {
@@ -70,35 +73,53 @@ public class TransactionView {
         this.refundSummary = builder.refundSummary;
         this.settlementSummary = builder.settlementSummary;
         this.metadata = builder.metadata;
+        this.refundedBy = builder.refundedBy;
     }
 
     public TransactionView() {
     }
 
-    public static TransactionView from(Payment transaction) {
+    public static TransactionView from(Transaction transaction) {
+        if(transaction instanceof Payment) {
+            Payment payment = (Payment) transaction;
+
+            return new Builder()
+                    .withId(payment.getId())
+                    .withGatewayAccountId(payment.getGatewayAccountId())
+                    .withAmount(payment.getAmount())
+                    .withTotalAmount(payment.getTotalAmount())
+                    .withCorporateCardSurcharge(payment.getCorporateCardSurcharge())
+                    .withFee(payment.getFee())
+                    .withNetAmount(payment.getNetAmount())
+                    .withState(payment.getState())
+                    .withDescription(payment.getDescription())
+                    .withReference(payment.getReference())
+                    .withLanguage(payment.getLanguage())
+                    .withExternalId(payment.getExternalId())
+                    .withReturnUrl(payment.getReturnUrl())
+                    .withEmail(payment.getEmail())
+                    .withPaymentProvider(payment.getPaymentProvider())
+                    .withCreatedDate(payment.getCreatedDate())
+                    .withCardDetails(payment.getCardDetails())
+                    .withDelayedCapture(payment.getDelayedCapture())
+                    .withGatewayTransactionId(payment.getGatewayTransactionId())
+                    .withRefundSummary(payment.getRefundSummary())
+                    .withSettlementSummary(payment.getSettlementSummary())
+                    .withMetadata(payment.getExternalMetadata())
+                    .build();
+        }
+
+        Refund refund = (Refund) transaction;
         return new Builder()
-                .withId(transaction.getId())
-                .withGatewayAccountId(transaction.getGatewayAccountId())
-                .withAmount(transaction.getAmount())
-                .withTotalAmount(transaction.getTotalAmount())
-                .withCorporateCardSurcharge(transaction.getCorporateCardSurcharge())
-                .withFee(transaction.getFee())
-                .withNetAmount(transaction.getNetAmount())
-                .withState(transaction.getState())
-                .withDescription(transaction.getDescription())
-                .withReference(transaction.getReference())
-                .withLanguage(transaction.getLanguage())
-                .withExternalId(transaction.getExternalId())
-                .withReturnUrl(transaction.getReturnUrl())
-                .withEmail(transaction.getEmail())
-                .withPaymentProvider(transaction.getPaymentProvider())
-                .withCreatedDate(transaction.getCreatedDate())
-                .withCardDetails(transaction.getCardDetails())
-                .withDelayedCapture(transaction.getDelayedCapture())
-                .withGatewayTransactionId(transaction.getGatewayTransactionId())
-                .withRefundSummary(transaction.getRefundSummary())
-                .withSettlementSummary(transaction.getSettlementSummary())
-                .withMetadata(transaction.getExternalMetadata())
+                .withId(refund.getId())
+                .withGatewayAccountId(refund.getGatewayAccountId())
+                .withAmount(refund.getAmount())
+                .withState(refund.getState())
+                .withDescription(refund.getDescription())
+                .withReference(refund.getReference())
+                .withExternalId(refund.getExternalId())
+                .withCreatedDate(refund.getCreatedDate())
+                .withRefundedBy(refund.getRefundedBy())
                 .build();
     }
 
@@ -218,6 +239,10 @@ public class TransactionView {
         return netAmount;
     }
 
+    public String getRefundedBy() {
+        return refundedBy;
+    }
+
     public static class Builder {
         private Long id;
         private String gatewayAccountId;
@@ -241,6 +266,7 @@ public class TransactionView {
         private RefundSummary refundSummary;
         private SettlementSummary settlementSummary;
         private Map<String, Object> metadata;
+        private String refundedBy;
         private List<Link> links = new ArrayList<>();
 
         public Builder() {
@@ -357,6 +383,11 @@ public class TransactionView {
 
         public Builder withMetadata(Map<String, Object> metadata) {
             this.metadata = metadata;
+            return this;
+        }
+
+        public Builder withRefundedBy(String refundedBy) {
+            this.refundedBy = refundedBy;
             return this;
         }
     }

@@ -25,7 +25,15 @@ public class PaymentFactory {
         this.objectMapper = objectMapper;
     }
 
-    public Payment createTransactionEntity(TransactionEntity entity) {
+    public Transaction createTransactionEntity(TransactionEntity entity) {
+        if("REFUND".equals(entity.getTransactionType())) {
+            return createRefund(entity);
+        }
+
+        return createPayment(entity);
+    }
+
+    private Transaction createPayment(TransactionEntity entity) {
         try {
             JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
             Address billingAddress = Address.from(
@@ -57,6 +65,20 @@ public class PaymentFactory {
                     entity.getEventCount(), safeGetAsString(transactionDetails, "gateway_transaction_id"),
                     safeGetAsLong(transactionDetails, "corporate_surcharge"), entity.getFee(),
                     entity.getNetAmount(), refundSummary, entity.getTotalAmount(), settlementSummary);
+        } catch (IOException e) {
+            LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
+        }
+
+        return null;
+    }
+
+    private Transaction createRefund(TransactionEntity entity) {
+        try {
+            JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
+
+            return new Refund(entity.getGatewayAccountId(), entity.getAmount(), entity.getReference(), entity.getDescription(),
+                    TransactionState.from(entity.getState()), entity.getExternalId(), entity.getCreatedDate(),
+                    entity.getEventCount(), safeGetAsString(transactionDetails, "refunded_by"));
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
         }

@@ -55,6 +55,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Long refundAmountAvailable = 100L;
     private String transactionType;
     private String parentExternalId;
+    private String refundedById;
 
 
     private TransactionFixture() {
@@ -94,7 +95,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1L).plusMinutes(i))
                     .insert(jdbi)
                     .toEntity();
-            transactionList.add(new PaymentFactory(Jackson.newObjectMapper()).createTransactionEntity(entity));
+            transactionList.add((Payment) new PaymentFactory(Jackson.newObjectMapper()).createTransactionEntity(entity));
         }
         return transactionList;
     }
@@ -328,6 +329,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("delayed_capture", delayedCapture);
         transactionDetails.addProperty("gateway_transaction_id", gatewayTransactionId);
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
+        transactionDetails.addProperty("refunded_by", refundedById);
         Optional.ofNullable(cardDetails)
                 .ifPresent(cd -> Optional.ofNullable(cd.getBillingAddress())
                         .ifPresent(ba -> {
@@ -480,6 +482,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withSettledTime(ZonedDateTime time) {
         this.settledTime = time;
+        return this;
+    }
+
+    public TransactionFixture withRefundedById(String refundedById) {
+        this.refundedById = refundedById;
         return this;
     }
 }

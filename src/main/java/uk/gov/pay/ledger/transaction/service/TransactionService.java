@@ -7,8 +7,8 @@ import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.PaymentFactory;
+import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionEvent;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
@@ -57,7 +57,7 @@ public class TransactionService {
     }
 
     public TransactionSearchResponse searchTransactions(TransactionSearchParams searchParams, UriInfo uriInfo) {
-        List<Payment> transactionList = transactionDao.searchTransactions(searchParams)
+        List<Transaction> transactionList = transactionDao.searchTransactions(searchParams)
                 .stream()
                 .map(paymentFactory::createTransactionEntity)
                 .collect(Collectors.toList());
@@ -75,7 +75,7 @@ public class TransactionService {
         ).withPaginationBuilder(paginationBuilder);
     }
 
-    private List<TransactionView> mapToTransactionViewList(List<Payment> transactionList, TransactionSearchParams searchParams,
+    private List<TransactionView> mapToTransactionViewList(List<Transaction> transactionList, TransactionSearchParams searchParams,
                                                            UriInfo uriInfo) {
         return transactionList.stream()
                 .map(transaction -> decorateWithLinks(TransactionView.from(transaction),
