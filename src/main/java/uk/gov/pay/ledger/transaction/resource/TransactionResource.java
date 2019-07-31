@@ -2,13 +2,13 @@ package uk.gov.pay.ledger.transaction.resource;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import javax.validation.Valid;
@@ -42,10 +42,15 @@ public class TransactionResource {
     @GET
     @Timed
     public TransactionView getById(@PathParam("transactionExternalId") String transactionExternalId,
-                                   @QueryParam("account_id") @NotEmpty String gatewayAccountId,
+                                   @QueryParam("account_id") String gatewayAccountId,
+                                   @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
                                    @Context UriInfo uriInfo) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
-        return transactionService.getTransactionForGatewayAccount(gatewayAccountId, transactionExternalId, uriInfo)
+
+        return AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId)
+                .withSupplier((accountId) -> transactionService.getTransactionForGatewayAccount(accountId, transactionExternalId, uriInfo))
+                .withPrivilegedSupplier(() -> transactionService.getTransaction(transactionExternalId, uriInfo))
+                .validateAndGet()
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
 
