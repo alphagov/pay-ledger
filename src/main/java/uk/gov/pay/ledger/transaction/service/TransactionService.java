@@ -102,7 +102,8 @@ public class TransactionService {
         transactionDao.upsert(transaction);
     }
 
-    public TransactionEventResponse findTransactionEvents(String externalId, String gatewayAccountId) {
+    public TransactionEventResponse findTransactionEvents(String externalId, String gatewayAccountId,
+                                                          boolean includeAllEvents) {
         Map<String, TransactionEntity> transactionEntityMap = getTransactionsAsMap(externalId, gatewayAccountId);
 
         if (transactionEntityMap.isEmpty()) {
@@ -111,7 +112,11 @@ public class TransactionService {
 
         List<TransactionEvent> transactionEvents = getTransactionEventsFor(transactionEntityMap);
 
-        return TransactionEventResponse.of(externalId, removeDuplicates(transactionEvents));
+        if (includeAllEvents) {
+            return TransactionEventResponse.of(externalId, transactionEvents);
+        } else {
+            return TransactionEventResponse.of(externalId, removeDuplicates(transactionEvents));
+        }
     }
 
     private Map<String, TransactionEntity> getTransactionsAsMap(String externalId, String gatewayAccountId) {
