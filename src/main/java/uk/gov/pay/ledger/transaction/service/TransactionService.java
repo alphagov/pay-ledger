@@ -103,6 +103,11 @@ public class TransactionService {
     }
 
     public TransactionEventResponse findTransactionEvents(String externalId, String gatewayAccountId) {
+        return findTransactionEvents(externalId, gatewayAccountId, false);
+    }
+
+
+    public TransactionEventResponse findTransactionEvents(String externalId, String gatewayAccountId, boolean deduplicate) {
         Map<String, TransactionEntity> transactionEntityMap = getTransactionsAsMap(externalId, gatewayAccountId);
 
         if (transactionEntityMap.isEmpty()) {
@@ -111,7 +116,10 @@ public class TransactionService {
 
         List<TransactionEvent> transactionEvents = getTransactionEventsFor(transactionEntityMap);
 
-        return TransactionEventResponse.of(externalId, removeDuplicates(transactionEvents));
+        if (deduplicate) {
+            transactionEvents = removeDuplicates(transactionEvents);
+        }
+        return TransactionEventResponse.of(externalId, transactionEvents);
     }
 
     private Map<String, TransactionEntity> getTransactionsAsMap(String externalId, String gatewayAccountId) {

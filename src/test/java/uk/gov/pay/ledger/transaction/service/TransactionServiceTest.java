@@ -172,7 +172,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void findTransactionEvents_shouldFilterEventWithoutAMappingToTransactionState() {
+    public void findTransactionEvents_shouldFilterEventWithoutAMappingToTransactionStateIfDeduplicateFlagTrue() {
         List<TransactionEntity> transactionEntityList = TransactionFixture.aTransactionList(gatewayAccountId, 2);
         when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
                 .thenReturn(transactionEntityList);
@@ -186,7 +186,7 @@ public class TransactionServiceTest {
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
         TransactionEventResponse transactionEventResponse
-                = transactionService.findTransactionEvents("external-id", gatewayAccountId);
+                = transactionService.findTransactionEvents("external-id", gatewayAccountId, true);
 
         List<TransactionEvent> transactionEvents = transactionEventResponse.getEvents();
 
@@ -209,7 +209,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void findTransactionEvents_shouldRemoveDuplicateEventsByExternalIdResourceTypeAndState() {
+    public void findTransactionEvents_shouldRemoveDuplicateEventsByExternalIdResourceTypeAndStateIfDeduplicateFlagSet() {
         List<TransactionEntity> transactionEntityList = TransactionFixture.aTransactionList(gatewayAccountId, 1);
         when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
                 .thenReturn(transactionEntityList);
@@ -232,7 +232,7 @@ public class TransactionServiceTest {
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
         TransactionEventResponse transactionEventResponse
-                = transactionService.findTransactionEvents("external-id", gatewayAccountId);
+                = transactionService.findTransactionEvents("external-id", gatewayAccountId, true);
 
         List<TransactionEvent> transactionEvents = transactionEventResponse.getEvents();
 
@@ -242,6 +242,43 @@ public class TransactionServiceTest {
         assertTransactionEvent(event1ForStateSubmitted, transactionEvents.get(0), transactionEntityList.get(0).getAmount(), "submitted");
         assertTransactionEvent(event1ForStateError, transactionEvents.get(1), transactionEntityList.get(0).getAmount(), "submitted");
     }
+
+    @Test
+    public void findTransactionEvents_shouldNotRemoveDuplicateEventsByExternalIdResourceTypeAndStateByDefault() {
+        List<TransactionEntity> transactionEntityList = TransactionFixture.aTransactionList(gatewayAccountId, 1);
+        when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
+                .thenReturn(transactionEntityList);
+
+        Event event1ForStateSubmitted = EventFixture.anEventFixture()
+                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .withEventDate(ZonedDateTime.now())
+                .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
+        Event event2ForStateSubmitted = EventFixture.anEventFixture()
+                .withEventType("USER_APPROVED_FOR_CAPTURE_AWAITING_SERVICE_APPROVAL")
+                .withEventDate(ZonedDateTime.now().plusDays(1))
+                .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
+        Event event1ForRefund = EventFixture.anEventFixture()
+                .withEventType("REFUND_SUBMITTED")
+                .withResourceType(ResourceType.REFUND)
+                .withEventDate(ZonedDateTime.now().plusDays(2))
+                .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
+
+        List<Event> eventList = List.of(event1ForStateSubmitted, event2ForStateSubmitted, event1ForRefund);
+        when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
+
+        TransactionEventResponse transactionEventResponse
+                = transactionService.findTransactionEvents("external-id", gatewayAccountId);
+
+        List<TransactionEvent> transactionEvents = transactionEventResponse.getEvents();
+
+        assertThat(transactionEventResponse.getTransactionId(), is("external-id"));
+        assertThat(transactionEvents.size(), is(3));
+
+        assertTransactionEvent(event1ForStateSubmitted, transactionEvents.get(0), transactionEntityList.get(0).getAmount(), "submitted");
+        assertTransactionEvent(event2ForStateSubmitted, transactionEvents.get(1), transactionEntityList.get(0).getAmount(), "submitted");
+        assertTransactionEvent(event1ForRefund, transactionEvents.get(2), transactionEntityList.get(0).getAmount(), "submitted");
+    }
+
 
     private void assertTransactionEvent(Event event, TransactionEvent transactionEvent, Long amount, String state) {
         assertThat(transactionEvent.getState().getState(), is(state));
