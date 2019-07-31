@@ -73,10 +73,11 @@ public class TransactionResource {
     @Timed
     public TransactionEventResponse events(@PathParam("transactionExternalId") String transactionExternalId,
                                            @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId,
+                                           @QueryParam("include_all_events") boolean includeAllEvents,
                                            @Context UriInfo uriInfo) {
 
         LOGGER.info("Get transaction event: external_id [{}], gateway_account_id [{}]",
                 transactionExternalId, gatewayAccountId);
-        return transactionService.findTransactionEvents(transactionExternalId, gatewayAccountId);
+        return transactionService.findTransactionEvents(transactionExternalId, gatewayAccountId, includeAllEvents);
     }
 }
