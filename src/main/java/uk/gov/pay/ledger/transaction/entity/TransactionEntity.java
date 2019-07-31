@@ -3,15 +3,17 @@ package uk.gov.pay.ledger.transaction.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.time.ZonedDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TransactionEntity {
 
     @JsonIgnore
     private Long id;
-    @JsonProperty("gateway_account_id")
     private String gatewayAccountId;
     @JsonIgnore
     private String externalId;
@@ -22,9 +24,7 @@ public class TransactionEntity {
     private String description;
     private String state;
     private String email;
-    @JsonProperty("cardholder_name")
     private String cardholderName;
-    @JsonProperty("external_metadata")
     private String externalMetadata;
     @JsonIgnore
     private ZonedDateTime createdDate;
@@ -32,19 +32,12 @@ public class TransactionEntity {
     private String transactionDetails;
     @JsonIgnore
     private Integer eventCount;
-    @JsonProperty("card_brand")
     private String cardBrand;
-    @JsonProperty("last_digits_card_number")
     private String lastDigitsCardNumber;
-    @JsonProperty("first_digits_card_number")
     private String firstDigitsCardNumber;
-    @JsonProperty("net_amount")
     private Long netAmount;
-    @JsonProperty("total_amount")
     private Long totalAmount;
-    @JsonProperty("fee")
     private Long fee;
-    @JsonProperty("transaction_type")
     private String transactionType;
 
     private ZonedDateTime settlementSubmittedTime;
