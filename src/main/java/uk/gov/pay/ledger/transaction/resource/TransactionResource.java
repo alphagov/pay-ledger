@@ -42,7 +42,7 @@ public class TransactionResource {
     @Timed
     public TransactionView getById(@PathParam("transactionExternalId") String transactionExternalId,
                                    @QueryParam("account_id") String gatewayAccountId,
-                                   @QueryParam("account_id_is_not_required") Boolean overrideAccountRestriction,
+                                   @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
                                    @Context UriInfo uriInfo) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
 

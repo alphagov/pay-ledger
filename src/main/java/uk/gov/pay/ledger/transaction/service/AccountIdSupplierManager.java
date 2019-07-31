@@ -25,8 +25,8 @@ public class AccountIdSupplierManager {
         this.gatewayAccountId = gatewayAccountId;
     }
 
-    public static AccountIdSupplierManager of(Boolean flag, String gatewayAccountId) {
-        return new AccountIdSupplierManager(flag, gatewayAccountId);
+    public static AccountIdSupplierManager of(Boolean overrideAccountRestriction, String gatewayAccountId) {
+        return new AccountIdSupplierManager(overrideAccountRestriction, gatewayAccountId);
     }
 
     public AccountIdSupplierManager withPrivilegedSupplier(Supplier<Optional<TransactionView>> supplier) {

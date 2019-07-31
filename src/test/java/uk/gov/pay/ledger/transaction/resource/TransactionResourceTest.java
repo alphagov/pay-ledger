@@ -46,7 +46,7 @@ public class TransactionResourceTest {
 
         Response response = resources
                 .target("/v1/transaction/some-external-id")
-                .queryParam("account_id_is_not_required", true)
+                .queryParam("override_account_id_restriction", true)
                 .request()
                 .get();
 
