@@ -126,4 +126,33 @@ public class QueueMessageReceiverIT {
                 .body("charge_id", is(resourceExternalId))
                 .body("state.status", is("submitted"));
     }
+
+    @Test
+    public void shouldHandleRefundAvailabilityUpdatedEvent() throws InterruptedException {
+        final String resourceExternalId = "rexid2";
+        final String gatewayAccountId = "test_accountId";
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
+                .insert(rule.getSqsClient());
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("REFUND_AVAILABILITY_UPDATED")
+                .withEventData("{\"refund_amount_available\": 200}")
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
+
+        given().port(rule.getAppRule().getLocalPort())
+                .contentType(JSON)
+                .get("/v1/transaction/" + resourceExternalId + "?account_id=" + gatewayAccountId)
+                .then()
+                .statusCode(200)
+                .body("charge_id", is(resourceExternalId))
+                .body("refund_summary.amount_available", is(200));
+    }
 }

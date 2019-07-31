@@ -42,6 +42,7 @@ public interface EventDao {
             "    FROM event " +
             "    WHERE resource_type_id = :resourceTypeId AND " +
             "          resource_external_id = :resourceExternalId AND  " +
+            "          event_date = :eventDate AND   " +
             "          event_type = :eventType) ")
     @GetGeneratedKeys
     Optional<Long> insertIfDoesNotExist(@BindBean Event event, @Bind("resourceTypeId") int resourceTypeId);
