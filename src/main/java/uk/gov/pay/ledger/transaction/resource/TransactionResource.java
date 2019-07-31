@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
@@ -59,5 +60,17 @@ public class TransactionResource {
         }
         validateSearchParams(searchParams);
         return transactionService.searchTransactions(searchParams, uriInfo);
+    }
+
+    @Path("{transactionExternalId}/event")
+    @GET
+    @Timed
+    public TransactionEventResponse events(@PathParam("transactionExternalId") String transactionExternalId,
+                                           @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId,
+                                           @Context UriInfo uriInfo) {
+
+        LOGGER.info("Get transaction event: external_id [{}], gateway_account_id [{}]",
+                transactionExternalId, gatewayAccountId);
+        return transactionService.findTransactionEvents(transactionExternalId, gatewayAccountId);
     }
 }
