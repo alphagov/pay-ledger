@@ -54,6 +54,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Long refundAmountSubmitted = 0L;
     private Long refundAmountAvailable = 100L;
     private String transactionType;
+    private String parentExternalId;
 
 
     private TransactionFixture() {
@@ -119,6 +120,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withExternalId(String externalId) {
         this.externalId = externalId;
+        return this;
+    }
+
+    public TransactionFixture withParentExternalId(String parentExternalId) {
+        this.parentExternalId = parentExternalId;
         return this;
     }
 
@@ -255,6 +261,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "    transaction(\n" +
                                 "        id,\n" +
                                 "        external_id,\n" +
+                                "        parent_external_id,\n" +
                                 "        gateway_account_id,\n" +
                                 "        amount,\n" +
                                 "        description,\n" +
@@ -279,9 +286,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        settled_time,\n" +
                                 "        type\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
                         id,
                         externalId,
+                        parentExternalId,
                         gatewayAccountId,
                         amount,
                         description,

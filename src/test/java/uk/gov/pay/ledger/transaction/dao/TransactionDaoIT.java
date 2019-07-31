@@ -7,6 +7,8 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -136,5 +138,51 @@ public class TransactionDaoIT {
         TransactionEntity retrievedTransaction = transactionDao.findTransactionByExternalId(transaction.getExternalId()).get();
 
         assertThat(retrievedTransaction.getState(), is(transaction.getState()));
+    }
+
+    @Test
+    public void shouldFilterTransactionByExternalIdOrParentExternalIdAndGatewayAccountId() {
+        TransactionEntity transaction1 = aTransactionFixture()
+                .withState(TransactionState.CREATED)
+                .withExternalId("external-id-1")
+                .withGatewayAccountId("gateway-account-id-1")
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        TransactionEntity transaction2 = aTransactionFixture()
+                .withState(TransactionState.SUBMITTED)
+                .withExternalId("external-id-2")
+                .withGatewayAccountId("gateway-account-id-2")
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        List<TransactionEntity> transactionEntityList =
+                transactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(
+                        transaction1.getExternalId(), transaction1.getGatewayAccountId());
+
+        assertThat(transactionEntityList.size(), is(1));
+        assertThat(transactionEntityList.get(0).getExternalId(), is(transaction1.getExternalId()));
+        assertThat(transactionEntityList.get(0).getGatewayAccountId(), is(transaction1.getGatewayAccountId()));
+    }
+
+    @Test
+    public void shouldFilterTransactionByParentExternalId() {
+        TransactionEntity transaction1 = aTransactionFixture()
+                .withState(TransactionState.CREATED)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        TransactionEntity transaction2 = aTransactionFixture()
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(transaction1.getGatewayAccountId())
+                .withParentExternalId(transaction1.getExternalId())
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        List<TransactionEntity> transactionEntityList =
+                transactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(
+                        transaction1.getExternalId(), transaction1.getGatewayAccountId());
+
+        assertThat(transactionEntityList.size(), is(2));
     }
 }
