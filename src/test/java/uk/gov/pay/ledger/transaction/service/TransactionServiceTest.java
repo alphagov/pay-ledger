@@ -15,7 +15,7 @@ import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.model.PaymentFactory;
+import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionEvent;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
@@ -60,8 +60,8 @@ public class TransactionServiceTest {
     public void setUp() {
         ObjectMapper objectMapper = Jackson.newObjectMapper();
         TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(objectMapper);
-        PaymentFactory paymentFactory = new PaymentFactory(objectMapper);
-        transactionService = new TransactionService(mockTransactionDao, mockEventDao, transactionEntityFactory, paymentFactory);
+        TransactionFactory transactionFactory = new TransactionFactory(objectMapper);
+        transactionService = new TransactionService(mockTransactionDao, mockEventDao, transactionEntityFactory, transactionFactory);
         searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
 

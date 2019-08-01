@@ -7,6 +7,8 @@ import org.junit.Test;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.Payment;
+import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
@@ -59,10 +61,37 @@ public class TransactionResourceIT {
     }
 
     @Test
+    public void shouldGetRefundTransaction() {
+        var now = ZonedDateTime.parse("2019-07-31T14:52:07.073Z");
+        var refundedBy = "some_user_id";
+
+        transactionFixture = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUCCESS)
+                .withCreatedDate(now)
+                .withRefundedById(refundedBy)
+                .withDefaultTransactionDetails();
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("transaction_id", is(transactionFixture.getExternalId()))
+                .body("state.status", is(transactionFixture.getState().getState()))
+                .body("amount", is(transactionFixture.getAmount().intValue()))
+                .body("reference", is(transactionFixture.getReference()))
+                .body("created_date", is(now.toString()))
+                .body("refunded_by", is(refundedBy));
+    }
+
+    @Test
     public void shouldSearchUsingAllFieldsAndReturnAllFieldsCorrectly() {
         String gatewayAccountId = RandomStringUtils.randomAlphanumeric(20);
-        List<Payment> transactionList = aPersistedTransactionList(gatewayAccountId, 10, rule.getJdbi(), true);
-        Payment transactionToVerify = transactionList.get(7);
+        List<Transaction> transactionList = aPersistedTransactionList(gatewayAccountId, 10, rule.getJdbi(), true);
+        Payment transactionToVerify = (Payment) transactionList.get(7);
         given().port(port)
                 .contentType(JSON)
                 //todo: add more query params (refund_states, payment_states...) when search functionality is available
