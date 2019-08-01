@@ -17,15 +17,18 @@ public class DatabaseTestHelper {
         return new DatabaseTestHelper(jdbi);
     }
 
-    public Map<String, Object> getEventByExternalId(String externalId) {
+    public List<Map<String, Object>> getEventsByExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle
                         .createQuery("SELECT * FROM event WHERE resource_external_id = :external_id")
                         .bind("external_id", externalId)
                         .mapToMap()
-                        .findFirst()
-                        .get()
+                        .list()
         );
+    }
+
+    public Map<String, Object> getEventByExternalId(String externalId) {
+        return getEventsByExternalId(externalId).stream().findFirst().get();
     }
 
     public void truncateAllData() {
@@ -48,7 +51,7 @@ public class DatabaseTestHelper {
     public List<Map<String, Object>> getAllTransactions() {
         return jdbi.withHandle(handle ->
                 handle.createQuery("SELECT * FROM transaction")
-                .mapToMap()
-                .list());
+                        .mapToMap()
+                        .list());
     }
 }

@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
@@ -85,8 +84,29 @@ public class EventDaoIT {
     }
 
     @Test
+    public void shouldInsertDuplicateEventWithDifferentTimestamp() throws IOException {
+        Event event = anEventFixture()
+                .insert(rule.getJdbi())
+                .toEntity();
+        Event duplicateEvent = anEventFixture()
+                .from(event)
+                .withEventDate(CREATED_AT)
+                .toEntity();
+
+        Optional<Long> status = eventDao.insertEventIfDoesNotExistWithResourceTypeId(duplicateEvent);
+
+        assertThat(status.isPresent(), is(true));
+
+        List<Map<String, Object>> results = dbHelper.getEventsByExternalId(event.getResourceExternalId());
+        assertThat(results.size(), is(2));
+        assertThat(results.get(0).get("sqs_message_id"), is(duplicateEvent.getSqsMessageId()));
+        assertThat(results.get(1).get("sqs_message_id"), is(event.getSqsMessageId()));
+    }
+
+    @Test
     public void shouldNotInsertDuplicateEvent() throws IOException {
         Event event = anEventFixture()
+                .withEventDate(CREATED_AT)
                 .insert(rule.getJdbi())
                 .toEntity();
         Event duplicateEvent = anEventFixture()
@@ -98,7 +118,7 @@ public class EventDaoIT {
 
         Optional<Long> status = eventDao.insertEventIfDoesNotExistWithResourceTypeId(duplicateEvent);
 
-        assertFalse(status.isPresent());
+        assertThat(status.isPresent(), is(false));
 
         int resourceTypeId = resourceTypeDao.getResourceTypeIdByName(event.getResourceType().name());
         Map<String, Object> result = dbHelper.getEventByExternalId(event.getResourceExternalId());
