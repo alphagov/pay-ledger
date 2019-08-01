@@ -15,14 +15,13 @@ import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionEvent;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
+import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
-import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
@@ -65,7 +64,6 @@ public class TransactionServiceTest {
         searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
 
-        when(mockUriInfo.getBaseUri()).thenReturn(UriBuilder.fromUri("http://app.com").build());
         when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://app.com"));
         when(mockUriInfo.getPath()).thenReturn("/v1/transaction");
     }
@@ -81,24 +79,6 @@ public class TransactionServiceTest {
         assertThat(transactionSearchResponse.getCount(), is(5L));
         assertThat(transactionSearchResponse.getTotal(), is(5L));
         assertThat(transactionSearchResponse.getTransactionViewList().size(), is(5));
-    }
-
-    @Test
-    public void shouldListTransactionWithCorrectSelfAndRefundsLinks() {
-        List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 1);
-        when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
-        when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(1L);
-
-        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(searchParams, mockUriInfo);
-        TransactionView transactionView = transactionSearchResponse.getTransactionViewList().get(0);
-
-        assertThat(transactionView.getLinks().get(0).getRel(), is("self"));
-        assertThat(transactionView.getLinks().get(0).getMethod(), is("GET"));
-        assertThat(transactionView.getLinks().get(0).getHref(), is("http://app.com/v1/transaction/" + transactionView.getExternalId()));
-
-        assertThat(transactionView.getLinks().get(1).getRel(), is("refunds"));
-        assertThat(transactionView.getLinks().get(1).getMethod(), is("GET"));
-        assertThat(transactionView.getLinks().get(1).getHref(), is("http://app.com/v1/transaction/" + transactionView.getExternalId() + "/refunds"));
     }
 
     @Test

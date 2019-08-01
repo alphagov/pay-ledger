@@ -10,12 +10,10 @@ import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import javax.ws.rs.core.Response;
-
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,7 +40,7 @@ public class TransactionResourceTest {
 
     @Test
     public void shouldReturn200IfTransactionGatewayAccountIdIsNotProvidedButNotRequiredFlag() {
-        when(mockTransactionService.getTransaction(eq("some-external-id"), any())).thenReturn(Optional.of(new TransactionView()));
+        when(mockTransactionService.getTransaction(eq("some-external-id"))).thenReturn(Optional.of(new TransactionView()));
 
         Response response = resources
                 .target("/v1/transaction/some-external-id")

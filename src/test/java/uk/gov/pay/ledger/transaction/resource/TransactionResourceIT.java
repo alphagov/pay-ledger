@@ -133,12 +133,6 @@ public class TransactionResourceIT {
                 .body("results[0].card_details.card_brand", is(transactionToVerify.getCardDetails().getCardBrand()))
                 .body("results[0].delayed_capture", is(transactionToVerify.getDelayedCapture()))
                 .body("results[0].charge_id", is(transactionToVerify.getExternalId()))
-                .body("results[0].links[0].href", containsString("v1/transaction/" + transactionToVerify.getExternalId()))
-                .body("results[0].links[0].method", is("GET"))
-                .body("results[0].links[0].rel", is("self"))
-                .body("results[0].links[1].href", containsString("v1/transaction/" + transactionToVerify.getExternalId() + "/refunds"))
-                .body("results[0].links[1].method", is("GET"))
-                .body("results[0].links[1].rel", is("refunds"))
 
                 .body("count", is(2))
                 .body("page", is(2))
