@@ -15,13 +15,13 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
-public class PaymentFactory {
+public class TransactionFactory {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PaymentFactory.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(TransactionFactory.class);
     private ObjectMapper objectMapper;
 
     @Inject
-    public PaymentFactory(ObjectMapper objectMapper) {
+    public TransactionFactory(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 

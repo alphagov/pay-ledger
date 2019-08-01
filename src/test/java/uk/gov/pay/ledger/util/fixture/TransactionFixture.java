@@ -9,8 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
-import uk.gov.pay.ledger.transaction.model.Payment;
-import uk.gov.pay.ledger.transaction.model.PaymentFactory;
+import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -76,8 +76,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return transactionList;
     }
 
-    public static List<Payment> aPersistedTransactionList(String gatewayAccountId, int noOfViews, Jdbi jdbi, boolean includeCardDeatils) {
-        List<Payment> transactionList = new ArrayList<>();
+    public static List<Transaction> aPersistedTransactionList(String gatewayAccountId, int noOfViews, Jdbi jdbi, boolean includeCardDeatils) {
+        List<Transaction> transactionList = new ArrayList<>();
         long preId = RandomUtils.nextLong();
         for (int i = 0; i < noOfViews; i++) {
             TransactionEntity entity = aTransactionFixture()
@@ -95,7 +95,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1L).plusMinutes(i))
                     .insert(jdbi)
                     .toEntity();
-            transactionList.add((Payment) new PaymentFactory(Jackson.newObjectMapper()).createTransactionEntity(entity));
+            transactionList.add(new TransactionFactory(Jackson.newObjectMapper()).createTransactionEntity(entity));
         }
         return transactionList;
     }

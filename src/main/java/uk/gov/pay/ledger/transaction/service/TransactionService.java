@@ -7,7 +7,7 @@ import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.model.PaymentFactory;
+import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionEvent;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
@@ -35,31 +35,31 @@ public class TransactionService {
     private final TransactionDao transactionDao;
     private final EventDao eventDao;
     private TransactionEntityFactory transactionEntityFactory;
-    private PaymentFactory paymentFactory;
+    private TransactionFactory transactionFactory;
 
     @Inject
     public TransactionService(TransactionDao transactionDao, EventDao eventDao, TransactionEntityFactory transactionEntityFactory,
-                              PaymentFactory paymentFactory) {
+                              TransactionFactory transactionFactory) {
         this.transactionDao = transactionDao;
         this.eventDao = eventDao;
         this.transactionEntityFactory = transactionEntityFactory;
-        this.paymentFactory = paymentFactory;
+        this.transactionFactory = transactionFactory;
     }
 
     public Optional<TransactionView> getTransactionForGatewayAccount(String gatewayAccountId, String transactionExternalId, UriInfo uriInfo) {
         return transactionDao.findTransactionByExternalIdAndGatewayAccountId(transactionExternalId, gatewayAccountId)
-                .map(entity -> decorateWithLinks(TransactionView.from(paymentFactory.createTransactionEntity(entity)), uriInfo));
+                .map(entity -> decorateWithLinks(TransactionView.from(transactionFactory.createTransactionEntity(entity)), uriInfo));
     }
 
     public Optional<TransactionView> getTransaction(String transactionExternalId, UriInfo uriInfo) {
         return transactionDao.findTransactionByExternalId(transactionExternalId)
-                .map(entity -> decorateWithLinks(TransactionView.from(paymentFactory.createTransactionEntity(entity)), uriInfo));
+                .map(entity -> decorateWithLinks(TransactionView.from(transactionFactory.createTransactionEntity(entity)), uriInfo));
     }
 
     public TransactionSearchResponse searchTransactions(TransactionSearchParams searchParams, UriInfo uriInfo) {
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams)
                 .stream()
-                .map(paymentFactory::createTransactionEntity)
+                .map(transactionFactory::createTransactionEntity)
                 .collect(Collectors.toList());
         Long total = transactionDao.getTotalForSearch(searchParams);
         PaginationBuilder paginationBuilder = new PaginationBuilder(searchParams, uriInfo);

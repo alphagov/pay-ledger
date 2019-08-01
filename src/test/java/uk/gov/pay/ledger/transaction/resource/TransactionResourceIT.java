@@ -7,6 +7,7 @@ import org.junit.Test;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.Payment;
+import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
@@ -89,8 +90,8 @@ public class TransactionResourceIT {
     @Test
     public void shouldSearchUsingAllFieldsAndReturnAllFieldsCorrectly() {
         String gatewayAccountId = RandomStringUtils.randomAlphanumeric(20);
-        List<Payment> transactionList = aPersistedTransactionList(gatewayAccountId, 10, rule.getJdbi(), true);
-        Payment transactionToVerify = transactionList.get(7);
+        List<Transaction> transactionList = aPersistedTransactionList(gatewayAccountId, 10, rule.getJdbi(), true);
+        Payment transactionToVerify = (Payment) transactionList.get(7);
         given().port(port)
                 .contentType(JSON)
                 //todo: add more query params (refund_states, payment_states...) when search functionality is available

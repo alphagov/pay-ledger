@@ -15,9 +15,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-public class PaymentFactoryTest {
+public class TransactionFactoryTest {
 
-    private PaymentFactory paymentFactory;
+    private TransactionFactory transactionFactory;
     private TransactionEntity fullDataObject;
     private TransactionEntity minimalDataObject;
 
@@ -113,12 +113,12 @@ public class PaymentFactoryTest {
                 .withRefundAmountAvailable(refundAmountAvailable)
                 .build();
 
-        paymentFactory = new PaymentFactory(Jackson.newObjectMapper());
+        transactionFactory = new TransactionFactory(Jackson.newObjectMapper());
     }
 
     @Test
     public void createsPaymentFromTransactionEntityWithFullData() {
-        var payment = (Payment) paymentFactory.createTransactionEntity(fullDataObject);
+        var payment = (Payment) transactionFactory.createTransactionEntity(fullDataObject);
 
         assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
         assertThat(payment.getAmount(), is(amount));
@@ -162,7 +162,7 @@ public class PaymentFactoryTest {
 
     @Test
     public void createsPaymentFromTransactionEntityWithMinimalData() {
-        var payment = (Payment) paymentFactory.createTransactionEntity(minimalDataObject);
+        var payment = (Payment) transactionFactory.createTransactionEntity(minimalDataObject);
 
         assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
         assertThat(payment.getAmount(), is(amount));
@@ -212,7 +212,7 @@ public class PaymentFactoryTest {
                 .withEventCount(eventCount)
                 .withTransactionDetails("{\"refunded_by\": \"some_user_id\"}")
                 .build();
-        var refundEntity = (Refund) paymentFactory.createTransactionEntity(refund);
+        var refundEntity = (Refund) transactionFactory.createTransactionEntity(refund);
 
         assertThat(refundEntity.getGatewayAccountId(), is(gatewayAccountId));
         assertThat(refundEntity.getAmount(), is(amount));
