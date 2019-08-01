@@ -279,7 +279,7 @@ public class TransactionServiceTest {
     }
 
     private void assertTransactionEvent(Event event, TransactionEvent transactionEvent, Long amount, String state) {
-        assertThat(transactionEvent.getState() == null ? null : transactionEvent.getState().getState(), is(state));
+        assertThat(transactionEvent.getState() == null ? null : transactionEvent.getState().getStatus(), is(state));
         assertThat(transactionEvent.getAmount(), is(amount));
         assertThat(transactionEvent.getData(), is(event.getEventData()));
         assertThat(transactionEvent.getEventType(), is(event.getEventType()));

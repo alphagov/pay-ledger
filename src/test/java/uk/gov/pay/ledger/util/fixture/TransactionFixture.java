@@ -295,7 +295,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         amount,
                         description,
                         reference,
-                        state.getState(),
+                        state.getStatus(),
                         email,
                         cardholderName,
                         externalMetadata,
@@ -353,7 +353,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withAmount(amount)
                 .withReference(reference)
                 .withDescription(description)
-                .withState(state.getState())
+                .withState(state.getStatus())
                 .withEmail(email)
                 .withCardholderName(cardholderName)
                 .withExternalMetadata(externalMetadata)
