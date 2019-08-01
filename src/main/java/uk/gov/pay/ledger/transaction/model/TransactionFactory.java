@@ -26,7 +26,7 @@ public class TransactionFactory {
     }
 
     public Transaction createTransactionEntity(TransactionEntity entity) {
-        if("REFUND".equals(entity.getTransactionType())) {
+        if ("REFUND".equals(entity.getTransactionType())) {
             return createRefund(entity);
         }
 
@@ -50,8 +50,9 @@ public class TransactionFactory {
                     safeGetAsString(transactionDetails, "card_expiry_date"));
 
             Map<String, Object> metadata = null;
-            if(entity.getExternalMetadata() != null) {
-                metadata = objectMapper.readValue(entity.getExternalMetadata(), new TypeReference<Map<String, Object>>() {});
+            if (entity.getExternalMetadata() != null) {
+                metadata = objectMapper.readValue(entity.getExternalMetadata(), new TypeReference<Map<String, Object>>() {
+                });
             }
 
             RefundSummary refundSummary = RefundSummary.from(entity);
@@ -76,9 +77,18 @@ public class TransactionFactory {
         try {
             JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
 
-            return new Refund(entity.getGatewayAccountId(), entity.getAmount(), entity.getReference(), entity.getDescription(),
-                    TransactionState.from(entity.getState()), entity.getExternalId(), entity.getCreatedDate(),
-                    entity.getEventCount(), safeGetAsString(transactionDetails, "refunded_by"));
+            return new Refund.Builder()
+                    .withGatewayAccountId(entity.getGatewayAccountId())
+                    .withAmount(entity.getAmount())
+                    .withReference(entity.getReference())
+                    .withDescription(entity.getDescription())
+                    .withState(TransactionState.from(entity.getState()))
+                    .withExternalId(entity.getExternalId())
+                    .withCreatedDate(entity.getCreatedDate())
+                    .withEventCount(entity.getEventCount())
+                    .withRefundedBy(safeGetAsString(transactionDetails, "refunded_by"))
+                    .build();
+
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
         }

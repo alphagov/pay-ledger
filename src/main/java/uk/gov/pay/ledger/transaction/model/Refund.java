@@ -12,15 +12,14 @@ public class Refund extends Transaction {
     private final Integer eventCount;
     private final String refundedBy;
 
-    public Refund(String gatewayAccountId, Long amount, String reference, String description, TransactionState state,
-                  String externalId, ZonedDateTime createdDate, Integer eventCount, String refundedBy) {
-        super(null, gatewayAccountId, amount, externalId);
-        this.reference = reference;
-        this.description = description;
-        this.state = state;
-        this.createdDate = createdDate;
-        this.eventCount = eventCount;
-        this.refundedBy = refundedBy;
+    public Refund(Builder builder) {
+        super(builder.id, builder.gatewayAccountId, builder.amount, builder.externalId);
+        this.reference = builder.reference;
+        this.description = builder.description;
+        this.state = builder.state;
+        this.createdDate = builder.createdDate;
+        this.eventCount = builder.eventCount;
+        this.refundedBy = builder.refundedBy;
     }
 
     public String getReference() {
@@ -45,5 +44,75 @@ public class Refund extends Transaction {
 
     public String getRefundedBy() {
         return refundedBy;
+    }
+
+    public static class Builder {
+        private String reference;
+        private String description;
+        private TransactionState state;
+        private ZonedDateTime createdDate;
+        private Integer eventCount;
+        private String refundedBy;
+        private Long id;
+        private String gatewayAccountId;
+        private Long amount;
+        private String externalId;
+
+        public Builder() {
+        }
+
+        public Refund build() {
+            return new Refund(this);
+        }
+
+        public Builder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withGatewayAccountId(String gatewayAccountId) {
+            this.gatewayAccountId = gatewayAccountId;
+            return this;
+        }
+
+        public Builder withAmount(Long amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public Builder withExternalId(String externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
+        public Builder withReference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder withState(TransactionState state) {
+            this.state = state;
+            return this;
+        }
+
+        public Builder withCreatedDate(ZonedDateTime createdDate) {
+            this.createdDate = createdDate;
+            return this;
+        }
+
+        public Builder withEventCount(Integer eventCount) {
+            this.eventCount = eventCount;
+            return this;
+        }
+
+        public Builder withRefundedBy(String refundedBy) {
+            this.refundedBy = refundedBy;
+            return this;
+        }
     }
 }
