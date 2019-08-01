@@ -18,30 +18,41 @@ public enum TransactionState {
     CREATED("created", false),
     STARTED("started", false),
     SUBMITTED("submitted", false),
+    CAPTURABLE("capturable", false),
     SUCCESS("success", true),
-    FAILED_REJECTED("declined", true),
-    FAILED_EXPIRED("timedout", true),
-    FAILED_CANCELLED("cancelled", true),
-    CANCELLED("cancelled", true),
-    ERROR_GATEWAY("error", true),
-    ERROR("error", true);
+    FAILED_REJECTED("failed", "declined", true, "P0010", "Payment method rejected"),
+    FAILED_EXPIRED("failed", "timedout", true, "P0020", "Payment expired"),
+    FAILED_CANCELLED("failed", "cancelled", true, "P0030", "Payment was cancelled by the user"),
+    CANCELLED("cancelled", "cancelled", true, "P0040", "Payment was cancelled by the service"),
+    ERROR("error", "error", true, "P0050", "Payment provider returned an error"),
+    ERROR_GATEWAY("error", "error", true, "P0050", "Payment provider returned an error");
 
-    private final String value;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionState.class);
+
+    private final String status;
+    private final String newStatus;
     private final boolean finished;
     private final String code;
     private final String message;
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionState.class);
 
-    TransactionState(String value, boolean finished) {
-        this.value = value;
+    TransactionState(String status, boolean finished) {
+        this.status = status;
+        this.newStatus = status;
         this.finished = finished;
         this.code = null;
         this.message = null;
     }
 
-    @JsonProperty("status")
-    public String getState() {
-        return value;
+    TransactionState(String status, String newStatus, boolean finished, String code, String message) {
+        this.status = status;
+        this.newStatus = newStatus;
+        this.finished = finished;
+        this.code = code;
+        this.message = message;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     @JsonProperty("finished")
@@ -56,6 +67,7 @@ public enum TransactionState {
     public String getMessage() {
         return message;
     }
+
 
     private static final Map<SalientEventType, TransactionState> EVENT_TYPE_TRANSACTION_STATE_MAP =
             Map.ofEntries(
@@ -97,7 +109,7 @@ public enum TransactionState {
     }
 
     public static TransactionState from(String transactionState) {
-        return stream(values()).filter(v -> v.getState().equals(transactionState)).findFirst()
+        return stream(values()).filter(v -> v.getStatus().equals(transactionState)).findFirst()
                 .orElseGet(() -> {
                     LOGGER.warn("Unknown transaction state {}", transactionState);
                     return null;
