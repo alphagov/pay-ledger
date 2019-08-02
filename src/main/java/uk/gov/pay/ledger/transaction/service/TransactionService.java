@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
@@ -34,14 +35,17 @@ public class TransactionService {
     private final EventDao eventDao;
     private TransactionEntityFactory transactionEntityFactory;
     private TransactionFactory transactionFactory;
+    private ObjectMapper objectMapper;
 
     @Inject
     public TransactionService(TransactionDao transactionDao, EventDao eventDao, TransactionEntityFactory transactionEntityFactory,
-                              TransactionFactory transactionFactory) {
+                              TransactionFactory transactionFactory,
+                              ObjectMapper objectMapper) {
         this.transactionDao = transactionDao;
         this.eventDao = eventDao;
         this.transactionEntityFactory = transactionEntityFactory;
         this.transactionFactory = transactionFactory;
+        this.objectMapper = objectMapper;
     }
 
     public Optional<TransactionView> getTransactionForGatewayAccount(String gatewayAccountId, String transactionExternalId) {
@@ -117,7 +121,7 @@ public class TransactionService {
 
     private List<TransactionEvent> mapToTransactionEvent(Map<String, TransactionEntity> transactionEntityMap, List<Event> eventList) {
         return eventList.stream()
-                .map(event -> TransactionEvent.from(transactionEntityMap.get(event.getResourceExternalId()), event))
+                .map(event -> TransactionEvent.from(transactionEntityMap.get(event.getResourceExternalId()), event, objectMapper))
                 .collect(Collectors.toList());
     }
 

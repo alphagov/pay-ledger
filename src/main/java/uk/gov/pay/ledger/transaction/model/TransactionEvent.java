@@ -1,9 +1,13 @@
 package uk.gov.pay.ledger.transaction.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
@@ -11,10 +15,14 @@ import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TransactionEvent {
+
+    private static Logger logger = LoggerFactory.getLogger(TransactionFactory.class);
 
     @JsonIgnore
     private final String externalId;
@@ -24,7 +32,7 @@ public class TransactionEvent {
     private final String eventType;
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private final ZonedDateTime timestamp;
-    private final String data;
+    private final Map<String, Object> data;
 
     private TransactionEvent(TransactionEventBuilder builder) {
         this.externalId = builder.externalId;
@@ -36,15 +44,23 @@ public class TransactionEvent {
         this.data = builder.data;
     }
 
-    public static TransactionEvent from(TransactionEntity transactionEntity, Event event) {
-        return TransactionEventBuilder.aTransactionEvent()
-                .withExternalId(transactionEntity.getExternalId())
-                .withAmount(transactionEntity.getAmount())
-                .withState(SalientEventType.from(event.getEventType()).map(TransactionState::fromEventType).orElse(null))
-                .withResourceType(event.getResourceType())
-                .withEventType(event.getEventType())
-                .withTimestamp(event.getEventDate())
-                .withData(event.getEventData()).build();
+    public static TransactionEvent from(TransactionEntity transactionEntity, Event event, ObjectMapper objectMapper) {
+        try {
+            return TransactionEventBuilder.aTransactionEvent()
+                    .withExternalId(transactionEntity.getExternalId())
+                    .withAmount(transactionEntity.getAmount())
+                    .withState(SalientEventType.from(event.getEventType()).map(TransactionState::fromEventType).orElse(null))
+                    .withResourceType(event.getResourceType())
+                    .withEventType(event.getEventType())
+                    .withTimestamp(event.getEventDate())
+                    .withData(objectMapper.readValue(event.getEventData(), new TypeReference<Map<String, Object>>() {
+                    })).build();
+        } catch (IOException e) {
+            logger.error("Error parsing transaction event data [Transaction external ID - {}] [errorMessage={}]",
+                    transactionEntity.getExternalId(),
+                    e.getMessage());
+        }
+        return null;
     }
 
     public String getExternalId() {
@@ -71,7 +87,7 @@ public class TransactionEvent {
         return timestamp;
     }
 
-    public String getData() {
+    public Map<String, Object> getData() {
         return data;
     }
 
@@ -82,7 +98,7 @@ public class TransactionEvent {
         private ResourceType resourceType;
         private String eventType;
         private ZonedDateTime timestamp;
-        private String data;
+        private Map<String, Object> data;
 
         private TransactionEventBuilder() {
         }
@@ -121,7 +137,7 @@ public class TransactionEvent {
             return this;
         }
 
-        TransactionEventBuilder withData(String data) {
+        TransactionEventBuilder withData(Map<String, Object> data) {
             this.data = data;
             return this;
         }

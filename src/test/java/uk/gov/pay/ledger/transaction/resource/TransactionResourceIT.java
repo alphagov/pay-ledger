@@ -172,7 +172,7 @@ public class TransactionResourceIT {
                 .body("events[0].resource_type", is("PAYMENT"))
                 .body("events[0].event_type", is(event.getEventType()))
                 .body("events[0].timestamp", is("2019-07-31T09:52:43.451Z"))
-                .body("events[0].data", is(event.getEventData()));
+                .body("events[0].data.event_data", is("event data"));
     }
 
     @Test
