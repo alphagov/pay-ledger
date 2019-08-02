@@ -245,49 +245,48 @@ public class TransactionSearchParams {
     }
 
     public String buildQueryParamString(Long forPage) {
-        String query = GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + accountId;
+        StringBuilder sb = new StringBuilder(GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + accountId);
 
         if (fromDate != null) {
-            query += "&" + FROM_DATE_FIELD + "=" + fromDate;
+            sb.append("&" + FROM_DATE_FIELD + "=" + fromDate);
         }
         if (toDate != null) {
-            query += "&" + TO_DATE_FIELD + "=" + toDate;
+            sb.append("&" + TO_DATE_FIELD + "=" + toDate);
         }
 
         if (isNotBlank(email)) {
-            query += "&" + EMAIL_FIELD + "=" + email;
+            sb.append("&" + EMAIL_FIELD + "=" + email);
         }
         if (isNotBlank(reference)) {
-            query += "&" + REFERENCE_FIELD + "=" + reference;
+            sb.append("&" + REFERENCE_FIELD + "=" + reference);
         }
         if (isNotBlank(cardHolderName)) {
-            query += "&" + CARDHOLDER_NAME_FIELD + "=" + cardHolderName;
+            sb.append("&" + CARDHOLDER_NAME_FIELD + "=" + cardHolderName);
         }
         if (isNotBlank(firstDigitsCardNumber)) {
-            query += "&" + FIRST_DIGITS_CARD_NUMBER_FIELD + "=" + firstDigitsCardNumber;
+            sb.append("&" + FIRST_DIGITS_CARD_NUMBER_FIELD + "=" + firstDigitsCardNumber);
         }
         if (isNotBlank(lastDigitsCardNumber)) {
-            query += "&" + LAST_DIGITS_CARD_NUMBER_FIELD + "=" + lastDigitsCardNumber;
+            sb.append("&" + LAST_DIGITS_CARD_NUMBER_FIELD + "=" + lastDigitsCardNumber);
         }
         if (paymentStates != null && !paymentStates.isEmpty()) {
-            query += "&" + PAYMENT_STATES_FIELD + "=" + paymentStates.getRawString();
+            sb.append("&" + PAYMENT_STATES_FIELD + "=" + paymentStates.getRawString());
         }
         if (refundStates != null && !refundStates.isEmpty()) {
-            query += "&" + REFUND_STATES_FIELD + "=" + refundStates.getRawString();
+            sb.append("&" + REFUND_STATES_FIELD + "=" + refundStates.getRawString());
         }
         if (cardBrands != null && !cardBrands.isEmpty()) {
-            query += "&" + CARD_BRAND_FIELD + "=" + cardBrands.getRawString();
+            sb.append("&" + CARD_BRAND_FIELD + "=" + cardBrands.getRawString());
         }
         if (isNotBlank(state)) {
-            query += "&" + STATE_FIELD + "=" + state;
+            sb.append("&" + STATE_FIELD + "=" + state);
         }
         if(transactionType != null) {
-            query += "&" + TRANSACTION_TYPE_FIELD + "=" + transactionType;
+            sb.append("&" + TRANSACTION_TYPE_FIELD + "=" + transactionType);
         }
-        //todo: potentially replace the whole shebang with string builder (efficient doh!)
 
-        query += addPaginationParams(forPage);
-        return query;
+        sb.append(addPaginationParams(forPage));
+        return sb.toString();
     }
 
     private Long getOffset() {
@@ -309,6 +308,4 @@ public class TransactionSearchParams {
         queryParams += format("&display_size=%s", displaySize.intValue());
         return queryParams;
     }
-
-
 }

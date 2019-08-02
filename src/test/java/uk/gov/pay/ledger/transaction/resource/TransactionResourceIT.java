@@ -113,7 +113,6 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("count", is(2))
                 .body("results[0].gateway_account_id", is(transactionToVerify.getGatewayAccountId()))
                 .body("results[0].amount", is(transactionToVerify.getAmount().intValue()))
                 .body("results[0].state.finished", is(false))
