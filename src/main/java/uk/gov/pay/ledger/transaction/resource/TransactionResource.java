@@ -44,13 +44,12 @@ public class TransactionResource {
     @Timed
     public TransactionView getById(@PathParam("transactionExternalId") String transactionExternalId,
                                    @QueryParam("account_id") String gatewayAccountId,
-                                   @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
-                                   @Context UriInfo uriInfo) {
+                                   @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
 
         return AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId)
-                .withSupplier((accountId) -> transactionService.getTransactionForGatewayAccount(accountId, transactionExternalId, uriInfo))
-                .withPrivilegedSupplier(() -> transactionService.getTransaction(transactionExternalId, uriInfo))
+                .withSupplier((accountId) -> transactionService.getTransactionForGatewayAccount(accountId, transactionExternalId))
+                .withPrivilegedSupplier(() -> transactionService.getTransaction(transactionExternalId))
                 .validateAndGet()
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }

@@ -7,14 +7,12 @@ import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionEvent;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
+import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
-import uk.gov.pay.ledger.transaction.search.common.HalLinkBuilder;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
-import uk.gov.pay.ledger.transaction.search.model.Link;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
@@ -46,14 +44,14 @@ public class TransactionService {
         this.transactionFactory = transactionFactory;
     }
 
-    public Optional<TransactionView> getTransactionForGatewayAccount(String gatewayAccountId, String transactionExternalId, UriInfo uriInfo) {
+    public Optional<TransactionView> getTransactionForGatewayAccount(String gatewayAccountId, String transactionExternalId) {
         return transactionDao.findTransactionByExternalIdAndGatewayAccountId(transactionExternalId, gatewayAccountId)
-                .map(entity -> decorateWithLinks(TransactionView.from(transactionFactory.createTransactionEntity(entity)), uriInfo));
+                .map(entity -> TransactionView.from(transactionFactory.createTransactionEntity(entity)));
     }
 
-    public Optional<TransactionView> getTransaction(String transactionExternalId, UriInfo uriInfo) {
+    public Optional<TransactionView> getTransaction(String transactionExternalId) {
         return transactionDao.findTransactionByExternalId(transactionExternalId)
-                .map(entity -> decorateWithLinks(TransactionView.from(transactionFactory.createTransactionEntity(entity)), uriInfo));
+                .map(entity -> TransactionView.from(transactionFactory.createTransactionEntity(entity)));
     }
 
     public TransactionSearchResponse searchTransactions(TransactionSearchParams searchParams, UriInfo uriInfo) {
@@ -65,7 +63,7 @@ public class TransactionService {
         PaginationBuilder paginationBuilder = new PaginationBuilder(searchParams, uriInfo);
         paginationBuilder = paginationBuilder.withTotalCount(total).buildResponse();
 
-        List<TransactionView> transactionViewList = mapToTransactionViewList(transactionList, searchParams, uriInfo);
+        List<TransactionView> transactionViewList = mapToTransactionViewList(transactionList);
 
         return new TransactionSearchResponse(searchParams.getAccountId(),
                 total,
@@ -75,25 +73,10 @@ public class TransactionService {
         ).withPaginationBuilder(paginationBuilder);
     }
 
-    private List<TransactionView> mapToTransactionViewList(List<Transaction> transactionList, TransactionSearchParams searchParams,
-                                                           UriInfo uriInfo) {
+    private List<TransactionView> mapToTransactionViewList(List<Transaction> transactionList) {
         return transactionList.stream()
-                .map(transaction -> decorateWithLinks(TransactionView.from(transaction),
-                        uriInfo))
+                .map(transaction -> TransactionView.from(transaction))
                 .collect(Collectors.toList());
-    }
-
-    private TransactionView decorateWithLinks(TransactionView transactionView,
-                                              UriInfo uriInfo) {
-        Link selfLink = HalLinkBuilder.createSelfLink(uriInfo, "/v1/transaction/{externalId}",
-                transactionView.getExternalId());
-        transactionView.addLink(selfLink);
-
-        Link refundsLink = HalLinkBuilder.createRefundsLink(uriInfo, "/v1/transaction/{externalId}/refunds",
-                transactionView.getExternalId());
-        transactionView.addLink(refundsLink);
-
-        return transactionView;
     }
 
     // @TODO(sfount) handling writing invalid transaction should be tested at `EventMessageHandler` integration level
