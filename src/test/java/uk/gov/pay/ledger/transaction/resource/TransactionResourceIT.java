@@ -61,6 +61,35 @@ public class TransactionResourceIT {
     }
 
     @Test
+    public void shouldGetAllTransactionsForAmbiguousExternalState() {
+
+        TransactionFixture cancelledTransaction1 = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withGatewayAccountId("123")
+                .withDefaultTransactionDetails()
+                .withState(TransactionState.FAILED_CANCELLED)
+                .insert(rule.getJdbi());
+        TransactionFixture cancelledTransaction2 =  aTransactionFixture()
+                .withGatewayAccountId("123")
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails()
+                .withState(TransactionState.CANCELLED)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction" +
+                        "?account_id=123" +
+                        "&state=cancelled"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("results[0].transaction_id", is(cancelledTransaction2.getExternalId()))
+                .body("results[1].transaction_id", is(cancelledTransaction1.getExternalId()));
+    }
+
+    @Test
     public void shouldGetRefundTransaction() {
         var now = ZonedDateTime.parse("2019-07-31T14:52:07.073Z");
         var refundedBy = "some_user_id";

@@ -51,7 +51,7 @@ public class TransactionEntityFactoryTest {
         TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
 
         assertThat(transactionEntity.getExternalId(), is(eventDigest.getResourceExternalId()));
-        assertThat(transactionEntity.getState(), is("created"));
+        assertThat(transactionEntity.getState().toString(), is("CREATED"));
         assertThat(transactionEntity.getCreatedDate(), is(paymentCreatedEvent.getEventDate()));
         assertThat(transactionEntity.getEventCount(), is(eventDigest.getEventCount()));
         assertThat(transactionEntity.getReference(), is(eventDigest.getEventPayload().get("reference")));
@@ -111,7 +111,7 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getTransactionType(), is("REFUND"));
         assertThat(transactionEntity.getParentExternalId(), is(eventDigest.getParentResourceExternalId()));
         assertThat(transactionEntity.getParentExternalId(), is(parentResourceExternalId));
-        assertThat(transactionEntity.getState(), is("submitted"));
+        assertThat(transactionEntity.getState().toString(), is("SUBMITTED"));
         assertThat(transactionEntity.getAmount(), is(1000L));
 
         Map<String, String> transactionDetails = objectMapper.readValue(transactionEntity.getTransactionDetails(), Map.class);
@@ -128,6 +128,6 @@ public class TransactionEntityFactoryTest {
         EventDigest eventDigest = EventDigest.fromEventList(List.of(secondNonSalientEvent, paymentStartedEvent, nonSalientEvent, paymentCreatedEvent));
         TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
 
-        assertThat(transactionEntity.getState(), is("started"));
+        assertThat(transactionEntity.getState().toString(), is("STARTED"));
     }
 }

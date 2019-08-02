@@ -3,13 +3,16 @@ package uk.gov.pay.ledger.transaction.search.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.lang.String.join;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionSearchParams {
@@ -158,13 +161,13 @@ public class TransactionSearchParams {
             //TODO implement
         }
         if (isNotBlank(state)) {
-            sb.append(" AND t.state = :" + STATE_FIELD);
+            sb.append(" AND t.state IN (<" + STATE_FIELD + ">)");
         }
         if (refundStates != null) {
             //TODO implement
         }
         if (cardBrands != null && !cardBrands.isEmpty()) {
-            sb.append(" AND t.card_brand IN(<" + CARD_BRAND_FIELD + ">)");
+            sb.append(" AND t.card_brand IN (<" + CARD_BRAND_FIELD + ">)");
         }
         if (isNotBlank(lastDigitsCardNumber)) {
             sb.append(" AND t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD);
@@ -202,7 +205,9 @@ public class TransactionSearchParams {
                 queryMap.put(TO_DATE_FIELD, ZonedDateTime.parse(toDate));
             }
             if (isNotBlank(state)) {
-                queryMap.put(STATE_FIELD, state);
+                queryMap.put(STATE_FIELD, TransactionState.getStatesForStatus(state).stream()
+                        .map(TransactionState::name)
+                        .collect(Collectors.toList()));
             }
             if (cardBrands != null && !cardBrands.isEmpty()) {
                 queryMap.put(CARD_BRAND_FIELD, cardBrands.getParameters());

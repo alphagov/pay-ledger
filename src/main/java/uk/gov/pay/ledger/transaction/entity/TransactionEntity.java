@@ -2,9 +2,9 @@ package uk.gov.pay.ledger.transaction.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
 
@@ -22,7 +22,7 @@ public class TransactionEntity {
     private Long amount;
     private String reference;
     private String description;
-    private String state;
+    private TransactionState state;
     private String email;
     private String cardholderName;
     private String externalMetadata;
@@ -106,7 +106,7 @@ public class TransactionEntity {
         return description;
     }
 
-    public String getState() {
+    public TransactionState getState() {
         return state;
     }
 
@@ -154,7 +154,7 @@ public class TransactionEntity {
         this.eventCount = eventCount;
     }
 
-    public void setState(String state) {
+    public void setState(TransactionState state) {
         this.state = state;
     }
 
@@ -211,7 +211,7 @@ public class TransactionEntity {
     }
 
     public static class Builder {
-        public Long fee;
+        private Long fee;
         private Long id;
         private String gatewayAccountId;
         private String externalId;
@@ -219,7 +219,7 @@ public class TransactionEntity {
         private Long amount;
         private String reference;
         private String description;
-        private String state;
+        private TransactionState state;
         private String email;
         private String cardholderName;
         private String externalMetadata;
@@ -280,7 +280,7 @@ public class TransactionEntity {
             return this;
         }
 
-        public Builder withState(String state) {
+        public Builder withState(TransactionState state) {
             this.state = state;
             return this;
         }

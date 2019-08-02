@@ -27,7 +27,7 @@ public class TransactionFactoryTest {
     private Long amount = 100L;
     private String reference = "ref_237156782465";
     private String description = "test description";
-    private String state = "created";
+    private TransactionState state = TransactionState.valueOf("CREATED");
     private String email = "test@email.com";
     private String cardholderName = "M Jan Kowalski";
     private String fullExternalMetadata = "{\"ledger_code\":123, \"some_key\":\"key\"}";
@@ -125,7 +125,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getExternalId(), is(externalId));
         assertThat(payment.getReference(), is(reference));
         assertThat(payment.getDescription(), is(description));
-        assertThat(payment.getState(), is(TransactionState.from(state)));
+        assertThat(payment.getState(), is(state));
         assertThat(payment.getLanguage(), is("en"));
         assertThat(payment.getReturnUrl(), is("https://test.url.com"));
         assertThat(payment.getEmail(), is(email));
@@ -169,7 +169,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getExternalId(), is(externalId));
         assertThat(payment.getReference(), is(reference));
         assertThat(payment.getDescription(), is(description));
-        assertThat(payment.getState(), is(TransactionState.from(state)));
+        assertThat(payment.getState(), is(state));
         assertThat(payment.getLanguage(), nullValue());
         assertThat(payment.getReturnUrl(), nullValue());
         assertThat(payment.getEmail(), is(email));
@@ -219,7 +219,7 @@ public class TransactionFactoryTest {
         assertThat(refundEntity.getExternalId(), is(externalId));
         assertThat(refundEntity.getRefundedBy(), is("some_user_id"));
         assertThat(refundEntity.getReference(), is(reference));
-        assertThat(refundEntity.getState(), is(TransactionState.from(state)));
+        assertThat(refundEntity.getState(), is(state));
         assertThat(refundEntity.getCreatedDate(), is(createdDate));
         assertThat(refundEntity.getEventCount(), is(eventCount));
 
