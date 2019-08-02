@@ -48,7 +48,6 @@ public class TransactionView {
     private SettlementSummary settlementSummary;
     private Map<String, Object> metadata;
     private String refundedBy;
-    private List<Link> links = new ArrayList<>();
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -123,11 +122,6 @@ public class TransactionView {
                 .build();
     }
 
-    public TransactionView addLink(Link link) {
-        links.add(link);
-        return this;
-    }
-
     public Long getId() {
         return id;
     }
@@ -183,10 +177,6 @@ public class TransactionView {
 
     public Boolean getDelayedCapture() {
         return delayedCapture;
-    }
-
-    public List<Link> getLinks() {
-        return links;
     }
 
     public String getGatewayTransactionId() {
