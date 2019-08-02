@@ -161,11 +161,6 @@ public class TransactionView {
         return externalId;
     }
 
-    @JsonProperty("charge_id")
-    public String getExternalId() {
-        return externalId;
-    }
-
     public String getReturnUrl() {
         return returnUrl;
     }
