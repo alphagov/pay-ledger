@@ -92,6 +92,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     .withLastDigitsCardNumber("1234")
                     .withDefaultTransactionDetails()
                     .withCardBrand(i % 2 == 0 ? "visa" : "mastercard")
+                    .withTransactionType(i % 2 == 0 ? "REFUND" : "PAYMENT")
                     .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1L).plusMinutes(i))
                     .insert(jdbi)
                     .toEntity();

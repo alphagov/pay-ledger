@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.transaction.search.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
@@ -29,6 +30,7 @@ public class TransactionSearchParams {
     private static final String REFUND_STATES_FIELD = "refund_states";
     private static final String CARD_BRAND_FIELD = "card_brand";
     private static final String STATE_FIELD = "state";
+    private static final String TRANSACTION_TYPE_FIELD = "transaction_type";
     private static final long MAX_DISPLAY_SIZE = 500;
     private static final long DEFAULT_PAGE_NUMBER = 1L;
 
@@ -56,6 +58,8 @@ public class TransactionSearchParams {
     private String fromDate;
     @QueryParam("to_date")
     private String toDate;
+    @QueryParam(TRANSACTION_TYPE_FIELD)
+    private TransactionType transactionType;
     private Long pageNumber = 1L;
     private Long displaySize = MAX_DISPLAY_SIZE;
     private Map<String, Object> queryMap;
@@ -92,7 +96,7 @@ public class TransactionSearchParams {
         this.refundStates = refundStates;
     }
 
-    public void setCardBrands(CommaDelimitedSetParameter  cardBrands) {
+    public void setCardBrands(CommaDelimitedSetParameter cardBrands) {
         this.cardBrands = cardBrands;
     }
 
@@ -106,6 +110,10 @@ public class TransactionSearchParams {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public void setTransactionType(TransactionType transactionType) {
+        this.transactionType = transactionType;
     }
 
     @QueryParam("page")
@@ -164,6 +172,9 @@ public class TransactionSearchParams {
         if (isNotBlank(firstDigitsCardNumber)) {
             sb.append(" AND t.first_digits_card_number = :" + FIRST_DIGITS_CARD_NUMBER_FIELD);
         }
+        if (transactionType != null) {
+            sb.append(" AND t.type = :" + TRANSACTION_TYPE_FIELD + "::transaction_type");
+        }
 
         return sb.toString();
     }
@@ -202,6 +213,9 @@ public class TransactionSearchParams {
             if (isNotBlank(firstDigitsCardNumber)) {
                 queryMap.put(FIRST_DIGITS_CARD_NUMBER_FIELD, firstDigitsCardNumber);
             }
+            if (transactionType != null) {
+                queryMap.put(TRANSACTION_TYPE_FIELD, transactionType);
+            }
         }
         return queryMap;
     }
@@ -224,6 +238,10 @@ public class TransactionSearchParams {
 
     public String getToDate() {
         return toDate;
+    }
+
+    public TransactionType getTransactionType() {
+        return transactionType;
     }
 
     public String buildQueryParamString(Long forPage) {
@@ -263,6 +281,10 @@ public class TransactionSearchParams {
         if (isNotBlank(state)) {
             query += "&" + STATE_FIELD + "=" + state;
         }
+        if(transactionType != null) {
+            query += "&" + TRANSACTION_TYPE_FIELD + "=" + transactionType;
+        }
+        //todo: potentially replace the whole shebang with string builder (efficient doh!)
 
         query += addPaginationParams(forPage);
         return query;
@@ -287,4 +309,6 @@ public class TransactionSearchParams {
         queryParams += format("&display_size=%s", displaySize.intValue());
         return queryParams;
     }
+
+
 }

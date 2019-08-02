@@ -9,7 +9,9 @@ import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -66,5 +68,19 @@ public class TransactionResourceTest {
     public void shouldReturn400IfTransactionGatewayAccountIdIsNotProvidedForSearch() {
         Response response = resources.target("/v1/transaction/").request().get();
         assertThat(response.getStatus(), is(400));
+    }
+
+    @Test
+    public void shouldReturn400IfTransactionTypeIsNotCorrectForSearch() {
+        Response response = resources
+                .target("/v1/transaction")
+                .queryParam("account_id", "666")
+                .queryParam("transaction_type", "not_existing_transaction_type")
+                .request()
+                .get();
+
+        var responseMessage = response.readEntity(new GenericType< HashMap >(){});
+        assertThat(response.getStatus(), is(400));
+        assertThat(responseMessage.get("message"), is("query param transaction_type must be one of [PAYMENT, REFUND]"));
     }
 }
