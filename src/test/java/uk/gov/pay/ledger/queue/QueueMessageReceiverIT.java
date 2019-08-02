@@ -50,7 +50,7 @@ public class QueueMessageReceiverIT {
                 .get("/v1/transaction/" + resourceExternalId + "?account_id=" + gatewayAccountId)
                 .then()
                 .statusCode(200)
-                .body("charge_id", is(resourceExternalId))
+                .body("transaction_id", is(resourceExternalId))
                 .body("state.status", is("submitted"));
     }
 
@@ -89,7 +89,7 @@ public class QueueMessageReceiverIT {
                 .get("/v1/transaction/" + resourceExternalId2 + "?account_id=" + secondResource.getGatewayAccountId())
                 .then()
                 .statusCode(200)
-                .body("charge_id", is(resourceExternalId2))
+                .body("transaction_id", is(resourceExternalId2))
                 .body("state.status", is("created"));
     }
 
@@ -123,7 +123,7 @@ public class QueueMessageReceiverIT {
                 .get("/v1/transaction/" + resourceExternalId + "?account_id=" + gatewayAccountId)
                 .then()
                 .statusCode(200)
-                .body("charge_id", is(resourceExternalId))
+                .body("transaction_id", is(resourceExternalId))
                 .body("state.status", is("submitted"));
     }
 
@@ -152,7 +152,7 @@ public class QueueMessageReceiverIT {
                 .get("/v1/transaction/" + resourceExternalId + "?account_id=" + gatewayAccountId)
                 .then()
                 .statusCode(200)
-                .body("charge_id", is(resourceExternalId))
+                .body("transaction_id", is(resourceExternalId))
                 .body("refund_summary.amount_available", is(200));
     }
 }
