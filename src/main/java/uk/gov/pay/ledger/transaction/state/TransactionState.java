@@ -17,6 +17,7 @@ import static java.util.Arrays.stream;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum TransactionState {
 
+    UNDEFINED("undefined", false),
     CREATED("created", false),
     STARTED("started", false),
     SUBMITTED("submitted", false),

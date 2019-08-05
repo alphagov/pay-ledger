@@ -51,7 +51,7 @@ public class EventDigest {
                 .map(e -> SalientEventType.from(e.getEventType()))
                 .flatMap(Optional::stream)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No supported external state transition events found for digest"));
+                .orElse(null);
 
         var earliestDate = events.stream()
                 .map(Event::getEventDate)
@@ -101,8 +101,8 @@ public class EventDigest {
         return parentResourceExternalId;
     }
 
-    public SalientEventType getMostRecentSalientEventType() {
-        return mostRecentSalientEventType;
+    public Optional<SalientEventType> getMostRecentSalientEventType() {
+        return Optional.ofNullable(mostRecentSalientEventType);
     }
 
     public Map<String, Object> getEventPayload() {

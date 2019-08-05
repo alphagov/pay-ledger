@@ -130,4 +130,14 @@ public class TransactionEntityFactoryTest {
 
         assertThat(transactionEntity.getState().toString(), is("STARTED"));
     }
+
+    @Test
+    public void create_ShouldSetUndefinedStateForNoSalientEventTypes() {
+        Event paymentDetailsEntered = aQueuePaymentEventFixture().withEventType("PAYMENT_DETAILS_ENTERED").toEntity();
+
+        EventDigest eventDigest = EventDigest.fromEventList(List.of(paymentDetailsEntered));
+        TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
+
+        assertThat(transactionEntity.getState().toString(), is("UNDEFINED"));
+    }
 }
