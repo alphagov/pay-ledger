@@ -42,16 +42,53 @@ public class TransactionDao {
 
     private static final String UPSERT_STRING =
             "INSERT INTO transaction(" +
-                "external_id,parent_external_id,gateway_account_id,amount,description,reference,state,email,cardholder_name," +
-                "created_date,transaction_details,event_count,card_brand, " +
-                "last_digits_card_number,first_digits_card_number,net_amount,total_amount,fee,type,refund_amount_available," +
-                    "refund_amount_refunded, refund_status" +
+                    "external_id," +
+                    "parent_external_id," +
+                    "gateway_account_id,amount," +
+                    "description," +
+                    "reference,state," +
+                    "email," +
+                    "cardholder_name," +
+                    "external_metadata," +
+                    "created_date," +
+                    "transaction_details," +
+                    "event_count," +
+                    "card_brand, " +
+                    "last_digits_card_number," +
+                    "first_digits_card_number," +
+                    "net_amount," +
+                    "total_amount," +
+                    "fee,type," +
+                    "refund_amount_available," +
+                    "refund_amount_refunded, " +
+                    "refund_status," +
+                    "capture_submitted_date" +
             ") " +
             "VALUES (" +
-                ":externalId,:parentExternalId,:gatewayAccountId,:amount,:description,:reference,:state,:email,:cardholderName," +
-                ":createdDate,CAST(:transactionDetails as jsonb), :eventCount," +
-                ":cardBrand,:lastDigitsCardNumber,:firstDigitsCardNumber,:netAmount,:totalAmount,:fee," +
-                ":transactionType::transaction_type,:refundAmountAvailable,:refundAmountRefunded,:refundStatus" +
+                    ":externalId," +
+                    ":parentExternalId," +
+                    ":gatewayAccountId," +
+                    ":amount," +
+                    ":description," +
+                    ":reference," +
+                    ":state," +
+                    ":email," +
+                    ":cardholderName," +
+                    "CAST(:externalMetadata as jsonb)," +
+                    ":createdDate," +
+                    "CAST(:transactionDetails as jsonb)," +
+                    ":eventCount," +
+                    ":cardBrand," +
+                    ":lastDigitsCardNumber," +
+                    ":firstDigitsCardNumber," +
+                    ":netAmount," +
+                    ":totalAmount," +
+                    ":fee," +
+                    ":transactionType::transaction_type," +
+                    ":refundAmountAvailable," +
+                    ":refundAmountRefunded," +
+                    ":refundStatus," +
+                    ":captureSubmittedDate" +
             ") " +
             "ON CONFLICT (external_id) " +
             "DO UPDATE SET " +
@@ -77,6 +114,7 @@ public class TransactionDao {
                 "refund_amount_available = EXCLUDED.refund_amount_available, " +
                 "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
                 "refund_status = EXCLUDED.refund_status " +
+                "capture_submitted_date = EXCLUDED.capture_submitted_date " +
             "WHERE EXCLUDED.event_count > transaction.event_count;";
 
     private final Jdbi jdbi;

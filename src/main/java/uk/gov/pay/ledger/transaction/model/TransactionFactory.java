@@ -56,7 +56,7 @@ public class TransactionFactory {
             }
 
             RefundSummary refundSummary = RefundSummary.from(entity);
-            SettlementSummary settlementSummary = new SettlementSummary(entity.getSettlementSubmittedTime(), entity.getSettledTime());
+            SettlementSummary settlementSummary = new SettlementSummary(entity.getCaptureSubmittedDate(), entity.getSettledTime());
 
             return new Payment(
                     entity.getGatewayAccountId(),

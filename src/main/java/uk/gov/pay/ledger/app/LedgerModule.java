@@ -5,6 +5,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -33,6 +34,15 @@ public class LedgerModule extends AbstractModule {
     protected void configure() {
         bind(LedgerConfig.class).toInstance(configuration);
         bind(Environment.class).toInstance(environment);
+    }
+
+    @Provides
+    @Singleton
+    public ObjectMapper provideObjectMapper() {
+        ObjectMapper objectMapper = environment.getObjectMapper();
+        objectMapper.findAndRegisterModules();
+
+        return objectMapper;
     }
 
     @Provides

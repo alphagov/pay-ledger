@@ -57,7 +57,7 @@ public class TransactionFactoryTest {
     private String firstDigitsCardNumber = "123456";
     private Long netAmount = 77L;
     private Long totalAmount = 99L;
-    private ZonedDateTime settlementSubmittedTime = ZonedDateTime.parse("2017-09-09T09:35:45.695951+01");
+    private ZonedDateTime captureSubmittedDate = ZonedDateTime.parse("2017-09-09T09:35:45.695951+01");
     private ZonedDateTime settledTime = ZonedDateTime.parse("2017-09-09T12:13Z");
     private String refundStatus = "available";
     private Long refundAmountRefunded = 0L;
@@ -85,7 +85,7 @@ public class TransactionFactoryTest {
                 .withFirstDigitsCardNumber(firstDigitsCardNumber)
                 .withNetAmount(netAmount)
                 .withTotalAmount(totalAmount)
-                .withSettlementSubmittedTime(settlementSubmittedTime)
+                .withCaptureSubmittedDate(captureSubmittedDate)
                 .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
                 .withRefundAmountRefunded(refundAmountRefunded)
@@ -110,7 +110,7 @@ public class TransactionFactoryTest {
                 .withFirstDigitsCardNumber(firstDigitsCardNumber)
                 .withNetAmount(netAmount)
                 .withTotalAmount(totalAmount)
-                .withSettlementSubmittedTime(settlementSubmittedTime)
+                .withCaptureSubmittedDate(captureSubmittedDate)
                 .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
                 .withRefundAmountRefunded(refundAmountRefunded)

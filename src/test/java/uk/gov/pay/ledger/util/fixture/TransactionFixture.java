@@ -53,7 +53,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Long fee;
     private Long netAmount;
     private Long totalAmount;
-    private ZonedDateTime settlementSubmittedTime;
+    private ZonedDateTime captureSubmittedDate;
     private ZonedDateTime settledTime;
     private String refundStatus = "available";
     private Long refundAmountRefunded = 0L;
@@ -293,7 +293,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        refund_status,\n" +
                                 "        refund_amount_refunded,\n" +
                                 "        refund_amount_available,\n" +
-                                "        settlement_submitted_time,\n" +
+                                "        capture_submitted_date,\n" +
                                 "        settled_time,\n" +
                                 "        type\n" +
                                 "    )\n" +
@@ -320,7 +320,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         refundStatus,
                         refundAmountRefunded,
                         refundAmountAvailable,
-                        settlementSubmittedTime,
+                        captureSubmittedDate,
                         settledTime,
                         transactionType
                 )
@@ -381,7 +381,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withFirstDigitsCardNumber(firstDigitsCardNumber)
                 .withNetAmount(netAmount)
                 .withTotalAmount(totalAmount)
-                .withSettlementSubmittedTime(settlementSubmittedTime)
+                .withCaptureSubmittedDate(captureSubmittedDate)
                 .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
                 .withRefundAmountRefunded(refundAmountRefunded)
@@ -486,8 +486,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withSettlementSubmittedTime(ZonedDateTime time) {
-        this.settlementSubmittedTime = time;
+    public TransactionFixture withCaptureSubmittedDate(ZonedDateTime time) {
+        this.captureSubmittedDate = time;
         return this;
     }
 

@@ -18,7 +18,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
     private String gatewayAccountId = "123456";
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private String parentResourceExternalId = RandomStringUtils.randomAlphanumeric(20);
-    private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
+    private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
     private String eventType = "REFUND_CREATED_BY_USER";
     private String eventData = "{\"event_data\": \"event data\"}";
     private String refundedBy = RandomStringUtils.randomAlphanumeric(20);

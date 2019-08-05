@@ -18,7 +18,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private String parentResourceExternalId = StringUtils.EMPTY;
-    private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
+    private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
     private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(5);
@@ -110,6 +110,12 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("net_amount", 1069)
                                 .build());
                 break;
+            case "CAPTURE_SUBMITTED":
+                eventData = new GsonBuilder().create()
+                        .toJson(ImmutableMap.builder()
+                                .put("capture_submitted_date", eventDate.toString())
+                                .build());
+                break;
             default:
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.of("event_data", "event_data"));
@@ -158,7 +164,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     }
 
     public PactDslJsonBody getAsPact() {
-       return QueueEventFixtureUtil.getAsPact(eventType, eventDate, resourceExternalId,
-               parentResourceExternalId, resourceType, eventData);
+        return QueueEventFixtureUtil.getAsPact(eventType, eventDate, resourceExternalId,
+                parentResourceExternalId, resourceType, eventData);
     }
 }
