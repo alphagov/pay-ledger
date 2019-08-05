@@ -28,13 +28,16 @@ import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -54,13 +57,14 @@ public class TransactionServiceTest {
     private TransactionService transactionService;
     private String gatewayAccountId = "gateway_account_id";
     private TransactionSearchParams searchParams;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
     public void setUp() {
         ObjectMapper objectMapper = Jackson.newObjectMapper();
         TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(objectMapper);
         TransactionFactory transactionFactory = new TransactionFactory(objectMapper);
-        transactionService = new TransactionService(mockTransactionDao, mockEventDao, transactionEntityFactory, transactionFactory);
+        transactionService = new TransactionService(mockTransactionDao, mockEventDao, transactionEntityFactory, transactionFactory, objectMapper);
         searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
 
@@ -259,11 +263,15 @@ public class TransactionServiceTest {
     }
 
     private void assertTransactionEvent(Event event, TransactionEvent transactionEvent, Long amount, String state) {
-        assertThat(transactionEvent.getState() == null ? null : transactionEvent.getState().getStatus(), is(state));
-        assertThat(transactionEvent.getAmount(), is(amount));
-        assertThat(transactionEvent.getData(), is(event.getEventData()));
-        assertThat(transactionEvent.getEventType(), is(event.getEventType()));
-        assertThat(transactionEvent.getResourceType(), is(event.getResourceType().toString().toUpperCase()));
-        assertThat(transactionEvent.getTimestamp(), is(event.getEventDate()));
+        try {
+            assertThat(transactionEvent.getState() == null ? null : transactionEvent.getState().getStatus(), is(state));
+            assertThat(transactionEvent.getAmount(), is(amount));
+            assertThat(transactionEvent.getData(), is(objectMapper.readValue(event.getEventData(), Map.class)));
+            assertThat(transactionEvent.getEventType(), is(event.getEventType()));
+            assertThat(transactionEvent.getResourceType(), is(event.getResourceType().toString().toUpperCase()));
+            assertThat(transactionEvent.getTimestamp(), is(event.getEventDate()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
