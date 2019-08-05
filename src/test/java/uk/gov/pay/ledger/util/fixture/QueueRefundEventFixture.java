@@ -15,6 +15,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
     private String sqsMessageId;
     private ResourceType resourceType = ResourceType.REFUND;
     private Long amount = 50L;
+    private String gatewayAccountId = "123456";
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private String parentResourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
@@ -70,12 +71,14 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
             case "REFUND_CREATED_BY_SERVICE":
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
+                                .put("gateway_account_id", gatewayAccountId)
                                 .put("amount", amount)
                                 .build());
                 break;
             case "REFUND_CREATED_BY_USER":
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
+                                .put("gateway_account_id", gatewayAccountId)
                                 .put("amount", amount)
                                 .put("refunded_by", refundedBy)
                                 .build());
@@ -83,7 +86,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
             case "REFUND_SUBMITTED":
                 eventData = "{}";
                 break;
-            case "REFUND_SUCCEEDED" :
+            case "REFUND_SUCCEEDED":
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
                                 .put("reference", reference)
