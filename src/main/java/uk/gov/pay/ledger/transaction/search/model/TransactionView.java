@@ -11,6 +11,7 @@ import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Refund;
 import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
@@ -48,6 +49,7 @@ public class TransactionView {
     private SettlementSummary settlementSummary;
     private Map<String, Object> metadata;
     private String refundedBy;
+    private TransactionType transactionType;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -73,6 +75,7 @@ public class TransactionView {
         this.settlementSummary = builder.settlementSummary;
         this.metadata = builder.metadata;
         this.refundedBy = builder.refundedBy;
+        this.transactionType = builder.transactionType;
     }
 
     public TransactionView() {
@@ -105,6 +108,7 @@ public class TransactionView {
                     .withRefundSummary(payment.getRefundSummary())
                     .withSettlementSummary(payment.getSettlementSummary())
                     .withMetadata(payment.getExternalMetadata())
+                    .withTransactionType(payment.getTransactionType())
                     .build();
         }
 
@@ -119,6 +123,7 @@ public class TransactionView {
                 .withExternalId(refund.getExternalId())
                 .withCreatedDate(refund.getCreatedDate())
                 .withRefundedBy(refund.getRefundedBy())
+                .withTransactionType(refund.getTransactionType())
                 .build();
     }
 
@@ -228,6 +233,10 @@ public class TransactionView {
         return refundedBy;
     }
 
+    public TransactionType getTransactionType() {
+        return transactionType;
+    }
+
     public static class Builder {
         private Long id;
         private String gatewayAccountId;
@@ -252,6 +261,7 @@ public class TransactionView {
         private SettlementSummary settlementSummary;
         private Map<String, Object> metadata;
         private String refundedBy;
+        private TransactionType transactionType;
         private List<Link> links = new ArrayList<>();
 
         public Builder() {
@@ -373,6 +383,11 @@ public class TransactionView {
 
         public Builder withRefundedBy(String refundedBy) {
             this.refundedBy = refundedBy;
+            return this;
+        }
+
+        public Builder withTransactionType(TransactionType transactionType) {
+            this.transactionType = transactionType;
             return this;
         }
     }

@@ -35,6 +35,8 @@ public abstract class Transaction {
         return amount;
     }
 
+    public abstract TransactionType getTransactionType();
+
     public String getExternalId() {
         return externalId;
     }

@@ -46,6 +46,11 @@ public class Refund extends Transaction {
         return refundedBy;
     }
 
+    @Override
+    public TransactionType getTransactionType() {
+        return TransactionType.REFUND;
+    }
+
     public static class Builder {
         private String reference;
         private String description;
