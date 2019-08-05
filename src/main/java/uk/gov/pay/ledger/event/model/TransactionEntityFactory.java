@@ -22,11 +22,16 @@ public class TransactionEntityFactory {
     }
 
     public TransactionEntity create(EventDigest eventDigest) {
+        TransactionState digestTransactionState = eventDigest
+                .getMostRecentSalientEventType()
+                .map(TransactionState::fromEventType)
+                .orElse(TransactionState.UNDEFINED);
+
         String transactionDetail = convertToTransactionDetails(eventDigest.getEventPayload());
         TransactionEntity entity = objectMapper.convertValue(eventDigest.getEventPayload(), TransactionEntity.class);
         entity.setTransactionDetails(transactionDetail);
         entity.setEventCount(eventDigest.getEventCount());
-        entity.setState(TransactionState.fromEventType(eventDigest.getMostRecentSalientEventType()));
+        entity.setState(digestTransactionState);
         entity.setCreatedDate(eventDigest.getEventCreatedDate());
         entity.setExternalId(eventDigest.getResourceExternalId());
         entity.setParentExternalId(eventDigest.getParentResourceExternalId());

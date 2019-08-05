@@ -63,7 +63,7 @@ public class EventServiceTest {
         EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
 
         assertThat(eventDigest.getMostRecentEventTimestamp(), is(latestEventTime));
-        assertThat(eventDigest.getMostRecentSalientEventType(), is(SalientEventType.PAYMENT_CREATED));
+        assertThat(eventDigest.getMostRecentSalientEventType().get(), is(SalientEventType.PAYMENT_CREATED));
     }
 
     @Test
@@ -93,7 +93,7 @@ public class EventServiceTest {
 
         EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
 
-        assertThat(eventDigest.getMostRecentSalientEventType(), is(SalientEventType.PAYMENT_CREATED));
+        assertThat(eventDigest.getMostRecentSalientEventType().get(), is(SalientEventType.PAYMENT_CREATED));
     }
 
     @Test
