@@ -7,6 +7,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -19,6 +20,7 @@ import java.util.List;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -392,5 +394,43 @@ public class TransactionDaoSearchIT {
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
         assertThat(transactionList.size(), Matchers.is(2));
+    }
+
+    @Test
+    public void shouldReturn2Records_whenTransactionTypeIsSpecified() {
+        String gatewayAccountId = "account-id-" + nextLong();
+
+        for (int i = 0; i < 4; i++) {
+            aTransactionFixture()
+                    .withGatewayAccountId(gatewayAccountId)
+                    .withTransactionType(i % 2 == 0 ? "REFUND" : "PAYMENT")
+                    .insert(rule.getJdbi());
+        }
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setTransactionType(TransactionType.REFUND);
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(2));
+        assertTrue(transactionList.stream().allMatch(e -> "REFUND".equals(e.getTransactionType())));
+    }
+
+    @Test
+    public void shouldReturn4Records_whenTransactionTypeIsNotSpecified() {
+        String gatewayAccountId = "account-id-" + nextLong();
+
+        for (int i = 0; i < 4; i++) {
+            aTransactionFixture()
+                    .withGatewayAccountId(gatewayAccountId)
+                    .withTransactionType(i % 2 == 0 ? "REFUND" : "PAYMENT")
+                    .insert(rule.getJdbi());
+        }
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setAccountId(gatewayAccountId);
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(4));
     }
 }

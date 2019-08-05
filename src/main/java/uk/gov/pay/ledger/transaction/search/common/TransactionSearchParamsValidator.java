@@ -5,7 +5,6 @@ import uk.gov.pay.ledger.exception.ValidationException;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.Collections;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isBlank;
