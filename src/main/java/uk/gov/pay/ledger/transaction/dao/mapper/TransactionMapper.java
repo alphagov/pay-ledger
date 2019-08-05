@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.dao.mapper;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,7 +24,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withAmount(rs.getLong("amount"))
                 .withReference(rs.getString("reference"))
                 .withDescription(rs.getString("description"))
-                .withState(rs.getString("state"))
+                .withState(TransactionState.valueOf(rs.getString("state")))
                 .withEmail(rs.getString("email"))
                 .withCardholderName(rs.getString("cardholder_name"))
                 .withExternalMetadata(rs.getString("external_metadata"))

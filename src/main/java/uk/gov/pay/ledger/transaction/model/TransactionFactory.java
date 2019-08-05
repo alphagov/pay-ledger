@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
-import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.io.IOException;
 import java.util.Map;
@@ -17,7 +16,7 @@ import java.util.Optional;
 
 public class TransactionFactory {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(TransactionFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionFactory.class);
     private ObjectMapper objectMapper;
 
     @Inject
@@ -58,14 +57,30 @@ public class TransactionFactory {
             RefundSummary refundSummary = RefundSummary.from(entity);
             SettlementSummary settlementSummary = new SettlementSummary(entity.getSettlementSubmittedTime(), entity.getSettledTime());
 
-            return new Payment(entity.getGatewayAccountId(), entity.getAmount(), entity.getReference(), entity.getDescription(),
-                    TransactionState.from(entity.getState()), safeGetAsString(transactionDetails, "language"),
-                    entity.getExternalId(), safeGetAsString(transactionDetails, "return_url"), entity.getEmail(),
-                    safeGetAsString(transactionDetails, "payment_provider"), entity.getCreatedDate(),
-                    cardDetails, safeGetAsBoolean(transactionDetails, "delayed_capture", false), metadata,
-                    entity.getEventCount(), safeGetAsString(transactionDetails, "gateway_transaction_id"),
-                    safeGetAsLong(transactionDetails, "corporate_surcharge"), entity.getFee(),
-                    entity.getNetAmount(), refundSummary, entity.getTotalAmount(), settlementSummary);
+            return new Payment(
+                    entity.getGatewayAccountId(),
+                    entity.getAmount(),
+                    entity.getReference(),
+                    entity.getDescription(),
+                    entity.getState(),
+                    safeGetAsString(transactionDetails, "language"),
+                    entity.getExternalId(),
+                    safeGetAsString(transactionDetails, "return_url"),
+                    entity.getEmail(),
+                    safeGetAsString(transactionDetails, "payment_provider"),
+                    entity.getCreatedDate(),
+                    cardDetails,
+                    safeGetAsBoolean(transactionDetails, "delayed_capture", false),
+                    metadata,
+                    entity.getEventCount(),
+                    safeGetAsString(transactionDetails, "gateway_transaction_id"),
+                    safeGetAsLong(transactionDetails, "corporate_surcharge"),
+                    entity.getFee(),
+                    entity.getNetAmount(),
+                    refundSummary,
+                    entity.getTotalAmount(),
+                    settlementSummary
+            );
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
         }
@@ -82,7 +97,7 @@ public class TransactionFactory {
                     .withAmount(entity.getAmount())
                     .withReference(entity.getReference())
                     .withDescription(entity.getDescription())
-                    .withState(TransactionState.from(entity.getState()))
+                    .withState(entity.getState())
                     .withExternalId(entity.getExternalId())
                     .withCreatedDate(entity.getCreatedDate())
                     .withEventCount(entity.getEventCount())

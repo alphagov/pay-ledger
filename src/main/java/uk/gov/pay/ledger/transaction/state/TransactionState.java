@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 
@@ -29,23 +31,23 @@ public enum TransactionState {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionState.class);
 
+    private final String oldStatus;
     private final String status;
-    private final String newStatus;
     private final boolean finished;
     private final String code;
     private final String message;
 
     TransactionState(String status, boolean finished) {
+        this.oldStatus = status;
         this.status = status;
-        this.newStatus = status;
         this.finished = finished;
         this.code = null;
         this.message = null;
     }
 
-    TransactionState(String status, String newStatus, boolean finished, String code, String message) {
+    TransactionState(String oldStatus, String status, boolean finished, String code, String message) {
+        this.oldStatus = oldStatus;
         this.status = status;
-        this.newStatus = newStatus;
         this.finished = finished;
         this.code = code;
         this.message = message;
@@ -109,10 +111,16 @@ public enum TransactionState {
     }
 
     public static TransactionState from(String transactionState) {
-        return stream(values()).filter(v -> v.getStatus().equals(transactionState)).findFirst()
+        return stream(values()).filter(v -> v.name().equals(transactionState)).findFirst()
                 .orElseGet(() -> {
                     LOGGER.warn("Unknown transaction state {}", transactionState);
                     return null;
                 });
+    }
+
+    public static List<TransactionState> getStatesForStatus(String status) {
+        return stream(values())
+                .filter(v -> v.getStatus().equals(status))
+                .collect(Collectors.toList());
     }
 }

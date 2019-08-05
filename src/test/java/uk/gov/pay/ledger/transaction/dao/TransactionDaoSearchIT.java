@@ -62,7 +62,7 @@ public class TransactionDaoSearchIT {
         assertThat(transaction.getAmount(), is(transactionFixture.getAmount()));
         assertThat(transaction.getReference(), is(transactionFixture.getReference()));
         assertThat(transaction.getDescription(), is(transactionFixture.getDescription()));
-        assertThat(transaction.getState(), is(transactionFixture.getState().getStatus()));
+        assertThat(transaction.getState(), is(transactionFixture.getState()));
         assertThat(transaction.getEmail(), is(transactionFixture.getEmail()));
         assertThat(transaction.getCardholderName(), is(transactionFixture.getCardDetails().getCardHolderName()));
         assertThat(transaction.getCardBrand(), is(transactionFixture.getCardDetails().getCardBrand()));
