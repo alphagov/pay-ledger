@@ -40,6 +40,7 @@ public class TransactionFactoryTest {
             "  \"gateway_transaction_id\": \"gti_12334\",\n" +
             "  \"corporate_surcharge\": 12,\n" +
             "  \"fee\": 5,\n" +
+            "  \"expiry_date\": \"10/27\",\n" +
             "  \"address_line1\": \"line 1\",\n" +
             "  \"address_line2\": \"line 2\",\n" +
             "  \"address_postcode\": \"A11 11BB\",\n" +
@@ -59,6 +60,7 @@ public class TransactionFactoryTest {
     private Long refundAmountSubmitted = 0L;
     private Long refundAmountAvailable = 99L;
     private Long fee = 66L;
+    private String cardExpiryDate = "10/27";
 
     @Before
     public void setUp() {
@@ -132,6 +134,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getPaymentProvider(), is("sandbox"));
         assertThat(payment.getCreatedDate(), is(createdDate));
         assertThat(payment.getCardDetails(), notNullValue());
+        assertThat(payment.getCardDetails().getExpiryDate(), is(cardExpiryDate));
         assertThat(payment.getCardDetails().getLastDigitsCardNumber(), is(lastDigitsCardNumber));
         assertThat(payment.getCardDetails().getFirstDigitsCardNumber(), is(firstDigitsCardNumber));
         assertThat(payment.getCardDetails().getCardHolderName(), is(cardholderName));

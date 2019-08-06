@@ -58,6 +58,7 @@ public class TransactionResourceIT {
                 .contentType(JSON)
                 .body("transaction_id", is(transactionFixture.getExternalId()))
                 .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
+                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
                 .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()));
     }
 
@@ -161,6 +162,7 @@ public class TransactionResourceIT {
                 .body("results[0].card_details.billing_address.city", is(transactionToVerify.getCardDetails().getBillingAddress().getAddressCity()))
                 .body("results[0].card_details.billing_address.country", is(transactionToVerify.getCardDetails().getBillingAddress().getAddressCountry()))
                 .body("results[0].card_details.card_brand", is(transactionToVerify.getCardDetails().getCardBrand()))
+                .body("results[0].card_details.expiry_date", is(transactionToVerify.getCardDetails().getExpiryDate()))
                 .body("results[0].delayed_capture", is(transactionToVerify.getDelayedCapture()))
                 .body("results[0].transaction_id", is(transactionToVerify.getExternalId()))
                 .body("results[0].transaction_type", is(TransactionType.PAYMENT.name()))
