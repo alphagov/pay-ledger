@@ -36,6 +36,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String transactionDetails = "{}";
     private Integer eventCount = 1;
     private String cardBrand = "visa";
+    private String cardExpiryDate = "10/21";
     private String language = "en";
     private String lastDigitsCardNumber;
     private String firstDigitsCardNumber;
@@ -332,15 +333,18 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
         transactionDetails.addProperty("refunded_by", refundedById);
         Optional.ofNullable(cardDetails)
-                .ifPresent(cd -> Optional.ofNullable(cd.getBillingAddress())
-                        .ifPresent(ba -> {
-                            transactionDetails.addProperty("address_line1", ba.getAddressLine1());
-                            transactionDetails.addProperty("address_line2", ba.getAddressLine2());
-                            transactionDetails.addProperty("address_postcode", ba.getAddressPostCode());
-                            transactionDetails.addProperty("address_city", ba.getAddressCity());
-                            transactionDetails.addProperty("address_county", ba.getAddressCounty());
-                            transactionDetails.addProperty("address_country", ba.getAddressCountry());
-                        }));
+                .ifPresent(cd -> {
+                    transactionDetails.addProperty("expiry_date", cardExpiryDate);
+                    Optional.ofNullable(cd.getBillingAddress())
+                            .ifPresent(ba -> {
+                                transactionDetails.addProperty("address_line1", ba.getAddressLine1());
+                                transactionDetails.addProperty("address_line2", ba.getAddressLine2());
+                                transactionDetails.addProperty("address_postcode", ba.getAddressPostCode());
+                                transactionDetails.addProperty("address_city", ba.getAddressCity());
+                                transactionDetails.addProperty("address_county", ba.getAddressCounty());
+                                transactionDetails.addProperty("address_country", ba.getAddressCountry());
+                            });
+                });
 
         return transactionDetails;
     }
@@ -439,7 +443,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     "London", null, "GB");
 
             cardDetails = new CardDetails(cardholderName, billingAddress, cardBrand,
-                    "1234", "123456", "11/23");
+                    "1234", "123456", cardExpiryDate);
         }
         return this;
     }
