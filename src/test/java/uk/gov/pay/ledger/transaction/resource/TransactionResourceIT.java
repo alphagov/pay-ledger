@@ -8,6 +8,7 @@ import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Transaction;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
@@ -162,6 +163,7 @@ public class TransactionResourceIT {
                 .body("results[0].card_details.card_brand", is(transactionToVerify.getCardDetails().getCardBrand()))
                 .body("results[0].delayed_capture", is(transactionToVerify.getDelayedCapture()))
                 .body("results[0].transaction_id", is(transactionToVerify.getExternalId()))
+                .body("results[0].transaction_type", is(TransactionType.PAYMENT.name()))
 
                 .body("count", is(2))
                 .body("page", is(2))

@@ -90,6 +90,11 @@ public class Payment extends Transaction{
                 gatewayTransactionId, corporateCardSurcharge, fee, netAmount, totalAmount, refundSummary, settlementSummary);
     }
 
+    @Override
+    public TransactionType getTransactionType() {
+        return TransactionType.PAYMENT;
+    }
+
     public String getReference() {
         return reference;
     }
