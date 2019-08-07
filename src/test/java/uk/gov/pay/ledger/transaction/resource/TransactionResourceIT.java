@@ -1,11 +1,13 @@
 package uk.gov.pay.ledger.transaction.resource;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
@@ -71,7 +73,7 @@ public class TransactionResourceIT {
                 .withDefaultTransactionDetails()
                 .withState(TransactionState.FAILED_CANCELLED)
                 .insert(rule.getJdbi());
-        TransactionFixture cancelledTransaction2 =  aTransactionFixture()
+        TransactionFixture cancelledTransaction2 = aTransactionFixture()
                 .withGatewayAccountId("123")
                 .withDefaultCardDetails()
                 .withDefaultTransactionDetails()
@@ -217,5 +219,71 @@ public class TransactionResourceIT {
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
                 .body("message", is("Transaction with id [some-external-id] not found"));
+    }
+
+    @Test
+    public void getTransactionsForTransactionShouldReturnTransactionsWithParentExternalId() {
+        TransactionEntity parentTransactionEntity = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi())
+                .toEntity();
+        transactionFixture.insert(rule.getJdbi());
+
+        TransactionEntity refundTransactionEntity = aTransactionFixture()
+                .withParentExternalId(parentTransactionEntity.getExternalId())
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUCCESS)
+                .withAmount(1000L)
+                .withRefundedById("refund-by-user-id")
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + parentTransactionEntity.getExternalId() + "/transaction?gateway_account_id=" + parentTransactionEntity.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("parent_transaction_id", is(parentTransactionEntity.getExternalId()))
+                .body("transactions[0].gateway_account_id", is(refundTransactionEntity.getGatewayAccountId()))
+                .body("transactions[0].amount", is(1000))
+                .body("transactions[0].state.status", is(refundTransactionEntity.getState().getStatus()))
+                .body("transactions[0].state.finished", is(true))
+                .body("transactions[0].reference", is(refundTransactionEntity.getReference()))
+                .body("transactions[0].created_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(refundTransactionEntity.getCreatedDate())))
+                .body("transactions[0].refunded_by", is("refund-by-user-id"))
+                .body("transactions[0].transaction_type", is(refundTransactionEntity.getTransactionType()))
+                .body("transactions[0].transaction_id", is(refundTransactionEntity.getExternalId()));
+    }
+
+    @Test
+    public void getTransactionsForTransactionShouldReturnEmptyListIfParentTransactionHasNoTransactions() {
+        transactionFixture = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails();
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "/transaction?gateway_account_id=1")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("parent_transaction_id", is(transactionFixture.getExternalId()))
+                .body("transactions", Matchers.hasSize(0));
+    }
+
+    @Test
+    public void getTransactionsForTransactionShouldReturnHttpNotFoundIfParentTranscationDoesNotExist() {
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/some-parent-external-id/transaction?gateway_account_id=1")
+                .then()
+                .contentType(JSON)
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode())
+                .body("message", is("Transaction with id [some-parent-external-id] not found"));
     }
 }

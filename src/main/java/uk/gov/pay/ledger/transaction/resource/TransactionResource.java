@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
+import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
@@ -78,5 +79,17 @@ public class TransactionResource {
         LOGGER.info("Get transaction event: external_id [{}], gateway_account_id [{}]",
                 transactionExternalId, gatewayAccountId);
         return transactionService.findTransactionEvents(transactionExternalId, gatewayAccountId, includeAllEvents);
+    }
+
+    @Path("/{parentTransactionExternalId}/transaction")
+    @GET
+    @Timed
+    public TransactionsForTransactionResponse getTransactionsForParentTransaction(@PathParam("parentTransactionExternalId") String parentTransactionExternalId,
+                                                                                  @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId
+    ) {
+        LOGGER.info("Get transactions for parent transaction: [{}], gateway_account_id [{}]",
+                parentTransactionExternalId, gatewayAccountId);
+
+        return transactionService.getTransactions(parentTransactionExternalId, gatewayAccountId);
     }
 }

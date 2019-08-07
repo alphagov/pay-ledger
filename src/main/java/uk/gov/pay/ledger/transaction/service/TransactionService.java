@@ -13,11 +13,14 @@ import uk.gov.pay.ledger.transaction.model.TransactionEvent;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
+import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.Collection;
 import java.util.Comparator;
@@ -56,6 +59,17 @@ public class TransactionService {
     public Optional<TransactionView> getTransaction(String transactionExternalId) {
         return transactionDao.findTransactionByExternalId(transactionExternalId)
                 .map(entity -> TransactionView.from(transactionFactory.createTransactionEntity(entity)));
+    }
+
+    public TransactionsForTransactionResponse getTransactions(String parentTransactionExternalId, String gatewayAccountId) {
+        return transactionDao.findTransactionByExternalId(parentTransactionExternalId)
+                .map(transactionEntity ->
+                        findTransactionsForParentExternalId(
+                                transactionEntity.getExternalId(),
+                                transactionEntity.getGatewayAccountId()))
+                .orElseThrow(() ->
+                        new WebApplicationException(format("Transaction with id [%s] not found", parentTransactionExternalId),
+                                Response.Status.NOT_FOUND));
     }
 
     public TransactionSearchResponse searchTransactions(TransactionSearchParams searchParams, UriInfo uriInfo) {
@@ -140,4 +154,13 @@ public class TransactionService {
                 .collect(Collectors.toList());
     }
 
+    private TransactionsForTransactionResponse findTransactionsForParentExternalId(String parentTransactionExternalId, String gatewayAccountId) {
+        List<TransactionView> transactions = transactionDao.findTransactionByParentIdAndGatewayAccountId(
+                parentTransactionExternalId, gatewayAccountId)
+                .stream()
+                .map(transactionEntity ->
+                        TransactionView.from(transactionFactory.createTransactionEntity(transactionEntity)))
+                .collect(Collectors.toList());
+        return TransactionsForTransactionResponse.of(parentTransactionExternalId, transactions);
+    }
 }
