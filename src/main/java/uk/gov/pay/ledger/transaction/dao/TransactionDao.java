@@ -26,6 +26,10 @@ public class TransactionDao {
             "WHERE (external_id = :externalId or parent_external_id = :externalId) " +
             "  AND gateway_account_id = :gatewayAccountId";
 
+    private static final String FIND_TRANSACTIONS_BY_PARENT_EXT_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
+            " WHERE parent_external_id = :parentExternalId" +
+            "   AND gateway_account_id = :gatewayAccountId";
+
     private static final String SEARCH_QUERY_STRING = "SELECT * FROM transaction t " +
             "WHERE t.gateway_account_id = :account_id " +
             ":searchExtraFields " +
@@ -108,6 +112,16 @@ public class TransactionDao {
                         .map(new TransactionMapper())
                         .stream().collect(Collectors.toList())
                         );
+    }
+
+    public List<TransactionEntity> findTransactionByParentIdAndGatewayAccountId(String parentExternalId, String gatewayAccountId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery(FIND_TRANSACTIONS_BY_PARENT_EXT_ID_AND_GATEWAY_ACCOUNT_ID)
+                        .bind("parentExternalId", parentExternalId)
+                        .bind("gatewayAccountId", gatewayAccountId)
+                        .map(new TransactionMapper())
+                        .stream().collect(Collectors.toList())
+        );
     }
 
     public List<TransactionEntity> searchTransactions(TransactionSearchParams searchParams) {

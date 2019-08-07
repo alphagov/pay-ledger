@@ -355,6 +355,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withId(id)
                 .withGatewayAccountId(gatewayAccountId)
                 .withExternalId(externalId)
+                .withParentExternalId(parentExternalId)
                 .withAmount(amount)
                 .withReference(reference)
                 .withDescription(description)
