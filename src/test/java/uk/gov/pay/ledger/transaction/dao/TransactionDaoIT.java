@@ -24,12 +24,12 @@ public class TransactionDaoIT {
     @Test
     public void shouldInsertTransaction() {
         TransactionFixture fixture = aTransactionFixture()
-                    .withDefaultCardDetails()
-                    .withNetAmount(55)
-                    .withTotalAmount(105)
-                    .withFee(33)
-                    .withTransactionType("PAYMENT")
-                    .withDefaultTransactionDetails();
+                .withDefaultCardDetails()
+                .withNetAmount(55)
+                .withTotalAmount(105)
+                .withFee(33)
+                .withTransactionType("PAYMENT")
+                .withDefaultTransactionDetails();
         TransactionEntity transactionEntity = fixture.toEntity();
 
         transactionDao.upsert(transactionEntity);
@@ -169,7 +169,7 @@ public class TransactionDaoIT {
     }
 
     @Test
-    public void shouldFilterTransactionByParentExternalId() {
+    public void findTransactionByExternalOrParentIdAndGatewayAccountId_shouldFilterByParentExternalId() {
         TransactionEntity transaction1 = aTransactionFixture()
                 .withState(TransactionState.CREATED)
                 .insert(rule.getJdbi())
@@ -187,5 +187,33 @@ public class TransactionDaoIT {
                         transaction1.getExternalId(), transaction1.getGatewayAccountId());
 
         assertThat(transactionEntityList.size(), is(2));
+    }
+
+    @Test
+    public void findTransactionByParentIdAndGatewayAccountId_shouldFilterByParentExternalId() {
+        TransactionEntity transaction1 = aTransactionFixture()
+                .withState(TransactionState.CREATED)
+                .withTransactionType("PAYMENT")
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        TransactionEntity transactionWithParentExternalId = aTransactionFixture()
+                .withState(TransactionState.SUBMITTED)
+                .withTransactionType("REFUND")
+                .withGatewayAccountId(transaction1.getGatewayAccountId())
+                .withParentExternalId(transaction1.getExternalId())
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        List<TransactionEntity> transactionEntityList =
+                transactionDao.findTransactionByParentIdAndGatewayAccountId(
+                        transactionWithParentExternalId.getParentExternalId(),
+                        transactionWithParentExternalId.getGatewayAccountId());
+
+        assertThat(transactionEntityList.size(), is(1));
+        TransactionEntity transactionEntity = transactionEntityList.get(0);
+
+        assertThat(transactionEntity.getId(), is(transactionWithParentExternalId.getId()));
+
     }
 }
