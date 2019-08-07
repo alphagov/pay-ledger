@@ -12,6 +12,8 @@ import uk.gov.pay.ledger.transaction.service.TransactionService;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -79,8 +81,24 @@ public class TransactionResourceTest {
                 .request()
                 .get();
 
-        var responseMessage = response.readEntity(new GenericType< HashMap >(){});
+        Map responseMessage = response.readEntity(new GenericType<HashMap>() {
+        });
         assertThat(response.getStatus(), is(400));
         assertThat(responseMessage.get("message"), is("query param transaction_type must be one of [PAYMENT, REFUND]"));
+    }
+
+    @Test
+    public void findTransactionsForTransactionShouldReturn400IfGatewayAccountIdIsNotProvided() {
+        Response response = resources
+                .target("/v1/transaction/parent-transaction-id/transaction")
+                .request()
+                .get();
+
+        Map responseMessage = response.readEntity(new GenericType<HashMap>() {
+        });
+        List errors = (List) responseMessage.get("errors");
+
+        assertThat(response.getStatus(), is(400));
+        assertThat(errors.get(0), is("query param gateway_account_id may not be empty"));
     }
 }
