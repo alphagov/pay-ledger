@@ -113,8 +113,8 @@ pipeline {
     }
     /*stage('Tests') {
       failFast true
-      parallel {
-        stage('Card Payment End-to-End Tests') {
+      stages {
+        stage('End-to-End Tests') {
             when {
                 anyOf {
                   branch 'master'
@@ -122,7 +122,7 @@ pipeline {
                 }
             }
             steps {
-                runCardPaymentsE2E("ledger")
+                runAppE2E("ledger", "card")
             }
         }
       }
