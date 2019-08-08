@@ -60,7 +60,7 @@ public class TransactionFactoryTest {
     private ZonedDateTime settlementSubmittedTime = ZonedDateTime.parse("2017-09-09T09:35:45.695951+01");
     private ZonedDateTime settledTime = ZonedDateTime.parse("2017-09-09T12:13Z");
     private String refundStatus = "available";
-    private Long refundAmountSubmitted = 0L;
+    private Long refundAmountRefunded = 0L;
     private Long refundAmountAvailable = 99L;
     private Long fee = 66L;
     private String cardExpiryDate = "10/27";
@@ -88,7 +88,7 @@ public class TransactionFactoryTest {
                 .withSettlementSubmittedTime(settlementSubmittedTime)
                 .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
-                .withRefundAmountSubmitted(refundAmountSubmitted)
+                .withRefundAmountRefunded(refundAmountRefunded)
                 .withRefundAmountAvailable(refundAmountAvailable)
                 .withFee(fee)
                 .build();
@@ -113,7 +113,7 @@ public class TransactionFactoryTest {
                 .withSettlementSubmittedTime(settlementSubmittedTime)
                 .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
-                .withRefundAmountSubmitted(refundAmountSubmitted)
+                .withRefundAmountRefunded(refundAmountRefunded)
                 .withRefundAmountAvailable(refundAmountAvailable)
                 .build();
 
@@ -159,7 +159,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getRefundSummary(), notNullValue());
         assertThat(payment.getRefundSummary().getStatus(), is(refundStatus));
         assertThat(payment.getRefundSummary().getAmountAvailable(), is(refundAmountAvailable));
-        assertThat(payment.getRefundSummary().getAmountSubmitted(), is(refundAmountSubmitted));
+        assertThat(payment.getRefundSummary().getAmountRefunded(), is(refundAmountRefunded));
         assertThat(payment.getSettlementSummary(), notNullValue());
         assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.of("2017-09-09")));
         assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.of("2017-09-09T08:35:45.695Z")));
@@ -197,7 +197,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getRefundSummary(), notNullValue());
         assertThat(payment.getRefundSummary().getStatus(), is(refundStatus));
         assertThat(payment.getRefundSummary().getAmountAvailable(), is(refundAmountAvailable));
-        assertThat(payment.getRefundSummary().getAmountSubmitted(), is(refundAmountSubmitted));
+        assertThat(payment.getRefundSummary().getAmountRefunded(), is(refundAmountRefunded));
         assertThat(payment.getSettlementSummary(), notNullValue());
         assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.of("2017-09-09")));
         assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.of("2017-09-09T08:35:45.695Z")));

@@ -56,7 +56,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private ZonedDateTime settlementSubmittedTime;
     private ZonedDateTime settledTime;
     private String refundStatus = "available";
-    private Long refundAmountSubmitted = 0L;
+    private Long refundAmountRefunded = 0L;
     private Long refundAmountAvailable = 100L;
     private String transactionType;
     private String parentExternalId;
@@ -291,7 +291,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        net_amount,\n" +
                                 "        fee,\n" +
                                 "        refund_status,\n" +
-                                "        refund_amount_submitted,\n" +
+                                "        refund_amount_refunded,\n" +
                                 "        refund_amount_available,\n" +
                                 "        settlement_submitted_time,\n" +
                                 "        settled_time,\n" +
@@ -318,7 +318,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         netAmount,
                         fee,
                         refundStatus,
-                        refundAmountSubmitted,
+                        refundAmountRefunded,
                         refundAmountAvailable,
                         settlementSubmittedTime,
                         settledTime,
@@ -384,7 +384,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withSettlementSubmittedTime(settlementSubmittedTime)
                 .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
-                .withRefundAmountSubmitted(refundAmountSubmitted)
+                .withRefundAmountRefunded(refundAmountRefunded)
                 .withRefundAmountAvailable(refundAmountAvailable)
                 .withFee(fee)
                 .withTransactionType(transactionType)
@@ -477,7 +477,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     public TransactionFixture withRefundSummary(RefundSummary refundSummary) {
         this.refundStatus = refundSummary.getStatus();
         this.refundAmountAvailable = refundSummary.getAmountAvailable();
-        this.refundAmountSubmitted = refundSummary.getAmountSubmitted();
+        this.refundAmountRefunded = refundSummary.getAmountRefunded();
         return this;
     }
 
