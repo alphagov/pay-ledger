@@ -49,9 +49,10 @@ public class TransactionFactory {
                     safeGetAsString(transactionDetails, "expiry_date"));
 
             Map<String, Object> metadata = null;
-            if (entity.getExternalMetadata() != null) {
-                metadata = objectMapper.readValue(entity.getExternalMetadata(), new TypeReference<Map<String, Object>>() {
-                });
+            if (transactionDetails.has("external_metadata")) {
+                metadata = objectMapper.readValue(
+                        objectMapper.treeAsTokens(transactionDetails.get("external_metadata")),
+                        new TypeReference<Map<String, Object>>() {});
             }
 
             RefundSummary refundSummary = RefundSummary.from(entity);

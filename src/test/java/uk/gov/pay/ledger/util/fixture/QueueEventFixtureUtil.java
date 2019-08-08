@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.util.fixture;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.SendMessageResult;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import uk.gov.pay.ledger.event.model.ResourceType;
@@ -46,25 +47,36 @@ public class QueueEventFixtureUtil {
             eventDetails.stringType("parent_resource_external_id", parentResourceExternalId);
         }
 
-        PactDslJsonBody paymentCreatedEventDetails = new PactDslJsonBody();
-        new JsonParser().parse(eventData).getAsJsonObject().entrySet()
+        PactDslJsonBody eventDetailsPact = getNestedPact(new JsonParser().parse(eventData).getAsJsonObject());
+
+        eventDetails.object("event_details", eventDetailsPact);
+
+        return eventDetails;
+    }
+
+    private static PactDslJsonBody getNestedPact(JsonObject eventData) {
+        PactDslJsonBody dslJsonBody = new PactDslJsonBody();
+        eventData.entrySet()
                 .forEach(e -> {
                     try {
-                        JsonPrimitive value = ((JsonPrimitive) e.getValue());
-                        if (value.isNumber()) {
-                            paymentCreatedEventDetails.integerType(e.getKey(), value.getAsInt());
-                        } else if (value.isBoolean()) {
-                            paymentCreatedEventDetails.booleanType(e.getKey(), value.getAsBoolean());
+                        if(e.getValue().isJsonPrimitive()) {
+                            JsonPrimitive value = (JsonPrimitive) e.getValue();
+
+                            if (value.isNumber()) {
+                                dslJsonBody.integerType(e.getKey(), value.getAsInt());
+                            } else if (value.isBoolean()) {
+                                dslJsonBody.booleanType(e.getKey(), value.getAsBoolean());
+                            } else {
+                                dslJsonBody.stringType(e.getKey(), value.getAsString());
+                            }
                         } else {
-                            paymentCreatedEventDetails.stringType(e.getKey(), value.getAsString());
+                            dslJsonBody.object(e.getKey(), getNestedPact(e.getValue().getAsJsonObject()));
                         }
                     } catch (Exception ex) {
-                        paymentCreatedEventDetails.stringType(e.getKey(), e.getValue().getAsString());
+                        dslJsonBody.stringType(e.getKey(), e.getValue().getAsString());
                     }
                 });
 
-        eventDetails.object("event_details", paymentCreatedEventDetails);
-
-        return eventDetails;
+        return dslJsonBody;
     }
 }

@@ -30,7 +30,6 @@ public class TransactionFactoryTest {
     private TransactionState state = TransactionState.valueOf("CREATED");
     private String email = "test@email.com";
     private String cardholderName = "M Jan Kowalski";
-    private String fullExternalMetadata = "{\"ledger_code\":123, \"some_key\":\"key\"}";
     private ZonedDateTime createdDate = ZonedDateTime.now();
     private String fullTransactionDetails = "{\n" +
             "  \"language\": \"en\",\n" +
@@ -46,7 +45,11 @@ public class TransactionFactoryTest {
             "  \"address_postcode\": \"A11 11BB\",\n" +
             "  \"address_city\": \"London\",\n" +
             "  \"address_county\": \"London\",\n" +
-            "  \"address_country\": \"GB\"\n" +
+            "  \"address_country\": \"GB\"\n," +
+            "  \"external_metadata\": {\n" +
+            "       \"ledger_code\":123,\n" +
+            "       \"some_key\":\"key\"" +
+            "   }" +
             "}";
     private Integer eventCount = 2;
     private String cardBrand = "visa";
@@ -74,7 +77,6 @@ public class TransactionFactoryTest {
                 .withState(state)
                 .withEmail(email)
                 .withCardholderName(cardholderName)
-                .withExternalMetadata(fullExternalMetadata)
                 .withCreatedDate(createdDate)
                 .withTransactionDetails(fullTransactionDetails)
                 .withEventCount(eventCount)

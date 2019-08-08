@@ -45,7 +45,6 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getState(), is(transactionEntity.getState()));
         assertThat(retrievedTransaction.getEmail(), is(transactionEntity.getEmail()));
         assertThat(retrievedTransaction.getCardholderName(), is(transactionEntity.getCardholderName()));
-        assertThat(retrievedTransaction.getExternalMetadata(), is(transactionEntity.getExternalMetadata()));
         assertThat(retrievedTransaction.getCreatedDate(), is(transactionEntity.getCreatedDate()));
         assertThat(retrievedTransaction.getTransactionDetails().contains(fixture.getLanguage()), is(true));
         assertThat(retrievedTransaction.getTransactionDetails().contains(fixture.getReturnUrl()), is(true));
@@ -88,7 +87,6 @@ public class TransactionDaoIT {
         assertThat(transaction.getState(), is(transactionEntity.getState()));
         assertThat(transaction.getEmail(), is(transactionEntity.getEmail()));
         assertThat(transaction.getCardholderName(), is(transactionEntity.getCardholderName()));
-        assertThat(transaction.getExternalMetadata(), is(transactionEntity.getExternalMetadata()));
         assertThat(transaction.getCreatedDate(), is(transactionEntity.getCreatedDate()));
         assertThat(transaction.getTransactionDetails().contains(fixture.getLanguage()), is(true));
         assertThat(transaction.getTransactionDetails().contains(fixture.getReturnUrl()), is(true));

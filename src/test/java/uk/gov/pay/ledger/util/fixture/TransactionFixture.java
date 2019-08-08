@@ -1,6 +1,9 @@
 package uk.gov.pay.ledger.util.fixture;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.dropwizard.jackson.Jackson;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -18,6 +21,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class TransactionFixture implements DbFixture<TransactionFixture, TransactionEntity> {
@@ -31,7 +35,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private TransactionState state = TransactionState.SUBMITTED;
     private String email = "someone@example.org";
     private String cardholderName = "j.doe@example.org";
-    private String externalMetadata = null;
+    private JsonElement externalMetadata = null;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
     private String transactionDetails = "{}";
     private Integer eventCount = 1;
@@ -165,8 +169,13 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withExternalMetadata(Map<String, Object> externalMetadata) {
+        this.externalMetadata = new Gson().toJsonTree(externalMetadata);
+        return this;
+    }
+
     public TransactionFixture withExternalMetadata(String externalMetadata) {
-        this.externalMetadata = externalMetadata;
+        this.externalMetadata = new JsonParser().parse(externalMetadata);
         return this;
     }
 
@@ -272,7 +281,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        state,\n" +
                                 "        email,\n" +
                                 "        cardholder_name,\n" +
-                                "        external_metadata,\n" +
                                 "        created_date,\n" +
                                 "        transaction_details,\n" +
                                 "        event_count,\n" +
@@ -289,7 +297,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        settled_time,\n" +
                                 "        type\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
                         id,
                         externalId,
                         parentExternalId,
@@ -300,7 +308,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         state,
                         email,
                         cardholderName,
-                        externalMetadata,
                         createdDate,
                         transactionDetail.toString(),
                         eventCount,
@@ -332,6 +339,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("gateway_transaction_id", gatewayTransactionId);
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
         transactionDetails.addProperty("refunded_by", refundedById);
+
+        Optional.ofNullable(externalMetadata)
+                .ifPresent(cd -> transactionDetails.add("external_metadata", externalMetadata));
+
         Optional.ofNullable(cardDetails)
                 .ifPresent(cd -> {
                     transactionDetails.addProperty("expiry_date", cardExpiryDate);
@@ -362,7 +373,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withState(state)
                 .withEmail(email)
                 .withCardholderName(cardholderName)
-                .withExternalMetadata(externalMetadata)
                 .withCreatedDate(createdDate)
                 .withTransactionDetails(transactionDetails)
                 .withEventCount(eventCount)
@@ -432,11 +442,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     public Boolean getDelayedCapture() {
         return delayedCapture;
     }
-
-    public String getExternalMetadata() {
-        return externalMetadata;
-    }
-
 
     public TransactionFixture withDefaultCardDetails(boolean includeCardDetails) {
         if (includeCardDetails) {

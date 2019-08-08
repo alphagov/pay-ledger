@@ -25,7 +25,6 @@ public class TransactionEntity {
     private TransactionState state;
     private String email;
     private String cardholderName;
-    private String externalMetadata;
     @JsonIgnore
     private ZonedDateTime createdDate;
     @JsonIgnore
@@ -60,7 +59,6 @@ public class TransactionEntity {
         this.state = builder.state;
         this.email = builder.email;
         this.cardholderName = builder.cardholderName;
-        this.externalMetadata = builder.externalMetadata;
         this.createdDate = builder.createdDate;
         this.transactionDetails = builder.transactionDetails;
         this.eventCount = builder.eventCount;
@@ -116,10 +114,6 @@ public class TransactionEntity {
 
     public String getCardholderName() {
         return cardholderName;
-    }
-
-    public String getExternalMetadata() {
-        return externalMetadata;
     }
 
     public ZonedDateTime getCreatedDate() {
@@ -222,7 +216,6 @@ public class TransactionEntity {
         private TransactionState state;
         private String email;
         private String cardholderName;
-        private String externalMetadata;
         private ZonedDateTime createdDate;
         private String transactionDetails;
         private Integer eventCount;
@@ -292,11 +285,6 @@ public class TransactionEntity {
 
         public Builder withCardholderName(String cardholderName) {
             this.cardholderName = cardholderName;
-            return this;
-        }
-
-        public Builder withExternalMetadata(String externalMetadata) {
-            this.externalMetadata = externalMetadata;
             return this;
         }
 

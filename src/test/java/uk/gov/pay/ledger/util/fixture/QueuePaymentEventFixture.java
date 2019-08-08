@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.pay.ledger.event.model.Event;
@@ -67,6 +68,9 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     public QueuePaymentEventFixture withDefaultEventDataForEventType(String eventType) {
         switch (eventType) {
             case "PAYMENT_CREATED":
+                var externalMetadata = new JsonObject();
+                externalMetadata.addProperty("key1", "value1");
+
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
                                 .put("amount", 1000)
@@ -77,6 +81,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("payment_provider", "sandbox")
                                 .put("delayed_capture", false)
+                                .put("external_metadata", externalMetadata)
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":
