@@ -81,7 +81,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("payment_provider", "sandbox")
                                 .put("delayed_capture", false)
-                                .put("external_metadata", externalMetadata)
+                                //.put("external_metadata", externalMetadata)   //todo: will be enabled after changes to connector
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":
