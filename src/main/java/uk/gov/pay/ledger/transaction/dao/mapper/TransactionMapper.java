@@ -39,7 +39,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withSettlementSubmittedTime(getZonedDateTime(rs, "settlement_submitted_time").orElse(null))
                 .withSettledTime(getZonedDateTime(rs, "settled_time").orElse(null))
                 .withRefundStatus(rs.getString("refund_status"))
-                .withRefundAmountSubmitted(rs.getLong("refund_amount_submitted"))
+                .withRefundAmountSubmitted(rs.getLong("refund_amount_refunded"))
                 .withRefundAmountAvailable(rs.getLong("refund_amount_available"))
                 .withFee(rs.getLong("fee"))
                 .withTransactionType(rs.getString("type"))
