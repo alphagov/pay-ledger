@@ -79,8 +79,8 @@ public class TransactionEntityFactoryTest {
                         "\"delayed_capture\":false," +
                         "\"return_url\":\"https://example.org\"," +
                         "\"gateway_transaction_id\":\"%s\"," +
-                        "\"corporate_surcharge\":5" +
-                        //"\"external_metadata\":{\"key1\":\"value1\"}" +    //todo: will be enabled after changes to connector
+                        "\"corporate_surcharge\":5," +
+                        "\"external_metadata\":{\"key\":\"value\"}" +
                         "}",
                 eventDigest.getEventPayload().get("gateway_transaction_id"));
 
