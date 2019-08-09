@@ -69,7 +69,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
         switch (eventType) {
             case "PAYMENT_CREATED":
                 var externalMetadata = new JsonObject();
-                externalMetadata.addProperty("key1", "value1");
+                externalMetadata.addProperty("key", "value");
 
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
@@ -81,7 +81,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("payment_provider", "sandbox")
                                 .put("delayed_capture", false)
-                                //.put("external_metadata", externalMetadata)   //todo: will be enabled after changes to connector
+                                .put("external_metadata", externalMetadata)
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":

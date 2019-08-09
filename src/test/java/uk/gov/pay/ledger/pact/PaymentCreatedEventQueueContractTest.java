@@ -80,6 +80,7 @@ public class PaymentCreatedEventQueueContractTest {
         assertThat(transaction.get().getTransactionDetails(), containsString("\"payment_provider\": \"sandbox\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"language\": \"en\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"delayed_capture\": false"));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"external_metadata\": {\"key\": \"value\"}"));
     }
 
     public void setMessage(byte[] messageContents) {
