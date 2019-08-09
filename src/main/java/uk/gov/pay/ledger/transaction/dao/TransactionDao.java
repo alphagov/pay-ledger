@@ -45,13 +45,13 @@ public class TransactionDao {
                 "external_id,parent_external_id,gateway_account_id,amount,description,reference,state,email,cardholder_name," +
                 "created_date,transaction_details,event_count,card_brand, " +
                 "last_digits_card_number,first_digits_card_number,net_amount,total_amount,fee,type,refund_amount_available," +
-                    "refund_amount_submitted, refund_status" +
+                    "refund_amount_refunded, refund_status" +
             ") " +
             "VALUES (" +
                 ":externalId,:parentExternalId,:gatewayAccountId,:amount,:description,:reference,:state,:email,:cardholderName," +
                 ":createdDate,CAST(:transactionDetails as jsonb), :eventCount," +
                 ":cardBrand,:lastDigitsCardNumber,:firstDigitsCardNumber,:netAmount,:totalAmount,:fee," +
-                ":transactionType::transaction_type,:refundAmountAvailable,:refundAmountSubmitted,:refundStatus" +
+                ":transactionType::transaction_type,:refundAmountAvailable,:refundAmountRefunded,:refundStatus" +
             ") " +
             "ON CONFLICT (external_id) " +
             "DO UPDATE SET " +
@@ -75,7 +75,7 @@ public class TransactionDao {
                 "fee = EXCLUDED.fee," +
                 "type = EXCLUDED.type, " +
                 "refund_amount_available = EXCLUDED.refund_amount_available, " +
-                "refund_amount_submitted = EXCLUDED.refund_amount_submitted, " +
+                "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
                 "refund_status = EXCLUDED.refund_status " +
             "WHERE EXCLUDED.event_count > transaction.event_count;";
 

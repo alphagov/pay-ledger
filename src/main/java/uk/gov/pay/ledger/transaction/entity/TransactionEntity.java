@@ -42,7 +42,7 @@ public class TransactionEntity {
     private ZonedDateTime settlementSubmittedTime;
     private ZonedDateTime settledTime;
     private String refundStatus;
-    private Long refundAmountSubmitted;
+    private Long refundAmountRefunded;
     private Long refundAmountAvailable;
 
     public TransactionEntity() {
@@ -70,7 +70,7 @@ public class TransactionEntity {
         this.settlementSubmittedTime = builder.settlementSubmittedTime;
         this.settledTime = builder.settledTime;
         this.refundStatus = builder.refundStatus;
-        this.refundAmountSubmitted = builder.refundAmountSubmitted;
+        this.refundAmountRefunded = builder.refundAmountRefunded;
         this.refundAmountAvailable = builder.refundAmountAvailable;
         this.fee = builder.fee;
         this.transactionType = builder.transactionType;
@@ -188,8 +188,8 @@ public class TransactionEntity {
         return refundStatus;
     }
 
-    public Long getRefundAmountSubmitted() {
-        return refundAmountSubmitted;
+    public Long getRefundAmountRefunded() {
+        return refundAmountRefunded;
     }
 
     public Long getRefundAmountAvailable() {
@@ -227,7 +227,7 @@ public class TransactionEntity {
         private ZonedDateTime settlementSubmittedTime;
         private ZonedDateTime settledTime;
         private String refundStatus;
-        private Long refundAmountSubmitted;
+        private Long refundAmountRefunded;
         private Long refundAmountAvailable;
         private String transactionType;
 
@@ -343,8 +343,8 @@ public class TransactionEntity {
             return this;
         }
 
-        public Builder withRefundAmountSubmitted(Long refundAmountSubmitted) {
-            this.refundAmountSubmitted = refundAmountSubmitted;
+        public Builder withRefundAmountRefunded(Long refundAmountRefunded) {
+            this.refundAmountRefunded = refundAmountRefunded;
             return this;
         }
 

@@ -17,23 +17,26 @@ public class RefundSummary {
 
     private Long amountSubmitted;
 
+    private Long amountRefunded;
+
     public RefundSummary() {
     }
 
-    public RefundSummary(String status, Long amountAvailable, Long amountSubmitted) {
+    public RefundSummary(String status, Long amountAvailable, Long amountRefunded) {
         this.status = status;
         this.amountAvailable = amountAvailable;
-        this.amountSubmitted = amountSubmitted;
+        this.amountRefunded = amountRefunded;
+        this.amountSubmitted = amountRefunded;
     }
 
     public static RefundSummary from(TransactionEntity entity) {
         if (entity.getRefundStatus() == null &&
                 entity.getRefundAmountAvailable() == null &&
-                entity.getRefundAmountSubmitted() == null) {
+                entity.getRefundAmountRefunded() == null) {
             return null;
         }
 
-        return new RefundSummary(entity.getRefundStatus(), entity.getRefundAmountAvailable(), entity.getRefundAmountSubmitted());
+        return new RefundSummary(entity.getRefundStatus(), entity.getRefundAmountAvailable(), entity.getRefundAmountRefunded());
     }
 
     public String getUserExternalId() {
@@ -44,6 +47,10 @@ public class RefundSummary {
         return amountAvailable;
     }
 
+    public Long getAmountRefunded() {
+        return amountRefunded;
+    }
+
     public Long getAmountSubmitted() {
         return amountSubmitted;
     }
@@ -52,8 +59,8 @@ public class RefundSummary {
         return status;
     }
 
-    public static RefundSummary ofValue(String status, Long amountAvailable, Long amountSubmitted) {
-        return new RefundSummary(status, amountAvailable, amountSubmitted);
+    public static RefundSummary ofValue(String status, Long amountAvailable, Long amountRefunded) {
+        return new RefundSummary(status, amountAvailable, amountRefunded);
     }
 
     @Override
@@ -76,7 +83,7 @@ public class RefundSummary {
         if (!Objects.equals(amountAvailable, that.amountAvailable)) {
             return false;
         }
-        return Objects.equals(amountSubmitted, that.amountSubmitted);
+        return Objects.equals(amountRefunded, that.amountRefunded);
     }
 
     @Override
@@ -84,7 +91,7 @@ public class RefundSummary {
         int result = status.hashCode();
         result = 31 * result + (userExternalId != null ? userExternalId.hashCode() : 0);
         result = 31 * result + (amountAvailable != null ? amountAvailable.hashCode() : 0);
-        result = 31 * result + (amountSubmitted != null ? amountSubmitted.hashCode() : 0);
+        result = 31 * result + (amountRefunded != null ? amountRefunded.hashCode() : 0);
         return result;
     }
 
@@ -94,7 +101,7 @@ public class RefundSummary {
                 "status='" + status + '\'' +
                 "userExternalId='" + userExternalId + '\'' +
                 ", amountAvailable=" + amountAvailable +
-                ", amountSubmitted=" + amountSubmitted +
+                ", amountRefunded=" + amountRefunded +
                 '}';
     }
 }
