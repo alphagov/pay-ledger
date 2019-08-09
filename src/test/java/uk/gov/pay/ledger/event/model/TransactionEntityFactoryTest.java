@@ -63,7 +63,6 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getFirstDigitsCardNumber(), is(eventDigest.getEventPayload().get("first_digits_card_number")));
         assertThat(transactionEntity.getLastDigitsCardNumber(), is(eventDigest.getEventPayload().get("last_digits_card_number")));
         assertThat(transactionEntity.getAmount(), is(((Integer)eventDigest.getEventPayload().get("amount")).longValue()));
-        assertThat(transactionEntity.getExternalMetadata(), is(eventDigest.getEventPayload().get("external_metadata")));
         assertThat(transactionEntity.getNetAmount(), is(((Integer)eventDigest.getEventPayload().get("net_amount")).longValue()));
         assertThat(transactionEntity.getTotalAmount(), is(((Integer)eventDigest.getEventPayload().get("total_amount")).longValue()));
         assertThat(transactionEntity.getFee(), is(((Integer)eventDigest.getEventPayload().get("fee")).longValue()));
@@ -81,6 +80,7 @@ public class TransactionEntityFactoryTest {
                         "\"return_url\":\"https://example.org\"," +
                         "\"gateway_transaction_id\":\"%s\"," +
                         "\"corporate_surcharge\":5" +
+                        //"\"external_metadata\":{\"key1\":\"value1\"}" +    //todo: will be enabled after changes to connector
                         "}",
                 eventDigest.getEventPayload().get("gateway_transaction_id"));
 

@@ -43,13 +43,13 @@ public class TransactionDao {
     private static final String UPSERT_STRING =
             "INSERT INTO transaction(" +
                 "external_id,parent_external_id,gateway_account_id,amount,description,reference,state,email,cardholder_name," +
-                "external_metadata,created_date,transaction_details,event_count,card_brand, " +
+                "created_date,transaction_details,event_count,card_brand, " +
                 "last_digits_card_number,first_digits_card_number,net_amount,total_amount,fee,type,refund_amount_available," +
                     "refund_amount_submitted, refund_status" +
             ") " +
             "VALUES (" +
                 ":externalId,:parentExternalId,:gatewayAccountId,:amount,:description,:reference,:state,:email,:cardholderName," +
-                "CAST(:externalMetadata as jsonb),:createdDate,CAST(:transactionDetails as jsonb), :eventCount," +
+                ":createdDate,CAST(:transactionDetails as jsonb), :eventCount," +
                 ":cardBrand,:lastDigitsCardNumber,:firstDigitsCardNumber,:netAmount,:totalAmount,:fee," +
                 ":transactionType::transaction_type,:refundAmountAvailable,:refundAmountSubmitted,:refundStatus" +
             ") " +
@@ -64,7 +64,6 @@ public class TransactionDao {
                 "state = EXCLUDED.state," +
                 "email = EXCLUDED.email," +
                 "cardholder_name = EXCLUDED.cardholder_name," +
-                "external_metadata = EXCLUDED.external_metadata," +
                 "created_date = EXCLUDED.created_date," +
                 "transaction_details = EXCLUDED.transaction_details," +
                 "event_count = EXCLUDED.event_count," +

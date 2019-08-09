@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.dao;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
@@ -9,6 +10,7 @@ import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,6 +30,7 @@ public class TransactionDaoIT {
                 .withNetAmount(55)
                 .withTotalAmount(105)
                 .withFee(33)
+                .withExternalMetadata(ImmutableMap.of("key1", "value1", "anotherKey", ImmutableMap.of("nestedKey", "value")))
                 .withTransactionType("PAYMENT")
                 .withDefaultTransactionDetails();
         TransactionEntity transactionEntity = fixture.toEntity();
@@ -45,7 +48,7 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getState(), is(transactionEntity.getState()));
         assertThat(retrievedTransaction.getEmail(), is(transactionEntity.getEmail()));
         assertThat(retrievedTransaction.getCardholderName(), is(transactionEntity.getCardholderName()));
-        assertThat(retrievedTransaction.getExternalMetadata(), is(transactionEntity.getExternalMetadata()));
+        assertThat(retrievedTransaction.getTransactionDetails(), containsString("\"external_metadata\": {\"key1\": \"value1\", \"anotherKey\": {\"nestedKey\": \"value\"}}"));
         assertThat(retrievedTransaction.getCreatedDate(), is(transactionEntity.getCreatedDate()));
         assertThat(retrievedTransaction.getTransactionDetails().contains(fixture.getLanguage()), is(true));
         assertThat(retrievedTransaction.getTransactionDetails().contains(fixture.getReturnUrl()), is(true));
@@ -69,6 +72,7 @@ public class TransactionDaoIT {
         TransactionFixture fixture = aTransactionFixture()
                 .withDefaultCardDetails()
                 .withTransactionType("PAYMENT")
+                .withExternalMetadata(ImmutableMap.of("key1", "value1", "anotherKey", ImmutableMap.of("nestedKey", "value")))
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
         TransactionEntity transactionEntity = fixture.toEntity();
@@ -88,7 +92,7 @@ public class TransactionDaoIT {
         assertThat(transaction.getState(), is(transactionEntity.getState()));
         assertThat(transaction.getEmail(), is(transactionEntity.getEmail()));
         assertThat(transaction.getCardholderName(), is(transactionEntity.getCardholderName()));
-        assertThat(transaction.getExternalMetadata(), is(transactionEntity.getExternalMetadata()));
+        assertThat(transaction.getTransactionDetails(), containsString("\"external_metadata\": {\"key1\": \"value1\", \"anotherKey\": {\"nestedKey\": \"value\"}}"));
         assertThat(transaction.getCreatedDate(), is(transactionEntity.getCreatedDate()));
         assertThat(transaction.getTransactionDetails().contains(fixture.getLanguage()), is(true));
         assertThat(transaction.getTransactionDetails().contains(fixture.getReturnUrl()), is(true));
