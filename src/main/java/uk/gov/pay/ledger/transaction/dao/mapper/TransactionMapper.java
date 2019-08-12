@@ -35,8 +35,6 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withFirstDigitsCardNumber(rs.getString("first_digits_card_number"))
                 .withNetAmount(getLongWithNullCheck(rs, "net_amount"))
                 .withTotalAmount(getLongWithNullCheck(rs, "total_amount"))
-                .withNetAmount(rs.getLong("net_amount"))
-                .withTotalAmount(rs.getLong("total_amount"))
                 .withSettledTime(getZonedDateTime(rs, "settled_time").orElse(null))
                 .withRefundStatus(rs.getString("refund_status"))
                 .withRefundAmountRefunded(getLongWithNullCheck(rs, "refund_amount_refunded"))

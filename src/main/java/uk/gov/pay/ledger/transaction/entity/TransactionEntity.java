@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import uk.gov.pay.ledger.event.model.serializer.MicrosecondPrecisionDateTimeSerializer;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
@@ -40,7 +38,6 @@ public class TransactionEntity {
     private Long totalAmount;
     private Long fee;
     private String transactionType;
-    private ZonedDateTime captureSubmittedDate;
     private ZonedDateTime settledTime;
     private String refundStatus;
     private Long refundAmountRefunded;
@@ -68,7 +65,6 @@ public class TransactionEntity {
         this.firstDigitsCardNumber = builder.firstDigitsCardNumber;
         this.netAmount = builder.netAmount;
         this.totalAmount = builder.totalAmount;
-        this.captureSubmittedDate = builder.captureSubmittedDate;
         this.settledTime = builder.settledTime;
         this.refundStatus = builder.refundStatus;
         this.refundAmountRefunded = builder.refundAmountRefunded;
@@ -177,10 +173,6 @@ public class TransactionEntity {
         return totalAmount;
     }
 
-    public ZonedDateTime getCaptureSubmittedDate() {
-        return captureSubmittedDate;
-    }
-
     public ZonedDateTime getSettledTime() {
         return settledTime;
     }
@@ -225,7 +217,6 @@ public class TransactionEntity {
         private String firstDigitsCardNumber;
         private Long netAmount;
         private Long totalAmount;
-        private ZonedDateTime captureSubmittedDate;
         private ZonedDateTime settledTime;
         private String refundStatus;
         private Long refundAmountRefunded;
@@ -326,11 +317,6 @@ public class TransactionEntity {
 
         public Builder withTotalAmount(Long totalAmount) {
             this.totalAmount = totalAmount;
-            return this;
-        }
-
-        public Builder withCaptureSubmittedDate(ZonedDateTime captureSubmittedDate) {
-            this.captureSubmittedDate = captureSubmittedDate;
             return this;
         }
 

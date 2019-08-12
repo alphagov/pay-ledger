@@ -11,6 +11,7 @@ import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,7 +57,10 @@ public class TransactionFactory {
             }
 
             RefundSummary refundSummary = RefundSummary.from(entity);
-            SettlementSummary settlementSummary = new SettlementSummary(entity.getCaptureSubmittedDate(), entity.getSettledTime());
+            SettlementSummary settlementSummary = new SettlementSummary(
+                    safeGetAsDate(transactionDetails, "capture_submitted_date"),
+                    entity.getSettledTime()
+            );
 
             return new Payment(
                     entity.getGatewayAccountId(),
@@ -127,6 +131,13 @@ public class TransactionFactory {
     private static String safeGetAsString(JsonNode object, String propertyName) {
         return safeGetJsonElement(object, propertyName)
                 .map(JsonNode::textValue)
+                .orElse(null);
+    }
+
+    private static ZonedDateTime safeGetAsDate(JsonNode object, String propertyName) {
+        return safeGetJsonElement(object, propertyName)
+                .map(JsonNode::textValue)
+                .map(ZonedDateTime::parse)
                 .orElse(null);
     }
 

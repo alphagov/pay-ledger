@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.search.model.ConvertedTransactionDetails;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.util.Map;
@@ -41,9 +40,8 @@ public class TransactionEntityFactory {
     }
 
     private String convertToTransactionDetails(Map<String, Object> transactionPayload) {
-        ConvertedTransactionDetails details = objectMapper.convertValue(transactionPayload, ConvertedTransactionDetails.class);
         try {
-            return objectMapper.writeValueAsString(details);
+            return objectMapper.writeValueAsString(transactionPayload);
         } catch (JsonProcessingException e) {
             LOGGER.error("Unable to parse incoming event payload: {}", e.getMessage());
         }

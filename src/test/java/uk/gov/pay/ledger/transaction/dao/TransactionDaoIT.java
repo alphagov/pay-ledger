@@ -66,7 +66,6 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getRefundAmountAvailable(), is(transactionEntity.getRefundAmountAvailable()));
         assertThat(retrievedTransaction.getRefundAmountRefunded(), is(transactionEntity.getRefundAmountRefunded()));
         assertThat(retrievedTransaction.getRefundStatus(), is(transactionEntity.getRefundStatus()));
-        assertThat(retrievedTransaction.getCaptureSubmittedDate(), is(transactionEntity.getCaptureSubmittedDate()));
     }
 
     @Test

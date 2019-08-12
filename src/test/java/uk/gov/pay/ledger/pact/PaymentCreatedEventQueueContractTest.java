@@ -36,7 +36,7 @@ public class PaymentCreatedEventQueueContractTest {
     );
 
     private byte[] currentMessage;
-    private String externalId = "externalId";
+    private String externalId = "created_externalId";
     private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
     private String gatewayAccountId = "gateway_account_id";
 

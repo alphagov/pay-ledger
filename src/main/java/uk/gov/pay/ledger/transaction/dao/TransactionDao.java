@@ -44,12 +44,12 @@ public class TransactionDao {
             "INSERT INTO transaction(" +
                     "external_id," +
                     "parent_external_id," +
-                    "gateway_account_id,amount," +
+                    "gateway_account_id," +
+                    "amount," +
                     "description," +
                     "reference,state," +
                     "email," +
                     "cardholder_name," +
-                    "external_metadata," +
                     "created_date," +
                     "transaction_details," +
                     "event_count," +
@@ -61,8 +61,7 @@ public class TransactionDao {
                     "fee,type," +
                     "refund_amount_available," +
                     "refund_amount_refunded, " +
-                    "refund_status," +
-                    "capture_submitted_date" +
+                    "refund_status" +
             ") " +
             "VALUES (" +
                     ":externalId," +
@@ -74,7 +73,6 @@ public class TransactionDao {
                     ":state," +
                     ":email," +
                     ":cardholderName," +
-                    "CAST(:externalMetadata as jsonb)," +
                     ":createdDate," +
                     "CAST(:transactionDetails as jsonb)," +
                     ":eventCount," +
@@ -87,8 +85,7 @@ public class TransactionDao {
                     ":transactionType::transaction_type," +
                     ":refundAmountAvailable," +
                     ":refundAmountRefunded," +
-                    ":refundStatus," +
-                    ":captureSubmittedDate" +
+                    ":refundStatus" +
             ") " +
             "ON CONFLICT (external_id) " +
             "DO UPDATE SET " +
@@ -114,7 +111,6 @@ public class TransactionDao {
                 "refund_amount_available = EXCLUDED.refund_amount_available, " +
                 "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
                 "refund_status = EXCLUDED.refund_status " +
-                "capture_submitted_date = EXCLUDED.capture_submitted_date " +
             "WHERE EXCLUDED.event_count > transaction.event_count;";
 
     private final Jdbi jdbi;

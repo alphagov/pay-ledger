@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
+import com.google.gson.Gson;
 import org.junit.Rule;
 import org.junit.Test;
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
@@ -28,6 +29,8 @@ import static uk.gov.pay.ledger.util.fixture.QueueRefundEventFixture.aQueueRefun
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class RefundCreatedByUserEventQueueContractTest {
+    Gson gson = new Gson();
+
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -77,8 +80,9 @@ public class RefundCreatedByUserEventQueueContractTest {
         assertThat(transaction.get().getParentExternalId(), is(refundFixture.getParentResourceExternalId()));
         assertThat(transaction.get().getAmount(), is(refundFixture.getAmount()));
         assertThat(transaction.get().getCreatedDate(),is(refundFixture.getEventDate()));
-        assertThat(transaction.get().getTransactionDetails(),
-                is("{\"refunded_by\": \"" + refundFixture.getRefundedBy() + "\"}"));
+
+        Map<String, String> transactionDetails = gson.fromJson(transaction.get().getTransactionDetails(), Map.class);
+        assertThat(transactionDetails.get("refunded_by"), is(refundFixture.getRefundedBy()));
     }
 
     public void setMessage(byte[] messageContents) {

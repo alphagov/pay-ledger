@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
+import com.google.gson.Gson;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
@@ -25,6 +26,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CaptureSubmittedEventQueueContractTest {
+    Gson gson = new Gson();
+
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -69,7 +72,8 @@ public class CaptureSubmittedEventQueueContractTest {
         Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
         assertThat(transaction.isPresent(), is(true));
         assertThat(transaction.get().getExternalId(), is(externalId));
-        assertThat(transaction.get().getCaptureSubmittedDate(), is(eventDate));
+        Map<String, String> transactionDetails = gson.fromJson(transaction.get().getTransactionDetails(), Map.class);
+        assertThat(transactionDetails.get("capture_submitted_date"), is(eventDate.toString()));
     }
 
     public void setMessage(byte[] messageContents) {
