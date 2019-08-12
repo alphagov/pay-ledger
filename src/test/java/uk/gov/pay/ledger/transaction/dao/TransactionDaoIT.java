@@ -13,6 +13,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -103,6 +104,10 @@ public class TransactionDaoIT {
         assertThat(transaction.getLastDigitsCardNumber(), is(transactionEntity.getLastDigitsCardNumber()));
         assertThat(transaction.getFirstDigitsCardNumber(), is(transactionEntity.getFirstDigitsCardNumber()));
         assertThat(transaction.getTransactionType(), is(transactionEntity.getTransactionType()));
+        assertThat(transaction.getFee(), is(nullValue()));
+        assertThat(transaction.getTotalAmount(), is(nullValue()));
+        assertThat(transaction.getRefundAmountAvailable(), is(transactionEntity.getRefundAmountAvailable()));
+        assertThat(transaction.getRefundAmountRefunded(), is(transactionEntity.getRefundAmountRefunded()));
     }
 
     @Test
