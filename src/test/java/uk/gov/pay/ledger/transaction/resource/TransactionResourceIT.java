@@ -23,6 +23,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aPersistedTransactionList;
@@ -168,6 +169,12 @@ public class TransactionResourceIT {
                 .body("results[0].delayed_capture", is(transactionToVerify.getDelayedCapture()))
                 .body("results[0].transaction_id", is(transactionToVerify.getExternalId()))
                 .body("results[0].transaction_type", is(TransactionType.PAYMENT.name()))
+                .body("results[0].net_amount", is(nullValue()))
+                .body("results[0].total_amount", is(nullValue()))
+                .body("results[0].fee", is(nullValue()))
+                .body("results[0].refund_summary.amount_available", is(transactionToVerify.getRefundSummary().getAmountAvailable().intValue()))
+                .body("results[0].refund_summary.amount_submitted", is(transactionToVerify.getRefundSummary().getAmountSubmitted().intValue()))
+                .body("results[0].refund_summary.amount_refunded", is(transactionToVerify.getRefundSummary().getAmountRefunded().intValue()))
 
                 .body("count", is(2))
                 .body("page", is(2))

@@ -21,7 +21,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withGatewayAccountId(rs.getString("gateway_account_id"))
                 .withExternalId(rs.getString("external_id"))
                 .withParentExternalId(rs.getString("parent_external_id"))
-                .withAmount(rs.getLong("amount"))
+                .withAmount(getLongWithNullCheck(rs, "amount"))
                 .withReference(rs.getString("reference"))
                 .withDescription(rs.getString("description"))
                 .withState(TransactionState.valueOf(rs.getString("state")))
@@ -33,16 +33,21 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withCardBrand(rs.getString("card_brand"))
                 .withLastDigitsCardNumber(rs.getString("last_digits_card_number"))
                 .withFirstDigitsCardNumber(rs.getString("first_digits_card_number"))
-                .withNetAmount(rs.getLong("net_amount"))
-                .withTotalAmount(rs.getLong("total_amount"))
+                .withNetAmount(getLongWithNullCheck(rs, "net_amount"))
+                .withTotalAmount(getLongWithNullCheck(rs, "total_amount"))
                 .withSettlementSubmittedTime(getZonedDateTime(rs, "settlement_submitted_time").orElse(null))
                 .withSettledTime(getZonedDateTime(rs, "settled_time").orElse(null))
                 .withRefundStatus(rs.getString("refund_status"))
-                .withRefundAmountRefunded(rs.getLong("refund_amount_refunded"))
-                .withRefundAmountAvailable(rs.getLong("refund_amount_available"))
-                .withFee(rs.getLong("fee"))
+                .withRefundAmountRefunded(getLongWithNullCheck(rs, "refund_amount_refunded"))
+                .withRefundAmountAvailable(getLongWithNullCheck(rs, "refund_amount_available"))
+                .withFee(getLongWithNullCheck(rs, "fee"))
                 .withTransactionType(rs.getString("type"))
                 .build();
+    }
+
+    private Long getLongWithNullCheck(ResultSet rs, String columnName) throws SQLException {
+        long value = rs.getLong(columnName);
+        return rs.wasNull() ? null : value;
     }
 
     private Optional<ZonedDateTime> getZonedDateTime(ResultSet rs, String columnLabel) throws SQLException {
