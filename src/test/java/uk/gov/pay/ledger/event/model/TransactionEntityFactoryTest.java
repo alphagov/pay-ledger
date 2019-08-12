@@ -1,6 +1,8 @@
 package uk.gov.pay.ledger.event.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -68,23 +70,20 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getFee(), is(((Integer)eventDigest.getEventPayload().get("fee")).longValue()));
         assertThat(transactionEntity.getTransactionType(), is("PAYMENT"));
 
-        var expectedTransactionDetails = String.format("{" +
-                        "\"language\":\"en\"," +
-                        "\"payment_provider\":\"sandbox\"," +
-                        "\"expiry_date\":\"11/21\"," +
-                        "\"address_line1\":\"12 Rouge Avenue\"," +
-                        "\"address_postcode\":\"N1 3QU\"," +
-                        "\"address_city\":\"London\"," +
-                        "\"address_country\":\"GB\"," +
-                        "\"delayed_capture\":false," +
-                        "\"return_url\":\"https://example.org\"," +
-                        "\"gateway_transaction_id\":\"%s\"," +
-                        "\"corporate_surcharge\":5," +
-                        "\"external_metadata\":{\"key\":\"value\"}" +
-                        "}",
-                eventDigest.getEventPayload().get("gateway_transaction_id"));
 
-        assertThat(transactionEntity.getTransactionDetails(), is(expectedTransactionDetails));
+        JsonObject transactionDetails = new JsonParser().parse(transactionEntity.getTransactionDetails()).getAsJsonObject();
+        assertThat(transactionDetails.get("language").getAsString(), is("en"));
+        assertThat(transactionDetails.get("payment_provider").getAsString(), is("sandbox"));
+        assertThat(transactionDetails.get("expiry_date").getAsString(), is("11/21"));
+        assertThat(transactionDetails.get("address_line1").getAsString(), is("12 Rouge Avenue"));
+        assertThat(transactionDetails.get("address_postcode").getAsString(), is("N1 3QU"));
+        assertThat(transactionDetails.get("address_country").getAsString(), is("GB"));
+        assertThat(transactionDetails.get("delayed_capture").getAsBoolean(), is(false));
+        assertThat(transactionDetails.get("return_url").getAsString(), is("https://example.org"));
+        assertThat(transactionDetails.get("corporate_surcharge").getAsInt(), is(5));
+        assertThat(transactionDetails.get("gateway_transaction_id").getAsString(), is(eventDigest.getEventPayload().get("gateway_transaction_id")));
+        assertThat(transactionDetails.get("external_metadata").getAsJsonObject().get("key").getAsString(), is("value"));
+
     }
 
     @Test

@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.model;
 
+import com.google.gson.JsonObject;
 import io.dropwizard.jackson.Jackson;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,33 +32,13 @@ public class TransactionFactoryTest {
     private String email = "test@email.com";
     private String cardholderName = "M Jan Kowalski";
     private ZonedDateTime createdDate = ZonedDateTime.now();
-    private String fullTransactionDetails = "{\n" +
-            "  \"language\": \"en\",\n" +
-            "  \"return_url\": \"https://test.url.com\",\n" +
-            "  \"payment_provider\": \"sandbox\",\n" +
-            "  \"delayed_capture\": true,\n" +
-            "  \"gateway_transaction_id\": \"gti_12334\",\n" +
-            "  \"corporate_surcharge\": 12,\n" +
-            "  \"fee\": 5,\n" +
-            "  \"expiry_date\": \"10/27\",\n" +
-            "  \"address_line1\": \"line 1\",\n" +
-            "  \"address_line2\": \"line 2\",\n" +
-            "  \"address_postcode\": \"A11 11BB\",\n" +
-            "  \"address_city\": \"London\",\n" +
-            "  \"address_county\": \"London\",\n" +
-            "  \"address_country\": \"GB\"\n," +
-            "  \"external_metadata\": {\n" +
-            "       \"ledger_code\":123,\n" +
-            "       \"some_key\":\"key\"" +
-            "   }" +
-            "}";
+    private JsonObject fullTransactionDetails = new JsonObject();
     private Integer eventCount = 2;
     private String cardBrand = "visa";
     private String lastDigitsCardNumber = "5678";
     private String firstDigitsCardNumber = "123456";
     private Long netAmount = 77L;
     private Long totalAmount = 99L;
-    private ZonedDateTime settlementSubmittedTime = ZonedDateTime.parse("2017-09-09T09:35:45.695951+01");
     private ZonedDateTime settledTime = ZonedDateTime.parse("2017-09-09T12:13Z");
     private String refundStatus = "available";
     private Long refundAmountRefunded = 0L;
@@ -67,6 +48,29 @@ public class TransactionFactoryTest {
 
     @Before
     public void setUp() {
+        JsonObject metadata = new JsonObject();
+        metadata.addProperty("ledger_code", 123);
+        metadata.addProperty("some_key", "key");
+
+        fullTransactionDetails.addProperty("language", "en");
+        fullTransactionDetails.addProperty("return_url", "https://test.url.com");
+        fullTransactionDetails.addProperty("payment_provider", "sandbox");
+        fullTransactionDetails.addProperty("delayed_capture", true);
+        fullTransactionDetails.addProperty("gateway_transaction_id", "gti_12334");
+        fullTransactionDetails.addProperty("corporate_surcharge", 12);
+        fullTransactionDetails.addProperty("fee", 5);
+        fullTransactionDetails.addProperty("address_line1", "line 1");
+        fullTransactionDetails.addProperty("address_line2", "line 2");
+        fullTransactionDetails.addProperty("address_postcode", "A11 11BB");
+        fullTransactionDetails.addProperty("address_line1", "line 1");
+        fullTransactionDetails.addProperty("address_city", "London");
+        fullTransactionDetails.addProperty("address_county", "London");
+        fullTransactionDetails.addProperty("address_country", "GB");
+        fullTransactionDetails.addProperty("capture_submitted_date", "2017-09-09T09:35:45.695951+01");
+        fullTransactionDetails.add("external_metadata", metadata);
+        fullTransactionDetails.addProperty("expiry_date", cardExpiryDate);
+
+
         fullDataObject = new TransactionEntity.Builder()
                 .withId(id)
                 .withGatewayAccountId(gatewayAccountId)
@@ -78,14 +82,13 @@ public class TransactionFactoryTest {
                 .withEmail(email)
                 .withCardholderName(cardholderName)
                 .withCreatedDate(createdDate)
-                .withTransactionDetails(fullTransactionDetails)
+                .withTransactionDetails(fullTransactionDetails.toString())
                 .withEventCount(eventCount)
                 .withCardBrand(cardBrand)
                 .withLastDigitsCardNumber(lastDigitsCardNumber)
                 .withFirstDigitsCardNumber(firstDigitsCardNumber)
                 .withNetAmount(netAmount)
                 .withTotalAmount(totalAmount)
-                .withSettlementSubmittedTime(settlementSubmittedTime)
                 .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
                 .withRefundAmountRefunded(refundAmountRefunded)
@@ -110,7 +113,6 @@ public class TransactionFactoryTest {
                 .withFirstDigitsCardNumber(firstDigitsCardNumber)
                 .withNetAmount(netAmount)
                 .withTotalAmount(totalAmount)
-                .withSettlementSubmittedTime(settlementSubmittedTime)
                 .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
                 .withRefundAmountRefunded(refundAmountRefunded)
@@ -200,7 +202,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getRefundSummary().getAmountRefunded(), is(refundAmountRefunded));
         assertThat(payment.getSettlementSummary(), notNullValue());
         assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.of("2017-09-09")));
-        assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.of("2017-09-09T08:35:45.695Z")));
+        assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.empty()));
     }
 
     @Test

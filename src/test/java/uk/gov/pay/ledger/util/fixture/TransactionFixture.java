@@ -53,7 +53,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Long fee;
     private Long netAmount;
     private Long totalAmount;
-    private ZonedDateTime settlementSubmittedTime;
+    private ZonedDateTime captureSubmittedDate;
     private ZonedDateTime settledTime;
     private String refundStatus = "available";
     private Long refundAmountRefunded = 0L;
@@ -293,11 +293,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        refund_status,\n" +
                                 "        refund_amount_refunded,\n" +
                                 "        refund_amount_available,\n" +
-                                "        settlement_submitted_time,\n" +
                                 "        settled_time,\n" +
                                 "        type\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
                         id,
                         externalId,
                         parentExternalId,
@@ -320,7 +319,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         refundStatus,
                         refundAmountRefunded,
                         refundAmountAvailable,
-                        settlementSubmittedTime,
                         settledTime,
                         transactionType
                 )
@@ -339,10 +337,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("gateway_transaction_id", gatewayTransactionId);
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
         transactionDetails.addProperty("refunded_by", refundedById);
-
         Optional.ofNullable(externalMetadata)
                 .ifPresent(cd -> transactionDetails.add("external_metadata", externalMetadata));
-
+        Optional.ofNullable(captureSubmittedDate).ifPresent(
+                date -> transactionDetails.addProperty("capture_submitted_date", date.toString())
+        );
         Optional.ofNullable(cardDetails)
                 .ifPresent(cd -> {
                     transactionDetails.addProperty("expiry_date", cardExpiryDate);
@@ -381,7 +380,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withFirstDigitsCardNumber(firstDigitsCardNumber)
                 .withNetAmount(netAmount)
                 .withTotalAmount(totalAmount)
-                .withSettlementSubmittedTime(settlementSubmittedTime)
                 .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
                 .withRefundAmountRefunded(refundAmountRefunded)
@@ -486,8 +484,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withSettlementSubmittedTime(ZonedDateTime time) {
-        this.settlementSubmittedTime = time;
+    public TransactionFixture withCaptureSubmittedDate(ZonedDateTime time) {
+        this.captureSubmittedDate = time;
         return this;
     }
 
