@@ -100,6 +100,7 @@ public class TransactionsApiContractTest {
                 .withGatewayAccountId(gatewayAccountId)
                 .withAmount(200L)
                 .withTransactionType("REFUND")
+                .withState(TransactionState.ERROR_GATEWAY)
                 .withReference("reference2")
                 .withDescription("description2")
                 .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:16:16.067Z"))
