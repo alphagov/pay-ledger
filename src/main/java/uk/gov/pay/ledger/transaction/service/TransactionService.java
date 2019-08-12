@@ -158,6 +158,7 @@ public class TransactionService {
         List<TransactionView> transactions = transactionDao.findTransactionByParentIdAndGatewayAccountId(
                 parentTransactionExternalId, gatewayAccountId)
                 .stream()
+                .sorted(Comparator.comparing(TransactionEntity::getCreatedDate))
                 .map(transactionEntity ->
                         TransactionView.from(transactionFactory.createTransactionEntity(transactionEntity)))
                 .collect(Collectors.toList());
