@@ -210,6 +210,7 @@ public class TransactionFactoryTest {
                 .withId(id)
                 .withGatewayAccountId(gatewayAccountId)
                 .withExternalId(externalId)
+                .withParentExternalId("parent-ext-id")
                 .withAmount(amount)
                 .withReference(reference)
                 .withState(state)
@@ -222,6 +223,7 @@ public class TransactionFactoryTest {
         assertThat(refundEntity.getGatewayAccountId(), is(gatewayAccountId));
         assertThat(refundEntity.getAmount(), is(amount));
         assertThat(refundEntity.getExternalId(), is(externalId));
+        assertThat(refundEntity.getParentExternalId(), is("parent-ext-id"));
         assertThat(refundEntity.getRefundedBy(), is("some_user_id"));
         assertThat(refundEntity.getReference(), is(reference));
         assertThat(refundEntity.getState(), is(state));
