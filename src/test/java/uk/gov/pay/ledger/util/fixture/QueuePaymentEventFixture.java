@@ -106,6 +106,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
                                 .put("gateway_event_date", eventDate.toString())
+                                .put("captured_date", eventDate.toString())
                                 .put("fee", 5)
                                 .put("net_amount", 1069)
                                 .build());

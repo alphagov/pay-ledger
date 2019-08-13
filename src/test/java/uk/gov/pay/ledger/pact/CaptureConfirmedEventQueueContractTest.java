@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
+import com.google.gson.Gson;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.dao.EventDao;
@@ -83,8 +84,13 @@ public class CaptureConfirmedEventQueueContractTest {
         assertThat(transaction.get().getFee(), is(5L));
         assertThat(transaction.get().getNetAmount(), is(1069L));
 
+        Map<String, Object> transactionDetails = new Gson().fromJson(transaction.get().getTransactionDetails(), Map.class);
+        assertThat(transactionDetails.get("captured_date"), is("2018-03-12T16:25:01.123456Z"));
+
         Event event = eventDao.getEventsByResourceExternalId(externalId).get(0);
-        assertThat(event.getEventData(), containsString("\"gateway_event_date\": \"2018-03-12T16:25:01.123456Z\""));
+        Map<String, Object> eventDetails = new Gson().fromJson(event.getEventData(), Map.class);
+        assertThat(eventDetails.get("gateway_event_date"),  is("2018-03-12T16:25:01.123456Z"));
+        assertThat(eventDetails.get("captured_date"),  is("2018-03-12T16:25:01.123456Z"));
     }
 
     public void setMessage(byte[] messageContents) {

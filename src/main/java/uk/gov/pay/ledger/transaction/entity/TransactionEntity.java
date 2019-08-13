@@ -38,7 +38,6 @@ public class TransactionEntity {
     private Long totalAmount;
     private Long fee;
     private String transactionType;
-    private ZonedDateTime settledTime;
     private String refundStatus;
     private Long refundAmountRefunded;
     private Long refundAmountAvailable;
@@ -65,7 +64,6 @@ public class TransactionEntity {
         this.firstDigitsCardNumber = builder.firstDigitsCardNumber;
         this.netAmount = builder.netAmount;
         this.totalAmount = builder.totalAmount;
-        this.settledTime = builder.settledTime;
         this.refundStatus = builder.refundStatus;
         this.refundAmountRefunded = builder.refundAmountRefunded;
         this.refundAmountAvailable = builder.refundAmountAvailable;
@@ -173,10 +171,6 @@ public class TransactionEntity {
         return totalAmount;
     }
 
-    public ZonedDateTime getSettledTime() {
-        return settledTime;
-    }
-
     public String getRefundStatus() {
         return refundStatus;
     }
@@ -217,7 +211,6 @@ public class TransactionEntity {
         private String firstDigitsCardNumber;
         private Long netAmount;
         private Long totalAmount;
-        private ZonedDateTime settledTime;
         private String refundStatus;
         private Long refundAmountRefunded;
         private Long refundAmountAvailable;
@@ -317,11 +310,6 @@ public class TransactionEntity {
 
         public Builder withTotalAmount(Long totalAmount) {
             this.totalAmount = totalAmount;
-            return this;
-        }
-
-        public Builder withSettledTime(ZonedDateTime settledTime) {
-            this.settledTime = settledTime;
             return this;
         }
 

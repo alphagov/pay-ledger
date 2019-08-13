@@ -54,7 +54,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Long netAmount;
     private Long totalAmount;
     private ZonedDateTime captureSubmittedDate;
-    private ZonedDateTime settledTime;
+    private ZonedDateTime capturedDate;
     private String refundStatus = "available";
     private Long refundAmountRefunded = 0L;
     private Long refundAmountAvailable = 100L;
@@ -293,10 +293,9 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        refund_status,\n" +
                                 "        refund_amount_refunded,\n" +
                                 "        refund_amount_available,\n" +
-                                "        settled_time,\n" +
                                 "        type\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
                         id,
                         externalId,
                         parentExternalId,
@@ -319,7 +318,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         refundStatus,
                         refundAmountRefunded,
                         refundAmountAvailable,
-                        settledTime,
                         transactionType
                 )
         );
@@ -341,6 +339,9 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .ifPresent(cd -> transactionDetails.add("external_metadata", externalMetadata));
         Optional.ofNullable(captureSubmittedDate).ifPresent(
                 date -> transactionDetails.addProperty("capture_submitted_date", date.toString())
+        );
+        Optional.ofNullable(capturedDate).ifPresent(
+                date -> transactionDetails.addProperty("captured_date", date.toString())
         );
         Optional.ofNullable(cardDetails)
                 .ifPresent(cd -> {
@@ -380,7 +381,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withFirstDigitsCardNumber(firstDigitsCardNumber)
                 .withNetAmount(netAmount)
                 .withTotalAmount(totalAmount)
-                .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
                 .withRefundAmountRefunded(refundAmountRefunded)
                 .withRefundAmountAvailable(refundAmountAvailable)
@@ -489,8 +489,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withSettledTime(ZonedDateTime time) {
-        this.settledTime = time;
+    public TransactionFixture withCapturedDate(ZonedDateTime time) {
+        this.capturedDate = time;
         return this;
     }
 

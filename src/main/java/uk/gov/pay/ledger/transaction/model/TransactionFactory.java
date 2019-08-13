@@ -59,7 +59,7 @@ public class TransactionFactory {
             RefundSummary refundSummary = RefundSummary.from(entity);
             SettlementSummary settlementSummary = new SettlementSummary(
                     safeGetAsDate(transactionDetails, "capture_submitted_date"),
-                    entity.getSettledTime()
+                    safeGetAsDate(transactionDetails, "captured_date")
             );
 
             return new Payment(

@@ -39,7 +39,6 @@ public class TransactionFactoryTest {
     private String firstDigitsCardNumber = "123456";
     private Long netAmount = 77L;
     private Long totalAmount = 99L;
-    private ZonedDateTime settledTime = ZonedDateTime.parse("2017-09-09T12:13Z");
     private String refundStatus = "available";
     private Long refundAmountRefunded = 0L;
     private Long refundAmountAvailable = 99L;
@@ -67,6 +66,7 @@ public class TransactionFactoryTest {
         fullTransactionDetails.addProperty("address_county", "London");
         fullTransactionDetails.addProperty("address_country", "GB");
         fullTransactionDetails.addProperty("capture_submitted_date", "2017-09-09T09:35:45.695951+01");
+        fullTransactionDetails.addProperty("captured_date", "2017-09-09T09:35:45.695951+01");
         fullTransactionDetails.add("external_metadata", metadata);
         fullTransactionDetails.addProperty("expiry_date", cardExpiryDate);
 
@@ -89,7 +89,6 @@ public class TransactionFactoryTest {
                 .withFirstDigitsCardNumber(firstDigitsCardNumber)
                 .withNetAmount(netAmount)
                 .withTotalAmount(totalAmount)
-                .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
                 .withRefundAmountRefunded(refundAmountRefunded)
                 .withRefundAmountAvailable(refundAmountAvailable)
@@ -113,7 +112,6 @@ public class TransactionFactoryTest {
                 .withFirstDigitsCardNumber(firstDigitsCardNumber)
                 .withNetAmount(netAmount)
                 .withTotalAmount(totalAmount)
-                .withSettledTime(settledTime)
                 .withRefundStatus(refundStatus)
                 .withRefundAmountRefunded(refundAmountRefunded)
                 .withRefundAmountAvailable(refundAmountAvailable)
@@ -201,7 +199,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getRefundSummary().getAmountAvailable(), is(refundAmountAvailable));
         assertThat(payment.getRefundSummary().getAmountRefunded(), is(refundAmountRefunded));
         assertThat(payment.getSettlementSummary(), notNullValue());
-        assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.of("2017-09-09")));
+        assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.empty()));
         assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.empty()));
     }
 
