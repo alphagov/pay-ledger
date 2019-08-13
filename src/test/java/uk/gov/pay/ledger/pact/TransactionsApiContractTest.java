@@ -7,7 +7,6 @@ import au.com.dius.pact.provider.junit.State;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactBrokerAuth;
 import au.com.dius.pact.provider.junit.loader.PactFilter;
-import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
@@ -16,6 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
@@ -65,6 +65,7 @@ public class TransactionsApiContractTest {
                 .withReference("aReference")
                 .withDescription("Test description")
                 .withState(TransactionState.CREATED)
+                .withTransactionType(TransactionType.PAYMENT.name())
                 .withReturnUrl("https://example.org")
                 .withCardBrand(null)
                 .withDefaultCardDetails()
