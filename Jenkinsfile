@@ -142,6 +142,9 @@ pipeline {
       }
     }
     stage('Check pact compatibility') {
+      when {
+        branch 'master'
+      }
       steps {
         checkPactCompatibility("ledger", gitCommit(), "test")
       }

@@ -95,7 +95,7 @@ public class GetTransactionContractTest {
                 .withCorporateCardSurcharge(250L)
                 .withTotalAmount(2250L)
                 .withCaptureSubmittedDate(ZonedDateTime.now())
-                .withSettledTime(ZonedDateTime.now())
+                .withCapturedDate(ZonedDateTime.now())
                 .insert(app.getJdbi());
     }
 

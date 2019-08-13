@@ -11,11 +11,11 @@ import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_
 
 public class SettlementSummary {
     private ZonedDateTime settlementSubmittedTime;
-    private ZonedDateTime settledTime;
+    private ZonedDateTime capturedDate;
 
-    public SettlementSummary(ZonedDateTime settlementSubmittedTime, ZonedDateTime settledTime) {
+    public SettlementSummary(ZonedDateTime settlementSubmittedTime, ZonedDateTime capturedDate) {
         this.settlementSubmittedTime = settlementSubmittedTime;
-        this.settledTime = settledTime;
+        this.capturedDate = capturedDate;
     }
 
     @JsonProperty("capture_submit_time")
@@ -26,7 +26,7 @@ public class SettlementSummary {
 
     @JsonProperty("captured_date")
     public Optional<String> getCapturedDate() {
-        return Optional.ofNullable(settledTime)
+        return Optional.ofNullable(capturedDate)
                 .map(t -> t.format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
 
@@ -39,13 +39,13 @@ public class SettlementSummary {
 
         if (!Objects.equals(settlementSubmittedTime, that.settlementSubmittedTime))
             return false;
-        return Objects.equals(settledTime, that.settledTime);
+        return Objects.equals(capturedDate, that.capturedDate);
     }
 
     @Override
     public int hashCode() {
         int result = settlementSubmittedTime != null ? settlementSubmittedTime.hashCode() : 0;
-        result = 31 * result + (settledTime != null ? settledTime.hashCode() : 0);
+        result = 31 * result + (capturedDate != null ? capturedDate.hashCode() : 0);
         return result;
     }
 
@@ -53,7 +53,7 @@ public class SettlementSummary {
     public String toString() {
         return "SettlementSummary{" +
                 ", settlementSubmittedTime=" + settlementSubmittedTime +
-                ", settledTime=" + settledTime +
+                ", capturedDate=" + capturedDate +
                 '}';
     }
 }
