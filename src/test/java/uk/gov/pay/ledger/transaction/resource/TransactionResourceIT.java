@@ -229,9 +229,9 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
+                .body("count", is(2))
                 .body("results[0].transaction_id", is(createdTransaction.getExternalId()))
-                .body("results[1].transaction_id", is(submittedTransaction.getExternalId()))
-                .body("results[2].transaction_id", is(nullValue()));
+                .body("results[1].transaction_id", is(submittedTransaction.getExternalId()));
     }
 
     @Test
@@ -276,9 +276,9 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
+                .body("count", is(2))
                 .body("results[0].transaction_id", is(createdTransaction.getExternalId()))
-                .body("results[1].transaction_id", is(submittedTransaction.getExternalId()))
-                .body("results[2].transaction_id", is(nullValue()));
+                .body("results[1].transaction_id", is(submittedTransaction.getExternalId()));
     }
 
     @Test
@@ -324,9 +324,9 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
+                .body("count", is(2))
                 .body("results[0].transaction_id", is(successfulRefund.getExternalId()))
-                .body("results[1].transaction_id", is(submittedPayment.getExternalId()))
-                .body("results[2].transaction_id", is(nullValue()));
+                .body("results[1].transaction_id", is(submittedPayment.getExternalId()));
     }
 
     @Test
