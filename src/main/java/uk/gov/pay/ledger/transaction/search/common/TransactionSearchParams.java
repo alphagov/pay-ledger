@@ -8,11 +8,12 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static java.lang.String.join;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionSearchParams {
@@ -157,14 +158,11 @@ public class TransactionSearchParams {
         if (toDate != null) {
             sb.append(" AND t.created_date < :" + TO_DATE_FIELD);
         }
-        if (paymentStates != null && !paymentStates.isEmpty()) {
-            //TODO implement
+        if (isSet(paymentStates) || isSet(refundStates)) {
+            sb.append(" AND " + createStateFilter());
         }
         if (isNotBlank(state)) {
             sb.append(" AND t.state IN (<" + STATE_FIELD + ">)");
-        }
-        if (refundStates != null) {
-            //TODO implement
         }
         if (cardBrands != null && !cardBrands.isEmpty()) {
             sb.append(" AND t.card_brand IN (<" + CARD_BRAND_FIELD + ">)");
@@ -211,6 +209,12 @@ public class TransactionSearchParams {
             }
             if (cardBrands != null && !cardBrands.isEmpty()) {
                 queryMap.put(CARD_BRAND_FIELD, cardBrands.getParameters());
+            }
+            if (isSet(paymentStates)) {
+                queryMap.put(PAYMENT_STATES_FIELD, getTransactionStatesForStatuses(paymentStates));
+            }
+            if (isSet(refundStates)) {
+                queryMap.put(REFUND_STATES_FIELD, getTransactionStatesForStatuses(refundStates));
             }
             if (isNotBlank(lastDigitsCardNumber)) {
                 queryMap.put(LAST_DIGITS_CARD_NUMBER_FIELD, lastDigitsCardNumber);
@@ -274,7 +278,7 @@ public class TransactionSearchParams {
         if (isNotBlank(lastDigitsCardNumber)) {
             sb.append("&" + LAST_DIGITS_CARD_NUMBER_FIELD + "=" + lastDigitsCardNumber);
         }
-        if (paymentStates != null && !paymentStates.isEmpty()) {
+        if (isSet(paymentStates)) {
             sb.append("&" + PAYMENT_STATES_FIELD + "=" + paymentStates.getRawString());
         }
         if (refundStates != null && !refundStates.isEmpty()) {
@@ -286,7 +290,7 @@ public class TransactionSearchParams {
         if (isNotBlank(state)) {
             sb.append("&" + STATE_FIELD + "=" + state);
         }
-        if(transactionType != null) {
+        if (transactionType != null) {
             sb.append("&" + TRANSACTION_TYPE_FIELD + "=" + transactionType);
         }
 
@@ -304,6 +308,33 @@ public class TransactionSearchParams {
         return offset;
     }
 
+    private List<String> getTransactionStatesForStatuses(CommaDelimitedSetParameter paymentStates) {
+        return paymentStates.getParameters().stream()
+                .map(TransactionState::getStatesForStatus)
+                .flatMap(List::stream)
+                .map(TransactionState::name)
+                .collect(Collectors.toList());
+    }
+
+    private String createStateFilter() {
+        String paymentStateFilter = null;
+        String refundStateFilter = null;
+        if (isSet(paymentStates)) {
+            paymentStateFilter =
+                    " (t.state IN (<" + PAYMENT_STATES_FIELD + ">) AND t.type =  'PAYMENT'::transaction_type)";
+        }
+        if (isSet(refundStates)) {
+            refundStateFilter =
+                    " (t.state IN (<" + REFUND_STATES_FIELD + ">) AND t.type =  'REFUND'::transaction_type)";
+        }
+
+        return List.of(
+                Optional.ofNullable(paymentStateFilter), Optional.ofNullable(refundStateFilter)
+        ).stream()
+                .flatMap(Optional::stream)
+                .collect(Collectors.joining(" OR "));
+    }
+
     private String likeClause(String rawUserInputText) {
         return "%" + rawUserInputText + "%";
     }
@@ -312,5 +343,9 @@ public class TransactionSearchParams {
         String queryParams = format("&page=%s", forPage);
         queryParams += format("&display_size=%s", displaySize.intValue());
         return queryParams;
+    }
+
+    private boolean isSet(CommaDelimitedSetParameter commaDelimitedSetParameter) {
+        return commaDelimitedSetParameter != null && !commaDelimitedSetParameter.isEmpty();
     }
 }
