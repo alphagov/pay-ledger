@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
@@ -45,11 +46,13 @@ public class TransactionResource {
     @Timed
     public TransactionView getById(@PathParam("transactionExternalId") String transactionExternalId,
                                    @QueryParam("account_id") String gatewayAccountId,
-                                   @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction) {
+                                   @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
+                                   @QueryParam("transaction_type") TransactionType transactionType,
+                                   @QueryParam("parent_external_id") String parentTransactionExternalId) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
 
         return AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId)
-                .withSupplier((accountId) -> transactionService.getTransactionForGatewayAccount(accountId, transactionExternalId))
+                .withSupplier((accountId) -> transactionService.getTransactionForGatewayAccount(accountId, transactionExternalId, transactionType, parentTransactionExternalId))
                 .withPrivilegedSupplier(() -> transactionService.getTransaction(transactionExternalId))
                 .validateAndGet()
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));

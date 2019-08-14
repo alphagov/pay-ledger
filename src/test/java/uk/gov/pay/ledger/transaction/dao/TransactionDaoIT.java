@@ -5,6 +5,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
@@ -79,10 +80,10 @@ public class TransactionDaoIT {
         TransactionEntity transactionEntity = fixture.toEntity();
 
         TransactionEntity transaction = transactionDao
-                .findTransactionByExternalIdAndGatewayAccountId(
+                .findTransaction(
                         transactionEntity.getExternalId(),
-                        transactionEntity.getGatewayAccountId()
-                ).get();
+                        transactionEntity.getGatewayAccountId(),
+                        TransactionType.PAYMENT, null).get();
 
         assertThat(transaction.getId(), notNullValue());
         assertThat(transaction.getGatewayAccountId(), is(transactionEntity.getGatewayAccountId()));
@@ -108,6 +109,39 @@ public class TransactionDaoIT {
         assertThat(transaction.getTotalAmount(), is(nullValue()));
         assertThat(transaction.getRefundAmountAvailable(), is(transactionEntity.getRefundAmountAvailable()));
         assertThat(transaction.getRefundAmountRefunded(), is(transactionEntity.getRefundAmountRefunded()));
+    }
+
+    @Test
+    public void shouldRetrieveRefundTransactionByExternalIdAndGatewayAccountId() {
+        TransactionEntity parentTransactionEntity = aTransactionFixture()
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        TransactionEntity transactionEntity = aTransactionFixture()
+                .withTransactionType(TransactionType.REFUND.name())
+                .withParentExternalId(parentTransactionEntity.getExternalId())
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        TransactionEntity transaction = transactionDao
+                .findTransaction(
+                        transactionEntity.getExternalId(),
+                        transactionEntity.getGatewayAccountId(),
+                        TransactionType.REFUND, parentTransactionEntity.getExternalId())
+                .get();
+
+        assertThat(transaction.getId(), notNullValue());
+        assertThat(transaction.getGatewayAccountId(), is(transactionEntity.getGatewayAccountId()));
+        assertThat(transaction.getExternalId(), is(transactionEntity.getExternalId()));
+        assertThat(transaction.getAmount(), is(transactionEntity.getAmount()));
+        assertThat(transaction.getDescription(), is(transactionEntity.getDescription()));
+        assertThat(transaction.getState(), is(transactionEntity.getState()));
+        assertThat(transaction.getCreatedDate(), is(transactionEntity.getCreatedDate()));
+        assertThat(transaction.getEventCount(), is(transactionEntity.getEventCount()));
+        assertThat(transaction.getTransactionType(), is(transactionEntity.getTransactionType()));
     }
 
     @Test

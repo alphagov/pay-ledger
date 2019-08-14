@@ -6,6 +6,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.transaction.dao.mapper.TransactionMapper;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
 import java.util.List;
@@ -20,7 +21,9 @@ public class TransactionDao {
 
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
             "WHERE external_id = :externalId " +
-            "and gateway_account_id = :gatewayAccountId";
+            "AND gateway_account_id = :gatewayAccountId " +
+            "AND (:transactionType::transaction_type is NULL OR type = :transactionType::transaction_type) " +
+            "AND (:parentExternalId is NULL OR parent_external_id = :parentExternalId)";
 
     private static final String FIND_TRANSACTIONS_BY_EXTERNAL_OR_PARENT_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
             "WHERE (external_id = :externalId or parent_external_id = :externalId) " +
@@ -120,11 +123,13 @@ public class TransactionDao {
         this.jdbi = jdbi;
     }
 
-    public Optional<TransactionEntity> findTransactionByExternalIdAndGatewayAccountId(String externalId, String gatewayAccountId) {
+    public Optional<TransactionEntity> findTransaction(String externalId, String gatewayAccountId, TransactionType transactionType, String parentTransactionExternalId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery(FIND_TRANSACTION_BY_EXTERNAL_ID_AND_GATEWAY_ACCOUNT_ID)
                         .bind("externalId", externalId)
                         .bind("gatewayAccountId", gatewayAccountId)
+                        .bind("transactionType", transactionType)
+                        .bind("parentExternalId", parentTransactionExternalId)
                         .map(new TransactionMapper())
                         .findFirst());
     }
