@@ -37,6 +37,7 @@ public class TransactionView {
     private String reference;
     private String language;
     private String externalId;
+    private String parentExternalId;
     private String returnUrl;
     private String email;
     private String paymentProvider;
@@ -64,6 +65,7 @@ public class TransactionView {
         this.reference = builder.reference;
         this.language = builder.language;
         this.externalId = builder.externalId;
+        this.parentExternalId = builder.parentExternalId;
         this.returnUrl = builder.returnUrl;
         this.email = builder.email;
         this.paymentProvider = builder.paymentProvider;
@@ -82,7 +84,7 @@ public class TransactionView {
     }
 
     public static TransactionView from(Transaction transaction) {
-        if(transaction instanceof Payment) {
+        if (transaction instanceof Payment) {
             Payment payment = (Payment) transaction;
 
             return new Builder()
@@ -121,6 +123,7 @@ public class TransactionView {
                 .withDescription(refund.getDescription())
                 .withReference(refund.getReference())
                 .withExternalId(refund.getExternalId())
+                .withParentExternalId(refund.getParentExternalId())
                 .withCreatedDate(refund.getCreatedDate())
                 .withRefundedBy(refund.getRefundedBy())
                 .withTransactionType(refund.getTransactionType())
@@ -158,6 +161,11 @@ public class TransactionView {
     @JsonProperty("transaction_id")
     public String getTransactionId() {
         return externalId;
+    }
+
+    @JsonProperty("parent_transaction_id")
+    public String getParentTransactionId() {
+        return parentExternalId;
     }
 
     public String getReturnUrl() {
@@ -250,6 +258,7 @@ public class TransactionView {
         private String reference;
         private String language;
         private String externalId;
+        private String parentExternalId;
         private String returnUrl;
         private String email;
         private String paymentProvider;
@@ -328,6 +337,11 @@ public class TransactionView {
 
         public Builder withExternalId(String externalId) {
             this.externalId = externalId;
+            return this;
+        }
+
+        public Builder withParentExternalId(String parentExternalId) {
+            this.parentExternalId = parentExternalId;
             return this;
         }
 

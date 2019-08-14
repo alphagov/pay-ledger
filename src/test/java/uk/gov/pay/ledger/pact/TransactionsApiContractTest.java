@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.pact;
 
-import au.com.dius.pact.provider.junit.IgnoreNoPactsToVerify;
 import au.com.dius.pact.provider.junit.PactRunner;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.State;
@@ -31,9 +30,9 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
         consumers = {"publicapi"})
 @PactFilter({"a transaction with created state exist",
-        "refund transactions for a transaction exist"
+        "refund transactions for a transaction exist",
+        "refund transactions exists for a gateway account"
 })
-@IgnoreNoPactsToVerify
 public class TransactionsApiContractTest {
 
     @ClassRule
@@ -61,7 +60,7 @@ public class TransactionsApiContractTest {
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
                 .withGatewayAccountId(gatewayAccountId)
-                .withAmount(1000l)
+                .withAmount(1000L)
                 .withReference("aReference")
                 .withDescription("Test description")
                 .withState(TransactionState.CREATED)
@@ -79,32 +78,57 @@ public class TransactionsApiContractTest {
         String transactionExternalId = params.get("transaction_external_id");
         String gatewayAccountId = params.get("gateway_account_id");
 
+        createPaymentTransaction(transactionExternalId, gatewayAccountId);
+
+        createARefundTransaction(transactionExternalId, gatewayAccountId, "refund-transaction-1d1",
+                100L, "reference1", "description1",
+                "2018-09-22T10:14:16.067Z", TransactionState.SUBMITTED);
+
+        createARefundTransaction(transactionExternalId, gatewayAccountId, "refund-transaction-1d2",
+                200L, "reference2", "description2",
+                "2018-09-22T10:16:16.067Z", TransactionState.ERROR_GATEWAY);
+    }
+
+    @State("refund transactions exists for a gateway account")
+    public void createRefundTransactionsForAGatewayAccount(Map<String, String> params) {
+        String transactionExternalId1 = "someExternalId1";
+        String transactionExternalId2 = "someExternalId2";
+        String gatewayAccountId = params.get("gateway_account_id");
+
+        createPaymentTransaction(transactionExternalId1, gatewayAccountId);
+        createPaymentTransaction(transactionExternalId2, gatewayAccountId);
+
+        createARefundTransaction(transactionExternalId1, gatewayAccountId, "refund-transaction-1d1",
+                150L, "reference1", null,
+                "2018-09-22T10:14:16.067Z", TransactionState.SUCCESS);
+
+        createARefundTransaction(transactionExternalId2, gatewayAccountId, "refund-transaction-1d2",
+                250L, "reference2", null,
+                "2018-10-22T10:16:16.067Z", TransactionState.SUCCESS);
+    }
+
+    private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
+                                          String externalId, Long amount,
+                                          String reference, String description,
+                                          String createdDate, TransactionState state) {
+        aTransactionFixture()
+                .withExternalId(externalId)
+                .withParentExternalId(parentExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withAmount(amount)
+                .withState(state)
+                .withTransactionType(TransactionType.REFUND.name())
+                .withReference(reference)
+                .withDescription(description)
+                .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .insert(app.getJdbi());
+    }
+
+    private void createPaymentTransaction(String transactionExternalId, String gatewayAccountId) {
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
                 .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
                 .insert(app.getJdbi()).toEntity();
-
-        aTransactionFixture()
-                .withExternalId("refund-transaction-id1")
-                .withParentExternalId(transactionExternalId)
-                .withGatewayAccountId(gatewayAccountId)
-                .withAmount(100L)
-                .withTransactionType("REFUND")
-                .withReference("reference1")
-                .withDescription("description1")
-                .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:14:16.067Z"))
-                .insert(app.getJdbi());
-
-        aTransactionFixture()
-                .withExternalId("refund-transaction-id2")
-                .withParentExternalId(transactionExternalId)
-                .withGatewayAccountId(gatewayAccountId)
-                .withAmount(200L)
-                .withTransactionType("REFUND")
-                .withState(TransactionState.ERROR_GATEWAY)
-                .withReference("reference2")
-                .withDescription("description2")
-                .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:16:16.067Z"))
-                .insert(app.getJdbi());
     }
 }

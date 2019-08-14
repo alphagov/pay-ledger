@@ -107,6 +107,7 @@ public class TransactionFactory {
                     .withCreatedDate(entity.getCreatedDate())
                     .withEventCount(entity.getEventCount())
                     .withRefundedBy(safeGetAsString(transactionDetails, "refunded_by"))
+                    .withParentExternalId(entity.getParentExternalId())
                     .build();
 
         } catch (IOException e) {
