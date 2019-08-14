@@ -14,6 +14,7 @@ import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionFactory;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -58,7 +59,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String refundStatus = "available";
     private Long refundAmountRefunded = 0L;
     private Long refundAmountAvailable = 100L;
-    private String transactionType;
+    private String transactionType = TransactionType.PAYMENT.name();
     private String parentExternalId;
     private String refundedById;
 
