@@ -188,6 +188,148 @@ public class TransactionResourceIT {
     }
 
     @Test
+    public void shouldSearchCorrectlyUsingPaymentStates() {
+        String gatewayAccountId = "1";
+        TransactionFixture createdTransaction = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.CREATED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .withCreatedDate(ZonedDateTime.now())
+                .insert(rule.getJdbi());
+
+
+        TransactionFixture submittedTransaction = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .insert(rule.getJdbi());
+
+        TransactionFixture successTransaction = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+
+        transactionFixture.insert(rule.getJdbi());
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5" +
+                        "&payment_states=created,submitted"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("results[0].transaction_id", is(createdTransaction.getExternalId()))
+                .body("results[1].transaction_id", is(submittedTransaction.getExternalId()))
+                .body("results[2].transaction_id", is(nullValue()));
+    }
+
+    @Test
+    public void shouldSearchCorrectlyUsingRefundStates() {
+        String gatewayAccountId = "2";
+        TransactionFixture createdTransaction = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .withCreatedDate(ZonedDateTime.now())
+                .insert(rule.getJdbi());
+
+
+        TransactionFixture submittedTransaction = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUBMITTED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .insert(rule.getJdbi());
+
+        TransactionFixture successTransaction = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+
+        transactionFixture.insert(rule.getJdbi());
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5" +
+                        "&refund_states=success,submitted"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("results[0].transaction_id", is(createdTransaction.getExternalId()))
+                .body("results[1].transaction_id", is(submittedTransaction.getExternalId()))
+                .body("results[2].transaction_id", is(nullValue()));
+    }
+
+    @Test
+    public void shouldSearchCorrectlyUsingBothPaymentAndRefundStates() {
+        String gatewayAccountId = "3";
+        TransactionFixture successfulRefund = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .withCreatedDate(ZonedDateTime.now())
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUBMITTED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .insert(rule.getJdbi());
+
+        TransactionFixture submittedPayment = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(ZonedDateTime.now().minusHours(2))
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+
+        transactionFixture.insert(rule.getJdbi());
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5" +
+                        "&refund_states=success" +
+                        "&payment_states=submitted"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("results[0].transaction_id", is(successfulRefund.getExternalId()))
+                .body("results[1].transaction_id", is(submittedPayment.getExternalId()))
+                .body("results[2].transaction_id", is(nullValue()));
+    }
+
+    @Test
     public void shouldReturnTransactionEventsCorrectly() {
         transactionFixture = aTransactionFixture()
                 .withTransactionType("PAYMENT")
