@@ -30,6 +30,7 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
         consumers = {"publicapi"})
 @PactFilter({"a transaction with created state exist",
+        "a refund transaction for a transaction exists",
         "refund transactions for a transaction exist",
         "refund transactions exists for a gateway account"
 })
@@ -73,8 +74,21 @@ public class TransactionsApiContractTest {
                 .insert(app.getJdbi());
     }
 
-    @State("refund transactions for a transaction exist")
+    @State("a refund transaction for a transaction exists")
     public void createRefundTransactionForATransaction(Map<String, String> params) {
+        String transactionExternalId = params.get("transaction_external_id");
+        String parentExternalId = params.get("parent_external_id");
+        String gatewayAccountId = params.get("gateway_account_id");
+
+        createPaymentTransaction(parentExternalId, gatewayAccountId);
+
+        createARefundTransaction(parentExternalId, gatewayAccountId, transactionExternalId,
+                100L, "reference1", "description1",
+                "2018-09-22T10:14:16.067Z", TransactionState.SUCCESS);
+    }
+
+    @State("refund transactions for a transaction exist")
+    public void createRefundTransactionsForATransaction(Map<String, String> params) {
         String transactionExternalId = params.get("transaction_external_id");
         String gatewayAccountId = params.get("gateway_account_id");
 
