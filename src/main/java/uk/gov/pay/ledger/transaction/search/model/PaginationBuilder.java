@@ -97,7 +97,7 @@ public class PaginationBuilder {
         URI uri = uriInfo.getBaseUriBuilder()
                 .replacePath(uriInfo.getPath())
                 .replaceQuery(queryParams)
-                .build(searchParams.getAccountId());
+                .build();
 
         return uri.toString();
     }

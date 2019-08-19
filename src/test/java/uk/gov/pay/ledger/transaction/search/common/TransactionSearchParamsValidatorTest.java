@@ -17,14 +17,6 @@ public class TransactionSearchParamsValidatorTest {
     @Before
     public void setup(){
         searchParams = new TransactionSearchParams();
-        searchParams.setAccountId("account_id");
-    }
-    @Test
-    public void shouldThrowException_whenAccountIdIsNull() {
-        searchParams.setAccountId(null);
-        thrown.expect(ValidationException.class);
-        thrown.expectMessage("Field [account_id] cannot be empty");
-        TransactionSearchParamsValidator.validateSearchParams(searchParams);
     }
 
     @Test

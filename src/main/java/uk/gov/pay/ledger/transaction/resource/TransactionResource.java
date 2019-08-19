@@ -25,6 +25,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParamsValidator.validateSearchParams;
@@ -51,7 +52,10 @@ public class TransactionResource {
                                    @QueryParam("parent_external_id") String parentTransactionExternalId) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
 
-        return AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId)
+        AccountIdSupplierManager<Optional<TransactionView>> accountIdSupplierManager =
+                AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId);
+
+        return accountIdSupplierManager
                 .withSupplier((accountId) -> transactionService.getTransactionForGatewayAccount(accountId, transactionExternalId, transactionType, parentTransactionExternalId))
                 .withPrivilegedSupplier(() -> transactionService.getTransaction(transactionExternalId))
                 .validateAndGet()
@@ -61,14 +65,23 @@ public class TransactionResource {
     @Path("/")
     @GET
     @Timed
-    public TransactionSearchResponse search(@Valid @BeanParam TransactionSearchParams searchParams,
+    public TransactionSearchResponse search(@Valid
+                                            @BeanParam TransactionSearchParams searchParams,
+                                            @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
+                                            @QueryParam("account_id") String gatewayAccountId,
                                             @Context UriInfo uriInfo) {
 
-        if (searchParams == null) {
-            searchParams = new TransactionSearchParams();
-        }
-        validateSearchParams(searchParams);
-        return transactionService.searchTransactions(searchParams, uriInfo);
+        TransactionSearchParams transactionSearchParams = Optional.ofNullable(searchParams)
+                .orElse(new TransactionSearchParams());
+
+        validateSearchParams(transactionSearchParams);
+        AccountIdSupplierManager<TransactionSearchResponse> accountIdSupplierManager =
+                AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId);
+
+        return accountIdSupplierManager
+                .withSupplier((accountId) -> transactionService.searchTransactions(gatewayAccountId, transactionSearchParams, uriInfo))
+                .withPrivilegedSupplier(() -> transactionService.searchTransactions(transactionSearchParams, uriInfo))
+                .validateAndGet();
     }
 
     @Path("{transactionExternalId}/event")
