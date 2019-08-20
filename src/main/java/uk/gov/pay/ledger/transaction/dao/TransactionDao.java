@@ -4,13 +4,11 @@ import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.core.statement.SqlStatements;
 import uk.gov.pay.ledger.transaction.dao.mapper.TransactionMapper;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -166,6 +164,8 @@ public class TransactionDao {
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(createSearchTemplate(searchParams, SEARCH_TRANSACTIONS));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
+            query.bind("offset", searchParams.getOffset());
+            query.bind("limit", searchParams.getDisplaySize());
             return query
                     .map(new TransactionMapper())
                     .list();
@@ -174,8 +174,7 @@ public class TransactionDao {
 
     public Long getTotalForSearch(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = handle.configure(SqlStatements.class, stmts -> stmts.setUnusedBindingAllowed(true))
-                    .createQuery(createSearchTemplate(searchParams, COUNT_TRANSACTIONS));
+            Query query = handle.createQuery(createSearchTemplate(searchParams, COUNT_TRANSACTIONS));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             return query
                     .mapTo(Long.class)

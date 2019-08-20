@@ -21,8 +21,6 @@ public class TransactionSearchParams {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionSearchParams.class);
 
     private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "account_id";
-    private static final String OFFSET_FIELD = "offset";
-    private static final String PAGE_SIZE_FIELD = "limit";
     private static final String CARDHOLDER_NAME_FIELD = "cardholder_name";
     private static final String FROM_DATE_FIELD = "from_date";
     private static final String TO_DATE_FIELD = "to_date";
@@ -185,8 +183,6 @@ public class TransactionSearchParams {
     public Map<String, Object> getQueryMap() {
         if (queryMap == null) {
             queryMap = new HashMap<>();
-            queryMap.put(OFFSET_FIELD, getOffset());
-            queryMap.put(PAGE_SIZE_FIELD, displaySize);
 
             if (isNotBlank(accountId)) {
                 queryMap.put(GATEWAY_ACCOUNT_EXTERNAL_FIELD, accountId);
@@ -308,7 +304,7 @@ public class TransactionSearchParams {
         return String.join("&", queries);
     }
 
-    private Long getOffset() {
+    public Long getOffset() {
         Long offset = 0l;
 
         if (pageNumber != null) {
