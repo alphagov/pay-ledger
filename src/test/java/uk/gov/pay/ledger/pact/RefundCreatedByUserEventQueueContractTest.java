@@ -6,14 +6,15 @@ import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.google.gson.Gson;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.QueueRefundEventFixture;
 
 import java.util.HashMap;
@@ -44,8 +45,13 @@ public class RefundCreatedByUserEventQueueContractTest {
     private QueueRefundEventFixture refundFixture = aQueueRefundEventFixture()
             .withResourceType(ResourceType.REFUND)
             .withEventType("REFUND_CREATED_BY_USER")
-            .withRefundedBy(RandomStringUtils.randomAlphanumeric(14))
+            .withRefundedBy("a_user_id")
             .withDefaultEventDataForEventType("REFUND_CREATED_BY_USER");
+
+    @Before
+    public void setUp() {
+        DatabaseTestHelper.aDatabaseTestHelper(appRule.getJdbi()).truncateAllData();
+    }
 
     @Pact(provider = "connector", consumer = "ledger")
     public MessagePact createRefundCreatedByUserEventPact(MessagePactBuilder builder) {
