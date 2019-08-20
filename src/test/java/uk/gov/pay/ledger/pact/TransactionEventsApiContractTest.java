@@ -28,7 +28,7 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 @Provider("ledger")
 @PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
-        consumers = {"publicapi"})
+        consumers = {"publicapi", "selfservice"})
 @PactFilter({"a transaction has CREATED and AUTHORISATION_REJECTED payment events"})
 @IgnoreNoPactsToVerify
 public class TransactionEventsApiContractTest {
