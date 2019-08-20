@@ -433,4 +433,50 @@ public class TransactionDaoSearchIT {
 
         assertThat(transactionList.size(), Matchers.is(4));
     }
+
+    @Test
+    public void shouldFilterByGatewayAccountIdWhenSpecified() {
+        String gatewayAccountId = "account-id-" + nextLong();
+
+        TransactionFixture transaction = aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType("PAYMENT")
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId + "different_account")
+                .withTransactionType("PAYMENT")
+                .insert(rule.getJdbi());
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setAccountId(gatewayAccountId);
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(1));
+        assertThat(transactionList.get(0).getExternalId(), is(transaction.getExternalId()));
+    }
+
+    @Test
+    public void shouldNotFilterByGatewayAccountIdWhenNotSpecified() {
+        String gatewayAccountId = "account-id-" + nextLong();
+
+        TransactionFixture mostRecent = aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType("PAYMENT")
+                .withCreatedDate(ZonedDateTime.now())
+                .insert(rule.getJdbi());
+
+        TransactionFixture earlier =  aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId + "different_account")
+                .withTransactionType("PAYMENT")
+                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .insert(rule.getJdbi());
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(2));
+        assertThat(transactionList.get(0).getExternalId(), is(mostRecent.getExternalId()));
+        assertThat(transactionList.get(1).getExternalId(), is(earlier.getExternalId()));
+    }
 }

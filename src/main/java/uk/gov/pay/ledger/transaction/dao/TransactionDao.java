@@ -1,7 +1,7 @@
 package uk.gov.pay.ledger.transaction.dao;
 
 import com.google.inject.Inject;
-import org.jdbi.v3.core.Handle;
+import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.transaction.dao.mapper.TransactionMapper;
@@ -33,14 +33,12 @@ public class TransactionDao {
             " WHERE parent_external_id = :parentExternalId" +
             "   AND gateway_account_id = :gatewayAccountId";
 
-    private static final String SEARCH_QUERY_STRING = "SELECT * FROM transaction t " +
-            "WHERE t.gateway_account_id = :account_id " +
+    private static final String SEARCH_TRANSACTIONS = "SELECT * FROM transaction t " +
             ":searchExtraFields " +
             "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
 
-    private static final String SEARCH_COUNT_QUERY_STRING = "SELECT count(t.id) " +
+    private static final String COUNT_TRANSACTIONS = "SELECT count(t.id) " +
             "FROM transaction t " +
-            "WHERE t.gateway_account_id = :account_id " +
             ":searchExtraFields ";
 
     private static final String UPSERT_STRING =
@@ -164,7 +162,10 @@ public class TransactionDao {
 
     public List<TransactionEntity> searchTransactions(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = getQuery(searchParams, handle, SEARCH_QUERY_STRING);
+            Query query = handle.createQuery(createSearchTemplate(searchParams, SEARCH_TRANSACTIONS));
+            searchParams.getQueryMap().forEach(bindSearchParameter(query));
+            query.bind("offset", searchParams.getOffset());
+            query.bind("limit", searchParams.getDisplaySize());
             return query
                     .map(new TransactionMapper())
                     .list();
@@ -173,18 +174,26 @@ public class TransactionDao {
 
     public Long getTotalForSearch(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = getQuery(searchParams, handle, SEARCH_COUNT_QUERY_STRING);
+            Query query = handle.createQuery(createSearchTemplate(searchParams, COUNT_TRANSACTIONS));
+            searchParams.getQueryMap().forEach(bindSearchParameter(query));
             return query
                     .mapTo(Long.class)
                     .findOnly();
         });
     }
 
-    private Query getQuery(TransactionSearchParams searchParams, Handle handle, String searchCountQueryString) {
-        String searchExtraFields = searchParams.generateQuery();
-        Query query = handle.createQuery(searchCountQueryString.replace(":searchExtraFields", searchExtraFields));
-        searchParams.getQueryMap().forEach(bindSearchParameter(query));
-        return query;
+    private String createSearchTemplate(
+            TransactionSearchParams searchParams,
+            String baseQueryString
+            ) {
+        String searchClauseTemplate = String.join(" AND ", searchParams.getFilterTemplates());
+        searchClauseTemplate = StringUtils.isNotBlank(searchClauseTemplate) ?
+                "WHERE " + searchClauseTemplate :
+                "";
+
+        return baseQueryString.replace(
+                ":searchExtraFields",
+                searchClauseTemplate);
     }
 
     private BiConsumer<String, Object> bindSearchParameter(Query query) {

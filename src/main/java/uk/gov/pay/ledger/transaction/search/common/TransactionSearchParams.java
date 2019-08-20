@@ -7,13 +7,13 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionSearchParams {
@@ -21,8 +21,6 @@ public class TransactionSearchParams {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionSearchParams.class);
 
     private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "account_id";
-    private static final String OFFSET_FIELD = "offset";
-    private static final String PAGE_SIZE_FIELD = "limit";
     private static final String CARDHOLDER_NAME_FIELD = "cardholder_name";
     private static final String FROM_DATE_FIELD = "from_date";
     private static final String TO_DATE_FIELD = "to_date";
@@ -38,7 +36,6 @@ public class TransactionSearchParams {
     private static final long MAX_DISPLAY_SIZE = 500;
     private static final long DEFAULT_PAGE_NUMBER = 1L;
 
-    @QueryParam("account_id")
     private String accountId;
     @QueryParam("email")
     private String email;
@@ -140,52 +137,56 @@ public class TransactionSearchParams {
         }
     }
 
-    public String generateQuery() {
-        StringBuilder sb = new StringBuilder();
+    public List<String> getFilterTemplates() {
+        List<String> filters = new ArrayList<>();
 
+        if (isNotBlank(accountId)) {
+            filters.add(" t.gateway_account_id = :" + GATEWAY_ACCOUNT_EXTERNAL_FIELD);
+        }
         if (isNotBlank(email)) {
-            sb.append(" AND t.email ILIKE :" + EMAIL_FIELD);
+            filters.add(" t.email ILIKE :" + EMAIL_FIELD);
         }
         if (isNotBlank(reference)) {
-            sb.append(" AND t.reference ILIKE :" + REFERENCE_FIELD);
+            filters.add(" t.reference ILIKE :" + REFERENCE_FIELD);
         }
         if (isNotBlank(cardHolderName)) {
-            sb.append(" AND t.cardholder_name ILIKE :" + CARDHOLDER_NAME_FIELD);
+            filters.add(" t.cardholder_name ILIKE :" + CARDHOLDER_NAME_FIELD);
         }
         if (fromDate != null) {
-            sb.append(" AND t.created_date > :" + FROM_DATE_FIELD);
+            filters.add(" t.created_date > :" + FROM_DATE_FIELD);
         }
         if (toDate != null) {
-            sb.append(" AND t.created_date < :" + TO_DATE_FIELD);
+            filters.add(" t.created_date < :" + TO_DATE_FIELD);
         }
         if (isSet(paymentStates) || isSet(refundStates)) {
-            sb.append(" AND " + createStateFilter());
+            filters.add(createStateFilter());
         }
         if (isNotBlank(state)) {
-            sb.append(" AND t.state IN (<" + STATE_FIELD + ">)");
+            filters.add(" t.state IN (<" + STATE_FIELD + ">)");
         }
         if (cardBrands != null && !cardBrands.isEmpty()) {
-            sb.append(" AND t.card_brand IN (<" + CARD_BRAND_FIELD + ">)");
+            filters.add(" t.card_brand IN (<" + CARD_BRAND_FIELD + ">)");
         }
         if (isNotBlank(lastDigitsCardNumber)) {
-            sb.append(" AND t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD);
+            filters.add(" t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD);
         }
         if (isNotBlank(firstDigitsCardNumber)) {
-            sb.append(" AND t.first_digits_card_number = :" + FIRST_DIGITS_CARD_NUMBER_FIELD);
+            filters.add(" t.first_digits_card_number = :" + FIRST_DIGITS_CARD_NUMBER_FIELD);
         }
         if (transactionType != null) {
-            sb.append(" AND t.type = :" + TRANSACTION_TYPE_FIELD + "::transaction_type");
+            filters.add(" t.type = :" + TRANSACTION_TYPE_FIELD + "::transaction_type");
         }
 
-        return sb.toString();
+        return List.copyOf(filters);
     }
 
     public Map<String, Object> getQueryMap() {
         if (queryMap == null) {
             queryMap = new HashMap<>();
-            queryMap.put(GATEWAY_ACCOUNT_EXTERNAL_FIELD, accountId);
-            queryMap.put(OFFSET_FIELD, getOffset());
-            queryMap.put(PAGE_SIZE_FIELD, displaySize);
+
+            if (isNotBlank(accountId)) {
+                queryMap.put(GATEWAY_ACCOUNT_EXTERNAL_FIELD, accountId);
+            }
 
             if (isNotBlank(email)) {
                 queryMap.put(EMAIL_FIELD, likeClause(email));
@@ -254,51 +255,56 @@ public class TransactionSearchParams {
     }
 
     public String buildQueryParamString(Long forPage) {
-        StringBuilder sb = new StringBuilder(GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + accountId);
+        List<String> queries = new ArrayList<>();
 
+        if (accountId != null) {
+            queries.add(GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + accountId);
+        }
         if (fromDate != null) {
-            sb.append("&" + FROM_DATE_FIELD + "=" + fromDate);
+            queries.add(FROM_DATE_FIELD + "=" + fromDate);
         }
         if (toDate != null) {
-            sb.append("&" + TO_DATE_FIELD + "=" + toDate);
+            queries.add(TO_DATE_FIELD + "=" + toDate);
         }
 
         if (isNotBlank(email)) {
-            sb.append("&" + EMAIL_FIELD + "=" + email);
+            queries.add(EMAIL_FIELD + "=" + email);
         }
         if (isNotBlank(reference)) {
-            sb.append("&" + REFERENCE_FIELD + "=" + reference);
+            queries.add(REFERENCE_FIELD + "=" + reference);
         }
         if (isNotBlank(cardHolderName)) {
-            sb.append("&" + CARDHOLDER_NAME_FIELD + "=" + cardHolderName);
+            queries.add(CARDHOLDER_NAME_FIELD + "=" + cardHolderName);
         }
         if (isNotBlank(firstDigitsCardNumber)) {
-            sb.append("&" + FIRST_DIGITS_CARD_NUMBER_FIELD + "=" + firstDigitsCardNumber);
+            queries.add(FIRST_DIGITS_CARD_NUMBER_FIELD + "=" + firstDigitsCardNumber);
         }
         if (isNotBlank(lastDigitsCardNumber)) {
-            sb.append("&" + LAST_DIGITS_CARD_NUMBER_FIELD + "=" + lastDigitsCardNumber);
+            queries.add(LAST_DIGITS_CARD_NUMBER_FIELD + "=" + lastDigitsCardNumber);
         }
         if (isSet(paymentStates)) {
-            sb.append("&" + PAYMENT_STATES_FIELD + "=" + paymentStates.getRawString());
+            queries.add(PAYMENT_STATES_FIELD + "=" + paymentStates.getRawString());
         }
         if (refundStates != null && !refundStates.isEmpty()) {
-            sb.append("&" + REFUND_STATES_FIELD + "=" + refundStates.getRawString());
+            queries.add(REFUND_STATES_FIELD + "=" + refundStates.getRawString());
         }
         if (cardBrands != null && !cardBrands.isEmpty()) {
-            sb.append("&" + CARD_BRAND_FIELD + "=" + cardBrands.getRawString());
+            queries.add(CARD_BRAND_FIELD + "=" + cardBrands.getRawString());
         }
         if (isNotBlank(state)) {
-            sb.append("&" + STATE_FIELD + "=" + state);
+            queries.add(STATE_FIELD + "=" + state);
         }
         if (transactionType != null) {
-            sb.append("&" + TRANSACTION_TYPE_FIELD + "=" + transactionType);
+            queries.add(TRANSACTION_TYPE_FIELD + "=" + transactionType);
         }
+        queries.add("page=" + forPage);
+        queries.add("display_size=" + displaySize);
 
-        sb.append(addPaginationParams(forPage));
-        return sb.toString();
+
+        return String.join("&", queries);
     }
 
-    private Long getOffset() {
+    public Long getOffset() {
         Long offset = 0l;
 
         if (pageNumber != null) {
@@ -328,21 +334,15 @@ public class TransactionSearchParams {
                     " (t.state IN (<" + REFUND_STATES_FIELD + ">) AND t.type =  'REFUND'::transaction_type)";
         }
 
-        return List.of(
+        return "(" + List.of(
                 Optional.ofNullable(paymentStateFilter), Optional.ofNullable(refundStateFilter)
         ).stream()
                 .flatMap(Optional::stream)
-                .collect(Collectors.joining(" OR "));
+                .collect(Collectors.joining(" OR ")) + ")";
     }
 
     private String likeClause(String rawUserInputText) {
         return "%" + rawUserInputText + "%";
-    }
-
-    private String addPaginationParams(Long forPage) {
-        String queryParams = format("&page=%s", forPage);
-        queryParams += format("&display_size=%s", displaySize.intValue());
-        return queryParams;
     }
 
     private boolean isSet(CommaDelimitedSetParameter commaDelimitedSetParameter) {

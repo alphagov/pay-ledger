@@ -41,7 +41,6 @@ public class TransactionResourceIT {
 
     @Before
     public void setUp() {
-        transactionFixture = aTransactionFixture();
         aDatabaseTestHelper(rule.getJdbi()).truncateAllData();
     }
 
@@ -217,7 +216,6 @@ public class TransactionResourceIT {
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
-        transactionFixture.insert(rule.getJdbi());
         given().port(port)
                 .contentType(JSON)
                 .get("/v1/transaction?" +
@@ -264,7 +262,6 @@ public class TransactionResourceIT {
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
-        transactionFixture.insert(rule.getJdbi());
         given().port(port)
                 .contentType(JSON)
                 .get("/v1/transaction?" +
@@ -311,7 +308,6 @@ public class TransactionResourceIT {
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
-        transactionFixture.insert(rule.getJdbi());
         given().port(port)
                 .contentType(JSON)
                 .get("/v1/transaction?" +
@@ -327,6 +323,70 @@ public class TransactionResourceIT {
                 .body("count", is(2))
                 .body("results[0].transaction_id", is(successfulRefund.getExternalId()))
                 .body("results[1].transaction_id", is(submittedPayment.getExternalId()));
+    }
+
+    @Test
+    public void shouldSearchUsingGatewayAccountId() {
+        String targetGatewayAccountId = "123";
+        String otherGatewayAccountId = "456";
+
+
+        TransactionFixture targetPayment = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(targetGatewayAccountId)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(otherGatewayAccountId)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + targetGatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].transaction_id", is(targetPayment.getExternalId()));
+    }
+
+    @Test
+    public void shouldAllowNotSupplyingGatewayAccountId() {
+        String targetGatewayAccountId = "123";
+        String otherGatewayAccountId = "456";
+
+
+        TransactionFixture firstPayment = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(targetGatewayAccountId)
+                .insert(rule.getJdbi());
+
+        TransactionFixture secondPayment = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(otherGatewayAccountId)
+                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction?" +
+                        "override_account_id_restriction=true"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(2))
+                .body("results[0].transaction_id", is(firstPayment.getExternalId()))
+                .body("results[1].transaction_id", is(secondPayment.getExternalId()));
     }
 
     @Test
@@ -378,7 +438,6 @@ public class TransactionResourceIT {
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi())
                 .toEntity();
-        transactionFixture.insert(rule.getJdbi());
 
         TransactionEntity refundTransactionEntity = aTransactionFixture()
                 .withParentExternalId(parentTransactionEntity.getExternalId())

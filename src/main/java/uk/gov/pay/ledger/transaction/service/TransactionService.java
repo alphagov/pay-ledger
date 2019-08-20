@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.transaction.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
@@ -74,17 +75,27 @@ public class TransactionService {
     }
 
     public TransactionSearchResponse searchTransactions(TransactionSearchParams searchParams, UriInfo uriInfo) {
+        return searchTransactions(null, searchParams, uriInfo);
+    }
+
+    public TransactionSearchResponse searchTransactions(String gatewayAccountId, TransactionSearchParams searchParams, UriInfo uriInfo) {
+        if (StringUtils.isNotBlank(gatewayAccountId)) {
+            searchParams.setAccountId(gatewayAccountId);
+        }
+
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams)
                 .stream()
                 .map(transactionFactory::createTransactionEntity)
                 .collect(Collectors.toList());
+
         Long total = transactionDao.getTotalForSearch(searchParams);
+
         PaginationBuilder paginationBuilder = new PaginationBuilder(searchParams, uriInfo);
         paginationBuilder = paginationBuilder.withTotalCount(total).buildResponse();
 
         List<TransactionView> transactionViewList = mapToTransactionViewList(transactionList);
 
-        return new TransactionSearchResponse(searchParams.getAccountId(),
+        return new TransactionSearchResponse(
                 total,
                 (long) transactionList.size(),
                 searchParams.getPageNumber(),
@@ -97,8 +108,8 @@ public class TransactionService {
                 .map(transaction -> TransactionView.from(transaction))
                 .collect(Collectors.toList());
     }
-
     // @TODO(sfount) handling writing invalid transaction should be tested at `EventMessageHandler` integration level
+
     public void upsertTransactionFor(EventDigest eventDigest) {
         TransactionEntity transaction = transactionEntityFactory.create(eventDigest);
         transactionDao.upsert(transaction);

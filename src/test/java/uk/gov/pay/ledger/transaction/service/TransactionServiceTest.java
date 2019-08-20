@@ -78,7 +78,6 @@ public class TransactionServiceTest {
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
         when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(5L);
         TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(searchParams, mockUriInfo);
-        assertThat(transactionSearchResponse.getGatewayExternalId(), is(gatewayAccountId));
         assertThat(transactionSearchResponse.getPage(), is(1L));
         assertThat(transactionSearchResponse.getCount(), is(5L));
         assertThat(transactionSearchResponse.getTotal(), is(5L));
@@ -94,7 +93,7 @@ public class TransactionServiceTest {
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
         when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(100L);
 
-        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(searchParams, mockUriInfo);
+        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(gatewayAccountId, searchParams, mockUriInfo);
         PaginationBuilder paginationBuilder = transactionSearchResponse.getPaginationBuilder();
 
         assertThat(paginationBuilder.getFirstLink().getHref(), is("http://app.com/v1/transaction?account_id=gateway_account_id&page=1&display_size=10"));
