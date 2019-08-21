@@ -21,6 +21,7 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
+import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -108,6 +109,10 @@ public class TransactionsApiContractTest {
         String transactionExternalId1 = "someExternalId1";
         String transactionExternalId2 = "someExternalId2";
         String gatewayAccountId = params.get("gateway_account_id");
+
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
 
         createPaymentTransaction(transactionExternalId1, gatewayAccountId);
         createPaymentTransaction(transactionExternalId2, gatewayAccountId);

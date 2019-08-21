@@ -20,6 +20,7 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.util.Map;
 
+import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
@@ -54,6 +55,13 @@ public class TransactionEventsApiContractTest {
     public void createTransactionWithTwoEvents(Map<String, String> params) {
         String transactionId = params.get("transaction_id");
         String gatewayAccountId = params.get("gateway_account_id");
+
+        if (isBlank(transactionId)) {
+            transactionId = "ch_123abc456xyz";
+        }
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
 
         aTransactionFixture()
                 .withExternalId(transactionId)
