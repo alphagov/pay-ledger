@@ -21,6 +21,7 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
+import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -103,6 +104,13 @@ public class GetTransactionContractTest {
     public void createTransactionWithFeeAndNetAmount(Map<String, String> params) {
         String transactionExternalId = params.get("charge_id");
         String gatewayAccountId = params.get("account_id");
+
+        if (isBlank(transactionExternalId)) {
+            transactionExternalId = "ch_123abc456xyz";
+        }
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
 
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
