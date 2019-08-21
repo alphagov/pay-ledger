@@ -4,11 +4,9 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
-import org.apache.commons.lang3.RandomStringUtils;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFixture, Event> {
@@ -16,12 +14,12 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
     private ResourceType resourceType = ResourceType.REFUND;
     private Long amount = 50L;
     private String gatewayAccountId = "123456";
-    private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
-    private String parentResourceExternalId = RandomStringUtils.randomAlphanumeric(20);
+    private String resourceExternalId = "resource_external_id";
+    private String parentResourceExternalId = "parentResourceExternalId";
     private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
     private String eventType = "REFUND_CREATED_BY_USER";
     private String eventData = "{\"event_data\": \"event data\"}";
-    private String refundedBy = RandomStringUtils.randomAlphanumeric(20);
+    private String refundedBy = "a_user_id";
     private String reference = null;
 
     private QueueRefundEventFixture() {

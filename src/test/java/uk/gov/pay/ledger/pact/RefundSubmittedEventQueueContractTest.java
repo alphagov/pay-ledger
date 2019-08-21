@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.model.ResourceType;
@@ -12,6 +13,7 @@ import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.QueueRefundEventFixture;
 
 import java.util.HashMap;
@@ -51,6 +53,11 @@ public class RefundSubmittedEventQueueContractTest {
                 .withMetadata(metadata)
                 .withContent(refundFixture.getAsPact())
                 .toPact();
+    }
+
+    @Before
+    public void setUp() {
+        DatabaseTestHelper.aDatabaseTestHelper(appRule.getJdbi()).truncateAllData();
     }
 
     @Test
