@@ -18,6 +18,8 @@ public class QueueMessageReceiver implements Managed {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueMessageReceiver.class);
     private final QueueMessageReceiverConfig config;
 
+    private final int queueReadScheduleNumberOfThreads;
+
     private ScheduledExecutorService scheduledExecutorService;
     private EventMessageHandler eventMessageHandler;
 
@@ -28,8 +30,7 @@ public class QueueMessageReceiver implements Managed {
             EventMessageHandler eventMessageHandler) {
         this.eventMessageHandler = eventMessageHandler;
         this.config = configuration.getQueueMessageReceiverConfig();
-
-        int queueReadScheduleNumberOfThreads = config.getNumberOfThreads();
+        this.queueReadScheduleNumberOfThreads = config.getNumberOfThreads();
 
         scheduledExecutorService = environment
                 .lifecycle()
@@ -43,12 +44,14 @@ public class QueueMessageReceiver implements Managed {
         long initialDelay = config.getThreadDelayInMilliseconds();
         long delay = config.getThreadDelayInMilliseconds();
 
-        scheduledExecutorService.scheduleWithFixedDelay(
-                this::receive,
-                initialDelay,
-                delay,
-                TimeUnit.MILLISECONDS
-        );
+        for(int i = 0; i < queueReadScheduleNumberOfThreads; i++) {
+            scheduledExecutorService.scheduleWithFixedDelay(
+                    this::receive,
+                    initialDelay,
+                    delay,
+                    TimeUnit.MILLISECONDS
+            );
+        }
     }
 
     private void receive() {
