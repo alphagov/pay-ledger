@@ -71,11 +71,13 @@ public class TransactionEventsApiContractTest {
         anEventFixture()
                 .withEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withResourceExternalId(transactionId)
+                .withEventData("{}")
                 .insert(app.getJdbi());
 
         anEventFixture()
                 .withEventType(SalientEventType.AUTHORISATION_REJECTED.name())
                 .withResourceExternalId(transactionId)
+                .withEventData("{}")
                 .insert(app.getJdbi());
     }
 }
