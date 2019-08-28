@@ -15,6 +15,7 @@ import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.ledger.event.resource.EventResource;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
+import uk.gov.pay.ledger.healthcheck.DependentResourceWaitCommand;
 import uk.gov.pay.ledger.healthcheck.HealthCheckResource;
 import uk.gov.pay.ledger.healthcheck.SQSHealthCheck;
 import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
@@ -44,6 +45,7 @@ public class LedgerApp extends Application<LedgerConfig> {
         });
 
         bootstrap.addBundle(new JdbiExceptionsBundle());
+        bootstrap.addCommand(new DependentResourceWaitCommand());
     }
 
     @Override
