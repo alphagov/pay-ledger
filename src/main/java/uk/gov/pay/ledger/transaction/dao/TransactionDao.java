@@ -37,7 +37,7 @@ public class TransactionDao {
             ":searchExtraFields " +
             "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
 
-    private static final String COUNT_TRANSACTIONS = "SELECT count(t.id) " +
+    private static final String COUNT_TRANSACTIONS = "SELECT count(1) " +
             "FROM transaction t " +
             ":searchExtraFields ";
 
