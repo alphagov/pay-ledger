@@ -166,14 +166,14 @@ pipeline {
         tagPact("ledger", gitCommit(), "test")
       }
     }
-    /*stage('Smoke Tests') {
+    stage('Smoke Tests') {
       when {
         branch 'master'
       }
       steps {
-        runDirectDebitSmokeTest()
+        runCardSmokeTest()
       }
-    }*/
+    }
     stage('Complete') {
       failFast true
       parallel {
