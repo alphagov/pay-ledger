@@ -152,10 +152,10 @@ public class TransactionSearchParams {
         if (isNotBlank(cardHolderName)) {
             filters.add(" t.cardholder_name ILIKE :" + CARDHOLDER_NAME_FIELD);
         }
-        if (fromDate != null) {
+        if (isNotBlank(fromDate)) {
             filters.add(" t.created_date > :" + FROM_DATE_FIELD);
         }
-        if (toDate != null) {
+        if (isNotBlank(toDate)) {
             filters.add(" t.created_date < :" + TO_DATE_FIELD);
         }
         if (isSet(paymentStates) || isSet(refundStates)) {
@@ -194,13 +194,13 @@ public class TransactionSearchParams {
             if (isNotBlank(reference)) {
                 queryMap.put(REFERENCE_FIELD, likeClause(reference));
             }
-            if (cardHolderName != null) {
+            if (isNotBlank(cardHolderName)) {
                 queryMap.put(CARDHOLDER_NAME_FIELD, likeClause(cardHolderName));
             }
-            if (fromDate != null) {
+            if (isNotBlank(fromDate)) {
                 queryMap.put(FROM_DATE_FIELD, ZonedDateTime.parse(fromDate));
             }
-            if (toDate != null) {
+            if (isNotBlank(toDate)) {
                 queryMap.put(TO_DATE_FIELD, ZonedDateTime.parse(toDate));
             }
             if (isNotBlank(state)) {
@@ -257,13 +257,13 @@ public class TransactionSearchParams {
     public String buildQueryParamString(Long forPage) {
         List<String> queries = new ArrayList<>();
 
-        if (accountId != null) {
+        if (isNotBlank(accountId)) {
             queries.add(GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + accountId);
         }
-        if (fromDate != null) {
+        if (isNotBlank(fromDate)) {
             queries.add(FROM_DATE_FIELD + "=" + fromDate);
         }
-        if (toDate != null) {
+        if (isNotBlank(toDate)) {
             queries.add(TO_DATE_FIELD + "=" + toDate);
         }
 
