@@ -29,7 +29,7 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 @Provider("ledger")
 @PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
-        consumers = {"publicapi"})
+        consumers = {"publicapi", "selfservice"})
 @PactFilter({"a transaction with created state exist",
         "a refund transaction for a transaction exists",
         "refund transactions for a transaction exist",
