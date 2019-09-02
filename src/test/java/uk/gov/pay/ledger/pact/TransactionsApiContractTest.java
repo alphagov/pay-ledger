@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.pact;
 
+import au.com.dius.pact.provider.junit.IgnoreNoPactsToVerify;
 import au.com.dius.pact.provider.junit.PactRunner;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.State;
@@ -33,8 +34,10 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 @PactFilter({"a transaction with created state exist",
         "a refund transaction for a transaction exists",
         "refund transactions for a transaction exist",
-        "refund transactions exists for a gateway account"
+        "refund transactions exists for a gateway account",
+        "two payments and a refund transactions exist for selfservice search"
 })
+@IgnoreNoPactsToVerify
 public class TransactionsApiContractTest {
 
     @ClassRule
@@ -126,6 +129,22 @@ public class TransactionsApiContractTest {
                 "2018-10-22T10:16:16.067Z", TransactionState.SUCCESS);
     }
 
+    @State("two payments and a refund transactions exist for selfservice search")
+    public void createThreeTransactionsForSelfserviceSearch() {
+        String gatewayAccountId = "123456";
+        String transactionExternalId1 = "someExternalId1";
+        String transactionExternalId2 = "someExternalId2";
+
+        createPaymentTransactionForSelfserviceSearch(transactionExternalId1, gatewayAccountId,
+                TransactionState.CREATED, "reference1", null);
+        createPaymentTransactionForSelfserviceSearch(transactionExternalId2, gatewayAccountId,
+                TransactionState.SUBMITTED, "reference2", "visa");
+
+        createARefundTransaction(transactionExternalId2, gatewayAccountId, "refund-transaction-id",
+                150L, "reference", "description",
+                "2018-09-22T10:14:16.067Z", TransactionState.SUCCESS);
+    }
+
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
                                           String externalId, Long amount,
                                           String reference, String description,
@@ -149,5 +168,21 @@ public class TransactionsApiContractTest {
                 .withGatewayAccountId(gatewayAccountId)
                 .withTransactionType(TransactionType.PAYMENT.name())
                 .insert(app.getJdbi()).toEntity();
+    }
+
+    private void createPaymentTransactionForSelfserviceSearch(String transactionExternalId,
+                                                              String gatewayAccountId,
+                                                              TransactionState state,
+                                                              String reference,
+                                                              String cardBrand) {
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withReference(reference)
+                .withCardholderName(null)
+                .withState(state)
+                .withCardBrand(cardBrand)
+                .insert(app.getJdbi());
     }
 }
