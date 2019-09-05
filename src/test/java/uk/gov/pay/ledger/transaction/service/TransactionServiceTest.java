@@ -198,11 +198,11 @@ public class TransactionServiceTest {
                 .thenReturn(transactionEntityList);
 
         Event event1ForStateSubmitted = EventFixture.anEventFixture()
-                .withEventType("AUTHORISATION_SUCCESSFUL")
+                .withEventType("PAYMENT_STARTED")
                 .withEventDate(ZonedDateTime.now())
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
         Event event2ForStateSubmitted = EventFixture.anEventFixture()
-                .withEventType("USER_APPROVED_FOR_CAPTURE_AWAITING_SERVICE_APPROVAL")
+                .withEventType("GATEWAY_REQUIRES_3DS_AUTHORISATION")
                 .withEventDate(ZonedDateTime.now().plusDays(1))
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
         Event event1ForStateError = EventFixture.anEventFixture()
@@ -222,7 +222,7 @@ public class TransactionServiceTest {
         assertThat(transactionEventResponse.getTransactionId(), is("external-id"));
         assertThat(transactionEvents.size(), is(2));
 
-        assertTransactionEvent(event1ForStateSubmitted, transactionEvents.get(0), transactionEntityList.get(0).getAmount(), "submitted");
+        assertTransactionEvent(event1ForStateSubmitted, transactionEvents.get(0), transactionEntityList.get(0).getAmount(), "started");
         assertTransactionEvent(event1ForStateError, transactionEvents.get(1), transactionEntityList.get(0).getAmount(), "submitted");
     }
 
@@ -257,7 +257,7 @@ public class TransactionServiceTest {
         assertThat(transactionEvents.size(), is(3));
 
         assertTransactionEvent(event1ForStateSubmitted, transactionEvents.get(0), transactionEntityList.get(0).getAmount(), "submitted");
-        assertTransactionEvent(event2ForStateSubmitted, transactionEvents.get(1), transactionEntityList.get(0).getAmount(), "submitted");
+        assertTransactionEvent(event2ForStateSubmitted, transactionEvents.get(1), transactionEntityList.get(0).getAmount(), "capturable");
         assertTransactionEvent(eventForUnknownType, transactionEvents.get(2), transactionEntityList.get(0).getAmount(), null);
     }
 
