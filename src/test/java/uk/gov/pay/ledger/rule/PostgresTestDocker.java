@@ -48,6 +48,7 @@ public class PostgresTestDocker {
         try (Connection connection = getConnection(getConnectionUrl(), dbUser, getDbPassword())) {
             connection.createStatement().execute("CREATE DATABASE " + dbName + " WITH owner=" + dbUser + " TEMPLATE postgres");
             connection.createStatement().execute("GRANT ALL PRIVILEGES ON DATABASE " + dbName + " TO " + dbUser);
+            connection.createStatement().execute("CREATE EXTENSION IF NOT EXISTS pg_trgm");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
