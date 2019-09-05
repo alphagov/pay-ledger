@@ -90,7 +90,7 @@ public enum TransactionState {
                     Map.entry(SalientEventType.CAPTURE_ERRORED, ERROR_GATEWAY),
                     Map.entry(SalientEventType.CAPTURE_ABANDONED_AFTER_TOO_MANY_RETRIES, ERROR_GATEWAY),
                     Map.entry(SalientEventType.USER_APPROVED_FOR_CAPTURE, SUCCESS),
-                    Map.entry(SalientEventType.USER_APPROVED_FOR_CAPTURE_AWAITING_SERVICE_APPROVAL, SUBMITTED),
+                    Map.entry(SalientEventType.USER_APPROVED_FOR_CAPTURE_AWAITING_SERVICE_APPROVAL, CAPTURABLE),
                     Map.entry(SalientEventType.SERVICE_APPROVED_FOR_CAPTURE, SUCCESS),
                     Map.entry(SalientEventType.CANCEL_BY_EXPIRATION_SUBMITTED, FAILED_EXPIRED),
                     Map.entry(SalientEventType.CANCEL_BY_EXPIRATION_FAILED, FAILED_EXPIRED),
