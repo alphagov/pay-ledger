@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 

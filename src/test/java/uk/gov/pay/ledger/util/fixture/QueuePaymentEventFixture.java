@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventFixture, Event> {

@@ -5,7 +5,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.ledger.exception.UnparsableDateException;
-import uk.gov.pay.ledger.exception.ValidationException;
 
 public class TransactionSearchParamsValidatorTest {
 
