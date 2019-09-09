@@ -59,7 +59,7 @@ public class QueueMessageReceiver implements Managed {
         try {
             eventMessageHandler.handle();
         } catch (Exception e) {
-            LOGGER.error("Queue message receiver thread exception [{}]", e);
+            LOGGER.error("Queue message receiver thread exception", e);
         }
     }
 
