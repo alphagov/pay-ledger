@@ -128,7 +128,7 @@ public class TransactionDaoSearchIT {
 
         for (int i = 0; i < 2; i++) {
             aTransactionFixture()
-                    .withAmount(100l + i)
+                    .withAmount(100L + i)
                     .withGatewayAccountId(gatewayAccountId)
                     .withReference("reference " + i)
                     .withDescription("description " + i)
@@ -235,7 +235,7 @@ public class TransactionDaoSearchIT {
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
-        searchParams.setDisplaySize(10l);
+        searchParams.setDisplaySize(10L);
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -260,8 +260,8 @@ public class TransactionDaoSearchIT {
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
-        searchParams.setDisplaySize(2l);
-        searchParams.setPageNumber(3l);
+        searchParams.setDisplaySize(2L);
+        searchParams.setPageNumber(3L);
 
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);

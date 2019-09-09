@@ -5,7 +5,6 @@ import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
-import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

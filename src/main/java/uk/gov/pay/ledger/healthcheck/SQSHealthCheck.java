@@ -2,7 +2,6 @@ package uk.gov.pay.ledger.healthcheck;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.model.AmazonSQSException;
 import com.amazonaws.services.sqs.model.GetQueueAttributesRequest;
 import com.codahale.metrics.health.HealthCheck;
 import com.google.inject.Inject;

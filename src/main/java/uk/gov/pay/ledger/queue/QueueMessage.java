@@ -24,12 +24,10 @@ public class QueueMessage {
 
     public static List<QueueMessage> of(ReceiveMessageResult receiveMessageResult) {
 
-        List<QueueMessage> queueMessage = receiveMessageResult.getMessages()
+        return receiveMessageResult.getMessages()
                 .stream()
                 .map(c -> new QueueMessage(c.getMessageId(), c.getReceiptHandle(), c.getBody()))
                 .collect(Collectors.toList());
-
-        return queueMessage;
     }
 
     public static QueueMessage of(SendMessageResult messageResult, String validJsonMessage) {

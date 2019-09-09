@@ -84,7 +84,7 @@ public class EventDaoIT {
     }
 
     @Test
-    public void shouldInsertDuplicateEventWithDifferentTimestamp() throws IOException {
+    public void shouldInsertDuplicateEventWithDifferentTimestamp() {
         Event event = anEventFixture()
                 .insert(rule.getJdbi())
                 .toEntity();
