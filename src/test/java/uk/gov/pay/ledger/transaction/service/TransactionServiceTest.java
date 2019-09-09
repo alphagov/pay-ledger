@@ -87,8 +87,8 @@ public class TransactionServiceTest {
     public void shouldListTransactionsWithAllPaginationLinks() {
         List<TransactionEntity> transactionViewList = TransactionFixture
                 .aTransactionList(gatewayAccountId, 100);
-        searchParams.setPageNumber(3l);
-        searchParams.setDisplaySize(10l);
+        searchParams.setPageNumber(3L);
+        searchParams.setDisplaySize(10L);
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
         when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(100L);
 

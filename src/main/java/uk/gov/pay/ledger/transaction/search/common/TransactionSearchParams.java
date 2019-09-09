@@ -305,7 +305,7 @@ public class TransactionSearchParams {
     }
 
     public Long getOffset() {
-        Long offset = 0l;
+        Long offset = 0L;
 
         if (pageNumber != null) {
             offset = (pageNumber - 1) * getDisplaySize();
