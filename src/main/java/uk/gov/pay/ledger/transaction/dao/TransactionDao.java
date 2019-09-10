@@ -112,7 +112,7 @@ public class TransactionDao {
                 "refund_amount_available = EXCLUDED.refund_amount_available, " +
                 "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
                 "refund_status = EXCLUDED.refund_status " +
-            "WHERE EXCLUDED.event_count > transaction.event_count;";
+            "WHERE EXCLUDED.event_count >= transaction.event_count;";
 
     private final Jdbi jdbi;
 
