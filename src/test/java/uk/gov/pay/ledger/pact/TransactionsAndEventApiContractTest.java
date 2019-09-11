@@ -1,12 +1,10 @@
 package uk.gov.pay.ledger.pact;
 
-import au.com.dius.pact.provider.junit.IgnoreNoPactsToVerify;
 import au.com.dius.pact.provider.junit.PactRunner;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.State;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactBrokerAuth;
-import au.com.dius.pact.provider.junit.loader.PactFilter;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
@@ -14,8 +12,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
+import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
@@ -24,21 +24,15 @@ import java.util.Map;
 
 import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 @RunWith(PactRunner.class)
 @Provider("ledger")
 @PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
-        consumers = {"publicapi"})
-@PactFilter({"a transaction with created state exist",
-        "a refund transaction for a transaction exists",
-        "refund transactions for a transaction exist",
-        "refund transactions exists for a gateway account",
-        "two payments and a refund transactions exist for selfservice search"
-})
-@IgnoreNoPactsToVerify
-public class TransactionsApiContractTest {
+        consumers = {"publicapi", "selfservice"})
+public class TransactionsAndEventApiContractTest {
 
     @ClassRule
     public static AppWithPostgresAndSqsRule app = new AppWithPostgresAndSqsRule();
@@ -143,6 +137,120 @@ public class TransactionsApiContractTest {
         createARefundTransaction(transactionExternalId2, gatewayAccountId, "refund-transaction-id",
                 150L, "reference", "description",
                 "2018-09-22T10:14:16.067Z", TransactionState.SUCCESS);
+    }
+
+    @State("a transaction with metadata exists")
+    public void createTransactionWithMetadata(Map<String, String> params) {
+        String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
+        String metadata = params.get("metadata");
+
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withState(TransactionState.CREATED)
+                .withAmount(100L)
+                .withExternalMetadata(metadata)
+                .insert(app.getJdbi());
+    }
+
+    @State("a transaction with a gateway transaction id exists")
+    public void createTransactionWithGatewayId(Map<String, String> params) {
+        String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
+        String gatewayTransactionId = params.get("gateway_transaction_id");
+
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withState(TransactionState.CREATED)
+                .withAmount(100L)
+                .withGatewayTransactionId(gatewayTransactionId)
+                .insert(app.getJdbi());
+    }
+
+    @State("a transaction with corporate surcharge exists")
+    public void createTransactionWithCorporateSurcharge(Map<String, String> params) {
+        String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
+
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withState(TransactionState.CREATED)
+                .withAmount(2000L)
+                .withCorporateCardSurcharge(250L)
+                .withTotalAmount(2250L)
+                .withCaptureSubmittedDate(ZonedDateTime.now())
+                .withCapturedDate(ZonedDateTime.now())
+                .insert(app.getJdbi());
+    }
+
+    @State("a transaction with fee and net_amount exists")
+    public void createTransactionWithFeeAndNetAmount(Map<String, String> params) {
+        String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
+
+        if (isBlank(transactionExternalId)) {
+            transactionExternalId = "ch_123abc456xyz";
+        }
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
+
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withState(TransactionState.CREATED)
+                .withAmount(100L)
+                .withFee(5L)
+                .withNetAmount(95L)
+                .insert(app.getJdbi());
+    }
+
+    @State("a transaction with delayed capture true exists")
+    public void createTransactionWithDelayedCapture(Map<String, String> params) {
+        String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
+
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withState(TransactionState.CREATED)
+                .withDelayedCapture(true)
+                .withRefundSummary(RefundSummary.ofValue("pending", 100L, 0L))
+                .withAmount(100L)
+                .insert(app.getJdbi());
+    }
+
+    @State("a transaction has CREATED and AUTHORISATION_REJECTED payment events")
+    public void createTransactionWithTwoEvents(Map<String, String> params) {
+        String transactionId = params.get("transaction_id");
+        String gatewayAccountId = params.get("gateway_account_id");
+
+        if (isBlank(transactionId)) {
+            transactionId = "ch_123abc456xyz";
+        }
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
+
+        aTransactionFixture()
+                .withExternalId(transactionId)
+                .withGatewayAccountId(gatewayAccountId)
+                .insert(app.getJdbi());
+
+        anEventFixture()
+                .withEventType(SalientEventType.PAYMENT_CREATED.name())
+                .withResourceExternalId(transactionId)
+                .withEventData("{}")
+                .insert(app.getJdbi());
+
+        anEventFixture()
+                .withEventType(SalientEventType.AUTHORISATION_REJECTED.name())
+                .withResourceExternalId(transactionId)
+                .withEventData("{}")
+                .insert(app.getJdbi());
     }
 
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,

@@ -6,12 +6,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-        TransactionsApiContractTest.class,
-        TransactionEventsApiContractTest.class,
+        TransactionsAndEventApiContractTest.class,
         PaymentCreatedEventQueueContractTest.class,
         PaymentDetailsEnteredEventQueueContractTest.class,
         CaptureConfirmedEventQueueContractTest.class,
-        GetTransactionContractTest.class,
         RefundCreatedByUserEventQueueContractTest.class,
         RefundSubmittedEventQueueContractTest.class,
         RefundSucceededEventQueueContractTest.class,
