@@ -80,7 +80,7 @@ public enum TransactionState {
                     Map.entry(SalientEventType.AUTHORISATION_SUCCESSFUL, SUBMITTED),
                     Map.entry(SalientEventType.AUTHORISATION_REJECTED, FAILED_REJECTED),
                     Map.entry(SalientEventType.AUTHORISATION_SUCCEEDED, SUBMITTED),
-                    Map.entry(SalientEventType.AUTHORISATION_CANCELLED, FAILED_CANCELLED),
+                    Map.entry(SalientEventType.AUTHORISATION_CANCELLED, FAILED_REJECTED),
                     Map.entry(SalientEventType.GATEWAY_ERROR_DURING_AUTHORISATION, ERROR_GATEWAY),
                     Map.entry(SalientEventType.GATEWAY_TIMEOUT_DURING_AUTHORISATION, ERROR_GATEWAY),
                     Map.entry(SalientEventType.UNEXPECTED_GATEWAY_ERROR_DURING_AUTHORISATION, ERROR_GATEWAY),
