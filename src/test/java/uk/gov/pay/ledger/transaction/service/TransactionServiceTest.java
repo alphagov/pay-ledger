@@ -22,6 +22,8 @@ import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
+import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
@@ -33,6 +35,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,6 +43,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionServiceTest {
@@ -72,8 +76,31 @@ public class TransactionServiceTest {
     }
 
     @Test
+    public void shouldReturnTransactionWithNewStatusForVersion2(){
+        TransactionEntity transaction = aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity();
+        when(mockTransactionDao.findTransactionByExternalId("external_id")).thenReturn(Optional.of(transaction));
+
+        Optional<TransactionView> transactionView = transactionService.getTransaction("external_id", 2);
+
+        assertThat(transactionView.isPresent(), is(true));
+        assertThat(transactionView.get().getState().getStatus(), is("declined"));
+    }
+
+    @Test
+    public void shouldReturnTransactionWithOldStatusForVersion1(){
+        TransactionEntity transaction = aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity();
+        when(mockTransactionDao.findTransactionByExternalId("external_id")).thenReturn(Optional.of(transaction));
+
+        Optional<TransactionView> transactionView = transactionService.getTransaction("external_id", 1);
+
+        assertThat(transactionView.isPresent(), is(true));
+        assertThat(transactionView.get().getState().getStatus(), is("failed"));
+    }
+
+    @Test
     public void shouldReturnAListOfTransactions() {
-        List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 5);
+        List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 4);
+        transactionViewList.add(aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity());
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
         when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(5L);
         TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(searchParams, mockUriInfo);
@@ -81,6 +108,7 @@ public class TransactionServiceTest {
         assertThat(transactionSearchResponse.getCount(), is(5L));
         assertThat(transactionSearchResponse.getTotal(), is(5L));
         assertThat(transactionSearchResponse.getTransactionViewList().size(), is(5));
+        assertThat(transactionSearchResponse.getTransactionViewList().get(4).getState().getStatus(), is("declined"));
     }
 
     @Test
