@@ -119,14 +119,14 @@ public class TransactionService {
     }
 
     public TransactionEventResponse findTransactionEvents(String externalId, String gatewayAccountId,
-                                                          boolean includeAllEvents) {
+                                                          boolean includeAllEvents, int statusVersion) {
         Map<String, TransactionEntity> transactionEntityMap = getTransactionsAsMap(externalId, gatewayAccountId);
 
         if (transactionEntityMap.isEmpty()) {
             throw new BadRequestException(format("Transaction with id [%s] not found", externalId));
         }
 
-        List<TransactionEvent> transactionEvents = getTransactionEventsFor(transactionEntityMap);
+        List<TransactionEvent> transactionEvents = getTransactionEventsFor(transactionEntityMap, statusVersion);
 
         if (includeAllEvents) {
             return TransactionEventResponse.of(externalId, transactionEvents);
@@ -143,14 +143,14 @@ public class TransactionService {
                         transactionEntity -> transactionEntity));
     }
 
-    private List<TransactionEvent> getTransactionEventsFor(Map<String, TransactionEntity> transactionEntityMap) {
+    private List<TransactionEvent> getTransactionEventsFor(Map<String, TransactionEntity> transactionEntityMap, int statusVersion) {
         List<Event> events = eventDao.findEventsForExternalIds(transactionEntityMap.keySet());
-        return mapToTransactionEvent(transactionEntityMap, events);
+        return mapToTransactionEvent(transactionEntityMap, events, statusVersion);
     }
 
-    private List<TransactionEvent> mapToTransactionEvent(Map<String, TransactionEntity> transactionEntityMap, List<Event> eventList) {
+    private List<TransactionEvent> mapToTransactionEvent(Map<String, TransactionEntity> transactionEntityMap, List<Event> eventList, int statusVersion) {
         return eventList.stream()
-                .map(event -> TransactionEvent.from(transactionEntityMap.get(event.getResourceExternalId()), event, objectMapper))
+                .map(event -> TransactionEvent.from(transactionEntityMap.get(event.getResourceExternalId()), event, objectMapper, statusVersion))
                 .collect(Collectors.toList());
     }
 

@@ -13,7 +13,6 @@ import uk.gov.pay.ledger.transaction.model.Refund;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.ExternalTransactionState;
-import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -88,11 +87,6 @@ public class TransactionView {
         if (transaction instanceof Payment) {
             Payment payment = (Payment) transaction;
 
-            TransactionState state = payment.getState();
-            String status = statusVersion == 2 ? state.getStatus() : state.getOldStatus();
-            ExternalTransactionState externalState = new ExternalTransactionState(status, state.isFinished(),
-                    state.getCode(), state.getMessage());
-
             return new Builder()
                     .withId(payment.getId())
                     .withGatewayAccountId(payment.getGatewayAccountId())
@@ -101,7 +95,7 @@ public class TransactionView {
                     .withCorporateCardSurcharge(payment.getCorporateCardSurcharge())
                     .withFee(payment.getFee())
                     .withNetAmount(payment.getNetAmount())
-                    .withState(externalState)
+                    .withState(ExternalTransactionState.from(payment.getState(), statusVersion))
                     .withDescription(payment.getDescription())
                     .withReference(payment.getReference())
                     .withLanguage(payment.getLanguage())
@@ -125,7 +119,7 @@ public class TransactionView {
                 .withId(refund.getId())
                 .withGatewayAccountId(refund.getGatewayAccountId())
                 .withAmount(refund.getAmount())
-                .withState(new ExternalTransactionState(refund.getState().getStatus(), refund.getState().isFinished()))
+                .withState(ExternalTransactionState.from(refund.getState(), statusVersion))
                 .withDescription(refund.getDescription())
                 .withReference(refund.getReference())
                 .withExternalId(refund.getExternalId())

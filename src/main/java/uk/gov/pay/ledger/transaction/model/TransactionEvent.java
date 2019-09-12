@@ -13,6 +13,7 @@ import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.state.ExternalTransactionState;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.io.IOException;
@@ -27,7 +28,7 @@ public class TransactionEvent {
     @JsonIgnore
     private final String externalId;
     private final Long amount;
-    private final TransactionState state;
+    private final ExternalTransactionState state;
     private final ResourceType resourceType;
     private final String eventType;
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
@@ -44,12 +45,17 @@ public class TransactionEvent {
         this.data = builder.data;
     }
 
-    public static TransactionEvent from(TransactionEntity transactionEntity, Event event, ObjectMapper objectMapper) {
+    public static TransactionEvent from(TransactionEntity transactionEntity, Event event, ObjectMapper objectMapper, int statusVersion) {
         try {
+            ExternalTransactionState state = SalientEventType.from(event.getEventType())
+                    .map(TransactionState::fromEventType)
+                    .map(s -> ExternalTransactionState.from(s, statusVersion))
+                    .orElse(null);
+
             return TransactionEventBuilder.aTransactionEvent()
                     .withExternalId(transactionEntity.getExternalId())
                     .withAmount(transactionEntity.getAmount())
-                    .withState(SalientEventType.from(event.getEventType()).map(TransactionState::fromEventType).orElse(null))
+                    .withState(state)
                     .withResourceType(event.getResourceType())
                     .withEventType(event.getEventType())
                     .withTimestamp(event.getEventDate())
@@ -71,7 +77,7 @@ public class TransactionEvent {
         return amount;
     }
 
-    public TransactionState getState() {
+    public ExternalTransactionState getState() {
         return state;
     }
 
@@ -94,7 +100,7 @@ public class TransactionEvent {
     public static final class TransactionEventBuilder {
         private String externalId;
         private Long amount;
-        private TransactionState state;
+        private ExternalTransactionState state;
         private ResourceType resourceType;
         private String eventType;
         private ZonedDateTime timestamp;
@@ -117,7 +123,7 @@ public class TransactionEvent {
             return this;
         }
 
-        public TransactionEventBuilder withState(TransactionState state) {
+        public TransactionEventBuilder withState(ExternalTransactionState state) {
             this.state = state;
             return this;
         }

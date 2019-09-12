@@ -13,14 +13,13 @@ public class ExternalTransactionState {
     private final String code;
     private final String message;
 
-    public ExternalTransactionState(String value, boolean finished) {
-        this.value = value;
-        this.finished = finished;
-        this.code = null;
-        this.message = null;
+    public static ExternalTransactionState from(TransactionState state, int statusVersion) {
+        String status = statusVersion == 2 ? state.getStatus() : state.getOldStatus();
+        return new ExternalTransactionState(status, state.isFinished(),
+                state.getCode(), state.getMessage());
     }
 
-    public ExternalTransactionState(String value, boolean finished, String code, String message) {
+    private ExternalTransactionState(String value, boolean finished, String code, String message) {
         this.value = value;
         this.finished = finished;
         this.code = code;
@@ -41,5 +40,15 @@ public class ExternalTransactionState {
 
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return "ExternalTransactionState{" +
+                "value='" + value + '\'' +
+                ", finished=" + finished +
+                ", code='" + code + '\'' +
+                ", message='" + message + '\'' +
+                '}';
     }
 }

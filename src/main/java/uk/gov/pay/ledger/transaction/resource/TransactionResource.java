@@ -95,11 +95,12 @@ public class TransactionResource {
     public TransactionEventResponse events(@PathParam("transactionExternalId") String transactionExternalId,
                                            @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId,
                                            @QueryParam("include_all_events") boolean includeAllEvents,
+                                           @DefaultValue("2") @QueryParam("status_version") int statusVersion,
                                            @Context UriInfo uriInfo) {
 
         LOGGER.info("Get transaction event: external_id [{}], gateway_account_id [{}]",
                 transactionExternalId, gatewayAccountId);
-        return transactionService.findTransactionEvents(transactionExternalId, gatewayAccountId, includeAllEvents);
+        return transactionService.findTransactionEvents(transactionExternalId, gatewayAccountId, includeAllEvents, statusVersion);
     }
 
     @Path("/{parentTransactionExternalId}/transaction")
