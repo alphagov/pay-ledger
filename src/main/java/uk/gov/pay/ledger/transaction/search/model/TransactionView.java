@@ -12,7 +12,7 @@ import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Refund;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
-import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.transaction.state.ExternalTransactionState;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class TransactionView {
     private Long corporateCardSurcharge;
     private Long fee;
     private Long netAmount;
-    private TransactionState state;
+    private ExternalTransactionState state;
     private String description;
     private String reference;
     private String language;
@@ -83,7 +83,7 @@ public class TransactionView {
     public TransactionView() {
     }
 
-    public static TransactionView from(Transaction transaction) {
+    public static TransactionView from(Transaction transaction, int statusVersion) {
         if (transaction instanceof Payment) {
             Payment payment = (Payment) transaction;
 
@@ -95,7 +95,7 @@ public class TransactionView {
                     .withCorporateCardSurcharge(payment.getCorporateCardSurcharge())
                     .withFee(payment.getFee())
                     .withNetAmount(payment.getNetAmount())
-                    .withState(payment.getState())
+                    .withState(ExternalTransactionState.from(payment.getState(), statusVersion))
                     .withDescription(payment.getDescription())
                     .withReference(payment.getReference())
                     .withLanguage(payment.getLanguage())
@@ -119,7 +119,7 @@ public class TransactionView {
                 .withId(refund.getId())
                 .withGatewayAccountId(refund.getGatewayAccountId())
                 .withAmount(refund.getAmount())
-                .withState(refund.getState())
+                .withState(ExternalTransactionState.from(refund.getState(), statusVersion))
                 .withDescription(refund.getDescription())
                 .withReference(refund.getReference())
                 .withExternalId(refund.getExternalId())
@@ -142,7 +142,7 @@ public class TransactionView {
         return amount;
     }
 
-    public TransactionState getState() {
+    public ExternalTransactionState getState() {
         return state;
     }
 
@@ -253,7 +253,7 @@ public class TransactionView {
         private Long corporateCardSurcharge;
         private Long fee;
         private Long netAmount;
-        private TransactionState state;
+        private ExternalTransactionState state;
         private String description;
         private String reference;
         private String language;
@@ -315,7 +315,7 @@ public class TransactionView {
             return this;
         }
 
-        public Builder withState(TransactionState state) {
+        public Builder withState(ExternalTransactionState state) {
             this.state = state;
             return this;
         }

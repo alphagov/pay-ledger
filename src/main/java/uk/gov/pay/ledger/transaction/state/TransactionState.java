@@ -58,6 +58,10 @@ public enum TransactionState {
         return status;
     }
 
+    public String getOldStatus() {
+        return oldStatus;
+    }
+
     @JsonProperty("finished")
     public boolean isFinished() {
         return finished;

@@ -16,6 +16,7 @@ import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -49,15 +50,19 @@ public class TransactionResource {
                                    @QueryParam("account_id") String gatewayAccountId,
                                    @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
                                    @QueryParam("transaction_type") TransactionType transactionType,
-                                   @QueryParam("parent_external_id") String parentTransactionExternalId) {
+                                   @QueryParam("parent_external_id") String parentTransactionExternalId,
+                                   @DefaultValue("2") @QueryParam("status_version") int statusVersion
+    ) {
         LOGGER.info("Get transaction request: {}", transactionExternalId);
 
         AccountIdSupplierManager<Optional<TransactionView>> accountIdSupplierManager =
                 AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId);
 
         return accountIdSupplierManager
-                .withSupplier((accountId) -> transactionService.getTransactionForGatewayAccount(accountId, transactionExternalId, transactionType, parentTransactionExternalId))
-                .withPrivilegedSupplier(() -> transactionService.getTransaction(transactionExternalId))
+                .withSupplier((accountId) -> transactionService.getTransactionForGatewayAccount(accountId,
+                        transactionExternalId, transactionType,
+                        parentTransactionExternalId, statusVersion))
+                .withPrivilegedSupplier(() -> transactionService.getTransaction(transactionExternalId, statusVersion))
                 .validateAndGet()
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
@@ -90,11 +95,12 @@ public class TransactionResource {
     public TransactionEventResponse events(@PathParam("transactionExternalId") String transactionExternalId,
                                            @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId,
                                            @QueryParam("include_all_events") boolean includeAllEvents,
+                                           @DefaultValue("2") @QueryParam("status_version") int statusVersion,
                                            @Context UriInfo uriInfo) {
 
         LOGGER.info("Get transaction event: external_id [{}], gateway_account_id [{}]",
                 transactionExternalId, gatewayAccountId);
-        return transactionService.findTransactionEvents(transactionExternalId, gatewayAccountId, includeAllEvents);
+        return transactionService.findTransactionEvents(transactionExternalId, gatewayAccountId, includeAllEvents, statusVersion);
     }
 
     @Path("/{parentTransactionExternalId}/transaction")

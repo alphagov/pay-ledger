@@ -36,6 +36,7 @@ import static java.util.stream.Collectors.groupingBy;
 
 public class TransactionService {
 
+    public static final int DEFAULT_STATUS_VERSION = 2;
     private final TransactionDao transactionDao;
     private final EventDao eventDao;
     private TransactionEntityFactory transactionEntityFactory;
@@ -53,14 +54,16 @@ public class TransactionService {
         this.objectMapper = objectMapper;
     }
 
-    public Optional<TransactionView> getTransactionForGatewayAccount(String gatewayAccountId, String transactionExternalId, TransactionType transactionType, String parentTransactionExternalId) {
+    public Optional<TransactionView> getTransactionForGatewayAccount(String gatewayAccountId, String transactionExternalId,
+                                                                     TransactionType transactionType, String parentTransactionExternalId,
+                                                                     int statusVersion) {
         return transactionDao.findTransaction(transactionExternalId, gatewayAccountId, transactionType, parentTransactionExternalId)
-                .map(entity -> TransactionView.from(transactionFactory.createTransactionEntity(entity)));
+                .map(entity -> TransactionView.from(transactionFactory.createTransactionEntity(entity), statusVersion));
     }
 
-    public Optional<TransactionView> getTransaction(String transactionExternalId) {
+    public Optional<TransactionView> getTransaction(String transactionExternalId, int statusVersion) {
         return transactionDao.findTransactionByExternalId(transactionExternalId)
-                .map(entity -> TransactionView.from(transactionFactory.createTransactionEntity(entity)));
+                .map(entity -> TransactionView.from(transactionFactory.createTransactionEntity(entity), statusVersion));
     }
 
     public TransactionsForTransactionResponse getTransactions(String parentTransactionExternalId, String gatewayAccountId) {
@@ -105,7 +108,7 @@ public class TransactionService {
 
     private List<TransactionView> mapToTransactionViewList(List<Transaction> transactionList) {
         return transactionList.stream()
-                .map(transaction -> TransactionView.from(transaction))
+                .map(transaction -> TransactionView.from(transaction, DEFAULT_STATUS_VERSION))
                 .collect(Collectors.toList());
     }
     // @TODO(sfount) handling writing invalid transaction should be tested at `EventMessageHandler` integration level
@@ -116,14 +119,14 @@ public class TransactionService {
     }
 
     public TransactionEventResponse findTransactionEvents(String externalId, String gatewayAccountId,
-                                                          boolean includeAllEvents) {
+                                                          boolean includeAllEvents, int statusVersion) {
         Map<String, TransactionEntity> transactionEntityMap = getTransactionsAsMap(externalId, gatewayAccountId);
 
         if (transactionEntityMap.isEmpty()) {
             throw new BadRequestException(format("Transaction with id [%s] not found", externalId));
         }
 
-        List<TransactionEvent> transactionEvents = getTransactionEventsFor(transactionEntityMap);
+        List<TransactionEvent> transactionEvents = getTransactionEventsFor(transactionEntityMap, statusVersion);
 
         if (includeAllEvents) {
             return TransactionEventResponse.of(externalId, transactionEvents);
@@ -140,14 +143,14 @@ public class TransactionService {
                         transactionEntity -> transactionEntity));
     }
 
-    private List<TransactionEvent> getTransactionEventsFor(Map<String, TransactionEntity> transactionEntityMap) {
+    private List<TransactionEvent> getTransactionEventsFor(Map<String, TransactionEntity> transactionEntityMap, int statusVersion) {
         List<Event> events = eventDao.findEventsForExternalIds(transactionEntityMap.keySet());
-        return mapToTransactionEvent(transactionEntityMap, events);
+        return mapToTransactionEvent(transactionEntityMap, events, statusVersion);
     }
 
-    private List<TransactionEvent> mapToTransactionEvent(Map<String, TransactionEntity> transactionEntityMap, List<Event> eventList) {
+    private List<TransactionEvent> mapToTransactionEvent(Map<String, TransactionEntity> transactionEntityMap, List<Event> eventList, int statusVersion) {
         return eventList.stream()
-                .map(event -> TransactionEvent.from(transactionEntityMap.get(event.getResourceExternalId()), event, objectMapper))
+                .map(event -> TransactionEvent.from(transactionEntityMap.get(event.getResourceExternalId()), event, objectMapper, statusVersion))
                 .collect(Collectors.toList());
     }
 
@@ -172,7 +175,7 @@ public class TransactionService {
                 .stream()
                 .sorted(Comparator.comparing(TransactionEntity::getCreatedDate))
                 .map(transactionEntity ->
-                        TransactionView.from(transactionFactory.createTransactionEntity(transactionEntity)))
+                        TransactionView.from(transactionFactory.createTransactionEntity(transactionEntity), DEFAULT_STATUS_VERSION))
                 .collect(Collectors.toList());
         return TransactionsForTransactionResponse.of(parentTransactionExternalId, transactions);
     }

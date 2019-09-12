@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -22,6 +23,8 @@ import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
+import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
@@ -33,6 +36,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,6 +44,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionServiceTest {
@@ -72,8 +77,31 @@ public class TransactionServiceTest {
     }
 
     @Test
+    public void shouldReturnTransactionWithNewStatusForStatusVersion2(){
+        TransactionEntity transaction = aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity();
+        when(mockTransactionDao.findTransactionByExternalId("external_id")).thenReturn(Optional.of(transaction));
+
+        Optional<TransactionView> transactionView = transactionService.getTransaction("external_id", 2);
+
+        assertThat(transactionView.isPresent(), is(true));
+        assertThat(transactionView.get().getState().getStatus(), is("declined"));
+    }
+
+    @Test
+    public void shouldReturnTransactionWithOldStatusForStatusVersion1(){
+        TransactionEntity transaction = aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity();
+        when(mockTransactionDao.findTransactionByExternalId("external_id")).thenReturn(Optional.of(transaction));
+
+        Optional<TransactionView> transactionView = transactionService.getTransaction("external_id", 1);
+
+        assertThat(transactionView.isPresent(), is(true));
+        assertThat(transactionView.get().getState().getStatus(), is("failed"));
+    }
+
+    @Test
     public void shouldReturnAListOfTransactions() {
-        List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 5);
+        List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 4);
+        transactionViewList.add(aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity());
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
         when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(5L);
         TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(searchParams, mockUriInfo);
@@ -81,6 +109,7 @@ public class TransactionServiceTest {
         assertThat(transactionSearchResponse.getCount(), is(5L));
         assertThat(transactionSearchResponse.getTotal(), is(5L));
         assertThat(transactionSearchResponse.getTransactionViewList().size(), is(5));
+        assertThat(transactionSearchResponse.getTransactionViewList().get(4).getState().getStatus(), is("declined"));
     }
 
     @Test
@@ -134,23 +163,45 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void findTransactionEvents_shouldReturnTransactionEventsCorrectly() {
+    public void findTransactionEvents_shouldReturnTransactionEventsCorrectlyForStatusVersion1() {
         List<TransactionEntity> transactionEntityList = TransactionFixture.aTransactionList(gatewayAccountId, 1);
         when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
                 .thenReturn(transactionEntityList);
 
-        Event event = EventFixture.anEventFixture().withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
+        Event event = EventFixture.anEventFixture().withEventType(SalientEventType.AUTHORISATION_CANCELLED.toString())
+                .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
         List<Event> eventList = List.of(event);
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
         TransactionEventResponse transactionEventResponse
-                = transactionService.findTransactionEvents("external-id", gatewayAccountId, false);
+                = transactionService.findTransactionEvents("external-id", gatewayAccountId, false, 1);
 
         List<TransactionEvent> transactionEvents = transactionEventResponse.getEvents();
 
         assertThat(transactionEventResponse.getTransactionId(), is("external-id"));
         assertThat(transactionEvents.size(), is(1));
-        assertTransactionEvent(event, transactionEvents.get(0), transactionEntityList.get(0).getAmount(), "created");
+        assertTransactionEvent(event, transactionEvents.get(0), transactionEntityList.get(0).getAmount(), "failed");
+    }
+
+    @Test
+    public void findTransactionEvents_shouldReturnTransactionEventsCorrectlyForStatusVersion2() {
+        List<TransactionEntity> transactionEntityList = TransactionFixture.aTransactionList(gatewayAccountId, 1);
+        when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
+                .thenReturn(transactionEntityList);
+
+        Event event = EventFixture.anEventFixture().withEventType(SalientEventType.AUTHORISATION_CANCELLED.toString())
+                .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
+        List<Event> eventList = List.of(event);
+        when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
+
+        TransactionEventResponse transactionEventResponse
+                = transactionService.findTransactionEvents("external-id", gatewayAccountId, false, 2);
+
+        List<TransactionEvent> transactionEvents = transactionEventResponse.getEvents();
+
+        assertThat(transactionEventResponse.getTransactionId(), is("external-id"));
+        assertThat(transactionEvents.size(), is(1));
+        assertTransactionEvent(event, transactionEvents.get(0), transactionEntityList.get(0).getAmount(), "declined");
     }
 
     @Test
@@ -168,7 +219,7 @@ public class TransactionServiceTest {
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
         TransactionEventResponse transactionEventResponse
-                = transactionService.findTransactionEvents("external-id", gatewayAccountId, false);
+                = transactionService.findTransactionEvents("external-id", gatewayAccountId, false, 1);
 
         List<TransactionEvent> transactionEvents = transactionEventResponse.getEvents();
 
@@ -187,7 +238,7 @@ public class TransactionServiceTest {
         thrown.expectMessage("Transaction with id [external-id] not found");
 
         TransactionEventResponse transactionEventResponse
-                = transactionService.findTransactionEvents("external-id", gatewayAccountId, false);
+                = transactionService.findTransactionEvents("external-id", gatewayAccountId, false, 1);
     }
 
     @Test
@@ -214,7 +265,7 @@ public class TransactionServiceTest {
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
         TransactionEventResponse transactionEventResponse
-                = transactionService.findTransactionEvents("external-id", gatewayAccountId, false);
+                = transactionService.findTransactionEvents("external-id", gatewayAccountId, false, 2);
 
         List<TransactionEvent> transactionEvents = transactionEventResponse.getEvents();
 
@@ -248,7 +299,7 @@ public class TransactionServiceTest {
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
         TransactionEventResponse transactionEventResponse
-                = transactionService.findTransactionEvents("external-id", gatewayAccountId, true);
+                = transactionService.findTransactionEvents("external-id", gatewayAccountId, true, 1);
 
         List<TransactionEvent> transactionEvents = transactionEventResponse.getEvents();
 

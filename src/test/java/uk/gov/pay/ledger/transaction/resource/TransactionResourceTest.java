@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -44,7 +45,7 @@ public class TransactionResourceTest {
 
     @Test
     public void shouldReturn200IfTransactionGatewayAccountIdIsNotProvidedButNotRequiredFlag() {
-        when(mockTransactionService.getTransaction(eq("some-external-id"))).thenReturn(Optional.of(new TransactionView()));
+        when(mockTransactionService.getTransaction(eq("some-external-id"), anyInt())).thenReturn(Optional.of(new TransactionView()));
 
         Response response = resources
                 .target("/v1/transaction/some-external-id")
