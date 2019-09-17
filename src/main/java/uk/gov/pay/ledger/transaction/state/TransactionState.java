@@ -128,4 +128,10 @@ public enum TransactionState {
                 .filter(v -> v.getStatus().equals(status))
                 .collect(Collectors.toList());
     }
+
+    public static List<TransactionState> getStatesForOldStatus(String status) {
+        return stream(values())
+                .filter(v -> v.getOldStatus().equals(status))
+                .collect(Collectors.toList());
+    }
 }

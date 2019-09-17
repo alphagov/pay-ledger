@@ -326,6 +326,47 @@ public class TransactionResourceIT {
     }
 
     @Test
+    public void shouldSearchTransactionCorrectlyByStateAndStatusVersion1() {
+        TransactionFixture submittedPayment = aTransactionFixture()
+                .withState(TransactionState.FAILED_REJECTED)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + submittedPayment.getGatewayAccountId() +
+                        "&state=failed" +
+                        "&status_version=1"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].transaction_id", is(submittedPayment.getExternalId()))
+                .body("results[0].state.status", is("failed"));
+    }
+
+    @Test
+    public void shouldSearchTransactionCorrectlyByStateWithDefaultStatusVersion2() {
+        TransactionFixture submittedPayment = aTransactionFixture()
+                .withState(TransactionState.FAILED_REJECTED)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + submittedPayment.getGatewayAccountId() +
+                        "&state=declined"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].transaction_id", is(submittedPayment.getExternalId()))
+                .body("results[0].state.status", is("declined"));
+    }
+
+    @Test
     public void shouldSearchUsingGatewayAccountId() {
         String targetGatewayAccountId = "123";
         String otherGatewayAccountId = "456";
