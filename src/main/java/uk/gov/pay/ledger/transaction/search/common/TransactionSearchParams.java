@@ -143,14 +143,17 @@ public class TransactionSearchParams {
         if (isNotBlank(accountId)) {
             filters.add(" t.gateway_account_id = :" + GATEWAY_ACCOUNT_EXTERNAL_FIELD);
         }
+        if (transactionType != null) {
+            filters.add(" t.type = :" + TRANSACTION_TYPE_FIELD + "::transaction_type");
+        }
         if (isNotBlank(email)) {
-            filters.add(" t.email ILIKE :" + EMAIL_FIELD);
+            filters.add(" lower(t.email) ILIKE :" + EMAIL_FIELD);
         }
         if (isNotBlank(reference)) {
-            filters.add(" t.reference ILIKE :" + REFERENCE_FIELD);
+            filters.add(" lower(t.reference) ILIKE :" + REFERENCE_FIELD);
         }
         if (isNotBlank(cardHolderName)) {
-            filters.add(" t.cardholder_name ILIKE :" + CARDHOLDER_NAME_FIELD);
+            filters.add(" lower(t.cardholder_name) ILIKE :" + CARDHOLDER_NAME_FIELD);
         }
         if (isNotBlank(fromDate)) {
             filters.add(" t.created_date > :" + FROM_DATE_FIELD);
@@ -172,9 +175,6 @@ public class TransactionSearchParams {
         }
         if (isNotBlank(firstDigitsCardNumber)) {
             filters.add(" t.first_digits_card_number = :" + FIRST_DIGITS_CARD_NUMBER_FIELD);
-        }
-        if (transactionType != null) {
-            filters.add(" t.type = :" + TRANSACTION_TYPE_FIELD + "::transaction_type");
         }
 
         return List.copyOf(filters);
