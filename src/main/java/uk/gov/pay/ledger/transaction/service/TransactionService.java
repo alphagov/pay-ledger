@@ -96,7 +96,7 @@ public class TransactionService {
         PaginationBuilder paginationBuilder = new PaginationBuilder(searchParams, uriInfo);
         paginationBuilder = paginationBuilder.withTotalCount(total).buildResponse();
 
-        List<TransactionView> transactionViewList = mapToTransactionViewList(transactionList);
+        List<TransactionView> transactionViewList = mapToTransactionViewList(transactionList, searchParams.getStatusVersion());
 
         return new TransactionSearchResponse(
                 total,
@@ -106,9 +106,9 @@ public class TransactionService {
         ).withPaginationBuilder(paginationBuilder);
     }
 
-    private List<TransactionView> mapToTransactionViewList(List<Transaction> transactionList) {
+    private List<TransactionView> mapToTransactionViewList(List<Transaction> transactionList, int statusVersion) {
         return transactionList.stream()
-                .map(transaction -> TransactionView.from(transaction, DEFAULT_STATUS_VERSION))
+                .map(transaction -> TransactionView.from(transaction, statusVersion))
                 .collect(Collectors.toList());
     }
     // @TODO(sfount) handling writing invalid transaction should be tested at `EventMessageHandler` integration level

@@ -99,7 +99,8 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void shouldReturnAListOfTransactions() {
+    public void shouldReturnAListOfTransactionsWithStatusVersion2() {
+        searchParams.setStatusVersion(2);
         List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 4);
         transactionViewList.add(aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity());
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
@@ -110,6 +111,17 @@ public class TransactionServiceTest {
         assertThat(transactionSearchResponse.getTotal(), is(5L));
         assertThat(transactionSearchResponse.getTransactionViewList().size(), is(5));
         assertThat(transactionSearchResponse.getTransactionViewList().get(4).getState().getStatus(), is("declined"));
+    }
+
+    @Test
+    public void shouldReturnAListOfTransactionsWithStatusVersion1() {
+        searchParams.setStatusVersion(1);
+        List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 4);
+        transactionViewList.add(aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity());
+        when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
+        when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(5L);
+        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(searchParams, mockUriInfo);
+        assertThat(transactionSearchResponse.getTransactionViewList().get(4).getState().getStatus(), is("failed"));
     }
 
     @Test

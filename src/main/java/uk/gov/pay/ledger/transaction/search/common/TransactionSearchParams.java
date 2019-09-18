@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -35,7 +36,9 @@ public class TransactionSearchParams {
     private static final String TRANSACTION_TYPE_FIELD = "transaction_type";
     private static final long MAX_DISPLAY_SIZE = 500;
     private static final long DEFAULT_PAGE_NUMBER = 1L;
-
+    @DefaultValue("2")
+    @QueryParam("status_version")
+    int statusVersion;
     private String accountId;
     @QueryParam("email")
     private String email;
@@ -115,6 +118,10 @@ public class TransactionSearchParams {
 
     public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
+    }
+
+    public void setStatusVersion(int statusVersion) {
+        this.statusVersion = statusVersion;
     }
 
     @QueryParam("page")
@@ -204,9 +211,10 @@ public class TransactionSearchParams {
                 queryMap.put(TO_DATE_FIELD, ZonedDateTime.parse(toDate));
             }
             if (isNotBlank(state)) {
-                queryMap.put(STATE_FIELD, TransactionState.getStatesForStatus(state).stream()
-                        .map(TransactionState::name)
-                        .collect(Collectors.toList()));
+                queryMap.put(STATE_FIELD,
+                        getTransactionState(state, statusVersion).stream()
+                                .map(TransactionState::name)
+                                .collect(Collectors.toList()));
             }
             if (cardBrands != null && !cardBrands.isEmpty()) {
                 queryMap.put(CARD_BRAND_FIELD, cardBrands.getParameters());
@@ -228,6 +236,12 @@ public class TransactionSearchParams {
             }
         }
         return queryMap;
+    }
+
+    private List<TransactionState> getTransactionState(String status, int statusVersion) {
+        return statusVersion == 2 ?
+                TransactionState.getStatesForStatus(status) :
+                TransactionState.getStatesForOldStatus(status);
     }
 
     public String getAccountId() {
@@ -252,6 +266,10 @@ public class TransactionSearchParams {
 
     public TransactionType getTransactionType() {
         return transactionType;
+    }
+
+    public int getStatusVersion() {
+        return statusVersion;
     }
 
     public String buildQueryParamString(Long forPage) {
@@ -316,7 +334,7 @@ public class TransactionSearchParams {
 
     private List<String> getTransactionStatesForStatuses(CommaDelimitedSetParameter paymentStates) {
         return paymentStates.getParameters().stream()
-                .map(TransactionState::getStatesForStatus)
+                .map(status -> getTransactionState(status, statusVersion))
                 .flatMap(List::stream)
                 .map(TransactionState::name)
                 .collect(Collectors.toList());
