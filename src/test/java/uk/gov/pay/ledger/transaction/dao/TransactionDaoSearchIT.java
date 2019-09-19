@@ -122,7 +122,7 @@ public class TransactionDaoSearchIT {
     }
 
     @Test
-    public void shouldReturn1Record_whenSearchingByReference() {
+    public void shouldReturn1Record_whenSearchingByExactReference() {
 
         String gatewayAccountId = "account-id-" + nextLong();
 
@@ -137,7 +137,36 @@ public class TransactionDaoSearchIT {
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
+        searchParams.setExactReferenceMatch(true);
         searchParams.setReference("reference 1");
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(1));
+        assertThat(transactionList.get(0).getReference(), is("reference 1"));
+
+        Long total = transactionDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
+    }
+
+    @Test
+    public void shouldReturn1Record_whenSearchingByPartialReference() {
+
+        String gatewayAccountId = "account-id-" + nextLong();
+
+        for (int i = 0; i < 2; i++) {
+            aTransactionFixture()
+                    .withAmount(100L + i)
+                    .withGatewayAccountId(gatewayAccountId)
+                    .withReference("reference " + i)
+                    .withDescription("description " + i)
+                    .insert(rule.getJdbi());
+        }
+
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setExactReferenceMatch(false);
+        searchParams.setReference("1");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
