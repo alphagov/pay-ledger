@@ -27,7 +27,7 @@ public class TransactionSearchParamsTest {
     @Test
     public void getsFilterAndQueryMapWhenNotEmptyReference() {
         transactionSearchParams.setReference("test-reference");
-        assertThat(transactionSearchParams.getFilterTemplates().get(0), is(" lower(t.reference) ILIKE :reference"));
+        assertThat(transactionSearchParams.getFilterTemplates().get(0), is(" lower(t.reference) LIKE lower(:reference)"));
         assertThat(transactionSearchParams.getQueryMap().get("reference"), is("%test-reference%"));
     }
 

@@ -157,17 +157,17 @@ public class TransactionSearchParams {
             filters.add(" t.type = :" + TRANSACTION_TYPE_FIELD + "::transaction_type");
         }
         if (isNotBlank(email)) {
-            filters.add(" lower(t.email) ILIKE :" + EMAIL_FIELD);
+            filters.add(" lower(t.email) LIKE lower(:" + EMAIL_FIELD + ")");
         }
         if (isNotBlank(reference)) {
             if(exactReferenceMatch) {
                 filters.add(" lower(t.reference) = lower(:" + REFERENCE_FIELD + ")");
             } else {
-                filters.add(" lower(t.reference) ILIKE :" + REFERENCE_FIELD);
+                filters.add(" lower(t.reference) LIKE lower(:" + REFERENCE_FIELD + ")");
             }
         }
         if (isNotBlank(cardHolderName)) {
-            filters.add(" lower(t.cardholder_name) ILIKE :" + CARDHOLDER_NAME_FIELD);
+            filters.add(" lower(t.cardholder_name) LIKE lower(:" + CARDHOLDER_NAME_FIELD + ")");
         }
         if (isNotBlank(fromDate)) {
             filters.add(" t.created_date > :" + FROM_DATE_FIELD);

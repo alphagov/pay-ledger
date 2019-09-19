@@ -122,7 +122,7 @@ public class TransactionDaoSearchIT {
     }
 
     @Test
-    public void shouldReturn1Record_whenSearchingByReference() {
+    public void shouldReturn1Record_whenSearchingByExactReference() {
 
         String gatewayAccountId = "account-id-" + nextLong();
 
