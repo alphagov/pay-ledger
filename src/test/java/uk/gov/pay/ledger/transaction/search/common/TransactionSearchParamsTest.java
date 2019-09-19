@@ -18,6 +18,28 @@ public class TransactionSearchParamsTest {
     }
 
     @Test
+    public void getsEmptyFilterAndQueryMapWhenEmptyReference() {
+        transactionSearchParams.setReference("");
+        assertThat(transactionSearchParams.getFilterTemplates().size(), is(0));
+        assertThat(transactionSearchParams.getQueryMap().size(), is(0));
+    }
+
+    @Test
+    public void getsFilterAndQueryMapWhenNotEmptyReference() {
+        transactionSearchParams.setReference("test-reference");
+        assertThat(transactionSearchParams.getFilterTemplates().get(0), is(" lower(t.reference) ILIKE :reference"));
+        assertThat(transactionSearchParams.getQueryMap().get("reference"), is("%test-reference%"));
+    }
+
+    @Test
+    public void getsFilterAndQueryMapWhenNotEmptyReferenceAndExactMatch() {
+        transactionSearchParams.setReference("test-reference");
+        transactionSearchParams.setExactReferenceMatch(true);
+        assertThat(transactionSearchParams.getFilterTemplates().get(0), is(" lower(t.reference) = lower(:reference)"));
+        assertThat(transactionSearchParams.getQueryMap().get("reference"), is("test-reference"));
+    }
+
+    @Test
     public void getsEmptyFilterTemplateWhenEmptyFromDate() {
         transactionSearchParams.setFromDate("");
         assertThat(transactionSearchParams.getFilterTemplates().size(), is(0));

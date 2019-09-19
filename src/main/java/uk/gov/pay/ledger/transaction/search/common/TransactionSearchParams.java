@@ -39,6 +39,9 @@ public class TransactionSearchParams {
     @DefaultValue("2")
     @QueryParam("status_version")
     int statusVersion;
+    @DefaultValue("false")
+    @QueryParam("exact_reference_match")
+    private boolean exactReferenceMatch;
     private String accountId;
     @QueryParam("email")
     private String email;
@@ -157,7 +160,11 @@ public class TransactionSearchParams {
             filters.add(" lower(t.email) ILIKE :" + EMAIL_FIELD);
         }
         if (isNotBlank(reference)) {
-            filters.add(" lower(t.reference) ILIKE :" + REFERENCE_FIELD);
+            if(exactReferenceMatch) {
+                filters.add(" lower(t.reference) = lower(:" + REFERENCE_FIELD + ")");
+            } else {
+                filters.add(" lower(t.reference) ILIKE :" + REFERENCE_FIELD);
+            }
         }
         if (isNotBlank(cardHolderName)) {
             filters.add(" lower(t.cardholder_name) ILIKE :" + CARDHOLDER_NAME_FIELD);
@@ -199,7 +206,11 @@ public class TransactionSearchParams {
                 queryMap.put(EMAIL_FIELD, likeClause(email));
             }
             if (isNotBlank(reference)) {
-                queryMap.put(REFERENCE_FIELD, likeClause(reference));
+                if(exactReferenceMatch) {
+                    queryMap.put(REFERENCE_FIELD, reference);
+                } else {
+                    queryMap.put(REFERENCE_FIELD, likeClause(reference));
+                }
             }
             if (isNotBlank(cardHolderName)) {
                 queryMap.put(CARDHOLDER_NAME_FIELD, likeClause(cardHolderName));
@@ -365,5 +376,10 @@ public class TransactionSearchParams {
 
     private boolean isSet(CommaDelimitedSetParameter commaDelimitedSetParameter) {
         return commaDelimitedSetParameter != null && !commaDelimitedSetParameter.isEmpty();
+    }
+
+    public TransactionSearchParams setExactReferenceMatch(boolean exactReferenceMatch) {
+        this.exactReferenceMatch = exactReferenceMatch;
+        return this;
     }
 }
