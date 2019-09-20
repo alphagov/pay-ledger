@@ -150,17 +150,13 @@ public class TransactionSearchParams {
     public List<String> getFilterTemplates() {
         List<String> filters = new ArrayList<>();
 
-        if (isNotBlank(accountId)) {
-            filters.add(" t.gateway_account_id = :" + GATEWAY_ACCOUNT_EXTERNAL_FIELD);
-        }
-        if (transactionType != null) {
-            filters.add(" t.type = :" + TRANSACTION_TYPE_FIELD + "::transaction_type");
-        }
+        addCommonFilterTemplates(filters);
+
         if (isNotBlank(email)) {
             filters.add(" lower(t.email) LIKE lower(:" + EMAIL_FIELD + ")");
         }
         if (isNotBlank(reference)) {
-            if(exactReferenceMatch) {
+            if (exactReferenceMatch) {
                 filters.add(" lower(t.reference) = lower(:" + REFERENCE_FIELD + ")");
             } else {
                 filters.add(" lower(t.reference) LIKE lower(:" + REFERENCE_FIELD + ")");
@@ -168,6 +164,59 @@ public class TransactionSearchParams {
         }
         if (isNotBlank(cardHolderName)) {
             filters.add(" lower(t.cardholder_name) LIKE lower(:" + CARDHOLDER_NAME_FIELD + ")");
+        }
+        if (cardBrands != null && !cardBrands.isEmpty()) {
+            filters.add(" t.card_brand IN (<" + CARD_BRAND_FIELD + ">)");
+        }
+        if (isNotBlank(lastDigitsCardNumber)) {
+            filters.add(" t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD);
+        }
+
+        return List.copyOf(filters);
+    }
+
+    public List<String> getFilterTemplatesWithParentTransactionSearch() {
+        List<String> filters = new ArrayList<>();
+
+        addCommonFilterTemplates(filters);
+
+        if (isNotBlank(email)) {
+            filters.add(" (lower(t.email) like lower(:" + EMAIL_FIELD + ")" +
+                    " or lower(parent.email) like lower(:" + EMAIL_FIELD + "))");
+        }
+        if (isNotBlank(cardHolderName)) {
+            filters.add(" (lower(t.cardholder_name) like lower(:" + CARDHOLDER_NAME_FIELD + ")" +
+                    " or lower(parent.cardholder_name) like lower(:" + CARDHOLDER_NAME_FIELD + "))");
+        }
+        if (isNotBlank(lastDigitsCardNumber)) {
+            filters.add(" (t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD +
+                    " or parent.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD + ")");
+        }
+        if (cardBrands != null && !cardBrands.isEmpty()) {
+            filters.add(" (lower(t.card_brand) IN (<" + CARD_BRAND_FIELD + ">)" +
+                    " or lower(parent.card_brand) IN (<" + CARD_BRAND_FIELD + ">))");
+        }
+
+        if (isNotBlank(reference)) {
+            if (exactReferenceMatch) {
+                filters.add(" (lower(t.reference) = lower(:" + REFERENCE_FIELD + ")" +
+                        " or lower(parent.reference) = lower(:" + REFERENCE_FIELD + "))");
+            } else {
+                filters.add(" (lower(t.reference) like lower(:" + REFERENCE_FIELD + ")" +
+                        " or lower(parent.reference) like lower(:" + REFERENCE_FIELD + "))");
+            }
+        }
+
+        return List.copyOf(filters);
+    }
+
+    private List<String> addCommonFilterTemplates(List<String> filters) {
+
+        if (isNotBlank(accountId)) {
+            filters.add(" t.gateway_account_id = :" + GATEWAY_ACCOUNT_EXTERNAL_FIELD);
+        }
+        if (transactionType != null) {
+            filters.add(" t.type = :" + TRANSACTION_TYPE_FIELD + "::transaction_type");
         }
         if (isNotBlank(fromDate)) {
             filters.add(" t.created_date > :" + FROM_DATE_FIELD);
@@ -181,17 +230,11 @@ public class TransactionSearchParams {
         if (isNotBlank(state)) {
             filters.add(" t.state IN (<" + STATE_FIELD + ">)");
         }
-        if (cardBrands != null && !cardBrands.isEmpty()) {
-            filters.add(" t.card_brand IN (<" + CARD_BRAND_FIELD + ">)");
-        }
-        if (isNotBlank(lastDigitsCardNumber)) {
-            filters.add(" t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD);
-        }
         if (isNotBlank(firstDigitsCardNumber)) {
             filters.add(" t.first_digits_card_number = :" + FIRST_DIGITS_CARD_NUMBER_FIELD);
         }
 
-        return List.copyOf(filters);
+        return filters;
     }
 
     public Map<String, Object> getQueryMap() {
@@ -206,7 +249,7 @@ public class TransactionSearchParams {
                 queryMap.put(EMAIL_FIELD, likeClause(email));
             }
             if (isNotBlank(reference)) {
-                if(exactReferenceMatch) {
+                if (exactReferenceMatch) {
                     queryMap.put(REFERENCE_FIELD, reference);
                 } else {
                     queryMap.put(REFERENCE_FIELD, likeClause(reference));
