@@ -123,7 +123,7 @@ public class TransactionService {
         Map<String, TransactionEntity> transactionEntityMap = getTransactionsAsMap(externalId, gatewayAccountId);
 
         if (transactionEntityMap.isEmpty()) {
-            throw new BadRequestException(format("Transaction with id [%s] not found", externalId));
+            throw new WebApplicationException(format("Transaction with id [%s] not found", externalId), Response.Status.NOT_FOUND);
         }
 
         List<TransactionEvent> transactionEvents = getTransactionEventsFor(transactionEntityMap, statusVersion);

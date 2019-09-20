@@ -29,6 +29,7 @@ import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
@@ -242,11 +243,11 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void findTransactionEvents_shouldThrowBadRequestExceptionIfNotRecordsFound() {
+    public void findTransactionEvents_shouldThrowWebApplicationExceptionRequestExceptionIfNotRecordsFound() {
         when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
                 .thenReturn(new ArrayList<>());
 
-        thrown.expect(BadRequestException.class);
+        thrown.expect(WebApplicationException.class);
         thrown.expectMessage("Transaction with id [external-id] not found");
 
         TransactionEventResponse transactionEventResponse
