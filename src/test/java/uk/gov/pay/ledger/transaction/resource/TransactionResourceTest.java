@@ -9,6 +9,7 @@ import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -18,8 +19,10 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +64,20 @@ public class TransactionResourceTest {
         Response response = resources
                 .target("/v1/transaction/non-existent-id")
                 .queryParam("account_id", 1)
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(404));
+    }
+
+    @Test
+    public void shouldReturn404IfTransactionDoesNotExistWhenGettingEvents() {
+        when(mockTransactionService.findTransactionEvents(any(), any(), anyBoolean(), anyInt()))
+                .thenThrow(new WebApplicationException("Not found", Response.Status.NOT_FOUND));
+
+        Response response = resources
+                .target("/v1/transaction/non-existent-id/event")
+                .queryParam("gateway_account_id", 1)
                 .request()
                 .get();
 

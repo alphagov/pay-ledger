@@ -466,7 +466,7 @@ public class TransactionResourceIT {
                 .contentType(JSON)
                 .get("/v1/transaction/some-external-id/event?gateway_account_id=some-gateway-id")
                 .then()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode())
                 .contentType(JSON)
                 .body("message", is("Transaction with id [some-external-id] not found"));
     }
