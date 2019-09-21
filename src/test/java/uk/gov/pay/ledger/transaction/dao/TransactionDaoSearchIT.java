@@ -14,9 +14,11 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import static java.time.ZonedDateTime.now;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -188,7 +190,7 @@ public class TransactionDaoSearchIT {
                     .withReference("reference " + i)
                     .withCardholderName("name" + i)
                     .withDescription("description " + i)
-                    .withCreatedDate(ZonedDateTime.now().plusSeconds(1L))
+                    .withCreatedDate(now().plusSeconds(1L))
                     .insert(rule.getJdbi());
         }
 
@@ -213,13 +215,13 @@ public class TransactionDaoSearchIT {
         for (int i = 1; i < 4; i++) {
             aTransactionFixture()
                     .withGatewayAccountId(gatewayAccountId)
-                    .withCreatedDate(ZonedDateTime.now().minusDays(i))
+                    .withCreatedDate(now().minusDays(i))
                     .insert(rule.getJdbi());
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
-        searchParams.setFromDate(ZonedDateTime.now().minusDays(1).minusMinutes(10).toString());
+        searchParams.setFromDate(now().minusDays(1).minusMinutes(10).toString());
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -236,13 +238,13 @@ public class TransactionDaoSearchIT {
         for (int i = 1; i < 4; i++) {
             aTransactionFixture()
                     .withGatewayAccountId(gatewayAccountId)
-                    .withCreatedDate(ZonedDateTime.now().minusDays(i))
+                    .withCreatedDate(now().minusDays(i))
                     .insert(rule.getJdbi());
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setAccountId(gatewayAccountId);
-        searchParams.setToDate(ZonedDateTime.now().minusDays(2).plusMinutes(10).toString());
+        searchParams.setToDate(now().minusDays(2).plusMinutes(10).toString());
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -317,7 +319,6 @@ public class TransactionDaoSearchIT {
                 .withState(TransactionState.SUBMITTED)
                 .withGatewayAccountId(gatewayAccountId)
                 .insert(rule.getJdbi());
-
 
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
@@ -492,13 +493,13 @@ public class TransactionDaoSearchIT {
         TransactionFixture mostRecent = aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId)
                 .withTransactionType("PAYMENT")
-                .withCreatedDate(ZonedDateTime.now())
+                .withCreatedDate(now())
                 .insert(rule.getJdbi());
 
-        TransactionFixture earlier =  aTransactionFixture()
+        TransactionFixture earlier = aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId + "different_account")
                 .withTransactionType("PAYMENT")
-                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .withCreatedDate(now().minusHours(1))
                 .insert(rule.getJdbi());
         TransactionSearchParams searchParams = new TransactionSearchParams();
 
@@ -507,5 +508,322 @@ public class TransactionDaoSearchIT {
         assertThat(transactionList.size(), Matchers.is(2));
         assertThat(transactionList.get(0).getExternalId(), is(mostRecent.getExternalId()));
         assertThat(transactionList.get(1).getExternalId(), is(earlier.getExternalId()));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByGatewayAccountIdOnTransactionAndParentTransaction() {
+        transactionFixture = insertTransaction();
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(1));
+        TransactionFixture transactionThatShouldBeExcluded = insertTransaction();
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+
+        assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(1), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(2L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByEmailOnTransactionAndParentTransaction() {
+        transactionFixture = aTransactionFixture()
+                .withEmail("test-email")
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(1));
+
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setEmail("test");
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+
+        assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(1), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(2L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByPartialReferenceOnTransactionAndParentTransaction() {
+        transactionFixture = aTransactionFixture()
+                .withReference("reference")
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(1));
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setReference("ref");
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+
+        assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(1), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(2L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByExactReferenceOnTransactionAndParentTransaction() {
+        transactionFixture = aTransactionFixture()
+                .withReference("reference")
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(1));
+        TransactionFixture transactionToExclude = aTransactionFixture()
+                .withReference("reference2")
+                .withGatewayAccountId(transactionFixture.getGatewayAccountId())
+                .insert(rule.getJdbi());
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setExactReferenceMatch(true);
+        searchParams.setReference("reference");
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+
+        assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(1), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(2L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByCardholderNameOnTransactionAndParentTransaction() {
+        transactionFixture = aTransactionFixture()
+                .withCardholderName("Mr Test")
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(1));
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setCardHolderName("mr");
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+
+        assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(1), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(2L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByLastDigitsCardNumberNameOnTransactionAndParentTransaction() {
+        transactionFixture = aTransactionFixture()
+                .withLastDigitsCardNumber("4242")
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(1));
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setLastDigitsCardNumber("4242");
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+
+        assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(1), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(2L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByCardBrandOnTransactionAndParentTransaction() {
+        transactionFixture = aTransactionFixture()
+                .withCardBrand("visa")
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(2));
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setCardBrands(new CommaDelimitedSetParameter("visa"));
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+        assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
+        assertTransactionEquals(transactionList.get(1), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(2L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByFromDate() {
+        transactionFixture = aTransactionFixture()
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(1));
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setFromDate(now(ZoneOffset.UTC).toString());
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+
+        assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(1L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByToDate() {
+        transactionFixture = aTransactionFixture()
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(1));
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setToDate(now(ZoneOffset.UTC).toString());
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+
+        assertTransactionEquals(transactionList.get(0), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(1L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_withPageSize10() {
+        String gatewayAccountId = "account-id-" + nextLong();
+
+        for (int i = 1; i <= 20; i++) {
+            aTransactionFixture()
+                    .withGatewayAccountId(gatewayAccountId)
+                    .insert(rule.getJdbi());
+        }
+
+        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setDisplaySize(10L);
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+        assertThat(transactionList.size(), Matchers.is(10));
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(20L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_withOffsetAndPageSize() {
+        transactionFixture = insertTransaction();
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(1));
+        TransactionFixture transactionFixture2 = aTransactionFixture()
+                .withGatewayAccountId(transactionFixture.getGatewayAccountId())
+                .withCreatedDate(now(ZoneOffset.UTC).plusDays(2))
+                .insert(rule.getJdbi());
+
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setDisplaySize(1L);
+        searchParams.setPageNumber(2L);
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+        assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(3L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByPaymentStates() {
+        transactionFixture = insertTransaction();
+        aTransactionFixture().withState(TransactionState.FAILED_REJECTED)
+                .withGatewayAccountId(transactionFixture.getGatewayAccountId())
+                .withTransactionType("PAYMENT")
+                .insert(rule.getJdbi());
+        insertChildTransaction(transactionFixture, now(ZoneOffset.UTC).plusDays(2));
+
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setPaymentStates(new CommaDelimitedSetParameter("created"));
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+        assertTransactionEquals(transactionList.get(0), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(1L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByRefundStates() {
+        transactionFixture = insertTransaction();
+        aTransactionFixture().withState(TransactionState.FAILED_REJECTED)
+                .withGatewayAccountId(transactionFixture.getGatewayAccountId())
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(2));
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setRefundStates(new CommaDelimitedSetParameter("created"));
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+        assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(1L));
+    }
+
+    @Test
+    public void searchTransactionsAndParent_shouldSearchByFirstDigitsCardNumber() {
+        transactionFixture = aTransactionFixture()
+                .withFirstDigitsCardNumber("424242")
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureChild = insertChildTransaction(transactionFixture,
+                now(ZoneOffset.UTC).plusDays(2));
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setFirstDigitsCardNumber("424242");
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
+        assertTransactionEquals(transactionList.get(0), transactionFixture);
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        assertThat(total, is(1L));
+    }
+
+    private void assertTransactionEquals(TransactionEntity actualTransactionEntity, TransactionFixture transactionFixture) {
+        assertThat(actualTransactionEntity.getId(), is(transactionFixture.getId()));
+        assertThat(actualTransactionEntity.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
+        assertThat(actualTransactionEntity.getExternalId(), is(transactionFixture.getExternalId()));
+        assertThat(actualTransactionEntity.getParentExternalId(), is(transactionFixture.getParentExternalId()));
+        assertThat(actualTransactionEntity.getAmount(), is(transactionFixture.getAmount()));
+        assertThat(actualTransactionEntity.getReference(), is(transactionFixture.getReference()));
+        assertThat(actualTransactionEntity.getDescription(), is(transactionFixture.getDescription()));
+        assertThat(actualTransactionEntity.getState(), is(transactionFixture.getState()));
+        assertThat(actualTransactionEntity.getEmail(), is(transactionFixture.getEmail()));
+        if (transactionFixture.getCardDetails() != null) {
+            assertThat(actualTransactionEntity.getCardholderName(), is(transactionFixture.getCardDetails().getCardHolderName()));
+            assertThat(actualTransactionEntity.getCardBrand(), is(transactionFixture.getCardDetails().getCardBrand()));
+        }
+        assertThat(actualTransactionEntity.getCreatedDate(), is(transactionFixture.getCreatedDate()));
+        assertThat(actualTransactionEntity.getCardBrand(), is(transactionFixture.getCardBrand()));
+        assertThat(actualTransactionEntity.getLastDigitsCardNumber(), is(transactionFixture.getLastDigitsCardNumber()));
+        assertThat(actualTransactionEntity.getFirstDigitsCardNumber(), is(transactionFixture.getFirstDigitsCardNumber()));
+    }
+
+    private TransactionFixture insertTransaction() {
+        return aTransactionFixture()
+                .withState(TransactionState.CREATED)
+                .withDefaultCardDetails()
+                .insert(rule.getJdbi());
+    }
+
+    private TransactionFixture insertChildTransaction(TransactionFixture parentTransactionFixture, ZonedDateTime createdDate) {
+        return aTransactionFixture()
+                .withParentExternalId(parentTransactionFixture.getExternalId())
+                .withGatewayAccountId(parentTransactionFixture.getGatewayAccountId())
+                .withTransactionType("REFUND")
+                .withState(TransactionState.CREATED)
+                .withCreatedDate(createdDate)
+                .insert(rule.getJdbi());
     }
 }

@@ -442,6 +442,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return delayedCapture;
     }
 
+    public String getParentExternalId() {
+        return parentExternalId;
+    }
+
     public TransactionFixture withDefaultCardDetails(boolean includeCardDetails) {
         if (includeCardDetails) {
             Address billingAddress = new Address("line1", "line2", "AB1 2CD",
