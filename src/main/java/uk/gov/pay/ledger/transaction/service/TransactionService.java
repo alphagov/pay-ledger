@@ -20,7 +20,6 @@ import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -86,6 +85,14 @@ public class TransactionService {
             searchParams.setAccountId(gatewayAccountId);
         }
 
+        if (searchParams.getWithParentTransaction()) {
+            return searchTransactionsAndParent(searchParams, uriInfo);
+        } else {
+            return searchTransactionsWithOutParent(searchParams, uriInfo);
+        }
+    }
+
+    private TransactionSearchResponse searchTransactionsWithOutParent(TransactionSearchParams searchParams, UriInfo uriInfo) {
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams)
                 .stream()
                 .map(transactionFactory::createTransactionEntity)
@@ -93,6 +100,21 @@ public class TransactionService {
 
         Long total = transactionDao.getTotalForSearch(searchParams);
 
+        return buildTransactionSearchResponse(searchParams, uriInfo, transactionList, total);
+    }
+
+    private TransactionSearchResponse searchTransactionsAndParent(TransactionSearchParams searchParams, UriInfo uriInfo) {
+        List<Transaction> transactionList = transactionDao.searchTransactionsAndParent(searchParams)
+                .stream()
+                .map(transactionFactory::createTransactionEntity)
+                .collect(Collectors.toList());
+
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+
+        return buildTransactionSearchResponse(searchParams, uriInfo, transactionList, total);
+    }
+
+    private TransactionSearchResponse buildTransactionSearchResponse(TransactionSearchParams searchParams, UriInfo uriInfo, List<Transaction> transactionList, Long total) {
         PaginationBuilder paginationBuilder = new PaginationBuilder(searchParams, uriInfo);
         paginationBuilder = paginationBuilder.withTotalCount(total).buildResponse();
 

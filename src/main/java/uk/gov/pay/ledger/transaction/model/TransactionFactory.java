@@ -97,6 +97,9 @@ public class TransactionFactory {
         try {
             JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
 
+            Optional<Transaction> parentTransaction = Optional.ofNullable(entity.getParentTransactionEntity())
+                    .map(this::createTransactionEntity);
+
             return new Refund.Builder()
                     .withGatewayAccountId(entity.getGatewayAccountId())
                     .withAmount(entity.getAmount())
@@ -108,6 +111,7 @@ public class TransactionFactory {
                     .withEventCount(entity.getEventCount())
                     .withRefundedBy(safeGetAsString(transactionDetails, "refunded_by"))
                     .withParentExternalId(entity.getParentExternalId())
+                    .withParentTransaction(parentTransaction)
                     .build();
 
         } catch (IOException e) {

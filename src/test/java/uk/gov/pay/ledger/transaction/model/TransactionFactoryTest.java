@@ -122,8 +122,82 @@ public class TransactionFactoryTest {
 
     @Test
     public void createsPaymentFromTransactionEntityWithFullData() {
-        var payment = (Payment) transactionFactory.createTransactionEntity(fullDataObject);
+        Payment payment = (Payment) transactionFactory.createTransactionEntity(fullDataObject);
 
+        assertCorrectPaymentTransactionWithFullData(payment);
+    }
+
+    @Test
+    public void createsPaymentFromTransactionEntityWithMinimalData() {
+        Payment payment = (Payment) transactionFactory.createTransactionEntity(minimalDataObject);
+
+        assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(payment.getAmount(), is(amount));
+        assertThat(payment.getExternalId(), is(externalId));
+        assertThat(payment.getReference(), is(reference));
+        assertThat(payment.getDescription(), is(description));
+        assertThat(payment.getState(), is(state));
+        assertThat(payment.getLanguage(), nullValue());
+        assertThat(payment.getReturnUrl(), nullValue());
+        assertThat(payment.getEmail(), is(email));
+        assertThat(payment.getPaymentProvider(), nullValue());
+        assertThat(payment.getCreatedDate(), is(createdDate));
+        assertThat(payment.getCardDetails(), notNullValue());
+        assertThat(payment.getCardDetails().getLastDigitsCardNumber(), is(lastDigitsCardNumber));
+        assertThat(payment.getCardDetails().getFirstDigitsCardNumber(), is(firstDigitsCardNumber));
+        assertThat(payment.getCardDetails().getCardHolderName(), is(cardholderName));
+        assertThat(payment.getCardDetails().getCardBrand(), is(cardBrand));
+        assertThat(payment.getCardDetails().getBillingAddress(), nullValue());
+        assertThat(payment.getDelayedCapture(), is(false));
+        assertThat(payment.getExternalMetadata(), nullValue());
+        assertThat(payment.getEventCount(), is(eventCount));
+        assertThat(payment.getGatewayTransactionId(), nullValue());
+        assertThat(payment.getCorporateCardSurcharge(), nullValue());
+        assertThat(payment.getFee(), nullValue());
+        assertThat(payment.getNetAmount(), is(netAmount));
+        assertThat(payment.getTotalAmount(), is(totalAmount));
+        assertThat(payment.getRefundSummary(), notNullValue());
+        assertThat(payment.getRefundSummary().getStatus(), is(refundStatus));
+        assertThat(payment.getRefundSummary().getAmountAvailable(), is(refundAmountAvailable));
+        assertThat(payment.getRefundSummary().getAmountRefunded(), is(refundAmountRefunded));
+        assertThat(payment.getSettlementSummary(), notNullValue());
+        assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.empty()));
+        assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.empty()));
+    }
+
+    @Test
+    public void createsRefundFromTransactionEntityWithMinimalData() {
+        Payment payment = (Payment) transactionFactory.createTransactionEntity(fullDataObject);
+        TransactionEntity refund = new TransactionEntity.Builder()
+                .withTransactionType("REFUND")
+                .withId(id)
+                .withGatewayAccountId(gatewayAccountId)
+                .withExternalId(externalId)
+                .withParentExternalId("parent-ext-id")
+                .withAmount(amount)
+                .withReference(reference)
+                .withState(state)
+                .withCreatedDate(createdDate)
+                .withEventCount(eventCount)
+                .withParentTransactionEntity(fullDataObject)
+                .withTransactionDetails("{\"refunded_by\": \"some_user_id\"}")
+                .build();
+        Refund refundEntity = (Refund) transactionFactory.createTransactionEntity(refund);
+
+        assertThat(refundEntity.getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(refundEntity.getAmount(), is(amount));
+        assertThat(refundEntity.getExternalId(), is(externalId));
+        assertThat(refundEntity.getParentExternalId(), is("parent-ext-id"));
+        assertThat(refundEntity.getRefundedBy(), is("some_user_id"));
+        assertThat(refundEntity.getReference(), is(reference));
+        assertThat(refundEntity.getState(), is(state));
+        assertThat(refundEntity.getCreatedDate(), is(createdDate));
+        assertThat(refundEntity.getEventCount(), is(eventCount));
+
+        assertCorrectPaymentTransactionWithFullData((Payment) refundEntity.getParentTransaction().get());
+    }
+
+    private void assertCorrectPaymentTransactionWithFullData(Payment payment) {
         assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
         assertThat(payment.getAmount(), is(amount));
         assertThat(payment.getExternalId(), is(externalId));
@@ -163,72 +237,5 @@ public class TransactionFactoryTest {
         assertThat(payment.getSettlementSummary(), notNullValue());
         assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.of("2017-09-09")));
         assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.of("2017-09-09T08:35:45.695Z")));
-    }
-
-    @Test
-    public void createsPaymentFromTransactionEntityWithMinimalData() {
-        var payment = (Payment) transactionFactory.createTransactionEntity(minimalDataObject);
-
-        assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
-        assertThat(payment.getAmount(), is(amount));
-        assertThat(payment.getExternalId(), is(externalId));
-        assertThat(payment.getReference(), is(reference));
-        assertThat(payment.getDescription(), is(description));
-        assertThat(payment.getState(), is(state));
-        assertThat(payment.getLanguage(), nullValue());
-        assertThat(payment.getReturnUrl(), nullValue());
-        assertThat(payment.getEmail(), is(email));
-        assertThat(payment.getPaymentProvider(), nullValue());
-        assertThat(payment.getCreatedDate(), is(createdDate));
-        assertThat(payment.getCardDetails(), notNullValue());
-        assertThat(payment.getCardDetails().getLastDigitsCardNumber(), is(lastDigitsCardNumber));
-        assertThat(payment.getCardDetails().getFirstDigitsCardNumber(), is(firstDigitsCardNumber));
-        assertThat(payment.getCardDetails().getCardHolderName(), is(cardholderName));
-        assertThat(payment.getCardDetails().getCardBrand(), is(cardBrand));
-        assertThat(payment.getCardDetails().getBillingAddress(), nullValue());
-        assertThat(payment.getDelayedCapture(), is(false));
-        assertThat(payment.getExternalMetadata(), nullValue());
-        assertThat(payment.getEventCount(), is(eventCount));
-        assertThat(payment.getGatewayTransactionId(), nullValue());
-        assertThat(payment.getCorporateCardSurcharge(), nullValue());
-        assertThat(payment.getFee(), nullValue());
-        assertThat(payment.getNetAmount(), is(netAmount));
-        assertThat(payment.getTotalAmount(), is(totalAmount));
-        assertThat(payment.getRefundSummary(), notNullValue());
-        assertThat(payment.getRefundSummary().getStatus(), is(refundStatus));
-        assertThat(payment.getRefundSummary().getAmountAvailable(), is(refundAmountAvailable));
-        assertThat(payment.getRefundSummary().getAmountRefunded(), is(refundAmountRefunded));
-        assertThat(payment.getSettlementSummary(), notNullValue());
-        assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.empty()));
-        assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.empty()));
-    }
-
-    @Test
-    public void createsRefundFromTransactionEntityWithMinimalData() {
-        var refund = new TransactionEntity.Builder()
-                .withTransactionType("REFUND")
-                .withId(id)
-                .withGatewayAccountId(gatewayAccountId)
-                .withExternalId(externalId)
-                .withParentExternalId("parent-ext-id")
-                .withAmount(amount)
-                .withReference(reference)
-                .withState(state)
-                .withCreatedDate(createdDate)
-                .withEventCount(eventCount)
-                .withTransactionDetails("{\"refunded_by\": \"some_user_id\"}")
-                .build();
-        var refundEntity = (Refund) transactionFactory.createTransactionEntity(refund);
-
-        assertThat(refundEntity.getGatewayAccountId(), is(gatewayAccountId));
-        assertThat(refundEntity.getAmount(), is(amount));
-        assertThat(refundEntity.getExternalId(), is(externalId));
-        assertThat(refundEntity.getParentExternalId(), is("parent-ext-id"));
-        assertThat(refundEntity.getRefundedBy(), is("some_user_id"));
-        assertThat(refundEntity.getReference(), is(reference));
-        assertThat(refundEntity.getState(), is(state));
-        assertThat(refundEntity.getCreatedDate(), is(createdDate));
-        assertThat(refundEntity.getEventCount(), is(eventCount));
-
     }
 }

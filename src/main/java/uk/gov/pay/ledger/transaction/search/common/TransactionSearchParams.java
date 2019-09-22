@@ -42,6 +42,9 @@ public class TransactionSearchParams {
     @DefaultValue("false")
     @QueryParam("exact_reference_match")
     private boolean exactReferenceMatch;
+    @DefaultValue("false")
+    @QueryParam("with_parent_transaction")
+    private boolean withParentTransaction;
     private String accountId;
     @QueryParam("email")
     private String email;
@@ -125,6 +128,10 @@ public class TransactionSearchParams {
 
     public void setStatusVersion(int statusVersion) {
         this.statusVersion = statusVersion;
+    }
+
+    public void setWithParentTransaction(boolean withParentTransaction) {
+        this.withParentTransaction = withParentTransaction;
     }
 
     @QueryParam("page")
@@ -324,6 +331,10 @@ public class TransactionSearchParams {
 
     public int getStatusVersion() {
         return statusVersion;
+    }
+
+    public boolean getWithParentTransaction() {
+        return withParentTransaction;
     }
 
     public String buildQueryParamString(Long forPage) {

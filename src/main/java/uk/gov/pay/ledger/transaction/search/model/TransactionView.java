@@ -51,6 +51,7 @@ public class TransactionView {
     private Map<String, Object> metadata;
     private String refundedBy;
     private TransactionType transactionType;
+    private TransactionView parentTransaction;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -78,6 +79,7 @@ public class TransactionView {
         this.metadata = builder.metadata;
         this.refundedBy = builder.refundedBy;
         this.transactionType = builder.transactionType;
+        this.parentTransaction = builder.parentTransaction;
     }
 
     public TransactionView() {
@@ -127,6 +129,7 @@ public class TransactionView {
                 .withCreatedDate(refund.getCreatedDate())
                 .withRefundedBy(refund.getRefundedBy())
                 .withTransactionType(refund.getTransactionType())
+                .withParentTransaction(refund.getParentTransaction().map(parentTransaction -> from(parentTransaction, statusVersion)).orElse(null))
                 .build();
     }
 
@@ -245,7 +248,12 @@ public class TransactionView {
         return transactionType;
     }
 
+    public TransactionView getParentTransaction() {
+        return parentTransaction;
+    }
+
     public static class Builder {
+        private TransactionView parentTransaction;
         private Long id;
         private String gatewayAccountId;
         private Long amount;
@@ -404,5 +412,11 @@ public class TransactionView {
             this.transactionType = transactionType;
             return this;
         }
+
+        public Builder withParentTransaction(TransactionView parentTransaction) {
+            this.parentTransaction = parentTransaction;
+            return this;
+        }
+
     }
 }
