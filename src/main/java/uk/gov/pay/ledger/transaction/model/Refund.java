@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.model;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 public class Refund extends Transaction {
     private final String reference;
@@ -12,6 +13,7 @@ public class Refund extends Transaction {
     private final Integer eventCount;
     private final String refundedBy;
     private final String parentExternalId;
+    private final Optional<Transaction> parentTransaction;
 
     public Refund(Builder builder) {
         super(builder.id, builder.gatewayAccountId, builder.amount, builder.externalId);
@@ -22,6 +24,7 @@ public class Refund extends Transaction {
         this.eventCount = builder.eventCount;
         this.refundedBy = builder.refundedBy;
         this.parentExternalId = builder.parentExternalId;
+        this.parentTransaction = builder.parentTransaction;
     }
 
     public String getReference() {
@@ -52,6 +55,10 @@ public class Refund extends Transaction {
         return parentExternalId;
     }
 
+    public Optional<Transaction> getParentTransaction() {
+        return parentTransaction;
+    }
+
     @Override
     public TransactionType getTransactionType() {
         return TransactionType.REFUND;
@@ -69,6 +76,7 @@ public class Refund extends Transaction {
         private Long amount;
         private String externalId;
         private String parentExternalId;
+        private Optional<Transaction> parentTransaction;
 
         public Builder() {
         }
@@ -129,6 +137,11 @@ public class Refund extends Transaction {
 
         public Builder withParentExternalId(String parentExternalId) {
             this.parentExternalId = parentExternalId;
+            return this;
+        }
+
+        public Builder withParentTransaction(Optional<Transaction> transaction) {
+            this.parentTransaction = transaction;
             return this;
         }
     }

@@ -28,7 +28,6 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -44,6 +43,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -78,7 +78,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void shouldReturnTransactionWithNewStatusForStatusVersion2(){
+    public void shouldReturnTransactionWithNewStatusForStatusVersion2() {
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity();
         when(mockTransactionDao.findTransactionByExternalId("external_id")).thenReturn(Optional.of(transaction));
 
@@ -89,7 +89,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void shouldReturnTransactionWithOldStatusForStatusVersion1(){
+    public void shouldReturnTransactionWithOldStatusForStatusVersion1() {
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity();
         when(mockTransactionDao.findTransactionByExternalId("external_id")).thenReturn(Optional.of(transaction));
 
@@ -150,29 +150,29 @@ public class TransactionServiceTest {
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
         when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(10L);
 
-        searchParams.setEmail("test@email.com");
-        searchParams.setCardHolderName("test");
-        searchParams.setFromDate("2019-05-01T10:15:30Z");
-        searchParams.setToDate("2019-06-01T10:15:30Z");
-        searchParams.setReference("ref");
-        searchParams.setFirstDigitsCardNumber("4242");
-        searchParams.setLastDigitsCardNumber("1234");
-        searchParams.setPaymentStates(new CommaDelimitedSetParameter("created,submitted"));
-        searchParams.setRefundStates(new CommaDelimitedSetParameter("created,refunded"));
-        searchParams.setCardBrands(new CommaDelimitedSetParameter("visa,mastercard"));
+        setAllSearchParams();
 
         TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(searchParams, mockUriInfo);
-        PaginationBuilder paginationBuilder = transactionSearchResponse.getPaginationBuilder();
-        String selfLink = paginationBuilder.getSelfLink().getHref();
+        assertCorrectPaginationQueryParams(transactionSearchResponse);
+    }
 
-        assertThat(selfLink, containsString("email=test%40email.com"));
-        assertThat(selfLink, containsString("reference=ref"));
-        assertThat(selfLink, containsString("cardholder_name=test"));
-        assertThat(selfLink, containsString("first_digits_card_number=4242"));
-        assertThat(selfLink, containsString("last_digits_card_number=1234"));
-        assertThat(selfLink, containsString("payment_states=created%2Csubmitted"));
-        assertThat(selfLink, containsString("refund_states=created%2Crefunded"));
-        assertThat(selfLink, containsString("card_brand=visa%2Cmastercard"));
+    @Test
+    public void shouldListTransactionsWithCorrectQueryParamsAndPaginationLinks_whenParentTransactionIsTrue() {
+        List<TransactionEntity> transactionViewList = TransactionFixture
+                .aTransactionList(gatewayAccountId, 100);
+
+        when(mockTransactionDao.searchTransactionsAndParent(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
+        when(mockTransactionDao.getTotalForSearchTransactionAndParent(any(TransactionSearchParams.class))).thenReturn(100L);
+
+        setAllSearchParams();
+        searchParams.setWithParentTransaction(true);
+
+        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(gatewayAccountId, searchParams, mockUriInfo);
+
+        verify(mockTransactionDao).searchTransactionsAndParent(searchParams);
+        verify(mockTransactionDao).getTotalForSearchTransactionAndParent(searchParams);
+
+        assertCorrectPaginationQueryParams(transactionSearchResponse);
     }
 
     @Test
@@ -335,5 +335,34 @@ public class TransactionServiceTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void setAllSearchParams() {
+        searchParams.setEmail("test@email.com");
+        searchParams.setCardHolderName("test");
+        searchParams.setFromDate("2019-05-01T10:15:30Z");
+        searchParams.setToDate("2019-06-01T10:15:30Z");
+        searchParams.setReference("ref");
+        searchParams.setFirstDigitsCardNumber("4242");
+        searchParams.setLastDigitsCardNumber("1234");
+        searchParams.setPaymentStates(new CommaDelimitedSetParameter("created,submitted"));
+        searchParams.setRefundStates(new CommaDelimitedSetParameter("created,refunded"));
+        searchParams.setCardBrands(new CommaDelimitedSetParameter("visa,mastercard"));
+    }
+
+    private void assertCorrectPaginationQueryParams(TransactionSearchResponse transactionSearchResponse) {
+        PaginationBuilder paginationBuilder = transactionSearchResponse.getPaginationBuilder();
+        String selfLink = paginationBuilder.getSelfLink().getHref();
+
+        assertThat(selfLink, containsString("email=test%40email.com"));
+        assertThat(selfLink, containsString("cardholder_name=test"));
+        assertThat(selfLink, containsString("reference=ref"));
+        assertThat(selfLink, containsString("first_digits_card_number=4242"));
+        assertThat(selfLink, containsString("last_digits_card_number=1234"));
+        assertThat(selfLink, containsString("payment_states=created%2Csubmitted"));
+        assertThat(selfLink, containsString("refund_states=created%2Crefunded"));
+        assertThat(selfLink, containsString("card_brand=visa%2Cmastercard"));
+        assertThat(selfLink, containsString("from_date=2019-05-01T10%3A15%3A30Z"));
+        assertThat(selfLink, containsString("to_date=2019-06-01T10%3A15%3A30Z"));
     }
 }
