@@ -42,7 +42,7 @@ public class TransactionDao {
             "FROM transaction t " +
             ":searchExtraFields ";
 
-    private static final String SEARCH_TRANSACTIONS_WITH_PARENT_TX = "select " +
+    private static final String SEARCH_TRANSACTIONS_WITH_PARENT_TRANSACTION = "select " +
             " t.*," +
             " parent.id as parent_id, " +
             " parent.gateway_account_id as parent_gateway_account_id, " +
@@ -72,7 +72,7 @@ public class TransactionDao {
             ":searchExtraFields " +
             "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
 
-    private static final String COUNT_TRANSACTIONS_WITH_PARENT_TX = "select " +
+    private static final String COUNT_TRANSACTIONS_WITH_PARENT_TRANSACTION = "select " +
             " count(1) " +
             " from transaction t left outer join transaction parent " +
             " on t.parent_external_id = parent.external_id " +
@@ -221,7 +221,7 @@ public class TransactionDao {
 
     public List<TransactionEntity> searchTransactionsAndParent(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplatesWithParentTransactionSearch(), SEARCH_TRANSACTIONS_WITH_PARENT_TX));
+            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplatesWithParentTransactionSearch(), SEARCH_TRANSACTIONS_WITH_PARENT_TRANSACTION));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             query.bind("offset", searchParams.getOffset());
             query.bind("limit", searchParams.getDisplaySize());
@@ -234,7 +234,7 @@ public class TransactionDao {
 
     public Long getTotalForSearchTransactionAndParent(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplatesWithParentTransactionSearch(), COUNT_TRANSACTIONS_WITH_PARENT_TX));
+            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplatesWithParentTransactionSearch(), COUNT_TRANSACTIONS_WITH_PARENT_TRANSACTION));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             return query
                     .mapTo(Long.class)

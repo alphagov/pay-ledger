@@ -56,7 +56,7 @@ public class TransactionWithParentMapper implements RowMapper<TransactionEntity>
                 .withCardholderName(rs.getString("cardholder_name"))
                 .withCreatedDate(getZonedDateTime(rs, "created_date").orElse(null))
                 .withTransactionDetails(rs.getString("transaction_details"))
-                .withEventCount(rs.getInt("event_count"))
+                .withEventCount(getIntegerWithNullCheck(rs, "event_count"))
                 .withCardBrand(rs.getString("card_brand"))
                 .withLastDigitsCardNumber(rs.getString("last_digits_card_number"))
                 .withFirstDigitsCardNumber(rs.getString("first_digits_card_number"))
@@ -80,6 +80,11 @@ public class TransactionWithParentMapper implements RowMapper<TransactionEntity>
 
     private Long getLongWithNullCheck(ResultSet rs, String columnName) throws SQLException {
         long value = rs.getLong(columnName);
+        return rs.wasNull() ? null : value;
+    }
+
+    private Integer getIntegerWithNullCheck(ResultSet rs, String columnName) throws SQLException {
+        int value = rs.getInt(columnName);
         return rs.wasNull() ? null : value;
     }
 
