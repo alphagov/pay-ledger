@@ -79,12 +79,12 @@ public class TransactionResource {
         TransactionSearchParams transactionSearchParams = Optional.ofNullable(searchParams)
                 .orElse(new TransactionSearchParams());
 
-        validateSearchParams(transactionSearchParams);
+        validateSearchParams(transactionSearchParams, gatewayAccountId);
         AccountIdSupplierManager<TransactionSearchResponse> accountIdSupplierManager =
                 AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId);
 
         return accountIdSupplierManager
-                .withSupplier((accountId) -> transactionService.searchTransactions(gatewayAccountId, transactionSearchParams, uriInfo))
+                .withSupplier(accountId -> transactionService.searchTransactions(gatewayAccountId, transactionSearchParams, uriInfo))
                 .withPrivilegedSupplier(() -> transactionService.searchTransactions(transactionSearchParams, uriInfo))
                 .validateAndGet();
     }

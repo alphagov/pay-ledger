@@ -153,6 +153,9 @@ public class TransactionServiceTest {
         setAllSearchParams();
 
         TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(searchParams, mockUriInfo);
+
+        verify(mockTransactionDao).searchTransactions(searchParams);
+        verify(mockTransactionDao).getTotalForSearch(searchParams);
         assertCorrectPaginationQueryParams(transactionSearchResponse);
     }
 

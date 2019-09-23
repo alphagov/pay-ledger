@@ -88,11 +88,11 @@ public class TransactionService {
         if (searchParams.getWithParentTransaction()) {
             return searchTransactionsAndParent(searchParams, uriInfo);
         } else {
-            return searchTransactionsWithOutParent(searchParams, uriInfo);
+            return searchTransactionsWithoutParent(searchParams, uriInfo);
         }
     }
 
-    private TransactionSearchResponse searchTransactionsWithOutParent(TransactionSearchParams searchParams, UriInfo uriInfo) {
+    private TransactionSearchResponse searchTransactionsWithoutParent(TransactionSearchParams searchParams, UriInfo uriInfo) {
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams)
                 .stream()
                 .map(transactionFactory::createTransactionEntity)

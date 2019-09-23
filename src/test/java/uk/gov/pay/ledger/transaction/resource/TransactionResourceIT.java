@@ -16,11 +16,13 @@ import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import javax.ws.rs.core.Response;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
@@ -469,6 +471,54 @@ public class TransactionResourceIT {
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode())
                 .contentType(JSON)
                 .body("message", is("Transaction with id [some-external-id] not found"));
+    }
+
+    @Test
+    public void shouldSearchCorrectlyOnTransactionAndParentTransaction_WhenWithParentTransactionIsTrue() {
+        String gatewayAccountId = String.valueOf(nextLong());
+        TransactionFixture payment = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUCCESS)
+                .withLastDigitsCardNumber("4242")
+                .withCardBrand("visa")
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1))
+                .insert(rule.getJdbi());
+
+        TransactionFixture successfulRefund = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUCCESS)
+                .withParentExternalId(payment.getExternalId())
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&with_parent_transaction=true" +
+                        "&card_brands=" + payment.getCardBrand() +
+                        "&cardholder_name=" + payment.getCardholderName() +
+                        "&email=" + payment.getEmail() +
+                        "&reference=" + payment.getReference() +
+                        "&last_digits_card_number=" + payment.getLastDigitsCardNumber()
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(2))
+                .body("results[0].transaction_id", is(successfulRefund.getExternalId()))
+                .body("results[0].transaction_type", is("REFUND"))
+                .body("results[0].parent_transaction.transaction_id", is(payment.getExternalId()))
+                .body("results[0].parent_transaction.transaction_type", is("PAYMENT"))
+                .body("results[0].parent_transaction.reference", is(payment.getReference()))
+                .body("results[0].parent_transaction.email", is(payment.getEmail()))
+                .body("results[0].parent_transaction.card_details.card_brand", is(payment.getCardBrand()))
+                .body("results[0].parent_transaction.card_details.last_digits_card_number", is(payment.getLastDigitsCardNumber()))
+                .body("results[0].parent_transaction.card_details.cardholder_name", is(payment.getCardholderName()))
+                .body("results[1].transaction_id", is(payment.getExternalId()))
+                .body("results[1].parent_transaction", is(nullValue()));
     }
 
     @Test
