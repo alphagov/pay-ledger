@@ -12,9 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 
 public class TransactionFactoryTest {
 
@@ -58,6 +56,7 @@ public class TransactionFactoryTest {
         fullTransactionDetails.addProperty("gateway_transaction_id", "gti_12334");
         fullTransactionDetails.addProperty("corporate_surcharge", 12);
         fullTransactionDetails.addProperty("fee", 5);
+        fullTransactionDetails.addProperty("card_brand_label", "Visa");
         fullTransactionDetails.addProperty("address_line1", "line 1");
         fullTransactionDetails.addProperty("address_line2", "line 2");
         fullTransactionDetails.addProperty("address_postcode", "A11 11BB");
@@ -146,7 +145,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getCardDetails().getLastDigitsCardNumber(), is(lastDigitsCardNumber));
         assertThat(payment.getCardDetails().getFirstDigitsCardNumber(), is(firstDigitsCardNumber));
         assertThat(payment.getCardDetails().getCardHolderName(), is(cardholderName));
-        assertThat(payment.getCardDetails().getCardBrand(), is(cardBrand));
+        assertThat(payment.getCardDetails().getCardBrand(), emptyString());
         assertThat(payment.getCardDetails().getBillingAddress(), nullValue());
         assertThat(payment.getDelayedCapture(), is(false));
         assertThat(payment.getExternalMetadata(), nullValue());
@@ -214,7 +213,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getCardDetails().getLastDigitsCardNumber(), is(lastDigitsCardNumber));
         assertThat(payment.getCardDetails().getFirstDigitsCardNumber(), is(firstDigitsCardNumber));
         assertThat(payment.getCardDetails().getCardHolderName(), is(cardholderName));
-        assertThat(payment.getCardDetails().getCardBrand(), is(cardBrand));
+        assertThat(payment.getCardDetails().getCardBrand(), is("Visa"));
         assertThat(payment.getCardDetails().getBillingAddress(), notNullValue());
         assertThat(payment.getCardDetails().getBillingAddress().getAddressLine1(), is("line 1"));
         assertThat(payment.getCardDetails().getBillingAddress().getAddressLine2(), is("line 2"));
