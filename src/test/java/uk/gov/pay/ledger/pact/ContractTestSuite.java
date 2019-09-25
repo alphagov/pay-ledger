@@ -21,6 +21,7 @@ public class ContractTestSuite {
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(RefundSubmittedEventQueueContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(RefundSucceededEventQueueContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(CaptureSubmittedEventQueueContractTest.class));
+        consumerToJUnitTest.put("connector", new JUnit4TestAdapter(PaymentNotificationCreatedEventQueueContractTest.class));
         return CreateTestSuite.create(consumerToJUnitTest.build());
     }
 
