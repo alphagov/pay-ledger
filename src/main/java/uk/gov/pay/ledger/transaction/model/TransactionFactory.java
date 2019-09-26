@@ -44,8 +44,9 @@ public class TransactionFactory {
                     safeGetAsString(transactionDetails, "address_county"),
                     safeGetAsString(transactionDetails, "address_country")
             );
+            String cardBrand = safeGetAsString(transactionDetails, "card_brand_label");
 
-            CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), billingAddress, entity.getCardBrand(),
+            CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), billingAddress, cardBrand,
                     entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
                     safeGetAsString(transactionDetails, "expiry_date"));
 
