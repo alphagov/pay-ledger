@@ -481,6 +481,7 @@ public class TransactionResourceIT {
                 .withState(TransactionState.SUCCESS)
                 .withLastDigitsCardNumber("4242")
                 .withCardBrand("visa")
+                .withCardBrandLabel("Visa")
                 .withGatewayAccountId(gatewayAccountId)
                 .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1))
                 .insert(rule.getJdbi());
@@ -514,7 +515,7 @@ public class TransactionResourceIT {
                 .body("results[0].parent_transaction.transaction_type", is("PAYMENT"))
                 .body("results[0].parent_transaction.reference", is(payment.getReference()))
                 .body("results[0].parent_transaction.email", is(payment.getEmail()))
-                .body("results[0].parent_transaction.card_details.card_brand", is(payment.getCardBrand()))
+                .body("results[0].parent_transaction.card_details.card_brand", is("Visa"))
                 .body("results[0].parent_transaction.card_details.last_digits_card_number", is(payment.getLastDigitsCardNumber()))
                 .body("results[0].parent_transaction.card_details.cardholder_name", is(payment.getCardholderName()))
                 .body("results[1].transaction_id", is(payment.getExternalId()))

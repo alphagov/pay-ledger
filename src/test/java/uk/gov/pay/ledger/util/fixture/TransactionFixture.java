@@ -62,7 +62,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String transactionType = TransactionType.PAYMENT.name();
     private String parentExternalId;
     private String refundedById;
-
+    private String cardBrandLabel;
 
     private TransactionFixture() {
     }
@@ -265,6 +265,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withCardBrandLabel(String cardBrandLabel) {
+        this.cardBrandLabel = cardBrandLabel;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         JsonObject transactionDetail = getTransactionDetail();
@@ -336,6 +341,9 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("gateway_transaction_id", gatewayTransactionId);
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
         transactionDetails.addProperty("refunded_by", refundedById);
+
+        Optional.ofNullable(cardBrandLabel)
+                .ifPresent(cardBrandLabel -> transactionDetails.addProperty("card_brand_label", cardBrandLabel));
         Optional.ofNullable(externalMetadata)
                 .ifPresent(cd -> transactionDetails.add("external_metadata", externalMetadata));
         Optional.ofNullable(captureSubmittedDate).ifPresent(

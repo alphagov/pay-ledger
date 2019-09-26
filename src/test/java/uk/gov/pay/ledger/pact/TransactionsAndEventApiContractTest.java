@@ -130,9 +130,9 @@ public class TransactionsAndEventApiContractTest {
         String transactionExternalId2 = "someExternalId2";
 
         createPaymentTransactionForSelfserviceSearch(transactionExternalId1, gatewayAccountId,
-                TransactionState.CREATED, "reference1", null);
+                TransactionState.CREATED, "reference1", null, null);
         createPaymentTransactionForSelfserviceSearch(transactionExternalId2, gatewayAccountId,
-                TransactionState.SUBMITTED, "reference2", "visa");
+                TransactionState.SUBMITTED, "reference2", "visa", "Visa");
 
         createARefundTransaction(transactionExternalId2, gatewayAccountId, "refund-transaction-id",
                 150L, "reference", "description",
@@ -282,7 +282,8 @@ public class TransactionsAndEventApiContractTest {
                                                               String gatewayAccountId,
                                                               TransactionState state,
                                                               String reference,
-                                                              String cardBrand) {
+                                                              String cardBrand,
+                                                              String cardBrandLabel) {
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
                 .withGatewayAccountId(gatewayAccountId)
@@ -291,6 +292,7 @@ public class TransactionsAndEventApiContractTest {
                 .withCardholderName(null)
                 .withState(state)
                 .withCardBrand(cardBrand)
+                .withCardBrandLabel(cardBrandLabel)
                 .insert(app.getJdbi());
     }
 }
