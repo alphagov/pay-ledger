@@ -41,6 +41,7 @@ public class TransactionEntity {
     private String refundStatus;
     private Long refundAmountRefunded;
     private Long refundAmountAvailable;
+    private boolean live;
     private TransactionEntity parentTransactionEntity;
 
     public TransactionEntity() {
@@ -71,6 +72,7 @@ public class TransactionEntity {
         this.fee = builder.fee;
         this.transactionType = builder.transactionType;
         this.parentTransactionEntity = builder.parentTransactionEntity;
+        this.live = builder.live;
     }
 
     public Long getId() {
@@ -193,6 +195,10 @@ public class TransactionEntity {
         return transactionType;
     }
 
+    public boolean isLive() {
+        return live;
+    }
+
     public TransactionEntity getParentTransactionEntity() {
         return parentTransactionEntity;
     }
@@ -221,6 +227,7 @@ public class TransactionEntity {
         private Long refundAmountRefunded;
         private Long refundAmountAvailable;
         private String transactionType;
+        private boolean live;
         private TransactionEntity parentTransactionEntity;
 
         public Builder() {
@@ -342,6 +349,11 @@ public class TransactionEntity {
 
         public Builder withTransactionType(String transactionType) {
             this.transactionType = transactionType;
+            return this;
+        }
+
+        public Builder withLive(boolean live) {
+            this.live = live;
             return this;
         }
 

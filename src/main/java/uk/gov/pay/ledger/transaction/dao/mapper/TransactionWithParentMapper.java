@@ -41,6 +41,7 @@ public class TransactionWithParentMapper implements RowMapper<TransactionEntity>
                 .withRefundAmountAvailable(getLongWithNullCheck(rs, "parent_refund_amount_available"))
                 .withFee(getLongWithNullCheck(rs, "parent_fee"))
                 .withTransactionType(rs.getString("parent_type"))
+                .withLive(rs.getBoolean("live"))
                 .build();
 
         return new TransactionEntity.Builder()
@@ -67,6 +68,7 @@ public class TransactionWithParentMapper implements RowMapper<TransactionEntity>
                 .withRefundAmountAvailable(getLongWithNullCheck(rs, "refund_amount_available"))
                 .withFee(getLongWithNullCheck(rs, "fee"))
                 .withTransactionType(rs.getString("type"))
+                .withLive(rs.getBoolean("live"))
                 .withParentTransactionEntity(parentTransactionEntity)
                 .build();
     }
