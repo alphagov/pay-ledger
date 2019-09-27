@@ -95,6 +95,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("address_postcode", "N1 3QU")
                                 .put("address_city", "London")
                                 .put("address_country", "GB")
+                                .put("card_type", "DEBIT")
                                 .put("card_brand", "visa")
                                 .put("gateway_transaction_id", gatewayAccountId)
                                 .put("corporate_surcharge", 5)
