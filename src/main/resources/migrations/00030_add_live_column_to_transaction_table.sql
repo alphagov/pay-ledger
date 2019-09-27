@@ -5,5 +5,6 @@
 ALTER TABLE transaction
     ADD COLUMN live BOOLEAN;
 
---changeset uk.gov.pay:index_transaction_live_column
-CREATE INDEX transaction_live_idx ON transaction(live)
+--changeset uk.gov.pay:index_transaction_live_column runInTransaction:false
+
+CREATE INDEX CONCURRENTLY transaction_live_idx ON transaction(live) WHERE live is true;
