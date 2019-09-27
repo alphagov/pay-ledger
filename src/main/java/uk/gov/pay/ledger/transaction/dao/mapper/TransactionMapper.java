@@ -24,7 +24,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withAmount(getLongWithNullCheck(rs, "amount"))
                 .withReference(rs.getString("reference"))
                 .withDescription(rs.getString("description"))
-                .withState(TransactionState.valueOf(rs.getString("state")))
+                .withState(TransactionState.from(rs.getString("state")))
                 .withEmail(rs.getString("email"))
                 .withCardholderName(rs.getString("cardholder_name"))
                 .withCreatedDate(getZonedDateTime(rs, "created_date").orElse(null))

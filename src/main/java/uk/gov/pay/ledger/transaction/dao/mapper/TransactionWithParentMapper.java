@@ -74,7 +74,7 @@ public class TransactionWithParentMapper implements RowMapper<TransactionEntity>
     private TransactionState getState(ResultSet rs, String columnName) throws SQLException {
         String state = rs.getString(columnName);
         return Optional.ofNullable(state)
-                .map(TransactionState::valueOf)
+                .map(TransactionState::from)
                 .orElse(null);
     }
 
