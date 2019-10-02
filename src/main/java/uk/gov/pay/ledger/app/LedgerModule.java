@@ -64,6 +64,8 @@ public class LedgerModule extends AbstractModule {
         return new TransactionDao(jdbi);
     }
 
+    @Provides
+    @Singleton
     public ReportDao provideReportDao() {
         return new ReportDao(jdbi);
     }

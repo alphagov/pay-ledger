@@ -104,6 +104,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>uk.gov.pay</groupId>
+            <artifactId>validation</artifactId>
+            <version>${pay-java-commons.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
             <version>${guice.version}</version>

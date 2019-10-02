@@ -1,11 +1,14 @@
 package uk.gov.pay.ledger.report.params;
 
+import uk.gov.pay.commons.validation.ValidDate;
+
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -17,8 +20,11 @@ public class PaymentsReportParams {
     private String accountId;
 
     @QueryParam("from_date")
+    @ValidDate(message = "Invalid attribute value: from_date. Must be a valid date")
     private String fromDate;
+
     @QueryParam("to_date")
+    @ValidDate(message = "Invalid attribute value: to_date. Must be a valid date")
     private String toDate;
 
     public String getAccountId() {
@@ -75,5 +81,29 @@ public class PaymentsReportParams {
         }
 
         return queryMap;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PaymentsReportParams that = (PaymentsReportParams) o;
+        return Objects.equals(accountId, that.accountId) &&
+                Objects.equals(fromDate, that.fromDate) &&
+                Objects.equals(toDate, that.toDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountId, fromDate, toDate);
+    }
+
+    @Override
+    public String toString() {
+        return "PaymentsReportParams{" +
+                "accountId='" + accountId + '\'' +
+                ", fromDate='" + fromDate + '\'' +
+                ", toDate='" + toDate + '\'' +
+                '}';
     }
 }
