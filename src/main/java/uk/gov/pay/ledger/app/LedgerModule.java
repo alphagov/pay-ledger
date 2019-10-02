@@ -13,6 +13,7 @@ import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
+import uk.gov.pay.ledger.report.dao.ReportDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 
 public class LedgerModule extends AbstractModule {
@@ -61,6 +62,10 @@ public class LedgerModule extends AbstractModule {
     @Singleton
     public TransactionDao provideTransactionDao() {
         return new TransactionDao(jdbi);
+    }
+
+    public ReportDao provideReportDao() {
+        return new ReportDao(jdbi);
     }
 
     @Provides
