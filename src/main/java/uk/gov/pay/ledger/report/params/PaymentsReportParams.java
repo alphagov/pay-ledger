@@ -21,12 +21,24 @@ public class PaymentsReportParams {
     @QueryParam("to_date")
     private String toDate;
 
+    public String getAccountId() {
+        return accountId;
+    }
+
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
 
+    public String getFromDate() {
+        return fromDate;
+    }
+
     public void setFromDate(String fromDate) {
         this.fromDate = fromDate;
+    }
+
+    public String getToDate() {
+        return toDate;
     }
 
     public void setToDate(String toDate) {

@@ -11,6 +11,14 @@ public class PaymentCountByStateResult {
         this.count = count;
     }
 
+    public String getState() {
+        return state;
+    }
+
+    public Long getCount() {
+        return count;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
