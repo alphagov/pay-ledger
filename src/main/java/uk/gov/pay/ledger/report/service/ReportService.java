@@ -20,6 +20,10 @@ public class ReportService {
         this.reportDao = reportDao;
     }
 
+    public Map<String, Long> getPaymentCountsByState(PaymentsReportParams params) {
+        return getPaymentCountsByState(null, params);
+    }
+
     public Map<String, Long> getPaymentCountsByState(String gatewayAccountId, PaymentsReportParams params) {
         if (isNotBlank(gatewayAccountId)) {
             params.setAccountId(gatewayAccountId);
