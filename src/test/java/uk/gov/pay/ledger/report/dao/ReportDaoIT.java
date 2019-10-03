@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
+import uk.gov.pay.ledger.report.entity.PaymentsStatisticsResult;
 import uk.gov.pay.ledger.report.params.PaymentsReportParams;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -161,5 +162,92 @@ public class ReportDaoIT {
                 is(new PaymentCountByStateResult("CREATED", 1L)),
                 is(new PaymentCountByStateResult("ERROR", 1L))
         ));
+    }
+
+    @Test
+    public void shouldReturnPaymentsStatisticsForSuccessfulPayments_whenSearchingWithNoParameters() {
+        aTransactionFixture()
+                .withTotalAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withTotalAmount(2000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withTotalAmount(3000L)
+                .withState(TransactionState.CREATED)
+                .insert(rule.getJdbi());
+
+        var params = new PaymentsReportParams();
+
+        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params);
+
+        assertThat(paymentsStatistics.getCount(), is(2L));
+        assertThat(paymentsStatistics.getGrossAmount(), is(3000L));
+    }
+
+    @Test
+    public void shouldReturnPaymentsStatistics_whenSearchingByGatewayAccount() {
+        String gatewayAccountId1 = "account-1";
+        String gatewayAccountId2 = "account-2";
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId1)
+                .withTotalAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId1)
+                .withTotalAmount(2000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId2)
+                .withTotalAmount(3000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+
+        var params = new PaymentsReportParams();
+        params.setAccountId(gatewayAccountId1);
+
+        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params);
+
+        assertThat(paymentsStatistics.getCount(), is(2L));
+        assertThat(paymentsStatistics.getGrossAmount(), is(3000L));
+    }
+
+    @Test
+    public void shouldReturnPaymentsStatistics_whenSearchingByFromDateAndToDate() {
+
+        aTransactionFixture()
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T00:00:00.000Z"))
+                .withTotalAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withTotalAmount(2000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withTotalAmount(3000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withCreatedDate(ZonedDateTime.parse("2019-09-29T00:00:00.000Z"))
+                .withTotalAmount(4000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+
+        var params = new PaymentsReportParams();
+        params.setFromDate("2019-09-29T23:59:59.000Z");
+        params.setToDate("2019-10-01T00:00:00.000Z");
+
+        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params);
+
+        assertThat(paymentsStatistics.getCount(), is(2L));
+        assertThat(paymentsStatistics.getGrossAmount(), is(5000L));
     }
 }

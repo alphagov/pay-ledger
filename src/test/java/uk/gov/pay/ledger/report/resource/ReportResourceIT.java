@@ -61,4 +61,33 @@ public class ReportResourceIT {
                 .body("cancelled", is(0))
                 .body("error", is(0));
     }
+
+    @Test
+    public void shouldGetPaymentsStatistics() {
+        String gatewayAccountId = "abc123";
+        aTransactionFixture()
+                .withTotalAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withTotalAmount(2000L)
+                .withState(TransactionState.SUCCESS)
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/report/payments?account_id=" + gatewayAccountId +
+                        "&from_date=2019-10-01T09:00:00.000Z" +
+                        "&to_date=2019-10-01T11:00:00.000Z"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(2))
+                .body("gross_amount", is(3000));
+    }
 }

@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.report.dao.ReportDao;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
+import uk.gov.pay.ledger.report.entity.PaymentsStatisticsResult;
 import uk.gov.pay.ledger.report.params.PaymentsReportParams;
 
 import java.util.List;
@@ -88,5 +89,41 @@ public class ReportServiceTest {
 
         assertThat(paymentsReportParamsCaptor.getValue().getAccountId(), is(nullValue()));
         assertThat(response, aMapWithSize(10));
+    }
+
+    @Test
+    public void shouldReturnPaymentsStatistics_whenGatewayAccountIdProvided() {
+        String gatewayAccountId = "1";
+        String fromDate = "2019-10-1T10:00:00.000Z";
+        String toDate = "2019-10-1T11:00:00.000Z";
+        var params = new PaymentsReportParams();
+        params.setFromDate(fromDate);
+        params.setToDate(toDate);
+
+        PaymentsStatisticsResult result = new PaymentsStatisticsResult(5L, 10000L);
+        when(mockReportDao.getPaymentsStatistics(paymentsReportParamsCaptor.capture()))
+                .thenReturn(result);
+
+        PaymentsStatisticsResult paymentsStatistics = reportService.getPaymentsStatistics(gatewayAccountId, params);
+
+        assertThat(paymentsReportParamsCaptor.getValue().getAccountId(), is(gatewayAccountId));
+        assertThat(paymentsReportParamsCaptor.getValue().getFromDate(), is(fromDate));
+        assertThat(paymentsReportParamsCaptor.getValue().getToDate(), is(toDate));
+
+        assertThat(paymentsStatistics, is(result));
+    }
+
+    @Test
+    public void shouldReturnPaymentsStatistics_whenGatewayAccountIdNotProvided() {
+        var params = new PaymentsReportParams();
+
+        PaymentsStatisticsResult result = new PaymentsStatisticsResult(5L, 10000L);
+        when(mockReportDao.getPaymentsStatistics(paymentsReportParamsCaptor.capture()))
+                .thenReturn(result);
+
+        PaymentsStatisticsResult paymentsStatistics = reportService.getPaymentsStatistics(null, params);
+
+        assertThat(paymentsReportParamsCaptor.getValue().getAccountId(), is(nullValue()));
+        assertThat(paymentsStatistics, is(result));
     }
 }
