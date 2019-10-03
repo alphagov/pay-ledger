@@ -81,7 +81,6 @@ public enum TransactionState {
                     Map.entry(SalientEventType.PAYMENT_CREATED, CREATED),
                     Map.entry(SalientEventType.PAYMENT_STARTED, STARTED),
                     Map.entry(SalientEventType.PAYMENT_EXPIRED, FAILED_EXPIRED),
-                    Map.entry(SalientEventType.AUTHORISATION_SUCCESSFUL, SUBMITTED),
                     Map.entry(SalientEventType.AUTHORISATION_REJECTED, FAILED_REJECTED),
                     Map.entry(SalientEventType.AUTHORISATION_SUCCEEDED, SUBMITTED),
                     Map.entry(SalientEventType.AUTHORISATION_CANCELLED, FAILED_REJECTED),
