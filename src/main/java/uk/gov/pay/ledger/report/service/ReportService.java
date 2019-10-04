@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.report.service;
 
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.report.dao.ReportDao;
+import uk.gov.pay.ledger.report.entity.PaymentsStatisticsResult;
 import uk.gov.pay.ledger.report.params.PaymentsReportParams;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -20,10 +21,6 @@ public class ReportService {
         this.reportDao = reportDao;
     }
 
-    public Map<String, Long> getPaymentCountsByState(PaymentsReportParams params) {
-        return getPaymentCountsByState(null, params);
-    }
-
     public Map<String, Long> getPaymentCountsByState(String gatewayAccountId, PaymentsReportParams params) {
         if (isNotBlank(gatewayAccountId)) {
             params.setAccountId(gatewayAccountId);
@@ -37,5 +34,13 @@ public class ReportService {
                 responseMap.put(TransactionState.from(result.getState()).getStatus(), result.getCount()));
 
         return responseMap;
+    }
+
+    public PaymentsStatisticsResult getPaymentsStatistics(String gatewayAccountId, PaymentsReportParams params) {
+        if (isNotBlank(gatewayAccountId)) {
+            params.setAccountId(gatewayAccountId);
+        }
+
+        return reportDao.getPaymentsStatistics(params);
     }
 }
