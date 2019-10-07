@@ -63,6 +63,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String parentExternalId;
     private String refundedById;
     private String cardBrandLabel;
+    private boolean live;
 
     private TransactionFixture() {
     }
@@ -270,6 +271,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withLive(boolean live) {
+        this.live = live;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         JsonObject transactionDetail = getTransactionDetail();
@@ -299,9 +305,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        refund_status,\n" +
                                 "        refund_amount_refunded,\n" +
                                 "        refund_amount_available,\n" +
-                                "        type\n" +
+                                "        type,\n" +
+                                "        live\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?)\n",
                         id,
                         externalId,
                         parentExternalId,
@@ -324,7 +331,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         refundStatus,
                         refundAmountRefunded,
                         refundAmountAvailable,
-                        transactionType
+                        transactionType,
+                        live
                 )
         );
         return this;
@@ -395,6 +403,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withRefundAmountAvailable(refundAmountAvailable)
                 .withFee(fee)
                 .withTransactionType(transactionType)
+                .withLive(live)
                 .build();
     }
 
