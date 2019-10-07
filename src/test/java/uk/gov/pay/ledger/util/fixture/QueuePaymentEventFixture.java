@@ -117,6 +117,29 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("capture_submitted_date", eventDate.toString())
                                 .build());
                 break;
+            case "PAYMENT_NOTIFICATION_CREATED":
+                externalMetadata = new JsonObject();
+                externalMetadata.addProperty("telephone_number", "+447700900796");
+                externalMetadata.addProperty("processor_id", "processorId");
+                externalMetadata.addProperty("authorised_date", "2018-02-21T16:05:33Z");
+                externalMetadata.addProperty("created_date", "2018-02-21T15:05:13Z");
+                externalMetadata.addProperty("auth_code", "authCode");
+                externalMetadata.addProperty("status", "success");
+                eventData = new GsonBuilder().create()
+                    .toJson(ImmutableMap.builder()
+                            .put("amount", 1000)
+                            .put("description", "New passport application")
+                            .put("reference", "MRPC12345")
+                            .put("email", "j.doe@example.org")
+                            .put("external_metadata", externalMetadata)
+                            .put("last_digits_card_number", "4242")
+                            .put("first_digits_card_number", "424242")
+                            .put("cardholder_name", "J citizen")
+                            .put("card_expiry_date", "11/21")
+                            .put("card_brand", "visa")
+                            .put("gateway_transaction_id", "providerId")
+                            .build());
+                break;
             default:
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.of("event_data", "event_data"));
