@@ -85,7 +85,7 @@ public class PaymentNotificationCreatedEventQueueContractTest {
         assertThat(transaction.get().getDescription(), is("New passport application"));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"gateway_transaction_id\": \"providerId\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"amount\": 1000"));
-//        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"11/21\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"11/21\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"status\": \"success\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"auth_code\": \"authCode\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"processor_id\": \"processorId\""));
