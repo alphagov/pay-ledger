@@ -40,6 +40,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withRefundAmountAvailable(getLongWithNullCheck(rs, "refund_amount_available"))
                 .withFee(getLongWithNullCheck(rs, "fee"))
                 .withTransactionType(rs.getString("type"))
+                .withLive(rs.getBoolean("live"))
                 .build();
     }
 

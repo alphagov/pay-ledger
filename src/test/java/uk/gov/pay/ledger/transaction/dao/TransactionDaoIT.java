@@ -34,6 +34,7 @@ public class TransactionDaoIT {
                 .withFee(33)
                 .withExternalMetadata(ImmutableMap.of("key1", "value1", "anotherKey", ImmutableMap.of("nestedKey", "value")))
                 .withTransactionType("PAYMENT")
+                .withLive(true)
                 .withDefaultTransactionDetails();
         TransactionEntity transactionEntity = fixture.toEntity();
 
@@ -67,6 +68,7 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getRefundAmountAvailable(), is(transactionEntity.getRefundAmountAvailable()));
         assertThat(retrievedTransaction.getRefundAmountRefunded(), is(transactionEntity.getRefundAmountRefunded()));
         assertThat(retrievedTransaction.getRefundStatus(), is(transactionEntity.getRefundStatus()));
+        assertThat(retrievedTransaction.isLive(), is(true));
     }
 
     @Test

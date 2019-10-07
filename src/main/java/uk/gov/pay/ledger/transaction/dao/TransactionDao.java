@@ -99,7 +99,8 @@ public class TransactionDao {
                     "fee,type," +
                     "refund_amount_available," +
                     "refund_amount_refunded, " +
-                    "refund_status" +
+                    "refund_status, " +
+                    "live" +
                     ") " +
                     "VALUES (" +
                     ":externalId," +
@@ -123,7 +124,8 @@ public class TransactionDao {
                     ":transactionType::transaction_type," +
                     ":refundAmountAvailable," +
                     ":refundAmountRefunded," +
-                    ":refundStatus" +
+                    ":refundStatus," +
+                    ":live" +
             ") " +
             "ON CONFLICT (external_id) " +
             "DO UPDATE SET " +
@@ -148,7 +150,8 @@ public class TransactionDao {
                 "type = EXCLUDED.type, " +
                 "refund_amount_available = EXCLUDED.refund_amount_available, " +
                 "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
-                "refund_status = EXCLUDED.refund_status " +
+                "refund_status = EXCLUDED.refund_status, " +
+                "live = EXCLUDED.live " +
             "WHERE EXCLUDED.event_count >= transaction.event_count;";
 
     private final Jdbi jdbi;
