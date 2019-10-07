@@ -135,7 +135,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                             .put("last_digits_card_number", "4242")
                             .put("first_digits_card_number", "424242")
                             .put("cardholder_name", "J citizen")
-                            .put("card_expiry_date", "11/21")
+                            // .put("expiry_date", "11/21")
                             .put("card_brand", "visa")
                             .put("gateway_transaction_id", "providerId")
                             .build());
