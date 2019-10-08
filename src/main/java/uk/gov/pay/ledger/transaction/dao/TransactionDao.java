@@ -100,7 +100,8 @@ public class TransactionDao {
                     "refund_amount_available," +
                     "refund_amount_refunded, " +
                     "refund_status, " +
-                    "live" +
+                    "live, " +
+                    "gateway_transaction_id" +
                     ") " +
                     "VALUES (" +
                     ":externalId," +
@@ -125,7 +126,8 @@ public class TransactionDao {
                     ":refundAmountAvailable," +
                     ":refundAmountRefunded," +
                     ":refundStatus," +
-                    ":live" +
+                    ":live, " +
+                    ":gatewayTransactionId" +
             ") " +
             "ON CONFLICT (external_id) " +
             "DO UPDATE SET " +
@@ -151,8 +153,9 @@ public class TransactionDao {
                 "refund_amount_available = EXCLUDED.refund_amount_available, " +
                 "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
                 "refund_status = EXCLUDED.refund_status, " +
-                "live = EXCLUDED.live " +
-            "WHERE EXCLUDED.event_count >= transaction.event_count;";
+                "live = EXCLUDED.live, " +
+                "gateway_transaction_id = EXCLUDED.gateway_transaction_id " +
+                "WHERE EXCLUDED.event_count >= transaction.event_count;";
 
     private final Jdbi jdbi;
 

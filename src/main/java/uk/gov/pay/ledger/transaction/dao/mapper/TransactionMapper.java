@@ -41,6 +41,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withFee(getLongWithNullCheck(rs, "fee"))
                 .withTransactionType(rs.getString("type"))
                 .withLive(rs.getBoolean("live"))
+                .withGatewayTransactionId(rs.getString("gateway_transaction_id"))
                 .build();
     }
 
