@@ -137,6 +137,8 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                             .put("cardholder_name", "J citizen")
                             .put("expiry_date", "11/21")
                             .put("card_brand", "visa")
+                            .put("card_brand_label", "Visa")
+                            .put("payment_provider", "sandbox")
                             .put("gateway_transaction_id", "providerId")
                             .build());
                 break;
