@@ -44,6 +44,7 @@ public class TransactionEntity {
     @JsonIgnore
     private boolean live;
     private TransactionEntity parentTransactionEntity;
+    private String gatewayTransactionId;
 
     public TransactionEntity() {
     }
@@ -74,6 +75,7 @@ public class TransactionEntity {
         this.transactionType = builder.transactionType;
         this.parentTransactionEntity = builder.parentTransactionEntity;
         this.live = builder.live;
+        this.gatewayTransactionId = builder.gatewayTransactionId;
     }
 
     public Long getId() {
@@ -204,6 +206,10 @@ public class TransactionEntity {
         return parentTransactionEntity;
     }
 
+    public String getGatewayTransactionId() {
+        return gatewayTransactionId;
+    }
+
     public static class Builder {
         private Long fee;
         private Long id;
@@ -230,6 +236,7 @@ public class TransactionEntity {
         private String transactionType;
         private boolean live;
         private TransactionEntity parentTransactionEntity;
+        public String gatewayTransactionId;
 
         public Builder() {
         }
@@ -363,5 +370,9 @@ public class TransactionEntity {
             return this;
         }
 
+        public Builder withGatewayTransactionId(String gatewayTransactionId) {
+            this.gatewayTransactionId = gatewayTransactionId;
+            return this;
+        }
     }
 }

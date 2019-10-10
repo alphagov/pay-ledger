@@ -113,6 +113,7 @@ public class TransactionView {
                     .withSettlementSummary(payment.getSettlementSummary())
                     .withMetadata(payment.getExternalMetadata())
                     .withTransactionType(payment.getTransactionType())
+                    .withGatewayTransactionId(payment.getGatewayTransactionId())
                     .build();
         }
 

@@ -306,9 +306,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        refund_amount_refunded,\n" +
                                 "        refund_amount_available,\n" +
                                 "        type,\n" +
-                                "        live\n" +
+                                "        live,\n" +
+                                "        gateway_transaction_id\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?)\n",
                         id,
                         externalId,
                         parentExternalId,
@@ -332,7 +333,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         refundAmountRefunded,
                         refundAmountAvailable,
                         transactionType,
-                        live
+                        live,
+                        gatewayTransactionId
                 )
         );
         return this;
@@ -404,6 +406,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withFee(fee)
                 .withTransactionType(transactionType)
                 .withLive(live)
+                .withGatewayTransactionId(gatewayTransactionId)
                 .build();
     }
 
