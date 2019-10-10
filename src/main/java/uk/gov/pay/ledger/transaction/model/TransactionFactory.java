@@ -46,9 +46,10 @@ public class TransactionFactory {
             );
             String cardBrand = safeGetAsString(transactionDetails, "card_brand_label");
 
+            CardType cardType = CardType.fromString(safeGetAsString(transactionDetails, "card_type"));
             CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), billingAddress, cardBrand,
                     entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
-                    safeGetAsString(transactionDetails, "expiry_date"));
+                    safeGetAsString(transactionDetails, "expiry_date"), cardType);
 
             Map<String, Object> metadata = null;
             if (transactionDetails.has("external_metadata")) {
