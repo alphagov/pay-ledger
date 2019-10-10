@@ -3,7 +3,11 @@ package uk.gov.pay.ledger.transaction.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import uk.gov.pay.ledger.util.serialiser.ToLowerCaseStringSerializer;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -16,29 +20,32 @@ public class CardDetails {
     private String lastDigitsCardNumber;
     private String firstDigitsCardNumber;
     private String expiryDate;
+    private CardType cardType;
 
     public CardDetails(String cardHolderName, Address billingAddress, String cardBrand,
-                       String lastDigitsCardNumber, String firstDigitsCardNumber, String cardExpiryDate) {
+                       String lastDigitsCardNumber, String firstDigitsCardNumber, String cardExpiryDate, CardType cardType) {
         this.cardHolderName = cardHolderName;
         this.billingAddress = billingAddress;
         this.cardBrand = cardBrand;
         this.lastDigitsCardNumber = lastDigitsCardNumber;
         this.firstDigitsCardNumber = firstDigitsCardNumber;
         this.expiryDate = cardExpiryDate;
+        this.cardType = cardType;
     }
 
     public static CardDetails from(String cardholderName, Address billingAddress, String cardBrand,
-                                   String lastDigitsCardNumber, String firstDigitsCardNumber, String cardExpiryDate) {
+                                   String lastDigitsCardNumber, String firstDigitsCardNumber, String cardExpiryDate, CardType cardType) {
         if(cardholderName == null &&
                 billingAddress == null &&
                 cardBrand == null &&
                 lastDigitsCardNumber == null &&
                 firstDigitsCardNumber == null &&
-                cardExpiryDate == null) {
+                cardExpiryDate == null &&
+                cardType == null) {
             return null;
         }
 
-        return new CardDetails(cardholderName, billingAddress, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber, cardExpiryDate);
+        return new CardDetails(cardholderName, billingAddress, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber, cardExpiryDate, cardType);
     }
 
     @JsonProperty("cardholder_name")
@@ -71,6 +78,11 @@ public class CardDetails {
         return expiryDate;
     }
 
+    @Enumerated(EnumType.STRING)
+    @JsonProperty("card_type")
+    @JsonSerialize(using = ToLowerCaseStringSerializer.class)
+    public CardType getCardType() { return cardType; }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -80,11 +92,12 @@ public class CardDetails {
                 Objects.equals(billingAddress, that.billingAddress) &&
                 Objects.equals(cardBrand, that.cardBrand) &&
                 Objects.equals(lastDigitsCardNumber, that.lastDigitsCardNumber) &&
-                Objects.equals(firstDigitsCardNumber, that.firstDigitsCardNumber);
+                Objects.equals(firstDigitsCardNumber, that.firstDigitsCardNumber) &&
+                Objects.equals(cardType, that.cardType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardHolderName, billingAddress, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber);
+        return Objects.hash(cardHolderName, billingAddress, cardBrand, lastDigitsCardNumber, firstDigitsCardNumber, cardType);
     }
 }

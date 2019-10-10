@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.pay.ledger.transaction.model.CardType.CREDIT;
+
 public class TransactionFixture implements DbFixture<TransactionFixture, TransactionEntity> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
@@ -351,7 +353,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("gateway_transaction_id", gatewayTransactionId);
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
         transactionDetails.addProperty("refunded_by", refundedById);
-
+        transactionDetails.addProperty("card_type", String.valueOf(CREDIT));
         Optional.ofNullable(cardBrandLabel)
                 .ifPresent(cardBrandLabel -> transactionDetails.addProperty("card_brand_label", cardBrandLabel));
         Optional.ofNullable(externalMetadata)
@@ -472,7 +474,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     "London", null, "GB");
 
             cardDetails = new CardDetails(cardholderName, billingAddress, cardBrand,
-                    "1234", "123456", cardExpiryDate);
+                    "1234", "123456", cardExpiryDate, CREDIT);
         }
         return this;
     }

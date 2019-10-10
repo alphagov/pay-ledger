@@ -63,6 +63,7 @@ public class TransactionResourceIT {
                 .body("transaction_id", is(transactionFixture.getExternalId()))
                 .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
                 .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
+                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
                 .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()));
     }
 
