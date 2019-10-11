@@ -92,6 +92,9 @@ public class PaymentNotificationCreatedEventQueueContractTest {
         assertThat(transaction.get().getTransactionDetails(), containsString("\"telephone_number\": \"+447700900796\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"authorised_date\": \"2018-02-21T16:05:33Z\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"created_date\": \"2018-02-21T15:05:13Z\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"card_brand_label\": \"Visa\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"payment_provider\": \"sandbox\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"11/21\""));
     }
 
     public void setMessage(byte[] messageContents) {
