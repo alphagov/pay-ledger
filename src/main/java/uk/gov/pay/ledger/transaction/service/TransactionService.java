@@ -100,6 +100,15 @@ public class TransactionService {
 
         Long total = transactionDao.getTotalForSearch(searchParams);
 
+        long size = searchParams.getDisplaySize();
+        if (total > 0 && searchParams.getDisplaySize() > 0) {
+            long lastPage = (total + size - 1) / size;
+            if (searchParams.getPageNumber() > lastPage || searchParams.getPageNumber() < 1) {
+                throw new WebApplicationException("the requested page not found",
+                        Response.Status.NOT_FOUND);
+            }
+        }
+
         return buildTransactionSearchResponse(searchParams, uriInfo, transactionList, total);
     }
 
