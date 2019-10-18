@@ -22,10 +22,18 @@ public class EventService {
         return EventDigest.fromEventList(events);
     }
 
-    public CreateEventResponse createIfDoesNotExist(Event event) {
+    private CreateEventResponse updateExistingEvent(Event event) {
+        try {
+            return new CreateEventResponse(eventDao.updateIfExistsWithResourceTypeId(event));
+        } catch (Exception e) {
+            return new CreateEventResponse(e);
+        }
+    }
+
+    public CreateEventResponse createOrUpdateIfExists(Event event) {
         try {
             Optional<Long> status = eventDao.insertEventIfDoesNotExistWithResourceTypeId(event);
-            return new CreateEventResponse(status);
+            return status.isPresent() ? new CreateEventResponse(status) : updateExistingEvent(event);
         } catch (Exception e) {
             return new CreateEventResponse(e);
         }

@@ -47,6 +47,21 @@ public interface EventDao {
     @GetGeneratedKeys
     Optional<Long> insertIfDoesNotExist(@BindBean Event event, @Bind("resourceTypeId") int resourceTypeId);
 
+    @SqlUpdate("UPDATE event " +
+            "SET event_data = CAST(:eventData as jsonb) " +
+            "WHERE resource_type_id = :resourceTypeId " +
+            "AND resource_external_id = :resourceExternalId " +
+            "AND event_date = :eventDate " +
+            "AND event_type = :eventType")
+    @GetGeneratedKeys
+    Optional<Long> updateIfExists(@BindBean Event event, @Bind("resourceTypeId") int resourceTypeId);
+
+    @Transaction
+    default Optional<Long> updateIfExistsWithResourceTypeId(Event event) {
+        int resourceTypeId = getResourceTypeDao().getResourceTypeIdByName(event.getResourceType().name());
+        return updateIfExists(event, resourceTypeId);
+    }
+
     @Transaction
     default Long insertEventWithResourceTypeId(Event event) {
         int resourceTypeId = getResourceTypeDao().getResourceTypeIdByName(event.getResourceType().name());
