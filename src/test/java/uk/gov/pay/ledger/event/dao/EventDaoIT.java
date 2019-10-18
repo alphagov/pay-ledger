@@ -12,6 +12,7 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -205,7 +206,6 @@ public class EventDaoIT {
                 .toEntity();
 
         List<Event> eventList = eventDao.findEventsForExternalIds(Set.of("external-id-1", "external-id-2"));
-
         assertThat(eventList.size(), is(2));
 
         assertThat(eventList.get(0).getResourceExternalId(), is(event1.getResourceExternalId()));
@@ -216,5 +216,20 @@ public class EventDaoIT {
     public void findEventsForExternalIds_ShouldReturnEmptyListIfNoRecordsFound() {
         List<Event> eventList = eventDao.findEventsForExternalIds(Set.of("some-ext-id-1", "some-ext-id-2"));
         assertThat(eventList.size(), is(0));
+    }
+
+    @Test
+    public void eventDetailsAreUpdated_IfEventAlreadyExists(){
+        Event event = anEventFixture()
+                .withResourceExternalId("key-value-test-id")
+                .insert(rule.getJdbi())
+                .toEntity();
+        Event event2 = anEventFixture()
+                .withResourceExternalId(event.getResourceExternalId())
+                .withEventData("{\"key\": \"value\"}")
+                .withEventDate(event.getEventDate())
+                .toEntity();
+        eventDao.updateIfExistsWithResourceTypeId(event2);
+        assertThat(eventDao.getById(event.getId()).get().getEventData(), is("{\"key\": \"value\"}"));
     }
 }
