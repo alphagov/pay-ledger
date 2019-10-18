@@ -100,7 +100,7 @@ public class EventServiceTest {
     public void createIfDoesNotExistReturnsSuccessfulCreatedResponse() {
         when(mockEventDao.insertEventIfDoesNotExistWithResourceTypeId(event)).thenReturn(Optional.of(1L));
 
-        CreateEventResponse response = eventService.createIfDoesNotExist(event);
+        CreateEventResponse response = eventService.createOrUpdateIfExists(event);
 
         assertTrue(response.isSuccessful());
         assertThat(response.getState(), is(CreateEventResponse.CreateEventState.INSERTED));
@@ -110,21 +110,31 @@ public class EventServiceTest {
     public void createIfDoesNotExistReturnsSuccessfulIgnoredResponse() {
         when(mockEventDao.insertEventIfDoesNotExistWithResourceTypeId(event)).thenReturn(Optional.empty());
 
-        CreateEventResponse response = eventService.createIfDoesNotExist(event);
+        CreateEventResponse response = eventService.createOrUpdateIfExists(event);
 
         assertTrue(response.isSuccessful());
         assertThat(response.getState(), is(CreateEventResponse.CreateEventState.IGNORED));
     }
 
     @Test
-    public void createIfDoesNotExistReturnsNotSuccessfulResponse() {
+    public void createOrUpdateIfExistsReturnsNotSuccessfulResponse() {
         when(mockEventDao.insertEventIfDoesNotExistWithResourceTypeId(event))
                 .thenThrow(new RuntimeException("forced failure"));
 
-        CreateEventResponse response = eventService.createIfDoesNotExist(event);
+        CreateEventResponse response = eventService.createOrUpdateIfExists(event);
 
         assertFalse(response.isSuccessful());
         assertThat(response.getState(), is(CreateEventResponse.CreateEventState.ERROR));
         assertThat(response.getErrorMessage(), is("forced failure"));
+    }
+
+    @Test
+    public void createOrUpdateIfExistsUpdatesExistingEvent() {
+        when(mockEventDao.insertEventIfDoesNotExistWithResourceTypeId(event)).thenReturn(Optional.empty());
+        when(mockEventDao.updateIfExistsWithResourceTypeId(event)).thenReturn(Optional.of(1L));
+        eventService.createOrUpdateIfExists(event);
+        CreateEventResponse response = eventService.createOrUpdateIfExists(event);
+        assertTrue(response.isSuccessful());
+        assertThat(response.getState(), is(CreateEventResponse.CreateEventState.INSERTED));
     }
 }

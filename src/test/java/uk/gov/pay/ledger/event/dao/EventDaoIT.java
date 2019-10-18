@@ -12,7 +12,6 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
