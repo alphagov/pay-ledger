@@ -56,6 +56,10 @@ logging:
         additionalFields:
           service-name: "ledger-service"
         includesMdcKeys: [X-Request-Id]
+    - type: sentry
+      threshold: ERROR
+      dsn: ${SENTRY_DSN:-https://example.com@dummy/1}
+      environment: ${ENVIRONMENT}
 
 sqsConfig:
   nonStandardServiceEndpoint: ${AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT:-false}
