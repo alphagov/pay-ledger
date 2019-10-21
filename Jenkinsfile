@@ -111,7 +111,7 @@ pipeline {
         }
       }
     }
-    /*stage('Tests') {
+    stage('Tests') {
       failFast true
       stages {
         stage('End-to-End Tests') {
@@ -126,7 +126,7 @@ pipeline {
             }
         }
       }
-    }*/
+    }
     stage('Docker Tag') {
       steps {
         script {
