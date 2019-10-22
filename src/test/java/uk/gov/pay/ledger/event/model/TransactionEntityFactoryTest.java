@@ -69,6 +69,7 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getTotalAmount(), is(((Integer)eventDigest.getEventPayload().get("total_amount")).longValue()));
         assertThat(transactionEntity.getFee(), is(((Integer)eventDigest.getEventPayload().get("fee")).longValue()));
         assertThat(transactionEntity.getTransactionType(), is("PAYMENT"));
+        assertThat(transactionEntity.isLive(), is(true));
 
 
         JsonObject transactionDetails = new JsonParser().parse(transactionEntity.getTransactionDetails()).getAsJsonObject();
