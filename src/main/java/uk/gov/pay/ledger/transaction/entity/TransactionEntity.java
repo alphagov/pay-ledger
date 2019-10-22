@@ -41,7 +41,6 @@ public class TransactionEntity {
     private String refundStatus;
     private Long refundAmountRefunded;
     private Long refundAmountAvailable;
-    @JsonIgnore
     private boolean live;
     private TransactionEntity parentTransactionEntity;
     private String gatewayTransactionId;

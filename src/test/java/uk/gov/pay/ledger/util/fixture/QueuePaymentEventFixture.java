@@ -80,6 +80,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("payment_provider", "sandbox")
                                 .put("delayed_capture", false)
+                                .put("live", true)
                                 .put("external_metadata", externalMetadata)
                                 .build());
                 break;
