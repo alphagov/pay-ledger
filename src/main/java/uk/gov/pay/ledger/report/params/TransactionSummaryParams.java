@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.report.params;
 
 import uk.gov.pay.commons.validation.ValidDate;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -12,41 +13,22 @@ import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class PaymentsReportParams implements ReportParams {
-    private static final String TO_DATE_FIELD = "to_date";
+public class TransactionSummaryParams implements ReportParams {
 
+    @QueryParam("account_id")
     private String accountId;
 
     @QueryParam("from_date")
     @ValidDate(message = "Invalid attribute value: from_date. Must be a valid date")
+    @NotNull(message = "Field [from_date] can not be null")
     private String fromDate;
-
-    @QueryParam("to_date")
-    @ValidDate(message = "Invalid attribute value: to_date. Must be a valid date")
-    private String toDate;
-
-    public String getAccountId() {
-        return accountId;
-    }
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
 
-    public String getFromDate() {
-        return fromDate;
-    }
-
     public void setFromDate(String fromDate) {
         this.fromDate = fromDate;
-    }
-
-    public String getToDate() {
-        return toDate;
-    }
-
-    public void setToDate(String toDate) {
-        this.toDate = toDate;
     }
 
     public List<String> getFilterTemplates() {
@@ -55,12 +37,7 @@ public class PaymentsReportParams implements ReportParams {
         if (isNotBlank(accountId)) {
             filters.add(" t.gateway_account_id = :" + GATEWAY_ACCOUNT_EXTERNAL_FIELD);
         }
-        if (isNotBlank(fromDate)) {
-            filters.add(" t.created_date > :" + FROM_DATE_FIELD);
-        }
-        if (isNotBlank(toDate)) {
-            filters.add(" t.created_date < :" + TO_DATE_FIELD);
-        }
+        filters.add(" t.created_date > :" + FROM_DATE_FIELD);
 
         return filters;
     }
@@ -71,12 +48,7 @@ public class PaymentsReportParams implements ReportParams {
         if (isNotBlank(accountId)) {
             queryMap.put(GATEWAY_ACCOUNT_EXTERNAL_FIELD, accountId);
         }
-        if (isNotBlank(fromDate)) {
-            queryMap.put(FROM_DATE_FIELD, ZonedDateTime.parse(fromDate));
-        }
-        if (isNotBlank(toDate)) {
-            queryMap.put(TO_DATE_FIELD, ZonedDateTime.parse(toDate));
-        }
+        queryMap.put(FROM_DATE_FIELD, ZonedDateTime.parse(fromDate));
 
         return queryMap;
     }
@@ -85,23 +57,21 @@ public class PaymentsReportParams implements ReportParams {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PaymentsReportParams that = (PaymentsReportParams) o;
+        TransactionSummaryParams that = (TransactionSummaryParams) o;
         return Objects.equals(accountId, that.accountId) &&
-                Objects.equals(fromDate, that.fromDate) &&
-                Objects.equals(toDate, that.toDate);
+                Objects.equals(fromDate, that.fromDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountId, fromDate, toDate);
+        return Objects.hash(accountId, fromDate);
     }
 
     @Override
     public String toString() {
-        return "PaymentsReportParams{" +
+        return "TransactionSummaryParams{" +
                 "accountId='" + accountId + '\'' +
                 ", fromDate='" + fromDate + '\'' +
-                ", toDate='" + toDate + '\'' +
                 '}';
     }
 }

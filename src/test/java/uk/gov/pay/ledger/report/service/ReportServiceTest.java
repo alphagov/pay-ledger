@@ -10,7 +10,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.report.dao.ReportDao;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
 import uk.gov.pay.ledger.report.entity.PaymentsStatisticsResult;
+import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
 import uk.gov.pay.ledger.report.params.PaymentsReportParams;
+import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.CREATED;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.ERROR;
@@ -101,7 +105,7 @@ public class ReportServiceTest {
         params.setToDate(toDate);
 
         PaymentsStatisticsResult result = new PaymentsStatisticsResult(5L, 10000L);
-        when(mockReportDao.getPaymentsStatistics(paymentsReportParamsCaptor.capture()))
+        when(mockReportDao.getPaymentsStatistics(paymentsReportParamsCaptor.capture(), eq(TransactionType.PAYMENT)))
                 .thenReturn(result);
 
         PaymentsStatisticsResult paymentsStatistics = reportService.getPaymentsStatistics(gatewayAccountId, params);
@@ -118,12 +122,28 @@ public class ReportServiceTest {
         var params = new PaymentsReportParams();
 
         PaymentsStatisticsResult result = new PaymentsStatisticsResult(5L, 10000L);
-        when(mockReportDao.getPaymentsStatistics(paymentsReportParamsCaptor.capture()))
+        when(mockReportDao.getPaymentsStatistics(paymentsReportParamsCaptor.capture(), eq(TransactionType.PAYMENT)))
                 .thenReturn(result);
 
         PaymentsStatisticsResult paymentsStatistics = reportService.getPaymentsStatistics(null, params);
 
         assertThat(paymentsReportParamsCaptor.getValue().getAccountId(), is(nullValue()));
         assertThat(paymentsStatistics, is(result));
+    }
+
+    @Test
+    public void shouldReturnTransactionsSummary() {
+        String gatewayAccountId = "1";
+        String fromDate = "2019-10-1T10:00:00.000Z";
+        TransactionSummaryParams params = new TransactionSummaryParams();
+        params.setAccountId(gatewayAccountId);
+        params.setFromDate(fromDate);
+        PaymentsStatisticsResult payments = new PaymentsStatisticsResult(5L, 10000L);
+        PaymentsStatisticsResult refunds = new PaymentsStatisticsResult(1L, 1000L);
+        TransactionSummaryResult result = new TransactionSummaryResult(payments, refunds);
+        when(mockReportDao.getPaymentsStatistics(params, TransactionType.PAYMENT)).thenReturn(payments);
+        when(mockReportDao.getPaymentsStatistics(params, TransactionType.REFUND)).thenReturn(refunds);
+        TransactionSummaryResult dashboardStatisticsResult = reportService.getTransactionsSummary(params);
+        assertThat(dashboardStatisticsResult, is(result));
     }
 }
