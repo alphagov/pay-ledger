@@ -81,6 +81,12 @@ public class PaymentCreatedEventQueueContractTest {
         assertThat(transaction.get().getTransactionDetails(), containsString("\"language\": \"en\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"delayed_capture\": false"));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"external_metadata\": {\"key\": \"value\"}"));
+        assertThat(transaction.get().getEmail(), is("j.doe@example.org"));
+        assertThat(transaction.get().getCardholderName(), is("J citizen"));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_line1\": \"12 Rouge Avenue\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_postcode\": \"N1 3QU\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_city\": \"London\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_country\": \"GB\""));
     }
 
     public void setMessage(byte[] messageContents) {

@@ -82,6 +82,12 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("delayed_capture", false)
                                 .put("live", true)
                                 .put("external_metadata", externalMetadata)
+                                .put("email", "j.doe@example.org")
+                                .put("cardholder_name", "J citizen")
+                                .put("address_line1", "12 Rouge Avenue")
+                                .put("address_postcode", "N1 3QU")
+                                .put("address_city", "London")
+                                .put("address_country", "GB")
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":
