@@ -2,6 +2,13 @@ server:
   applicationConnectors:
     - type: http
       port: ${PORT}
+  requestLog:
+    appenders:
+      - type: console
+        layout:
+          type: govuk-pay-access-json
+          additionalFields:
+            container: "ledger"
 
 database:
   driverClass: org.postgresql.Driver
