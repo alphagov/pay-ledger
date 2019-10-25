@@ -22,6 +22,7 @@ import uk.gov.pay.ledger.healthcheck.SQSHealthCheck;
 import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
 import uk.gov.pay.ledger.report.resource.ReportResource;
 import uk.gov.pay.ledger.transaction.resource.TransactionResource;
+import uk.gov.pay.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
 import uk.gov.pay.logging.LogstashConsoleAppenderFactory;
 
 import static java.util.EnumSet.of;
@@ -50,6 +51,7 @@ public class LedgerApp extends Application<LedgerConfig> {
         bootstrap.addBundle(new JdbiExceptionsBundle());
         bootstrap.addCommand(new DependentResourceWaitCommand());
         bootstrap.getObjectMapper().getSubtypeResolver().registerSubtypes(LogstashConsoleAppenderFactory.class);
+        bootstrap.getObjectMapper().getSubtypeResolver().registerSubtypes(GovUkPayDropwizardRequestJsonLogLayoutFactory.class);
     }
 
     @Override
