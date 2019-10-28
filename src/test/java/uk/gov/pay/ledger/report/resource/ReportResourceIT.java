@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import javax.ws.rs.core.Response;
@@ -21,6 +22,7 @@ public class ReportResourceIT {
     public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
 
     private Integer port = rule.getAppRule().getLocalPort();
+    private final String gatewayAccountId = "abc123";
 
     @Before
     public void setUp() {
@@ -29,7 +31,6 @@ public class ReportResourceIT {
 
     @Test
     public void shouldGetPaymentCountsByStatus() {
-        String gatewayAccountId = "abc123";
         aTransactionFixture()
                 .withState(TransactionState.CREATED)
                 .withGatewayAccountId(gatewayAccountId)
@@ -63,8 +64,7 @@ public class ReportResourceIT {
     }
 
     @Test
-    public void shouldGetPaymentsStatistics() {
-        String gatewayAccountId = "abc123";
+    public void shouldGetTransactionSummaryStatisticsForToolbox() {
         aTransactionFixture()
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
@@ -80,14 +80,88 @@ public class ReportResourceIT {
 
         given().port(port)
                 .contentType(JSON)
-                .get("/v1/report/payments?account_id=" + gatewayAccountId +
+                .get("/v1/report/transactions-summary?account_id=" + gatewayAccountId +
                         "&from_date=2019-10-01T09:00:00.000Z" +
-                        "&to_date=2019-10-01T11:00:00.000Z"
+                        "&to_date=2019-10-01T11:00:00.000Z" +
+                        "&override_from_date_validation=true"
                 )
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("count", is(2))
-                .body("gross_amount", is(3000));
+                .body("payments.count", is(2))
+                .body("payments.gross_amount", is(3000));
+    }
+
+    @Test
+    public void shouldGetTransactionSummaryForSelfservice() {
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(2000L)
+                .withState(TransactionState.FAILED_REJECTED)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(4000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-29T00:00:00.000Z"))
+                .withAmount(4000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId("another-gateway-account")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-29T00:00:00.000Z"))
+                .withAmount(4000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.REFUND.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T00:00:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId("another-gateway-account")
+                .withTransactionType(TransactionType.REFUND.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T00:00:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.REFUND.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-28T00:00:00.000Z"))
+                .withAmount(3000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.REFUND.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(2000L)
+                .withState(TransactionState.FAILED_REJECTED)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/report/transactions-summary?account_id=" + gatewayAccountId +
+                        "&from_date=2019-09-29T23:59:59.000Z"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("payments.count", is(1))
+                .body("payments.gross_amount", is(4000))
+                .body("refunds.count", is(1))
+                .body("refunds.gross_amount", is(1000));
     }
 }

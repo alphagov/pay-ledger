@@ -5,8 +5,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
-import uk.gov.pay.ledger.report.entity.PaymentsStatisticsResult;
-import uk.gov.pay.ledger.report.params.PaymentsReportParams;
+import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
@@ -44,7 +43,7 @@ public class ReportDaoIT {
         aTransactionFixture().withState(TransactionState.ERROR).insert(rule.getJdbi());
         aTransactionFixture().withState(TransactionState.SUCCESS).insert(rule.getJdbi());
 
-        var params = new PaymentsReportParams();
+        var params = new TransactionSummaryParams();
 
         List<PaymentCountByStateResult> paymentCountsByState = reportDao.getPaymentCountsByState(params);
 
@@ -74,7 +73,7 @@ public class ReportDaoIT {
                 .withState(TransactionState.ERROR)
                 .insert(rule.getJdbi());
 
-        var params = new PaymentsReportParams();
+        var params = new TransactionSummaryParams();
         params.setAccountId(gatewayAccountId1);
 
         List<PaymentCountByStateResult> paymentCountsByState = reportDao.getPaymentCountsByState(params);
@@ -109,7 +108,7 @@ public class ReportDaoIT {
                 .withCreatedDate(ZonedDateTime.parse("2019-09-29T00:00:00.000Z"))
                 .insert(rule.getJdbi());
 
-        var params = new PaymentsReportParams();
+        var params = new TransactionSummaryParams();
         params.setFromDate("2019-09-29T23:59:59.000Z");
         params.setToDate("2019-10-01T00:00:00.000Z");
 
@@ -153,7 +152,7 @@ public class ReportDaoIT {
                 .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
                 .insert(rule.getJdbi());
 
-        var params = new PaymentsReportParams();
+        var params = new TransactionSummaryParams();
         params.setAccountId(gatewayAccountId1);
         params.setFromDate("2019-09-29T23:59:59.000Z");
         params.setToDate("2019-10-01T00:00:00.000Z");
@@ -182,9 +181,9 @@ public class ReportDaoIT {
                 .withState(TransactionState.CREATED)
                 .insert(rule.getJdbi());
 
-        var params = new PaymentsReportParams();
+        var params = new TransactionSummaryParams();
 
-        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params, TransactionType.PAYMENT);
+        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(params, TransactionType.PAYMENT);
 
         assertThat(paymentsStatistics.getCount(), is(2L));
         assertThat(paymentsStatistics.getGrossAmount(), is(3000L));
@@ -211,10 +210,10 @@ public class ReportDaoIT {
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
 
-        var params = new PaymentsReportParams();
+        var params = new TransactionSummaryParams();
         params.setAccountId(gatewayAccountId1);
 
-        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params, TransactionType.PAYMENT);
+        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(params, TransactionType.PAYMENT);
 
         assertThat(paymentsStatistics.getCount(), is(2L));
         assertThat(paymentsStatistics.getGrossAmount(), is(3000L));
@@ -244,11 +243,11 @@ public class ReportDaoIT {
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
 
-        var params = new PaymentsReportParams();
+        var params = new TransactionSummaryParams();
         params.setFromDate("2019-09-29T23:59:59.000Z");
         params.setToDate("2019-10-01T00:00:00.000Z");
 
-        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params, TransactionType.PAYMENT);
+        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(params, TransactionType.PAYMENT);
 
         assertThat(paymentsStatistics.getCount(), is(2L));
         assertThat(paymentsStatistics.getGrossAmount(), is(5000L));
@@ -318,11 +317,11 @@ public class ReportDaoIT {
         transactionParams.setAccountId(gatewayAccountId);
         transactionParams.setFromDate("2019-09-29T23:59:59.000Z");
 
-        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(transactionParams, TransactionType.PAYMENT);
+        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(transactionParams, TransactionType.PAYMENT);
         assertThat(paymentsStatistics.getCount(), is(1L));
         assertThat(paymentsStatistics.getGrossAmount(), is(4000L));
 
-        PaymentsStatisticsResult refundsStatistics = reportDao.getPaymentsStatistics(transactionParams, TransactionType.REFUND);
+        TransactionsStatisticsResult refundsStatistics = reportDao.getTransactionSummaryStatistics(transactionParams, TransactionType.REFUND);
         assertThat(refundsStatistics.getCount(), is(1L));
         assertThat(refundsStatistics.getGrossAmount(), is(1000L));
     }
