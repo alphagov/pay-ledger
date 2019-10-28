@@ -6,6 +6,7 @@ import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
 import uk.gov.pay.ledger.report.entity.PaymentsStatisticsResult;
 import uk.gov.pay.ledger.report.params.PaymentsReportParams;
+import uk.gov.pay.ledger.report.params.ReportParams;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -18,7 +19,7 @@ public class ReportDao {
             ":searchExtraFields " +
             "GROUP BY state";
 
-    private static final String PAYMENT_STATISTICS = "SELECT count(1) AS count, sum(total_amount) AS grossAmount FROM transaction t " +
+    private static final String PAYMENT_STATISTICS = "SELECT count(1) AS count, sum(amount) AS grossAmount FROM transaction t " +
             "WHERE type = :transactionType::transaction_type " +
             "AND state = :state " +
             ":searchExtraFields ";
@@ -47,13 +48,12 @@ public class ReportDao {
         });
     }
 
-    public PaymentsStatisticsResult getPaymentsStatistics(PaymentsReportParams params) {
+    public PaymentsStatisticsResult getPaymentsStatistics(ReportParams params, TransactionType transactionType) {
         return jdbi.withHandle(handle -> {
-            String template = createSearchTemplate(params.getFilterTemplates(),
-                    PAYMENT_STATISTICS);
+            String template = createSearchTemplate(params.getFilterTemplates(), PAYMENT_STATISTICS);
 
             Query query = handle.createQuery(template)
-                    .bind("transactionType", TransactionType.PAYMENT)
+                    .bind("transactionType", transactionType)
                     .bind("state", TransactionState.SUCCESS);
             params.getQueryMap().forEach(query::bind);
 

@@ -66,13 +66,13 @@ public class ReportResourceIT {
     public void shouldGetPaymentsStatistics() {
         String gatewayAccountId = "abc123";
         aTransactionFixture()
-                .withTotalAmount(1000L)
+                .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
                 .withGatewayAccountId(gatewayAccountId)
                 .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
                 .insert(rule.getJdbi());
         aTransactionFixture()
-                .withTotalAmount(2000L)
+                .withAmount(2000L)
                 .withState(TransactionState.SUCCESS)
                 .withGatewayAccountId(gatewayAccountId)
                 .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))

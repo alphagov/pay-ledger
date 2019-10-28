@@ -1,12 +1,15 @@
 package uk.gov.pay.ledger.report.dao;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
 import uk.gov.pay.ledger.report.entity.PaymentsStatisticsResult;
 import uk.gov.pay.ledger.report.params.PaymentsReportParams;
+import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
@@ -167,21 +170,21 @@ public class ReportDaoIT {
     @Test
     public void shouldReturnPaymentsStatisticsForSuccessfulPayments_whenSearchingWithNoParameters() {
         aTransactionFixture()
-                .withTotalAmount(1000L)
+                .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
         aTransactionFixture()
-                .withTotalAmount(2000L)
+                .withAmount(2000L)
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
         aTransactionFixture()
-                .withTotalAmount(3000L)
+                .withAmount(3000L)
                 .withState(TransactionState.CREATED)
                 .insert(rule.getJdbi());
 
         var params = new PaymentsReportParams();
 
-        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params);
+        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params, TransactionType.PAYMENT);
 
         assertThat(paymentsStatistics.getCount(), is(2L));
         assertThat(paymentsStatistics.getGrossAmount(), is(3000L));
@@ -194,24 +197,24 @@ public class ReportDaoIT {
 
         aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId1)
-                .withTotalAmount(1000L)
+                .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
         aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId1)
-                .withTotalAmount(2000L)
+                .withAmount(2000L)
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
         aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId2)
-                .withTotalAmount(3000L)
+                .withAmount(3000L)
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
 
         var params = new PaymentsReportParams();
         params.setAccountId(gatewayAccountId1);
 
-        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params);
+        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params, TransactionType.PAYMENT);
 
         assertThat(paymentsStatistics.getCount(), is(2L));
         assertThat(paymentsStatistics.getGrossAmount(), is(3000L));
@@ -222,22 +225,22 @@ public class ReportDaoIT {
 
         aTransactionFixture()
                 .withCreatedDate(ZonedDateTime.parse("2019-10-01T00:00:00.000Z"))
-                .withTotalAmount(1000L)
+                .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
         aTransactionFixture()
                 .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
-                .withTotalAmount(2000L)
+                .withAmount(2000L)
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
         aTransactionFixture()
                 .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
-                .withTotalAmount(3000L)
+                .withAmount(3000L)
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
         aTransactionFixture()
                 .withCreatedDate(ZonedDateTime.parse("2019-09-29T00:00:00.000Z"))
-                .withTotalAmount(4000L)
+                .withAmount(4000L)
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
 
@@ -245,9 +248,82 @@ public class ReportDaoIT {
         params.setFromDate("2019-09-29T23:59:59.000Z");
         params.setToDate("2019-10-01T00:00:00.000Z");
 
-        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params);
+        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(params, TransactionType.PAYMENT);
 
         assertThat(paymentsStatistics.getCount(), is(2L));
         assertThat(paymentsStatistics.getGrossAmount(), is(5000L));
+    }
+
+    @Test
+    public void shouldReturnTransactionsSummary_whenSearchingByFromDate() {
+        String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(2000L)
+                .withState(TransactionState.FAILED_REJECTED)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(4000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-29T00:00:00.000Z"))
+                .withAmount(4000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId("another-gateway-account")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-29T00:00:00.000Z"))
+                .withAmount(4000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.REFUND.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T00:00:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId("another-gateway-account")
+                .withTransactionType(TransactionType.REFUND.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T00:00:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.REFUND.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-28T00:00:00.000Z"))
+                .withAmount(3000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.REFUND.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(2000L)
+                .withState(TransactionState.FAILED_REJECTED)
+                .insert(rule.getJdbi());
+
+        var transactionParams = new TransactionSummaryParams();
+        transactionParams.setAccountId(gatewayAccountId);
+        transactionParams.setFromDate("2019-09-29T23:59:59.000Z");
+
+        PaymentsStatisticsResult paymentsStatistics = reportDao.getPaymentsStatistics(transactionParams, TransactionType.PAYMENT);
+        assertThat(paymentsStatistics.getCount(), is(1L));
+        assertThat(paymentsStatistics.getGrossAmount(), is(4000L));
+
+        PaymentsStatisticsResult refundsStatistics = reportDao.getPaymentsStatistics(transactionParams, TransactionType.REFUND);
+        assertThat(refundsStatistics.getCount(), is(1L));
+        assertThat(refundsStatistics.getGrossAmount(), is(1000L));
     }
 }

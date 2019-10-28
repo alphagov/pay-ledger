@@ -2,8 +2,11 @@ package uk.gov.pay.ledger.report.service;
 
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.report.dao.ReportDao;
+import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
 import uk.gov.pay.ledger.report.entity.PaymentsStatisticsResult;
 import uk.gov.pay.ledger.report.params.PaymentsReportParams;
+import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
+import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.util.Arrays;
@@ -41,6 +44,12 @@ public class ReportService {
             params.setAccountId(gatewayAccountId);
         }
 
-        return reportDao.getPaymentsStatistics(params);
+        return reportDao.getPaymentsStatistics(params, TransactionType.PAYMENT);
+    }
+
+    public TransactionSummaryResult getTransactionsSummary(TransactionSummaryParams params) {
+        PaymentsStatisticsResult payments = reportDao.getPaymentsStatistics(params, TransactionType.PAYMENT);
+        PaymentsStatisticsResult refunds = reportDao.getPaymentsStatistics(params, TransactionType.REFUND);
+        return new TransactionSummaryResult(payments, refunds);
     }
 }
