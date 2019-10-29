@@ -1,14 +1,16 @@
 package uk.gov.pay.ledger.report.resource;
 
 import com.codahale.metrics.annotation.Timed;
-import uk.gov.pay.ledger.report.entity.PaymentsStatisticsResult;
-import uk.gov.pay.ledger.report.params.PaymentsReportParams;
+import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
+import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.report.service.ReportService;
+import uk.gov.pay.ledger.report.validator.TransactionSummaryValidator;
 import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -34,7 +36,7 @@ public class ReportResource {
     @GET
     @Timed
     public Response getPaymentCountsByState(
-            @Valid @BeanParam PaymentsReportParams paymentsReportParams,
+            @Valid @BeanParam TransactionSummaryParams transactionSummaryParams,
             @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
             @QueryParam("account_id") String gatewayAccountId) {
 
@@ -42,27 +44,29 @@ public class ReportResource {
                 AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId);
 
         Map<String, Long> paymentCountsByState = accountIdSupplierManager
-                .withSupplier(accountId -> reportService.getPaymentCountsByState(accountId, paymentsReportParams))
-                .withPrivilegedSupplier(() -> reportService.getPaymentCountsByState(null, paymentsReportParams))
+                .withSupplier(accountId -> reportService.getPaymentCountsByState(transactionSummaryParams))
+                .withPrivilegedSupplier(() -> reportService.getPaymentCountsByState(transactionSummaryParams))
                 .validateAndGet();
 
         return Response.status(OK).entity(paymentCountsByState).build();
     }
 
-    @Path("/payments")
+    @Path("/transactions-summary")
     @GET
     @Timed
-    public PaymentsStatisticsResult getPaymentsStatistics(
-            @Valid @BeanParam PaymentsReportParams paymentsReportParams,
+    public TransactionSummaryResult getTransactionSummaryResult(
+            @Valid @BeanParam TransactionSummaryParams transactionSummaryParams,
             @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
-            @QueryParam("account_id") String gatewayAccountId) {
+            @QueryParam("override_from_date_validation") @DefaultValue("false") Boolean overrideFromDateValidation) {
 
-        AccountIdSupplierManager<PaymentsStatisticsResult> accountIdSupplierManager =
-                AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId);
+        TransactionSummaryValidator.validateTransactionSummaryParams(transactionSummaryParams, overrideFromDateValidation);
+
+        AccountIdSupplierManager<TransactionSummaryResult> accountIdSupplierManager =
+                AccountIdSupplierManager.of(overrideAccountRestriction, transactionSummaryParams.getAccountId());
 
         return accountIdSupplierManager
-                .withSupplier(accountId -> reportService.getPaymentsStatistics(accountId, paymentsReportParams))
-                .withPrivilegedSupplier(() -> reportService.getPaymentsStatistics(null, paymentsReportParams))
+                .withSupplier(accountId -> reportService.getTransactionsSummary(transactionSummaryParams))
+                .withPrivilegedSupplier(() -> reportService.getTransactionsSummary(transactionSummaryParams))
                 .validateAndGet();
     }
 }

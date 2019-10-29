@@ -6,11 +6,11 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.Objects;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class PaymentsStatisticsResult {
+public class TransactionsStatisticsResult {
     private final long count;
     private final long grossAmount;
 
-    public PaymentsStatisticsResult(long count, long grossAmount) {
+    public TransactionsStatisticsResult(long count, long grossAmount) {
         this.count = count;
         this.grossAmount = grossAmount;
     }
@@ -27,7 +27,7 @@ public class PaymentsStatisticsResult {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PaymentsStatisticsResult that = (PaymentsStatisticsResult) o;
+        TransactionsStatisticsResult that = (TransactionsStatisticsResult) o;
         return count == that.count &&
                 grossAmount == that.grossAmount;
     }
@@ -39,7 +39,7 @@ public class PaymentsStatisticsResult {
 
     @Override
     public String toString() {
-        return "PaymentsStatisticsResult{" +
+        return "TransactionsStatisticsResult{" +
                 "count=" + count +
                 ", grossAmount=" + grossAmount +
                 '}';

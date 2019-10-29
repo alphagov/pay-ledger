@@ -7,8 +7,9 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.exception.JerseyViolationExceptionMapper;
-import uk.gov.pay.ledger.report.entity.PaymentsStatisticsResult;
-import uk.gov.pay.ledger.report.params.PaymentsReportParams;
+import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
+import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
+import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.report.service.ReportService;
 
 import javax.ws.rs.core.Response;
@@ -46,7 +47,7 @@ public class ReportResourceTest {
 
     @Test
     public void getPaymentsByState_shouldReturn200IfGatewayAccountIdIsNotProvidedButNotRequiredFlag() {
-        when(mockReportService.getPaymentCountsByState(null, new PaymentsReportParams()))
+        when(mockReportService.getPaymentCountsByState(new TransactionSummaryParams()))
                 .thenReturn(Map.of("blah", 1L));
 
         Response response = resources
@@ -91,7 +92,8 @@ public class ReportResourceTest {
     @Test
     public void getPaymentsStatistics_shouldReturn400IfGatewayAccountIsNotProvided() {
         Response response = resources
-                .target("/v1/report/payments")
+                .target("/v1/report/transactions-summary")
+                .queryParam("override_from_date_validation", true)
                 .request()
                 .get();
 
@@ -102,13 +104,14 @@ public class ReportResourceTest {
     }
 
     @Test
-    public void getPaymentsStatistics_shouldReturn200IfGatewayAccountIdIsNotProvidedButNotRequiredFlag() {
-        when(mockReportService.getPaymentsStatistics(null, new PaymentsReportParams()))
-                .thenReturn(new PaymentsStatisticsResult(200L, 20000L));
+    public void getTransactionSummary_shouldReturn200IfGatewayAccountIdIsNotProvidedButNotRequiredFlag() {
+        when(mockReportService.getTransactionsSummary(new TransactionSummaryParams()))
+                .thenReturn(new TransactionSummaryResult(new TransactionsStatisticsResult(200L, 20000L), new TransactionsStatisticsResult(0L, 0L)));
 
         Response response = resources
-                .target("/v1/report/payments")
+                .target("/v1/report/transactions-summary")
                 .queryParam("override_account_id_restriction", true)
+                .queryParam("override_from_date_validation", true)
                 .request()
                 .get();
 
@@ -116,9 +119,9 @@ public class ReportResourceTest {
     }
 
     @Test
-    public void getPaymentsStatistics_shouldReturn422IfFromDateInvalid() {
+    public void getTransactionSummary_shouldReturn422IfFromDateInvalid() {
         Response response = resources
-                .target("/v1/report/payments")
+                .target("/v1/report/transactions-summary")
                 .queryParam("account_id", "abc123")
                 .queryParam("from_date", "invalid")
                 .request()
@@ -131,11 +134,12 @@ public class ReportResourceTest {
     }
 
     @Test
-    public void getPaymentsStatistics_shouldReturn422IfToDateInvalid() {
+    public void getTransactionSummary_shouldReturn422IfToDateInvalid() {
         Response response = resources
-                .target("/v1/report/payments")
+                .target("/v1/report/transactions-summary")
                 .queryParam("account_id", "abc123")
                 .queryParam("to_date", "invalid")
+                .queryParam("override_from_date_validation", true)
                 .request()
                 .get();
 
@@ -143,5 +147,33 @@ public class ReportResourceTest {
 
         Map responseMap = response.readEntity(Map.class);
         assertThat(responseMap.get("message"), is(List.of("Invalid attribute value: to_date. Must be a valid date")));
+    }
+
+    @Test
+    public void getTransactionSummary_shouldReturn400IfGatewayAccountIsNotProvided() {
+        Response response = resources
+                .target("/v1/report/transactions-summary")
+                .queryParam("from_date", "2019-10-01T09:00:00.000Z")
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(400));
+
+        Map responseMap = response.readEntity(Map.class);
+        assertThat(responseMap.get("message"), is(List.of("Field [account_id] cannot be empty")));
+    }
+
+    @Test
+    public void getTransactionSummary_shouldReturn400IfNoFromDateAndValidationIsNotOverriden() {
+        Response response = resources
+                .target("/v1/report/transactions-summary")
+                .queryParam("account_id", "abc123")
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(400));
+
+        Map responseMap = response.readEntity(Map.class);
+        assertThat(responseMap.get("message"), is(List.of("Field [from_date] can not be null")));
     }
 }

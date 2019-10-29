@@ -8,19 +8,19 @@ import java.util.Objects;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TransactionSummaryResult {
 
-    private PaymentsStatisticsResult payments;
-    private PaymentsStatisticsResult refunds;
+    private TransactionsStatisticsResult payments;
+    private TransactionsStatisticsResult refunds;
 
-    public TransactionSummaryResult(PaymentsStatisticsResult payments, PaymentsStatisticsResult refunds) {
+    public TransactionSummaryResult(TransactionsStatisticsResult payments, TransactionsStatisticsResult refunds) {
         this.payments = payments;
         this.refunds = refunds;
     }
 
-    public PaymentsStatisticsResult getPayments() {
+    public TransactionsStatisticsResult getPayments() {
         return payments;
     }
 
-    public PaymentsStatisticsResult getRefunds() {
+    public TransactionsStatisticsResult getRefunds() {
         return refunds;
     }
 
