@@ -105,18 +105,18 @@ public class ReportServiceTest {
         params.setToDate(toDate);
         params.setAccountId(gatewayAccountId);
 
-        var result = new TransactionSummaryResult(new TransactionsStatisticsResult(5L, 10000L), new TransactionsStatisticsResult(0L, 0L));
+        var result = new TransactionSummaryResult(new TransactionsStatisticsResult(5L, 10000L), new TransactionsStatisticsResult(0L, 0L), 10000L);
         when(mockReportDao.getTransactionSummaryStatistics(transactionSummaryParamsArgumentCaptor.capture(), eq(TransactionType.PAYMENT)))
                 .thenReturn(result.getPayments());
         when(mockReportDao.getTransactionSummaryStatistics(transactionSummaryParamsArgumentCaptor.capture(), eq(TransactionType.REFUND)))
                 .thenReturn(result.getRefunds());
 
-        var paymentsStatistics = reportService.getTransactionsSummary(params);
+        var transactionStatistics = reportService.getTransactionsSummary(params);
 
         assertThat(transactionSummaryParamsArgumentCaptor.getValue().getAccountId(), is(gatewayAccountId));
         assertThat(transactionSummaryParamsArgumentCaptor.getValue().getFromDate(), is(fromDate));
         assertThat(transactionSummaryParamsArgumentCaptor.getValue().getToDate(), is(toDate));
 
-        assertThat(paymentsStatistics, is(result));
+        assertThat(transactionStatistics, is(result));
     }
 }

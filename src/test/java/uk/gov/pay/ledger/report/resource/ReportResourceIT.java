@@ -89,7 +89,8 @@ public class ReportResourceIT {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("payments.count", is(2))
-                .body("payments.gross_amount", is(3000));
+                .body("payments.gross_amount", is(3000))
+                .body("net_income", is(3000));
     }
 
     @Test
@@ -154,7 +155,8 @@ public class ReportResourceIT {
         given().port(port)
                 .contentType(JSON)
                 .get("/v1/report/transactions-summary?account_id=" + gatewayAccountId +
-                        "&from_date=2019-09-29T23:59:59.000Z"
+                        "&from_date=2019-09-29T23:59:59.000Z" +
+                        "&to_date=2019-10-02T00:00:00.000Z"
                 )
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
@@ -162,6 +164,7 @@ public class ReportResourceIT {
                 .body("payments.count", is(1))
                 .body("payments.gross_amount", is(4000))
                 .body("refunds.count", is(1))
-                .body("refunds.gross_amount", is(1000));
+                .body("refunds.gross_amount", is(1000))
+                .body("net_income", is(3000));
     }
 }

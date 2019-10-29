@@ -10,10 +10,14 @@ public class TransactionSummaryResult {
 
     private TransactionsStatisticsResult payments;
     private TransactionsStatisticsResult refunds;
+    private Long netIncome;
 
-    public TransactionSummaryResult(TransactionsStatisticsResult payments, TransactionsStatisticsResult refunds) {
+    public TransactionSummaryResult(TransactionsStatisticsResult payments,
+                                    TransactionsStatisticsResult refunds,
+                                    Long netIncome) {
         this.payments = payments;
         this.refunds = refunds;
+        this.netIncome = netIncome;
     }
 
     public TransactionsStatisticsResult getPayments() {
@@ -22,6 +26,10 @@ public class TransactionSummaryResult {
 
     public TransactionsStatisticsResult getRefunds() {
         return refunds;
+    }
+
+    public Long getNetIncome() {
+        return netIncome;
     }
 
     @Override
@@ -35,12 +43,14 @@ public class TransactionSummaryResult {
 
     @Override
     public int hashCode() {
-        return Objects.hash(payments.hashCode(), refunds.hashCode());
+        return Objects.hash(payments.hashCode(), refunds.hashCode(), netIncome);
     }
 
     @Override
     public String toString() {
         return "TransactionsSummaryResult: { payments: " + payments.toString() +
-                " refunds: " + refunds.toString() + " }";
+                " refunds: " + refunds.toString() +
+                " total in pence: " + netIncome +
+                " }";
     }
 }

@@ -35,6 +35,6 @@ public class ReportService {
     public TransactionSummaryResult getTransactionsSummary(TransactionSummaryParams params) {
         TransactionsStatisticsResult payments = reportDao.getTransactionSummaryStatistics(params, TransactionType.PAYMENT);
         TransactionsStatisticsResult refunds = reportDao.getTransactionSummaryStatistics(params, TransactionType.REFUND);
-        return new TransactionSummaryResult(payments, refunds);
+        return new TransactionSummaryResult(payments, refunds, payments.getGrossAmount() - refunds.getGrossAmount());
     }
 }
