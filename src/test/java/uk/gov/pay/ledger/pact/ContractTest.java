@@ -17,6 +17,7 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
@@ -243,6 +244,21 @@ public abstract class ContractTest {
                 .insert(app.getJdbi());
     }
 
+    @State("three payments and a refund all in success state exists")
+    public void createThreeTransactionsAndARefundInSuccessState(Map<String, String> params) {
+        String gatewayAccountId = params.get("gateway_account_id");
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
+        String externalId1 = randomAlphanumeric(12);
+        createPaymentTransaction(externalId1, gatewayAccountId, 1000L, TransactionState.SUCCESS, "2019-09-19T09:05:16.067Z");
+        createPaymentTransaction(randomAlphanumeric(12), gatewayAccountId, 2000L, TransactionState.SUCCESS, "2019-09-19T19:06:16.067Z");
+        createPaymentTransaction(randomAlphanumeric(12), gatewayAccountId, 1500L, TransactionState.SUCCESS, "2019-09-19T19:10:16.067Z");
+        createARefundTransaction(externalId1, gatewayAccountId, randomAlphanumeric(12), 1000L, "reference", "description",
+                "2019-09-21T19:05:16.067Z", TransactionState.SUCCESS);
+
+    }
+
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
                                           String externalId, Long amount,
                                           String reference, String description,
@@ -265,6 +281,17 @@ public abstract class ContractTest {
                 .withExternalId(transactionExternalId)
                 .withGatewayAccountId(gatewayAccountId)
                 .withTransactionType(TransactionType.PAYMENT.name())
+                .insert(app.getJdbi()).toEntity();
+    }
+
+    private void createPaymentTransaction(String transactionExternalId, String gatewayAccountId, Long amount, TransactionState state, String createdDate) {
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withAmount(amount)
+                .withState(state)
+                .withCreatedDate(ZonedDateTime.parse(createdDate))
                 .insert(app.getJdbi()).toEntity();
     }
 
