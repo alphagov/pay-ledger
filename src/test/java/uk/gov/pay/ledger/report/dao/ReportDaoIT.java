@@ -325,4 +325,57 @@ public class ReportDaoIT {
         assertThat(refundsStatistics.getCount(), is(1L));
         assertThat(refundsStatistics.getGrossAmount(), is(1000L));
     }
+
+    @Test
+    public void shouldSumAmountWhenTotalAmountIsNull() {
+        String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(1000L)
+                .withTotalAmount(1200L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(1000L)
+                .withTotalAmount(1200L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.REFUND.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T00:00:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
+        var transactionParams = new TransactionSummaryParams();
+        transactionParams.setAccountId(gatewayAccountId);
+        transactionParams.setFromDate("2019-09-29T23:59:59.000Z");
+
+        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(transactionParams, TransactionType.PAYMENT);
+        assertThat(paymentsStatistics.getCount(), is(4L));
+        assertThat(paymentsStatistics.getGrossAmount(), is(4400L));
+
+        TransactionsStatisticsResult refundsStatistics = reportDao.getTransactionSummaryStatistics(transactionParams, TransactionType.REFUND);
+        assertThat(refundsStatistics.getCount(), is(1L));
+        assertThat(refundsStatistics.getGrossAmount(), is(1000L));
+    }
 }
