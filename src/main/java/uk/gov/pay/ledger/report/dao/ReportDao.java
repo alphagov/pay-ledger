@@ -18,7 +18,9 @@ public class ReportDao {
             ":searchExtraFields " +
             "GROUP BY state";
 
-    private static final String TRANSACTION_SUMMARY_STATISTICS = "SELECT count(1) AS count, sum(amount) AS grossAmount FROM transaction t " +
+    private static final String TRANSACTION_SUMMARY_STATISTICS = "SELECT count(1) AS count, " +
+            "SUM(CASE WHEN total_amount IS NULL THEN amount ELSE total_amount END) AS grossAmount " +
+            "FROM transaction t " +
             "WHERE type = :transactionType::transaction_type " +
             "AND state = :state " +
             ":searchExtraFields ";
