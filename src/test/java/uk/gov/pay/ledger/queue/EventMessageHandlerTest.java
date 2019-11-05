@@ -8,8 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
-import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
+import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import java.util.List;
@@ -50,7 +50,8 @@ public class EventMessageHandlerTest {
         EventMessage message = mock(EventMessage.class);
 
         when(eventQueue.retrieveEvents()).thenReturn(List.of(message));
-        when(eventService.createOrUpdateIfExists(any())).thenReturn(createEventResponse);
+        when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
+
     }
 
     @Test
