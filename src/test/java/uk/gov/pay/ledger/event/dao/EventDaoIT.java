@@ -218,10 +218,9 @@ public class EventDaoIT {
     }
 
     @Test
-    public void eventDetailsAreUpdated_IfEventAlreadyExistsAndEventDetailsMismatch(){
+    public void eventDetailsAreUpdated_IfEventAlreadyExists(){
         Event event = anEventFixture()
                 .withResourceExternalId("key-value-test-id")
-                .withEventData("{}")
                 .insert(rule.getJdbi())
                 .toEntity();
         Event event2 = anEventFixture()
@@ -229,24 +228,7 @@ public class EventDaoIT {
                 .withEventData("{\"key\": \"value\"}")
                 .withEventDate(event.getEventDate())
                 .toEntity();
-        Optional<Long> updateCountOptional = eventDao.updateIfExistsWithResourceTypeId(event2);
+        eventDao.updateIfExistsWithResourceTypeId(event2);
         assertThat(eventDao.getById(event.getId()).get().getEventData(), is("{\"key\": \"value\"}"));
-        assertThat(updateCountOptional.isPresent(), is(true));
-    }
-
-    @Test
-    public void eventDetailsAreNotUpdated_IfEventAlreadyExistsAndEventDetailsMatch(){
-        Event event = anEventFixture()
-                .withResourceExternalId("key-value-test-id")
-                .withEventData("{\"key\": \"value\"}")
-                .insert(rule.getJdbi())
-                .toEntity();
-        Event event2 = anEventFixture()
-                .withResourceExternalId(event.getResourceExternalId())
-                .withEventData("{\"key\": \"value\"}")
-                .withEventDate(event.getEventDate())
-                .toEntity();
-        Optional<Long> updateCountOptional = eventDao.updateIfExistsWithResourceTypeId(event2);
-        assertThat(updateCountOptional.isPresent(), is(false));
     }
 }
