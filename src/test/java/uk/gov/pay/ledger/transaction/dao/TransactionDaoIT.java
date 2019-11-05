@@ -170,27 +170,6 @@ public class TransactionDaoIT {
     }
 
     @Test
-    public void shouldNotOverwriteTransactionIfItConsistsOfFewerEvents() {
-        TransactionEntity transaction = aTransactionFixture()
-                .withEventCount(5)
-                .withState(TransactionState.CREATED)
-                .insert(rule.getJdbi())
-                .toEntity();
-
-        TransactionEntity modifiedTransaction = aTransactionFixture()
-                .withExternalId(transaction.getExternalId())
-                .withEventCount(4)
-                .withState(TransactionState.SUBMITTED)
-                .toEntity();
-
-        transactionDao.upsert(modifiedTransaction);
-
-        TransactionEntity retrievedTransaction = transactionDao.findTransactionByExternalId(transaction.getExternalId()).get();
-
-        assertThat(retrievedTransaction.getState(), is(transaction.getState()));
-    }
-
-    @Test
     public void shouldFilterTransactionByExternalIdOrParentExternalIdAndGatewayAccountId() {
         TransactionEntity transaction1 = aTransactionFixture()
                 .withState(TransactionState.CREATED)

@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,12 +61,28 @@ public class EventMessageHandlerTest {
                 .toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(createEventResponse.isSuccessful()).thenReturn(true);
+        when(createEventResponse.getState()).thenReturn(CreateEventResponse.CreateEventState.INSERTED);
         when(eventService.getEventDigestForResource(event.getResourceExternalId()))
                 .thenReturn(EventDigest.fromEventList(List.of(event)));
 
         eventMessageHandler.processSingleMessage(eventMessage);
 
         verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
+        verify(transactionService).upsertTransactionFor(any(EventDigest.class));
+    }
+    
+    @Test
+    public void shouldNotUpsertTransactionIfEventIgnored() throws QueueException {
+        Event event = aQueuePaymentEventFixture()
+                .toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+        when(createEventResponse.isSuccessful()).thenReturn(true);
+        when(createEventResponse.getState()).thenReturn(CreateEventResponse.CreateEventState.IGNORED);
+
+        eventMessageHandler.processSingleMessage(eventMessage);
+
+        verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
+        verifyNoInteractions(transactionService);
     }
 
     @Test

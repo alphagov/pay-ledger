@@ -154,8 +154,7 @@ public class TransactionDao {
                 "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
                 "refund_status = EXCLUDED.refund_status, " +
                 "live = EXCLUDED.live, " +
-                "gateway_transaction_id = EXCLUDED.gateway_transaction_id " +
-                "WHERE EXCLUDED.event_count >= transaction.event_count;";
+                "gateway_transaction_id = EXCLUDED.gateway_transaction_id ";
 
     private final Jdbi jdbi;
 
