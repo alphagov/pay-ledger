@@ -43,7 +43,7 @@ public class EventMessageHandler {
 
     void processSingleMessage(EventMessage message) throws QueueException {
         Event event = message.getEvent();
-        CreateEventResponse response = eventService.createOrUpdateIfExists(event);
+        CreateEventResponse response = eventService.createIfDoesNotExist(event);
 
         if(response.isSuccessful()) {
             EventDigest eventDigest = eventService.getEventDigestForResource(event.getResourceExternalId());
