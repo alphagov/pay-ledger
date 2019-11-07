@@ -9,6 +9,7 @@ server:
           type: govuk-pay-access-json
           additionalFields:
             container: "ledger"
+            environment: ${ENVIRONMENT}
 
 database:
   driverClass: org.postgresql.Driver
@@ -52,6 +53,7 @@ logging:
       target: stdout
       customFields:
         container: "ledger"
+        environment: ${ENVIRONMENT}
     - type: sentry
       threshold: ERROR
       dsn: ${SENTRY_DSN:-https://example.com@dummy/1}
