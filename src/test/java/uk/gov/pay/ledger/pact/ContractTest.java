@@ -276,7 +276,46 @@ public abstract class ContractTest {
         createPaymentTransaction(randomAlphanumeric(12), gatewayAccountId, 1500L, TransactionState.SUCCESS, "2019-09-19T19:10:16.067Z");
         createARefundTransaction(externalId1, gatewayAccountId, randomAlphanumeric(12), 1000L, "reference", "description",
                 "2019-09-21T19:05:16.067Z", TransactionState.SUCCESS);
+    }
 
+    @State("a payment with success state exists")
+    public void createAPaymentWithSuccessState(Map<String, String> params) {
+        String gatewayAccountId = params.get("gateway_account_id");
+        String createdDate = params.get("created_date");
+        String reference = params.get("reference");
+        String email = params.get("email");
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
+        if (isBlank(createdDate)) {
+            createdDate = "2019-05-03T00:00:01.000Z";
+        }
+        if (isBlank(reference)) {
+            reference = "payment1";
+        }
+        if (isBlank(email)) {
+            email = "j.doe@example.org";
+        }
+        String transactionExternalId = randomAlphanumeric(12);
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withAmount(1000L)
+                .withReference(reference)
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withFirstDigitsCardNumber("424242")
+                .withLastDigitsCardNumber("4242")
+                .withCardBrand("visa")
+                .withCardBrandLabel("Visa")
+                .withGatewayTransactionId("gateway-transaction-id")
+                .withCardholderName("J Doe")
+                .withEmail(email)
+                .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .withCaptureSubmittedDate(ZonedDateTime.parse(createdDate).plusMinutes(20L))
+                .withCapturedDate(ZonedDateTime.parse(createdDate).plusHours(1L))
+                .insert(app.getJdbi());
     }
 
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
