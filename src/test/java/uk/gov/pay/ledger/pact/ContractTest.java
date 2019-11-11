@@ -4,6 +4,8 @@ import au.com.dius.pact.provider.junit.State;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -136,6 +138,17 @@ public abstract class ContractTest {
         String gatewayAccountId = params.get("account_id");
         String metadata = params.get("metadata");
 
+        if (isBlank(transactionExternalId)) {
+            transactionExternalId = "ch_123abc456xyz";
+        }
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
+        if (isBlank(metadata)) {
+            metadata = new GsonBuilder().create()
+                    .toJson(ImmutableMap.of("external_metadata", "metadata"));
+        }
+
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
                 .withGatewayAccountId(gatewayAccountId)
@@ -164,6 +177,13 @@ public abstract class ContractTest {
     public void createTransactionWithCorporateSurcharge(Map<String, String> params) {
         String transactionExternalId = params.get("charge_id");
         String gatewayAccountId = params.get("account_id");
+
+        if (isBlank(transactionExternalId)) {
+            transactionExternalId = "ch_123abc456xyz";
+        }
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
 
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
