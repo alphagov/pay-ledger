@@ -123,13 +123,15 @@ public abstract class ContractTest {
         String transactionExternalId2 = "someExternalId2";
 
         createPaymentTransactionForSelfserviceSearch(transactionExternalId1, gatewayAccountId,
-                TransactionState.CREATED, "reference1", null, null);
+                TransactionState.CREATED, "reference1", null,
+                null, "2019-09-20T10:14:16.067Z");
         createPaymentTransactionForSelfserviceSearch(transactionExternalId2, gatewayAccountId,
-                TransactionState.SUBMITTED, "reference2", "visa", "Visa");
+                TransactionState.SUBMITTED, "reference2", "visa",
+                "Visa", "2019-09-21T10:14:16.067Z");
 
         createARefundTransaction(transactionExternalId2, gatewayAccountId, "refund-transaction-id",
                 150L, "reference", "description",
-                "2018-09-22T10:14:16.067Z", TransactionState.SUCCESS);
+                "2019-09-19T10:14:16.067Z", TransactionState.SUCCESS);
     }
 
     @State("a transaction with metadata exists")
@@ -359,7 +361,8 @@ public abstract class ContractTest {
                                                               TransactionState state,
                                                               String reference,
                                                               String cardBrand,
-                                                              String cardBrandLabel) {
+                                                              String cardBrandLabel,
+                                                              String createdDate) {
         aTransactionFixture()
                 .withExternalId(transactionExternalId)
                 .withGatewayAccountId(gatewayAccountId)
@@ -369,6 +372,7 @@ public abstract class ContractTest {
                 .withState(state)
                 .withCardBrand(cardBrand)
                 .withCardBrandLabel(cardBrandLabel)
+                .withCreatedDate(ZonedDateTime.parse(createdDate))
                 .insert(app.getJdbi());
     }
 }
