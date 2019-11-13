@@ -320,6 +320,23 @@ public abstract class ContractTest {
                 .insert(app.getJdbi());
     }
 
+    @State("a payment with all fields and a corresponding refund exists")
+    public void createAPaymentWithAllFieldsAndWithACorrespondingRefund(Map<String, String> params) {
+        String gatewayAccountId = params.get("gateway_account_id");
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
+        String transactionExternalId = "someExternalId1";
+
+        createPaymentTransactionWithAllFields(transactionExternalId, gatewayAccountId,
+                TransactionState.SUCCESS, "reference1", "2019-09-21T12:22:16.067Z");
+
+        createARefundTransaction(transactionExternalId, gatewayAccountId, "refund-transaction-id",
+                150L, "reference2", "description",
+                "2019-09-21T15:14:16.067Z", TransactionState.SUCCESS);
+
+    }
+
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
                                           String externalId, Long amount,
                                           String reference, String description,
@@ -334,6 +351,8 @@ public abstract class ContractTest {
                 .withReference(reference)
                 .withDescription(description)
                 .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .withCardBrand(null)
+                .withEmail(null)
                 .insert(app.getJdbi());
     }
 
@@ -373,6 +392,32 @@ public abstract class ContractTest {
                 .withCardBrand(cardBrand)
                 .withCardBrandLabel(cardBrandLabel)
                 .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .insert(app.getJdbi());
+    }
+
+    private void createPaymentTransactionWithAllFields(String transactionExternalId,
+                                                       String gatewayAccountId,
+                                                       TransactionState state,
+                                                       String reference,
+                                                       String createdDate) {
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withAmount(1000L)
+                .withReference(reference)
+                .withState(state)
+                .withDefaultCardDetails()
+                .withFirstDigitsCardNumber("424242")
+                .withLastDigitsCardNumber("1212")
+                .withCardBrand("visa")
+                .withCardBrandLabel("Visa")
+                .withGatewayTransactionId("gateway-transaction-id")
+                .withCardholderName("J Doe")
+                .withEmail("gds-payments-team-smoke@digital.cabinet-office.gov.uk")
+                .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .withCaptureSubmittedDate(ZonedDateTime.parse(createdDate).plusMinutes(2L))
+                .withCapturedDate(ZonedDateTime.parse(createdDate).plusHours(1L))
                 .insert(app.getJdbi());
     }
 }
