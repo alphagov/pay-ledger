@@ -12,7 +12,6 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
-import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.ledger.event.resource.EventResource;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.exception.JerseyViolationExceptionMapper;
@@ -23,6 +22,7 @@ import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
 import uk.gov.pay.ledger.report.resource.ReportResource;
 import uk.gov.pay.ledger.transaction.resource.TransactionResource;
 import uk.gov.pay.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
+import uk.gov.pay.logging.LoggingFilter;
 import uk.gov.pay.logging.LogstashConsoleAppenderFactory;
 
 import static java.util.EnumSet.of;
