@@ -20,6 +20,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -73,12 +74,18 @@ public class TransactionResource {
     @Timed
     public TransactionSearchResponse search(@Valid
                                             @BeanParam TransactionSearchParams searchParams,
+                                            @HeaderParam("Accept") String acceptHeaderType,
                                             @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
                                             @QueryParam("account_id") String gatewayAccountId,
                                             @Context UriInfo uriInfo) {
 
         TransactionSearchParams transactionSearchParams = Optional.ofNullable(searchParams)
                 .orElse(new TransactionSearchParams());
+
+        if (acceptHeaderType != null && acceptHeaderType.equals("text/csv")) {
+            transactionSearchParams.setWithCount(false);
+            transactionSearchParams.overrideMaxDisplaySize(100000L);
+        }
 
         validateSearchParams(transactionSearchParams, gatewayAccountId);
         AccountIdSupplierManager<TransactionSearchResponse> accountIdSupplierManager =

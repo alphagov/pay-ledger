@@ -98,14 +98,18 @@ public class TransactionService {
                 .map(transactionFactory::createTransactionEntity)
                 .collect(Collectors.toList());
 
-        Long total = transactionDao.getTotalForSearch(searchParams);
 
-        long size = searchParams.getDisplaySize();
-        if (total > 0 && searchParams.getDisplaySize() > 0) {
-            long lastPage = (total + size - 1) / size;
-            if (searchParams.getPageNumber() > lastPage || searchParams.getPageNumber() < 1) {
-                throw new WebApplicationException("the requested page not found",
-                        Response.Status.NOT_FOUND);
+        Long total = null;
+        if (searchParams.withCount()) {
+            total = transactionDao.getTotalForSearch(searchParams);
+
+            long size = searchParams.getDisplaySize();
+            if (total > 0 && searchParams.getDisplaySize() > 0) {
+                long lastPage = (total + size - 1) / size;
+                if (searchParams.getPageNumber() > lastPage || searchParams.getPageNumber() < 1) {
+                    throw new WebApplicationException("the requested page not found",
+                            Response.Status.NOT_FOUND);
+                }
             }
         }
 
@@ -118,12 +122,16 @@ public class TransactionService {
                 .map(transactionFactory::createTransactionEntity)
                 .collect(Collectors.toList());
 
-        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        Long total = null;
+        if (searchParams.withCount()) {
+            total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
+        }
 
         return buildTransactionSearchResponse(searchParams, uriInfo, transactionList, total);
     }
 
-    private TransactionSearchResponse buildTransactionSearchResponse(TransactionSearchParams searchParams, UriInfo uriInfo, List<Transaction> transactionList, Long total) {
+    private TransactionSearchResponse buildTransactionSearchResponse(TransactionSearchParams searchParams, UriInfo uriInfo, List<Transaction> transactionList, Long totalCount) {
+        Long total = Optional.ofNullable(totalCount).orElse(0L);
         PaginationBuilder paginationBuilder = new PaginationBuilder(searchParams, uriInfo);
         paginationBuilder = paginationBuilder.withTotalCount(total).buildResponse();
 
