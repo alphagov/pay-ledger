@@ -21,6 +21,7 @@ import uk.gov.pay.ledger.healthcheck.SQSHealthCheck;
 import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
 import uk.gov.pay.ledger.report.resource.ReportResource;
 import uk.gov.pay.ledger.transaction.resource.TransactionResource;
+import uk.gov.pay.ledger.util.csv.CSVMessageBodyWriter;
 import uk.gov.pay.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
 import uk.gov.pay.logging.LoggingFilter;
 import uk.gov.pay.logging.LogstashConsoleAppenderFactory;
@@ -70,6 +71,8 @@ public class LedgerApp extends Application<LedgerConfig> {
         environment.jersey().register(new BadRequestExceptionMapper());
         environment.jersey().register(new JerseyViolationExceptionMapper());
         environment.healthChecks().register("sqsQueue", injector.getInstance(SQSHealthCheck.class));
+
+        environment.jersey().register(new CSVMessageBodyWriter());
 
         if(config.getQueueMessageReceiverConfig().isBackgroundProcessingEnabled()) {
             environment.lifecycle().manage(injector.getInstance(QueueMessageReceiver.class));

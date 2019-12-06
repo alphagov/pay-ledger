@@ -69,6 +69,7 @@ public class TransactionResource {
 
     @Path("/")
     @GET
+    @Produces({"application/json", "text/csv"})
     @Timed
     public TransactionSearchResponse search(@Valid
                                             @BeanParam TransactionSearchParams searchParams,
