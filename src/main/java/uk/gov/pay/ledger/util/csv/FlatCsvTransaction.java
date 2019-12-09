@@ -111,13 +111,12 @@ public class FlatCsvTransaction {
     private static String penceToCurrency(Long amount) {
         if (amount != null) {
             DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
-            return decimalFormat.format(amount);
+            return decimalFormat.format(amount / 100);
         }
         return null;
     }
 
     public static FlatCsvTransaction from(TransactionView transactionView) {
-
         String amount = penceToCurrency(transactionView.getAmount());
         String totalAmount = penceToCurrency(transactionView.getTotalAmount());
         String corporateSurchargeAmount = penceToCurrency(transactionView.getCorporateCardSurcharge());

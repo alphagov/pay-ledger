@@ -24,12 +24,13 @@ public class CSVMessageBodyWriter implements MessageBodyWriter<TransactionSearch
 
     @Override
     public boolean isWriteable(Class targetType, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return true;
+        return targetType == TransactionSearchResponse.class;
     }
 
     @Override
     public long getSize(TransactionSearchResponse data, Class aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        return 0;
+        // https://docs.oracle.com/javaee/7/api/javax/ws/rs/ext/MessageBodyWriter.html
+        return -1;
     }
 
     @Override
@@ -45,7 +46,7 @@ public class CSVMessageBodyWriter implements MessageBodyWriter<TransactionSearch
 
                 CsvMapper mapper = new CsvMapper();
 
-                // order properties by order of class instead of alphabetically
+                // rank properties by class property order instead of alphabetically
                 mapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
                 Object sample = results.get(0);
                 CsvSchema schema = mapper.schemaFor(sample.getClass()).withHeader();
