@@ -15,6 +15,8 @@ import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.event.resource.EventResource;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.exception.JerseyViolationExceptionMapper;
+import uk.gov.pay.ledger.filters.LoggingMDCRequestFilter;
+import uk.gov.pay.ledger.filters.LoggingMDCResponseFilter;
 import uk.gov.pay.ledger.healthcheck.DependentResourceWaitCommand;
 import uk.gov.pay.ledger.healthcheck.HealthCheckResource;
 import uk.gov.pay.ledger.healthcheck.SQSHealthCheck;
@@ -65,8 +67,12 @@ public class LedgerApp extends Application<LedgerConfig> {
         environment.jersey().register(injector.getInstance(TransactionResource.class));
         environment.jersey().register(injector.getInstance(ReportResource.class));
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
+
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
+        environment.jersey().register(injector.getInstance(LoggingMDCRequestFilter.class));
+        environment.jersey().register(injector.getInstance(LoggingMDCResponseFilter.class));
+
         environment.jersey().register(new BadRequestExceptionMapper());
         environment.jersey().register(new JerseyViolationExceptionMapper());
         environment.healthChecks().register("sqsQueue", injector.getInstance(SQSHealthCheck.class));
