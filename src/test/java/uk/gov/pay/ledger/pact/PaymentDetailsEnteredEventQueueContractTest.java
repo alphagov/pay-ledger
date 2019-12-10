@@ -46,6 +46,7 @@ public class PaymentDetailsEnteredEventQueueContractTest {
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
                 .withEventType(paymentDetailsEnteredEventName)
+                .withGatewayAccountId("I0YI1")
                 .withDefaultEventDataForEventType(paymentDetailsEnteredEventName);
 
         Map<String, String> metadata = new HashMap<>();
