@@ -9,7 +9,11 @@ import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+
+import static net.logstash.logback.argument.StructuredArguments.kv;
 
 public class EventMessageHandler {
 
@@ -41,23 +45,28 @@ public class EventMessageHandler {
         }
     }
 
-    void processSingleMessage(EventMessage message) throws QueueException {
+    private void processSingleMessage(EventMessage message) throws QueueException {
         Event event = message.getEvent();
         CreateEventResponse response = eventService.createIfDoesNotExist(event);
+
+        final long ingestLag = event.getEventDate().until(ZonedDateTime.now(), ChronoUnit.MICROS);
 
         if(response.isSuccessful()) {
             EventDigest eventDigest = eventService.getEventDigestForResource(event.getResourceExternalId());
             transactionService.upsertTransactionFor(eventDigest);
             eventQueue.markMessageAsProcessed(message);
-            LOGGER.info("The event message has been processed. [id={}] [state={}]",
-                    message.getId(),
-                    response.getState());
+            LOGGER.info("The event message has been processed.",
+                    kv("id", message.getId()),
+                    kv("resource_external_id", message.getEvent().getResourceExternalId()),
+                    kv("state", response.getState()),
+                    kv("ingest_lag_micro_seconds", ingestLag));
         } else {
             eventQueue.scheduleMessageForRetry(message);
-            LOGGER.warn("The event message has been scheduled for retry. [id={}] [state={}] [error={}]",
-                    message.getId(),
-                    response.getState(),
-                    response.getErrorMessage());
+            LOGGER.warn("The event message has been scheduled for retry.",
+                    kv("id", message.getId()),
+                    kv("resource_external_id", message.getEvent().getResourceExternalId()),
+                    kv("state", response.getState()),
+                    kv("error", response.getErrorMessage()));
         }
     }
 }
