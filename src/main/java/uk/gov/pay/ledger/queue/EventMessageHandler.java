@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.queue;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +19,21 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 public class EventMessageHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventMessageHandler.class);
-    private EventQueue eventQueue;
-    private EventService eventService;
-    private TransactionService transactionService;
+
+    private final EventQueue eventQueue;
+    private final EventService eventService;
+    private final TransactionService transactionService;
+    private final MetricRegistry metricRegistry;
 
     @Inject
-    public EventMessageHandler(EventQueue eventQueue, EventService eventService, TransactionService transactionService) {
+    public EventMessageHandler(EventQueue eventQueue,
+                               EventService eventService,
+                               TransactionService transactionService,
+                               MetricRegistry metricRegistry) {
         this.eventQueue = eventQueue;
         this.eventService = eventService;
         this.transactionService = transactionService;
+        this.metricRegistry = metricRegistry;
     }
 
     public void handle() throws QueueException {
@@ -55,6 +62,7 @@ public class EventMessageHandler {
             EventDigest eventDigest = eventService.getEventDigestForResource(event.getResourceExternalId());
             transactionService.upsertTransactionFor(eventDigest);
             eventQueue.markMessageAsProcessed(message);
+            metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
             LOGGER.info("The event message has been processed.",
                     kv("id", message.getId()),
                     kv("resource_external_id", message.getEvent().getResourceExternalId()),
