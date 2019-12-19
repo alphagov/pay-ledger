@@ -8,14 +8,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
-import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
+import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
@@ -38,32 +37,25 @@ public class EventMessageHandlerTest {
     @Mock
     private EventMessage eventMessage;
 
-    @Mock
-    private Event event;
-
+    private Event event = aQueuePaymentEventFixture().toEntity();
 
     @InjectMocks
     private EventMessageHandler eventMessageHandler;
 
     @Before
     public void setUp() throws QueueException {
-        EventMessage message = mock(EventMessage.class);
-
-        when(eventQueue.retrieveEvents()).thenReturn(List.of(message));
+        when(eventQueue.retrieveEvents()).thenReturn(List.of(eventMessage));
         when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
-
+        when(eventMessage.getEvent()).thenReturn(event);
     }
 
     @Test
     public void shouldMarkMessageAsProcessed_WhenEventIsProcessedSuccessfully() throws QueueException {
-        Event event = aQueuePaymentEventFixture()
-                .toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
         when(createEventResponse.isSuccessful()).thenReturn(true);
         when(eventService.getEventDigestForResource(event.getResourceExternalId()))
                 .thenReturn(EventDigest.fromEventList(List.of(event)));
 
-        eventMessageHandler.processSingleMessage(eventMessage);
+        eventMessageHandler.handle();
 
         verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
     }
