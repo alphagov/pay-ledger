@@ -20,6 +20,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
     private String eventType = "REFUND_CREATED_BY_USER";
     private String eventData = "{\"event_data\": \"event data\"}";
     private String refundedBy = "a_user_id";
+    private String userEmail = "test@example.com";
     private String reference = null;
 
     private QueueRefundEventFixture() {
@@ -79,6 +80,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("amount", amount)
                                 .put("refunded_by", refundedBy)
+                                .put("user_email", userEmail)
                                 .build());
                 break;
             case "REFUND_SUBMITTED":
@@ -130,6 +132,10 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
         return refundedBy;
     }
 
+    public String getUserEmail() {
+        return userEmail;
+    }
+
     public String getReference() {
         return reference;
     }
@@ -151,6 +157,10 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
         return this;
     }
 
+    public QueueRefundEventFixture withUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+        return this;
+    }
     public String getParentResourceExternalId() {
         return parentResourceExternalId;
     }
@@ -158,4 +168,5 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
     public Long getAmount() {
         return amount;
     }
+
 }
