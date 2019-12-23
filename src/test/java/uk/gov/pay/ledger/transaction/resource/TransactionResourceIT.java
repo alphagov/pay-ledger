@@ -101,6 +101,7 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
+                .body("page", is(1))
                 .body("results[0].transaction_id", is(cancelledTransaction2.getExternalId()))
                 .body("results[1].transaction_id", is(cancelledTransaction1.getExternalId()));
     }
