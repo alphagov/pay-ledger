@@ -46,6 +46,7 @@ public class RefundCreatedByUserEventQueueContractTest {
             .withResourceType(ResourceType.REFUND)
             .withEventType("REFUND_CREATED_BY_USER")
             .withRefundedBy("a_user_id")
+            .withUserEmail("test@example.com")
             .withDefaultEventDataForEventType("REFUND_CREATED_BY_USER");
 
     @Before
@@ -89,6 +90,7 @@ public class RefundCreatedByUserEventQueueContractTest {
 
         Map<String, String> transactionDetails = gson.fromJson(transaction.get().getTransactionDetails(), Map.class);
         assertThat(transactionDetails.get("refunded_by"), is(refundFixture.getRefundedBy()));
+        assertThat(transactionDetails.get("user_email"), is(refundFixture.getUserEmail()));
     }
 
     public void setMessage(byte[] messageContents) {
