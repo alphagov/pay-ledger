@@ -68,6 +68,15 @@ public class TransactionResourceIT {
     }
 
     @Test
+    public void shouldReturn404ForNonExistentTransaction() {
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/does-not-exist?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
     public void shouldGetAllTransactionsForAmbiguousExternalState() {
 
         TransactionFixture cancelledTransaction1 = aTransactionFixture()
