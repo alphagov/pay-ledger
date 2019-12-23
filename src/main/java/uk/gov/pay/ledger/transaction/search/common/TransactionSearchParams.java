@@ -35,8 +35,9 @@ public class TransactionSearchParams {
     private static final String STATE_FIELD = "state";
     private static final String TRANSACTION_TYPE_FIELD = "transaction_type";
     private static final long DEFAULT_PAGE_NUMBER = 1L;
+    private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
 
-    private long maxDisplaySize = 500;
+    private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
     @DefaultValue("2")
     @QueryParam("status_version")
