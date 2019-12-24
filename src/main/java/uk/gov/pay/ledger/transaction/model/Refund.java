@@ -12,6 +12,7 @@ public class Refund extends Transaction {
     private final ZonedDateTime createdDate;
     private final Integer eventCount;
     private final String refundedBy;
+    private final String refundedByUserEmail;
     private final String parentExternalId;
     private final Optional<Transaction> parentTransaction;
 
@@ -23,6 +24,7 @@ public class Refund extends Transaction {
         this.createdDate = builder.createdDate;
         this.eventCount = builder.eventCount;
         this.refundedBy = builder.refundedBy;
+        this.refundedByUserEmail = builder.refundedByUserEmail;
         this.parentExternalId = builder.parentExternalId;
         this.parentTransaction = builder.parentTransaction;
     }
@@ -64,6 +66,10 @@ public class Refund extends Transaction {
         return TransactionType.REFUND;
     }
 
+    public String getRefundedByUserEmail() {
+        return refundedByUserEmail;
+    }
+
     public static class Builder {
         private String reference;
         private String description;
@@ -71,6 +77,7 @@ public class Refund extends Transaction {
         private ZonedDateTime createdDate;
         private Integer eventCount;
         private String refundedBy;
+        private String refundedByUserEmail;
         private Long id;
         private String gatewayAccountId;
         private Long amount;
@@ -132,6 +139,11 @@ public class Refund extends Transaction {
 
         public Builder withRefundedBy(String refundedBy) {
             this.refundedBy = refundedBy;
+            return this;
+        }
+
+        public Builder withRefundedByUserEmail(String refundedByUserEmail) {
+            this.refundedByUserEmail = refundedByUserEmail;
             return this;
         }
 

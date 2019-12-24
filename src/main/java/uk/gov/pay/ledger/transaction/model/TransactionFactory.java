@@ -112,6 +112,7 @@ public class TransactionFactory {
                     .withCreatedDate(entity.getCreatedDate())
                     .withEventCount(entity.getEventCount())
                     .withRefundedBy(safeGetAsString(transactionDetails, "refunded_by"))
+                    .withRefundedByUserEmail(safeGetAsString(transactionDetails, "user_email"))
                     .withParentExternalId(entity.getParentExternalId())
                     .withParentTransaction(parentTransaction)
                     .build();

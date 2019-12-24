@@ -110,12 +110,14 @@ public class TransactionResourceIT {
     public void shouldGetRefundTransaction() {
         var now = ZonedDateTime.parse("2019-07-31T14:52:07.073Z");
         var refundedBy = "some_user_id";
+        var refundedByUserEmail = "test@example.com";
 
         transactionFixture = aTransactionFixture()
                 .withTransactionType("REFUND")
                 .withState(TransactionState.SUCCESS)
                 .withCreatedDate(now)
                 .withRefundedById(refundedBy)
+                .withRefundedByUserEmail(refundedByUserEmail)
                 .withDefaultTransactionDetails();
         transactionFixture.insert(rule.getJdbi());
 
@@ -130,7 +132,8 @@ public class TransactionResourceIT {
                 .body("amount", is(transactionFixture.getAmount().intValue()))
                 .body("reference", is(transactionFixture.getReference()))
                 .body("created_date", is(now.toString()))
-                .body("refunded_by", is(refundedBy));
+                .body("refunded_by", is(refundedBy))
+                .body("refunded_by_user_email", is(refundedByUserEmail));
     }
 
     @Test

@@ -182,7 +182,7 @@ public class TransactionFactoryTest {
                 .withCreatedDate(createdDate)
                 .withEventCount(eventCount)
                 .withParentTransactionEntity(fullDataObject)
-                .withTransactionDetails("{\"refunded_by\": \"some_user_id\"}")
+                .withTransactionDetails("{\"refunded_by\": \"some_user_id\", \"user_email\": \"test@example.com\"}")
                 .build();
         Refund refundEntity = (Refund) transactionFactory.createTransactionEntity(refund);
 
@@ -191,6 +191,7 @@ public class TransactionFactoryTest {
         assertThat(refundEntity.getExternalId(), is(externalId));
         assertThat(refundEntity.getParentExternalId(), is("parent-ext-id"));
         assertThat(refundEntity.getRefundedBy(), is("some_user_id"));
+        assertThat(refundEntity.getRefundedByUserEmail(), is("test@example.com"));
         assertThat(refundEntity.getReference(), is(reference));
         assertThat(refundEntity.getState(), is(state));
         assertThat(refundEntity.getCreatedDate(), is(createdDate));

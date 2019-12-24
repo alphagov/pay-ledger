@@ -50,6 +50,7 @@ public class TransactionView {
     private SettlementSummary settlementSummary;
     private Map<String, Object> metadata;
     private String refundedBy;
+    private String refundedByUserEmail;
     private TransactionType transactionType;
     private TransactionView parentTransaction;
 
@@ -78,6 +79,7 @@ public class TransactionView {
         this.settlementSummary = builder.settlementSummary;
         this.metadata = builder.metadata;
         this.refundedBy = builder.refundedBy;
+        this.refundedByUserEmail = builder.refundedByUserEmail;
         this.transactionType = builder.transactionType;
         this.parentTransaction = builder.parentTransaction;
     }
@@ -129,6 +131,7 @@ public class TransactionView {
                 .withParentExternalId(refund.getParentExternalId())
                 .withCreatedDate(refund.getCreatedDate())
                 .withRefundedBy(refund.getRefundedBy())
+                .withRefundedByUserEmail(refund.getRefundedByUserEmail())
                 .withTransactionType(refund.getTransactionType())
                 .withParentTransaction(refund.getParentTransaction().map(parentTransaction -> from(parentTransaction, statusVersion)).orElse(null))
                 .build();
@@ -198,6 +201,10 @@ public class TransactionView {
 
     public String getGatewayTransactionId() {
         return gatewayTransactionId;
+    }
+
+    public String getRefundedByUserEmail() {
+        return refundedByUserEmail;
     }
 
     @Override
@@ -279,6 +286,7 @@ public class TransactionView {
         private SettlementSummary settlementSummary;
         private Map<String, Object> metadata;
         private String refundedBy;
+        private String refundedByUserEmail;
         private TransactionType transactionType;
         private List<Link> links = new ArrayList<>();
 
@@ -406,6 +414,11 @@ public class TransactionView {
 
         public Builder withRefundedBy(String refundedBy) {
             this.refundedBy = refundedBy;
+            return this;
+        }
+
+        public Builder withRefundedByUserEmail(String refundedByUserEmail) {
+            this.refundedByUserEmail = refundedByUserEmail;
             return this;
         }
 

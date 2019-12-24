@@ -66,6 +66,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String refundedById;
     private String cardBrandLabel;
     private boolean live;
+    private String refundedByUserEmail;
 
     private TransactionFixture() {
     }
@@ -353,6 +354,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("gateway_transaction_id", gatewayTransactionId);
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
         transactionDetails.addProperty("refunded_by", refundedById);
+        transactionDetails.addProperty("user_email", refundedByUserEmail);
         transactionDetails.addProperty("card_type", String.valueOf(CREDIT));
         Optional.ofNullable(cardBrandLabel)
                 .ifPresent(cardBrandLabel -> transactionDetails.addProperty("card_brand_label", cardBrandLabel));
@@ -523,6 +525,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withRefundedById(String refundedById) {
         this.refundedById = refundedById;
+        return this;
+    }
+
+    public TransactionFixture withRefundedByUserEmail(String refundedByUserEmail) {
+        this.refundedByUserEmail = refundedByUserEmail;
         return this;
     }
 }
