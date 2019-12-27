@@ -80,7 +80,7 @@ public class TransactionSearchParams {
 
     @DefaultValue("500")
     @QueryParam("display_size")
-    private Long displaySize = 500L;
+    private Long displaySize = DEFAULT_MAX_DISPLAY_SIZE;
     private Map<String, Object> queryMap;
 
     public void setAccountId(String accountId) {
@@ -159,7 +159,6 @@ public class TransactionSearchParams {
             this.pageNumber = pageNumber;
         }
     }
-
 
     public void setDisplaySize(Long displaySize) {
         this.displaySize = displaySize;
@@ -400,7 +399,7 @@ public class TransactionSearchParams {
             queries.add(TRANSACTION_TYPE_FIELD + "=" + transactionType);
         }
         queries.add("page=" + forPage);
-        queries.add("display_size=" + displaySize);
+        queries.add("display_size=" + getDisplaySize());
 
 
         return String.join("&", queries);

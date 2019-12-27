@@ -599,11 +599,11 @@ public class TransactionResourceIT {
     }
 
     @Test
-    public void testResourceCSV() {
+    public void shouldGetAllTransactionsAsCSVWithAcceptType() {
         String targetGatewayAccountId = "123";
         String otherGatewayAccountId = "456";
 
-        aTransactionFixture()
+        TransactionFixture transactionFixture = aTransactionFixture()
                 .withTransactionType("PAYMENT")
                 .withState(TransactionState.SUBMITTED)
                 .withGatewayAccountId(targetGatewayAccountId)
@@ -624,6 +624,7 @@ public class TransactionResourceIT {
                 )
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
-                .contentType("text/csv");
+                .contentType("text/csv")
+                .body(containsString(transactionFixture.getExternalId()));
     }
 }
