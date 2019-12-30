@@ -11,9 +11,13 @@ import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
+
+import static uk.gov.pay.ledger.util.JsonParser.safeGetAsBoolean;
+import static uk.gov.pay.ledger.util.JsonParser.safeGetAsDate;
+import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
+import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
 
 public class TransactionFactory {
 
@@ -122,35 +126,5 @@ public class TransactionFactory {
         }
 
         return null;
-    }
-
-    private static Long safeGetAsLong(JsonNode object, String propertyName) {
-        return safeGetJsonElement(object, propertyName)
-                .map(JsonNode::longValue)
-                .orElse(null);
-    }
-
-    private static Boolean safeGetAsBoolean(JsonNode object, String propertyName, Boolean defaultValue) {
-        return safeGetJsonElement(object, propertyName)
-                .map(JsonNode::booleanValue)
-                .orElse(defaultValue);
-    }
-
-    private static String safeGetAsString(JsonNode object, String propertyName) {
-        return safeGetJsonElement(object, propertyName)
-                .map(JsonNode::textValue)
-                .orElse(null);
-    }
-
-    private static ZonedDateTime safeGetAsDate(JsonNode object, String propertyName) {
-        return safeGetJsonElement(object, propertyName)
-                .map(JsonNode::textValue)
-                .map(ZonedDateTime::parse)
-                .orElse(null);
-    }
-
-    private static Optional<JsonNode> safeGetJsonElement(JsonNode object, String propertyName) {
-        return Optional.ofNullable(object.get(propertyName))
-                .filter(p -> p != null);
     }
 }
