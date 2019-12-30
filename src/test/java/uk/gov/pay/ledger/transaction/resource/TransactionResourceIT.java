@@ -600,4 +600,34 @@ public class TransactionResourceIT {
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode())
                 .body("message", is("Transaction with id [some-parent-external-id] not found"));
     }
+
+    @Test
+    public void shouldGetAllTransactionsAsCSVWithAcceptType() {
+        String targetGatewayAccountId = "123";
+        String otherGatewayAccountId = "456";
+
+        TransactionFixture transactionFixture = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(targetGatewayAccountId)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(otherGatewayAccountId)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction?" +
+                        "account_id=" + targetGatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .body(containsString(transactionFixture.getExternalId()));
+    }
 }

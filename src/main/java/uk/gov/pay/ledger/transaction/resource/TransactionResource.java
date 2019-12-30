@@ -13,6 +13,7 @@ import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
+import uk.gov.pay.ledger.util.csv.FlatCsvTransaction;
 
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
@@ -26,7 +27,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParamsValidator.validateSearchParams;
@@ -75,7 +78,32 @@ public class TransactionResource {
                                             @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
                                             @QueryParam("account_id") String gatewayAccountId,
                                             @Context UriInfo uriInfo) {
+        return searchForTransactions(searchParams, overrideAccountRestriction, gatewayAccountId, uriInfo);
+    }
 
+    @Path("/")
+    @GET
+    @Produces("text/csv")
+    @Timed
+    public List<FlatCsvTransaction> searchCsv(@Valid
+                                            @BeanParam TransactionSearchParams searchParams,
+                                           @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
+                                           @QueryParam("account_id") String gatewayAccountId,
+                                           @Context UriInfo uriInfo) {
+        TransactionSearchParams csvSearchParams = Optional.ofNullable(searchParams)
+                .orElse(new TransactionSearchParams());
+        csvSearchParams.setWithCount(false);
+        csvSearchParams.overrideMaxDisplaySize(100000L);
+        TransactionSearchResponse response = searchForTransactions(csvSearchParams, overrideAccountRestriction, gatewayAccountId, uriInfo);
+
+        return response
+                .getTransactionViewList()
+                .stream()
+                .map(FlatCsvTransaction::from)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    private TransactionSearchResponse searchForTransactions(TransactionSearchParams searchParams, Boolean overrideAccountRestriction, String gatewayAccountId, UriInfo uriInfo) {
         TransactionSearchParams transactionSearchParams = Optional.ofNullable(searchParams)
                 .orElse(new TransactionSearchParams());
 

@@ -34,8 +34,11 @@ public class TransactionSearchParams {
     private static final String CARD_BRAND_FIELD = "card_brand";
     private static final String STATE_FIELD = "state";
     private static final String TRANSACTION_TYPE_FIELD = "transaction_type";
-    private static final long MAX_DISPLAY_SIZE = 500;
     private static final long DEFAULT_PAGE_NUMBER = 1L;
+    private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
+
+    private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
+
     @DefaultValue("2")
     @QueryParam("status_version")
     int statusVersion;
@@ -70,12 +73,26 @@ public class TransactionSearchParams {
     private String toDate;
     @QueryParam(TRANSACTION_TYPE_FIELD)
     private TransactionType transactionType;
+    @DefaultValue("true")
+    @QueryParam("with_count")
+    private boolean withCount;
     private Long pageNumber = 1L;
-    private Long displaySize = MAX_DISPLAY_SIZE;
+
+    @DefaultValue("500")
+    @QueryParam("display_size")
+    private Long displaySize = DEFAULT_MAX_DISPLAY_SIZE;
     private Map<String, Object> queryMap;
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
+    }
+
+    public void setWithCount(boolean withCount) {
+        this.withCount = withCount;
+    }
+
+    public boolean withCount() {
+        return this.withCount;
     }
 
     public void setEmail(String email) {
@@ -143,15 +160,12 @@ public class TransactionSearchParams {
         }
     }
 
-    @QueryParam("display_size")
     public void setDisplaySize(Long displaySize) {
-        if (displaySize == null || displaySize > MAX_DISPLAY_SIZE) {
-            LOGGER.info("Invalid display_size [{}] for transaction search params. Setting display_size to default [{}]",
-                    displaySize, MAX_DISPLAY_SIZE);
-            this.displaySize = MAX_DISPLAY_SIZE;
-        } else {
-            this.displaySize = displaySize;
-        }
+        this.displaySize = displaySize;
+    }
+
+    public void overrideMaxDisplaySize(Long maxDisplaySize) {
+        this.maxDisplaySize = maxDisplaySize;
     }
 
     public List<String> getFilterTemplates() {
@@ -314,7 +328,11 @@ public class TransactionSearchParams {
     }
 
     public Long getDisplaySize() {
-        return displaySize;
+        if (this.displaySize > this.maxDisplaySize) {
+            return this.maxDisplaySize;
+        } else {
+            return this.displaySize;
+        }
     }
 
     public String getFromDate() {
@@ -381,7 +399,7 @@ public class TransactionSearchParams {
             queries.add(TRANSACTION_TYPE_FIELD + "=" + transactionType);
         }
         queries.add("page=" + forPage);
-        queries.add("display_size=" + displaySize);
+        queries.add("display_size=" + getDisplaySize());
 
 
         return String.join("&", queries);
