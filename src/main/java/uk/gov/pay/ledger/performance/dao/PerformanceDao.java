@@ -11,7 +11,7 @@ public class PerformanceDao {
     private static final String PERFORMANCE_REPORT =
             "select coalesce(count(amount),0) as volume, coalesce(sum(amount),0) total_amount, " +
                     "coalesce(avg(amount),0) avg_amount from transaction " +
-            "where state='SUCCESS' and type='PAYMENT' AND  transaction_details @> '{\"live\": true}'";
+            "where state='SUCCESS' and type='PAYMENT' AND live=true";
 
     private final Jdbi jdbi;
 
