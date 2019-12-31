@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.event.dao;
 
-import au.com.dius.pact.provider.junit.target.TestTarget;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
@@ -9,8 +8,6 @@ import org.junit.Test;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventTicker;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
-import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.io.IOException;
@@ -225,7 +222,7 @@ public class EventDaoIT {
 
     @Test
     public void findEventsTickerFromDate_ShouldGetAllEventsFromDateSpecified() {
-        TransactionEntity transaction = aTransactionFixture()
+        aTransactionFixture()
                 .withExternalId("external-id-1")
                 .withLive(true)
                 .insert(rule.getJdbi())
@@ -240,7 +237,7 @@ public class EventDaoIT {
                 .withEventDate(event1.getEventDate().minusDays(1))
                 .insert(rule.getJdbi())
                 .toEntity();
-        Event event3 = anEventFixture()
+        anEventFixture()
                 .withResourceExternalId("external-id-1")
                 .withEventDate(event2.getEventDate().minusDays(1))
                 .insert(rule.getJdbi())

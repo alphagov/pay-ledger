@@ -69,8 +69,12 @@ public class EventTicker {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         EventTicker event = (EventTicker) o;
         return Objects.equals(id, event.id) &&
                 resourceType == event.resourceType &&
