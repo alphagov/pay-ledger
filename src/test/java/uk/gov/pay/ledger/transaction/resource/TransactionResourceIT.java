@@ -1,5 +1,7 @@
 package uk.gov.pay.ledger.transaction.resource;
 
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -16,14 +18,19 @@ import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import javax.ws.rs.core.Response;
-import java.time.ZoneOffset;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.time.ZoneOffset.UTC;
+import static org.apache.commons.csv.CSVFormat.DEFAULT;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
@@ -497,7 +504,7 @@ public class TransactionResourceIT {
                 .withCardBrand("visa")
                 .withCardBrandLabel("Visa")
                 .withGatewayAccountId(gatewayAccountId)
-                .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1))
+                .withCreatedDate(ZonedDateTime.now(UTC).minusHours(1))
                 .insert(rule.getJdbi());
 
         TransactionFixture successfulRefund = aTransactionFixture()
@@ -505,7 +512,7 @@ public class TransactionResourceIT {
                 .withState(TransactionState.SUCCESS)
                 .withParentExternalId(payment.getExternalId())
                 .withGatewayAccountId(gatewayAccountId)
-                .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
+                .withCreatedDate(ZonedDateTime.now(UTC))
                 .insert(rule.getJdbi());
 
         given().port(port)
@@ -602,14 +609,22 @@ public class TransactionResourceIT {
     }
 
     @Test
-    public void shouldGetAllTransactionsAsCSVWithAcceptType() {
+    public void shouldGetAllTransactionsAsCSVWithAcceptType() throws IOException {
         String targetGatewayAccountId = "123";
         String otherGatewayAccountId = "456";
 
         TransactionFixture transactionFixture = aTransactionFixture()
                 .withTransactionType("PAYMENT")
-                .withState(TransactionState.SUBMITTED)
+                .withState(TransactionState.ERROR_GATEWAY)
+                .withAmount(123L)
+                .withTotalAmount(123L)
+                .withCorporateCardSurcharge(5L)
+                .withCreatedDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
                 .withGatewayAccountId(targetGatewayAccountId)
+                .withLastDigitsCardNumber("1234")
+                .withCardBrandLabel("Diners Club")
+                .withDefaultCardDetails().withCardholderName("J Doe")
+                .withGatewayTransactionId("gateway-transaction-id")
                 .insert(rule.getJdbi());
 
         aTransactionFixture()
@@ -618,7 +633,7 @@ public class TransactionResourceIT {
                 .withGatewayAccountId(otherGatewayAccountId)
                 .insert(rule.getJdbi());
 
-        given().port(port)
+        InputStream csvResponseStream = given().port(port)
                 .accept("text/csv")
                 .get("/v1/transaction?" +
                         "account_id=" + targetGatewayAccountId +
@@ -628,6 +643,58 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType("text/csv")
-                .body(containsString(transactionFixture.getExternalId()));
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), DEFAULT).getRecords();
+
+        assertThat(csvRecords.size(), is(2));
+
+        CSVRecord header = csvRecords.get(0);
+        assertThat(header.get(0), is("Reference"));
+        assertThat(header.get(1), is("Description"));
+        assertThat(header.get(2), is("Email"));
+        assertThat(header.get(3), is("Amount"));
+        assertThat(header.get(4), is("Card Brand"));
+        assertThat(header.get(5), is("Cardholder Name"));
+        assertThat(header.get(6), is("Card Expiry Date"));
+        assertThat(header.get(7), is("Card Number"));
+        assertThat(header.get(8), is("State"));
+        assertThat(header.get(9), is("Finished"));
+        assertThat(header.get(10), is("Error Code"));
+        assertThat(header.get(11), is("Error Message"));
+        assertThat(header.get(12), is("Provider ID"));
+        assertThat(header.get(13), is("GOV.UK Payment ID"));
+        assertThat(header.get(14), is("Issued By"));
+        assertThat(header.get(15), is("Date Created"));
+        assertThat(header.get(16), is("Time Created"));
+        assertThat(header.get(17), is("Corporate Card Surcharge"));
+        assertThat(header.get(18), is("Total Amount"));
+        assertThat(header.get(19), is("Wallet Type"));
+        assertThat(header.get(20), is("Card Type"));
+
+        CSVRecord data = csvRecords.get(1);
+        assertThat(data.get(0), is(transactionFixture.getReference()));
+        assertThat(data.get(1), is(transactionFixture.getDescription()));
+        assertThat(data.get(2), is("someone@example.org"));
+        assertThat(data.get(3), is("1.23"));
+        assertThat(data.get(4), is("Diners Club"));
+        assertThat(data.get(5), is("J Doe"));
+        assertThat(data.get(6), is("10/21"));
+        assertThat(data.get(7), is("1234"));
+        assertThat(data.get(8), is("error"));
+        assertThat(data.get(9), is("true"));
+        assertThat(data.get(10), is("P0050"));
+        assertThat(data.get(11), is("Payment provider returned an error"));
+        assertThat(data.get(12), is("gateway-transaction-id"));
+        assertThat(data.get(13), is(transactionFixture.getExternalId()));
+        assertThat(data.get(14), is(""));
+        assertThat(data.get(15), is("12 Mar 2018"));
+        assertThat(data.get(16), is("16:25:01"));
+        assertThat(data.get(17), is("0.05"));
+        assertThat(data.get(18), is("1.23"));
+        assertThat(data.get(19), is(""));
+        assertThat(data.get(20), is("CREDIT"));
+
+        csvResponseStream.close();
     }
 }
