@@ -10,6 +10,8 @@ import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import static java.math.BigDecimal.valueOf;
+
 public class FlatCsvTransaction {
 
     @JsonProperty("Reference")
@@ -111,7 +113,7 @@ public class FlatCsvTransaction {
     private static String penceToCurrency(Long amount) {
         if (amount != null) {
             DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
-            return decimalFormat.format(amount / 100);
+            return decimalFormat.format(valueOf(amount).divide(valueOf(100L)));
         }
         return null;
     }
