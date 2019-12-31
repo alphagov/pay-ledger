@@ -1,7 +1,5 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -18,8 +16,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionSearchParams {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionSearchParams.class);
 
     private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "account_id";
     private static final String CARDHOLDER_NAME_FIELD = "cardholder_name";

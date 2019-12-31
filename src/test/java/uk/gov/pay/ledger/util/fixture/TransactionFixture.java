@@ -281,7 +281,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
-        JsonObject transactionDetail = getTransactionDetail();
         jdbi.withHandle(h ->
                 h.execute(
                         "INSERT INTO" +
@@ -324,7 +323,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         email,
                         cardholderName,
                         createdDate,
-                        transactionDetail.toString(),
+                        transactionDetails,
                         eventCount,
                         cardBrand,
                         lastDigitsCardNumber,

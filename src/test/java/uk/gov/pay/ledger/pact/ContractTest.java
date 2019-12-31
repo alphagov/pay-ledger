@@ -157,6 +157,7 @@ public abstract class ContractTest {
                 .withState(TransactionState.CREATED)
                 .withAmount(100L)
                 .withExternalMetadata(metadata)
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
 
@@ -172,6 +173,7 @@ public abstract class ContractTest {
                 .withState(TransactionState.CREATED)
                 .withAmount(100L)
                 .withGatewayTransactionId(gatewayTransactionId)
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
 
@@ -196,6 +198,7 @@ public abstract class ContractTest {
                 .withTotalAmount(2250L)
                 .withCaptureSubmittedDate(ZonedDateTime.now())
                 .withCapturedDate(ZonedDateTime.now())
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
 
@@ -218,6 +221,7 @@ public abstract class ContractTest {
                 .withAmount(100L)
                 .withFee(5L)
                 .withNetAmount(95L)
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
 
@@ -233,6 +237,7 @@ public abstract class ContractTest {
                 .withDelayedCapture(true)
                 .withRefundSummary(RefundSummary.ofValue("pending", 100L, 0L))
                 .withAmount(100L)
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
 
@@ -251,6 +256,7 @@ public abstract class ContractTest {
         aTransactionFixture()
                 .withExternalId(transactionId)
                 .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
 
         anEventFixture()
@@ -317,6 +323,7 @@ public abstract class ContractTest {
                 .withCreatedDate(ZonedDateTime.parse(createdDate))
                 .withCaptureSubmittedDate(ZonedDateTime.parse(createdDate).plusMinutes(20L))
                 .withCapturedDate(ZonedDateTime.parse(createdDate).plusHours(1L))
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
 
@@ -353,6 +360,7 @@ public abstract class ContractTest {
                 .withCreatedDate(ZonedDateTime.parse(createdDate))
                 .withCardBrand(null)
                 .withEmail(null)
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
 
@@ -361,6 +369,7 @@ public abstract class ContractTest {
                 .withExternalId(transactionExternalId)
                 .withGatewayAccountId(gatewayAccountId)
                 .withTransactionType(TransactionType.PAYMENT.name())
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi()).toEntity();
     }
 
@@ -372,6 +381,7 @@ public abstract class ContractTest {
                 .withAmount(amount)
                 .withState(state)
                 .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi()).toEntity();
     }
 
@@ -392,6 +402,7 @@ public abstract class ContractTest {
                 .withCardBrand(cardBrand)
                 .withCardBrandLabel(cardBrandLabel)
                 .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
 
@@ -418,6 +429,7 @@ public abstract class ContractTest {
                 .withCreatedDate(ZonedDateTime.parse(createdDate))
                 .withCaptureSubmittedDate(ZonedDateTime.parse(createdDate).plusMinutes(2L))
                 .withCapturedDate(ZonedDateTime.parse(createdDate).plusHours(1L))
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
 }
