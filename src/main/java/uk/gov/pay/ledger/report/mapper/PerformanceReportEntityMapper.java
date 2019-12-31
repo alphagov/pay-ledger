@@ -1,8 +1,8 @@
-package uk.gov.pay.ledger.performance.dao.mapper;
+package uk.gov.pay.ledger.report.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.ledger.performance.entity.PerformanceReportEntity;
+import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;

@@ -1,12 +1,12 @@
-package uk.gov.pay.ledger.performance.dao;
+package uk.gov.pay.ledger.report.dao;
 
 import org.jdbi.v3.core.Jdbi;
-import uk.gov.pay.ledger.performance.dao.mapper.PerformanceReportEntityMapper;
-import uk.gov.pay.ledger.performance.entity.PerformanceReportEntity;
+import uk.gov.pay.ledger.report.mapper.PerformanceReportEntityMapper;
+import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 
 import javax.inject.Inject;
 
-public class PerformanceDao {
+public class PerformanceReportDao {
 
     private static final String PERFORMANCE_REPORT =
             "select coalesce(count(amount),0) as volume, coalesce(sum(amount),0) total_amount, " +
@@ -16,7 +16,7 @@ public class PerformanceDao {
     private final Jdbi jdbi;
 
     @Inject
-    public PerformanceDao(Jdbi jdbi) {
+    public PerformanceReportDao(Jdbi jdbi) {
         this.jdbi = jdbi;
     }
 

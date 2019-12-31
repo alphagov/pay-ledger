@@ -1,10 +1,9 @@
-package uk.gov.pay.ledger.performance;
+package uk.gov.pay.ledger.report.dao;
 
 import org.hamcrest.Matchers;
 import org.junit.ClassRule;
 import org.junit.Test;
-import uk.gov.pay.ledger.performance.dao.PerformanceDao;
-import uk.gov.pay.ledger.performance.entity.PerformanceReportEntity;
+import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -17,12 +16,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.BigDecimalCloseTo.closeTo;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
-public class PerformanceDaoIT {
+public class PerformanceReportDaoIT {
 
     @ClassRule
     public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
 
-    private PerformanceDao transactionDao = new PerformanceDao(rule.getJdbi());
+    private PerformanceReportDao transactionDao = new PerformanceReportDao(rule.getJdbi());
 
     @Test
     public void report_volume_total_amount_and_average_amount() {

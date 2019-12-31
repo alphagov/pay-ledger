@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.performance.entity;
+package uk.gov.pay.ledger.report.entity;
 
 import java.math.BigDecimal;
 
