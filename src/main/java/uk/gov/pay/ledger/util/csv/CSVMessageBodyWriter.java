@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.util.csv;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -15,6 +16,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 @Provider
 @Produces("text/csv")
@@ -36,10 +38,15 @@ public class CSVMessageBodyWriter implements MessageBodyWriter<List> {
         if (data != null && !data.isEmpty()) {
             CsvMapper mapper = new CsvMapper();
 
-            // rank properties by class property order instead of alphabetically
             mapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
-            Object sample = data.get(0);
-            CsvSchema schema = mapper.schemaFor(sample.getClass()).withHeader();
+            mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
+
+            CsvSchema.Builder builder = CsvSchema.builder();
+            Map<String, Object> headerRow = (Map<String, Object>) data.get(data.size() - 1); // get last record which is header
+            headerRow.keySet().forEach(columnName -> builder.addColumn(columnName));
+
+            CsvSchema schema = builder.build().withHeader();
+            data.remove(data.size() - 1);
             mapper.writer(schema).writeValue(outputStream, data);
         }
     }

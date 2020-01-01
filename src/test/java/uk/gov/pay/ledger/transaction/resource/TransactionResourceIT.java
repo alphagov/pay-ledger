@@ -681,7 +681,7 @@ public class TransactionResourceIT {
         assertThat(data.get(5), is("J Doe"));
         assertThat(data.get(6), is("10/21"));
         assertThat(data.get(7), is("1234"));
-        assertThat(data.get(8), is("error"));
+        assertThat(data.get(8), is("error")); //todo: Map state to displayName as per selfservice and update test
         assertThat(data.get(9), is("true"));
         assertThat(data.get(10), is("P0050"));
         assertThat(data.get(11), is("Payment provider returned an error"));

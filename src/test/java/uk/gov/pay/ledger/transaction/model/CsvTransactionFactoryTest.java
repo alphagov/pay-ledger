@@ -43,6 +43,7 @@ public class CsvTransactionFactoryTest {
                                         .put("corporate_surcharge", 23)
                                         .put("wallet_type", "APPLE")
                                         .put("card_type", "DEBIT")
+                                        .put("card_brand_label", "Visa")
                                         .build())
                 );
     }
@@ -58,7 +59,7 @@ public class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Description"), is(transactionEntity.getDescription()));
         assertThat(csvDataMap.get("Email"), is(transactionEntity.getEmail()));
         assertThat(csvDataMap.get("Amount"), is("1.00"));
-        assertThat(csvDataMap.get("Card Brand"), is(transactionEntity.getCardBrand()));
+        assertThat(csvDataMap.get("Card Brand"), is("Visa"));
         assertThat(csvDataMap.get("Cardholder Name"), is(transactionEntity.getCardholderName()));
         assertThat(csvDataMap.get("Card Expiry Date"), is("10/24"));
         assertThat(csvDataMap.get("Card Number"), is(transactionEntity.getLastDigitsCardNumber()));

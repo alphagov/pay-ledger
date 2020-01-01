@@ -76,11 +76,11 @@ public class CsvTransactionFactory {
             result.put(FIELD_DESC, transactionEntity.getDescription());
             result.put(FIELD_EMAIL, transactionEntity.getEmail());
             result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount()));
-            result.put(FIELD_CARD_BRAND, transactionEntity.getCardBrand());
+            result.put(FIELD_CARD_BRAND, safeGetAsString(transactionDetails, "card_brand_label"));
             result.put(FIELD_CARDHOLDER_NAME, transactionEntity.getCardholderName());
             result.put(FIELD_CARD_EXPIRY_DATE, safeGetAsString(transactionDetails, "expiry_date"));
             result.put(FIELD_CARD_NUMBER, transactionEntity.getLastDigitsCardNumber());
-            result.put(FIELD_PROVIDER_ID, transactionEntity.getGatewayTransactionId());
+            result.put(FIELD_PROVIDER_ID, safeGetAsString(transactionDetails, "gateway_transaction_id"));
             result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getExternalId());
             result.put(FIELD_ISSUED_BY, safeGetAsString(transactionDetails, "user_email"));
             result.put(FIELD_DATE_CREATED, dateCreated);
