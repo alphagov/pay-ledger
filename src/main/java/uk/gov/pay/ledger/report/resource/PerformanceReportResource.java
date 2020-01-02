@@ -33,13 +33,15 @@ public class PerformanceReportResource {
     public PerformanceReportEntity getPerformanceReport(@QueryParam("from_date") String fromDate,
                                                         @QueryParam("to_date") String toDate) {
 
-        if ((isNotBlank(fromDate) && isBlank(toDate)) || (isNotBlank(toDate) && isBlank(fromDate))) {
-            throw new ValidationException("Both from_date and to_date must be provided");
+        boolean dateParamsProvided = isNotBlank(fromDate) || isNotBlank(toDate);
+        if (dateParamsProvided) {
+            if (isBlank(fromDate) || isBlank(toDate)) {
+                throw new ValidationException("Both from_date and to_date must be provided");
+            } else {
+                return performanceReportDao.performanceReportForPaymentTransactions(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
+            }
         }
-
-        if (isNotBlank(fromDate) && isNotBlank(toDate)) {
-            return performanceReportDao.performanceReportForPaymentTransactions(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
-        }
+        
         return performanceReportDao.performanceReportForPaymentTransactions();
     }
 }
