@@ -28,6 +28,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.csv.CSVFormat.DEFAULT;
+import static org.apache.commons.csv.CSVFormat.RFC4180;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -625,12 +626,79 @@ public class TransactionResourceIT {
                 .withCardBrandLabel("Diners Club")
                 .withDefaultCardDetails().withCardholderName("J Doe")
                 .withGatewayTransactionId("gateway-transaction-id")
+                .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
         aTransactionFixture()
                 .withTransactionType("PAYMENT")
                 .withState(TransactionState.SUBMITTED)
                 .withGatewayAccountId(otherGatewayAccountId)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withParentExternalId(transactionFixture.getExternalId())
+                .withGatewayAccountId(transactionFixture.getGatewayAccountId())
+                .withRefundedByUserEmail("refund-by-user-email@example.org")
+                .withCreatedDate(ZonedDateTime.parse("2018-03-12T16:24:01.123456Z"))
+                .withAmount(100L)
+                .withTotalAmount(100L)
+                .withState(TransactionState.ERROR_GATEWAY)
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction?" +
+                        "account_id=" + targetGatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(2));
+
+        CSVRecord paymentRecord = csvRecords.get(0);
+        assertPaymentTransactionDetails(paymentRecord, transactionFixture);
+        assertThat(paymentRecord.get("Amount"), is("1.23"));
+        assertThat(paymentRecord.get("State"), is("error")); //todo: Map state to displayName as per selfservice and update test
+        assertThat(paymentRecord.get("Finished"), is("true"));
+        assertThat(paymentRecord.get("Error Code"), is("P0050"));
+        assertThat(paymentRecord.get("Error Message"), is("Payment provider returned an error"));
+        assertThat(paymentRecord.get("Date Created"), is("12 Mar 2018"));
+        assertThat(paymentRecord.get("Time Created"), is("16:25:01"));
+        assertThat(paymentRecord.get("Corporate Card Surcharge"), is("0.05"));
+        assertThat(paymentRecord.get("Total Amount"), is("1.23"));
+        assertThat(paymentRecord.get("Wallet Type"), is(""));
+
+        CSVRecord refundRecord = csvRecords.get(1);
+        assertPaymentTransactionDetails(refundRecord, transactionFixture);
+        assertThat(refundRecord.get("Amount"), is("-1.00"));
+        assertThat(refundRecord.get("State"), is("error")); //todo: Map state to displayName as per selfservice and update test
+        assertThat(refundRecord.get("Finished"), is("true"));
+        assertThat(refundRecord.get("Error Code"), is("P0050"));
+        assertThat(refundRecord.get("Error Message"), is("Payment provider returned an error"));
+        assertThat(refundRecord.get("Date Created"), is("12 Mar 2018"));
+        assertThat(refundRecord.get("Time Created"), is("16:24:01"));
+        assertThat(refundRecord.get("Corporate Card Surcharge"), is("0.00"));
+        assertThat(refundRecord.get("Total Amount"), is("-1.00"));
+        assertThat(refundRecord.get("Wallet Type"), is(""));
+        assertThat(refundRecord.get("Issued By"), is("refund-by-user-email@example.org"));
+
+    }
+
+    @Test
+    public void shouldReturnCSVHeadersInCorrectOrder() throws IOException {
+        String targetGatewayAccountId = "123";
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(targetGatewayAccountId)
                 .insert(rule.getJdbi());
 
         InputStream csvResponseStream = given().port(port)
@@ -646,8 +714,6 @@ public class TransactionResourceIT {
                 .extract().asInputStream();
 
         List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), DEFAULT).getRecords();
-
-        assertThat(csvRecords.size(), is(2));
 
         CSVRecord header = csvRecords.get(0);
         assertThat(header.get(0), is("Reference"));
@@ -671,30 +737,18 @@ public class TransactionResourceIT {
         assertThat(header.get(18), is("Total Amount"));
         assertThat(header.get(19), is("Wallet Type"));
         assertThat(header.get(20), is("Card Type"));
+    }
 
-        CSVRecord data = csvRecords.get(1);
-        assertThat(data.get(0), is(transactionFixture.getReference()));
-        assertThat(data.get(1), is(transactionFixture.getDescription()));
-        assertThat(data.get(2), is("someone@example.org"));
-        assertThat(data.get(3), is("1.23"));
-        assertThat(data.get(4), is("Diners Club"));
-        assertThat(data.get(5), is("J Doe"));
-        assertThat(data.get(6), is("10/21"));
-        assertThat(data.get(7), is("1234"));
-        assertThat(data.get(8), is("error")); //todo: Map state to displayName as per selfservice and update test
-        assertThat(data.get(9), is("true"));
-        assertThat(data.get(10), is("P0050"));
-        assertThat(data.get(11), is("Payment provider returned an error"));
-        assertThat(data.get(12), is("gateway-transaction-id"));
-        assertThat(data.get(13), is(transactionFixture.getExternalId()));
-        assertThat(data.get(14), is(""));
-        assertThat(data.get(15), is("12 Mar 2018"));
-        assertThat(data.get(16), is("16:25:01"));
-        assertThat(data.get(17), is("0.05"));
-        assertThat(data.get(18), is("1.23"));
-        assertThat(data.get(19), is(""));
-        assertThat(data.get(20), is("CREDIT"));
-
-        csvResponseStream.close();
+    private void assertPaymentTransactionDetails(CSVRecord csvRecord, TransactionFixture transactionFixture) {
+        assertThat(csvRecord.get("Reference"), is(transactionFixture.getReference()));
+        assertThat(csvRecord.get("Description"), is(transactionFixture.getDescription()));
+        assertThat(csvRecord.get("Email"), is("someone@example.org"));
+        assertThat(csvRecord.get("Card Brand"), is("Diners Club"));
+        assertThat(csvRecord.get("Cardholder Name"), is("J Doe"));
+        assertThat(csvRecord.get("Card Expiry Date"), is("10/21"));
+        assertThat(csvRecord.get("Card Number"), is("1234"));
+        assertThat(csvRecord.get("Provider ID"), is("gateway-transaction-id"));
+        assertThat(csvRecord.get("GOV.UK Payment ID"), is(transactionFixture.getExternalId()));
+        assertThat(csvRecord.get("Card Type"), is("credit"));
     }
 }

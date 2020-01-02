@@ -67,6 +67,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String cardBrandLabel;
     private boolean live;
     private String refundedByUserEmail;
+    private TransactionEntity parentTransactionEntity;
 
     private TransactionFixture() {
     }
@@ -274,6 +275,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withParentTransactionEntity(TransactionEntity parentTransactionEntity) {
+        this.parentTransactionEntity = parentTransactionEntity;
+        return this;
+    }
+
     public TransactionFixture withLive(boolean live) {
         this.live = live;
         return this;
@@ -410,6 +416,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withTransactionType(transactionType)
                 .withLive(live)
                 .withGatewayTransactionId(gatewayTransactionId)
+                .withParentTransactionEntity(parentTransactionEntity)
                 .build();
     }
 

@@ -32,6 +32,7 @@ public class CsvTransactionFactoryTest {
 
         transactionFixture = aTransactionFixture()
                 .withState(TransactionState.FAILED_REJECTED)
+                .withTransactionType(TransactionType.PAYMENT.name())
                 .withAmount(100L)
                 .withCreatedDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
                 .withTotalAmount(123L)
@@ -41,7 +42,7 @@ public class CsvTransactionFactoryTest {
                                         .put("expiry_date", "10/24")
                                         .put("user_email", "refundedbyuser@example.org")
                                         .put("corporate_surcharge", 23)
-                                        .put("wallet_type", "APPLE")
+                                        .put("wallet", "APPLE_PAY")
                                         .put("card_type", "DEBIT")
                                         .put("card_brand_label", "Visa")
                                         .build())
@@ -49,33 +50,50 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void toMapShouldReturnMapWithCorrectCsvData() {
+    public void toMapShouldReturnMapWithCorrectCsvDataForPaymentTransaction() {
 
         TransactionEntity transactionEntity = transactionFixture.toEntity();
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
 
-        assertThat(csvDataMap.get("Reference"), is(transactionEntity.getReference()));
-        assertThat(csvDataMap.get("Description"), is(transactionEntity.getDescription()));
-        assertThat(csvDataMap.get("Email"), is(transactionEntity.getEmail()));
+        assertPaymentDetails(csvDataMap, transactionEntity);
+
         assertThat(csvDataMap.get("Amount"), is("1.00"));
-        assertThat(csvDataMap.get("Card Brand"), is("Visa"));
-        assertThat(csvDataMap.get("Cardholder Name"), is(transactionEntity.getCardholderName()));
-        assertThat(csvDataMap.get("Card Expiry Date"), is("10/24"));
-        assertThat(csvDataMap.get("Card Number"), is(transactionEntity.getLastDigitsCardNumber()));
         assertThat(csvDataMap.get("State"), is("declined"));
         assertThat(csvDataMap.get("Finished"), is(true));
         assertThat(csvDataMap.get("Error Code"), is("P0010"));
         assertThat(csvDataMap.get("Error Message"), is("Payment method rejected"));
-        assertThat(csvDataMap.get("Provider ID"), is(transactionEntity.getGatewayTransactionId()));
-        assertThat(csvDataMap.get("GOV.UK Payment ID"), is(transactionEntity.getExternalId()));
-        assertThat(csvDataMap.get("Issued By"), is("refundedbyuser@example.org"));
         assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
         assertThat(csvDataMap.get("Time Created"), is("16:25:01"));
         assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.23"));
         assertThat(csvDataMap.get("Total Amount"), is("1.23"));
-        assertThat(csvDataMap.get("Card Type"), is("DEBIT"));
-        assertThat(csvDataMap.get("Wallet Type"), is("APPLE"));
+    }
+
+    @Test
+    public void toMapShouldReturnMapWithCorrectCsvDataForRefundTransaction() {
+
+        TransactionEntity transactionEntity = transactionFixture.toEntity();
+        TransactionEntity refundTransactionEntity = transactionFixture.withTransactionType("REFUND")
+                .withAmount(99L)
+                .withTotalAmount(99L)
+                .withParentTransactionEntity(transactionEntity)
+                .withTransactionDetails(new GsonBuilder().create()
+                        .toJson(ImmutableMap.builder().put("user_email", "refundedbyuser@example.org").build()))
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(refundTransactionEntity);
+
+        assertPaymentDetails(csvDataMap, refundTransactionEntity.getParentTransactionEntity());
+        assertThat(csvDataMap.get("Amount"), is("-0.99"));
+        assertThat(csvDataMap.get("State"), is("declined"));
+        assertThat(csvDataMap.get("Finished"), is(true));
+        assertThat(csvDataMap.get("Error Code"), is("P0010"));
+        assertThat(csvDataMap.get("Error Message"), is("Payment method rejected"));
+        assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
+        assertThat(csvDataMap.get("Time Created"), is("16:25:01"));
+        assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.00"));
+        assertThat(csvDataMap.get("Total Amount"), is("-0.99"));
+        assertThat(csvDataMap.get("Net"), is("-0.99"));
     }
 
     @Test
@@ -98,6 +116,7 @@ public class CsvTransactionFactoryTest {
     public void toMapShouldIncludeFeeAndNetAmountForStripePayments() {
         TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
                 .withPaymentProvider("stripe")
+                .withTransactionType(TransactionType.PAYMENT.name())
                 .withFee(6).toEntity();
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
@@ -110,6 +129,7 @@ public class CsvTransactionFactoryTest {
     public void getCsvHeadersShouldReturnMapWithCorrectCsvHeaders() {
         TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
                 .withState(TransactionState.FAILED_REJECTED)
+                .withTransactionType(TransactionType.PAYMENT.name())
                 .withPaymentProvider("sandbox")
                 .withFee(6).toEntity();
 
@@ -187,5 +207,19 @@ public class CsvTransactionFactoryTest {
 
         assertThat(csvHeaders.get("Net"), is(notNullValue()));
         assertThat(csvHeaders.get("Fee"), is(notNullValue()));
+    }
+
+    private void assertPaymentDetails(Map<String, Object> csvDataMap, TransactionEntity transactionEntity) {
+        assertThat(csvDataMap.get("Reference"), is(transactionEntity.getReference()));
+        assertThat(csvDataMap.get("Description"), is(transactionEntity.getDescription()));
+        assertThat(csvDataMap.get("Email"), is(transactionEntity.getEmail()));
+        assertThat(csvDataMap.get("Card Brand"), is("Visa"));
+        assertThat(csvDataMap.get("Cardholder Name"), is(transactionEntity.getCardholderName()));
+        assertThat(csvDataMap.get("Card Expiry Date"), is("10/24"));
+        assertThat(csvDataMap.get("Card Number"), is(transactionEntity.getLastDigitsCardNumber()));
+        assertThat(csvDataMap.get("Provider ID"), is(transactionEntity.getGatewayTransactionId()));
+        assertThat(csvDataMap.get("GOV.UK Payment ID"), is(transactionEntity.getExternalId()));
+        assertThat(csvDataMap.get("Card Type"), is("debit"));
+        assertThat(csvDataMap.get("Wallet Type"), is("Apple Pay"));
     }
 }
