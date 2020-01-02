@@ -9,6 +9,7 @@ import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.model.CsvTransactionFactory;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionEvent;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
@@ -40,16 +41,18 @@ public class TransactionService {
     private final EventDao eventDao;
     private TransactionEntityFactory transactionEntityFactory;
     private TransactionFactory transactionFactory;
+    private CsvTransactionFactory csvTransactionFactory;
     private ObjectMapper objectMapper;
 
     @Inject
     public TransactionService(TransactionDao transactionDao, EventDao eventDao, TransactionEntityFactory transactionEntityFactory,
-                              TransactionFactory transactionFactory,
+                              TransactionFactory transactionFactory, CsvTransactionFactory csvTransactionFactory,
                               ObjectMapper objectMapper) {
         this.transactionDao = transactionDao;
         this.eventDao = eventDao;
         this.transactionEntityFactory = transactionEntityFactory;
         this.transactionFactory = transactionFactory;
+        this.csvTransactionFactory = csvTransactionFactory;
         this.objectMapper = objectMapper;
     }
 
@@ -128,6 +131,21 @@ public class TransactionService {
         }
 
         return buildTransactionSearchResponse(searchParams, uriInfo, transactionList, total);
+    }
+
+    public List<Map<String, Object>> searchTransactionsForCsv(TransactionSearchParams searchParams) {
+        List<TransactionEntity> transactions = transactionDao.searchTransactionsAndParent(searchParams);
+
+        List<Map<String, Object>> transactionListForCsv = transactions.stream()
+                .map(csvTransactionFactory::toMap)
+                .collect(Collectors.toList());
+
+        if (!transactionListForCsv.isEmpty()) {
+            Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeaders(transactions);
+            transactionListForCsv.add(csvHeaders);
+        }
+
+        return transactionListForCsv;
     }
 
     private TransactionSearchResponse buildTransactionSearchResponse(TransactionSearchParams searchParams, UriInfo uriInfo, List<Transaction> transactionList, Long totalCount) {
