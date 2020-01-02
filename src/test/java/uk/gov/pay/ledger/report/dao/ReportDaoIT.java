@@ -5,9 +5,11 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
+import uk.gov.pay.ledger.report.entity.TimeseriesReportSlice;
 import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
@@ -377,5 +379,84 @@ public class ReportDaoIT {
         TransactionsStatisticsResult refundsStatistics = reportDao.getTransactionSummaryStatistics(transactionParams, TransactionType.REFUND);
         assertThat(refundsStatistics.getCount(), is(1L));
         assertThat(refundsStatistics.getGrossAmount(), is(1000L));
+    }
+
+    @Test
+    public void shouldGetTransactionVolumesGroupedByTimeseries() {
+        aTransactionFixture()
+                .withGatewayAccountId("100")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.100Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        aTransactionFixture()
+                .withGatewayAccountId("100")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T08:30:00.000Z"))
+                .withAmount(1000L)
+                .withTotalAmount(1500L)
+                .withState(TransactionState.SUCCESS)
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        aTransactionFixture()
+                .withGatewayAccountId("100")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T08:40:00.000Z"))
+                .withAmount(1000L)
+                .withTotalAmount(1500L)
+                .withState(TransactionState.SUBMITTED)
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        aTransactionFixture()
+                .withGatewayAccountId("100")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T09:20:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        aTransactionFixture()
+                .withGatewayAccountId("100")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T18:20:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.ERROR)
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        List<TimeseriesReportSlice> timeseriesReportSlices = reportDao.getTransactionsVolumeByTimeseries(
+                ZonedDateTime.parse("2019-09-30T00:00:00.000Z"),
+                ZonedDateTime.parse("2019-09-30T23:59:59.999Z")
+        );
+        assertThat(timeseriesReportSlices.size(), is(4));
+
+        assertThat(timeseriesReportSlices.get(0).getTimestamp().getHour(), is(0));
+        assertThat(timeseriesReportSlices.get(0).getAllPayments(), is(1));
+
+        assertThat(timeseriesReportSlices.get(1).getTimestamp().getHour(), is(8));
+        assertThat(timeseriesReportSlices.get(1).getAmount(), is(2000));
+        assertThat(timeseriesReportSlices.get(1).getTotalAmount(), is(3000));
+        assertThat(timeseriesReportSlices.get(1).getAllPayments(), is(2));
+        assertThat(timeseriesReportSlices.get(1).getCompletedPayments(), is(1));
+        assertThat(timeseriesReportSlices.get(1).getErroredPayments(), is(0));
+
+        assertThat(timeseriesReportSlices.get(2).getTimestamp().getHour(), is(9));
+        assertThat(timeseriesReportSlices.get(2).getAllPayments(), is(1));
+
+        assertThat(timeseriesReportSlices.get(3).getTimestamp().getHour(), is(18));
+        assertThat(timeseriesReportSlices.get(3).getAllPayments(), is(1));
+        assertThat(timeseriesReportSlices.get(3).getCompletedPayments(), is(0));
+        assertThat(timeseriesReportSlices.get(3).getErroredPayments(), is(1));
     }
 }
