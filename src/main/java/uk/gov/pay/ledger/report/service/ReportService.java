@@ -2,14 +2,17 @@ package uk.gov.pay.ledger.report.service;
 
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.report.dao.ReportDao;
+import uk.gov.pay.ledger.report.entity.TimeseriesReportSlice;
 import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
 import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ReportService {
@@ -36,5 +39,9 @@ public class ReportService {
         TransactionsStatisticsResult payments = reportDao.getTransactionSummaryStatistics(params, TransactionType.PAYMENT);
         TransactionsStatisticsResult refunds = reportDao.getTransactionSummaryStatistics(params, TransactionType.REFUND);
         return new TransactionSummaryResult(payments, refunds, payments.getGrossAmount() - refunds.getGrossAmount());
+    }
+
+    public List<TimeseriesReportSlice> getTransactionsByHour(ZonedDateTime fromDate, ZonedDateTime toDate) {
+        return reportDao.getTransactionsVolumeByTimeseries(fromDate, toDate);
     }
 }
