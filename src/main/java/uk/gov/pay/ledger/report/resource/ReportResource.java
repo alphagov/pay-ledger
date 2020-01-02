@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.report.resource;
 
 import com.codahale.metrics.annotation.Timed;
+import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.report.entity.TimeseriesReportSlice;
 import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
 import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
@@ -10,7 +11,6 @@ import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;

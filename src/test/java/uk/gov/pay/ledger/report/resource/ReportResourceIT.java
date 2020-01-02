@@ -214,4 +214,24 @@ public class ReportResourceIT {
                 .body("[1].all_payments", is(1))
                 .body("[1].errored_payments", is(1));
     }
+
+    @Test
+    public void shouldRejectTimeseriesReportForTransactionVolumesByHourWithInvalidParams() {
+        aTransactionFixture()
+                .withGatewayAccountId("100")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T08:10:00.100Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("to_date", "2019-09-30T23:59:59.999Z")
+                .get("/v1/report/transactions-by-hour")
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+    }
 }

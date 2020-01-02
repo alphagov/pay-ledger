@@ -442,6 +442,7 @@ public class ReportDaoIT {
 
         assertThat(timeseriesReportSlices.get(0).getTimestamp().getHour(), is(0));
         assertThat(timeseriesReportSlices.get(0).getAllPayments(), is(1));
+        assertThat(timeseriesReportSlices.get(0).getCompletedPayments(), is(1));
 
         assertThat(timeseriesReportSlices.get(1).getTimestamp().getHour(), is(8));
         assertThat(timeseriesReportSlices.get(1).getAmount(), is(2000));
@@ -452,6 +453,9 @@ public class ReportDaoIT {
 
         assertThat(timeseriesReportSlices.get(2).getTimestamp().getHour(), is(9));
         assertThat(timeseriesReportSlices.get(2).getAllPayments(), is(1));
+        assertThat(timeseriesReportSlices.get(2).getCompletedPayments(), is(1));
+        assertThat(timeseriesReportSlices.get(2).getErroredPayments(), is(0));
+        assertThat(timeseriesReportSlices.get(2).getAmount(), is(1000));
 
         assertThat(timeseriesReportSlices.get(3).getTimestamp().getHour(), is(18));
         assertThat(timeseriesReportSlices.get(3).getAllPayments(), is(1));
