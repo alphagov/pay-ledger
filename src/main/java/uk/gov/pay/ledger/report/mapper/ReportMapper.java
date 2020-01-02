@@ -2,10 +2,8 @@ package uk.gov.pay.ledger.report.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 import uk.gov.pay.ledger.report.entity.TimeseriesReportSlice;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;

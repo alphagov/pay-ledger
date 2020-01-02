@@ -9,7 +9,6 @@ import uk.gov.pay.ledger.report.entity.TimeseriesReportSlice;
 import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
-import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;

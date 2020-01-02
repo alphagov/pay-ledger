@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
-import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
 import uk.gov.pay.ledger.report.entity.TimeseriesReportSlice;
 import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
@@ -72,13 +71,11 @@ public class ReportDao {
         });
     }
 
-    // @TODO(sfount) using an interface with annotations seems like a neater way of writing a DAO (see events)
-    // @TODO(sfount) selecting this report by individual gateway account would be useful in the future
     public List<TimeseriesReportSlice> getTransactionsVolumeByTimeseries(ZonedDateTime fromDate, ZonedDateTime toDate) {
         return jdbi.withHandle(handle -> handle.createQuery("SELECT " +
                     "date_trunc('hour', t.created_date) as timestamp, " +
                     "COUNT(1) as all_payments, " +
-                    "COUNT(1) filter (WHERE t.state IN ('ERROR', 'GATEWAY_ERROR')) as errored_payments, " +
+                    "COUNT(1) filter (WHERE t.state IN ('ERROR', 'ERROR_GATEWAY')) as errored_payments, " +
                     "COUNT(1) filter (WHERE t.state IN ('SUCCESS')) as completed_payments, " +
                     "SUM(t.amount) as amount, SUM(t.net_amount) as net_amount, SUM(t.total_amount) as total_amount, SUM(t.fee) as fee " +
                     "FROM transaction t " +

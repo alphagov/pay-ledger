@@ -167,4 +167,51 @@ public class ReportResourceIT {
                 .body("refunds.gross_amount", is(1000))
                 .body("net_income", is(3000));
     }
+
+    @Test
+    public void shouldGetTimeseriesReportForTransactionVolumesByHour() {
+        aTransactionFixture()
+                .withGatewayAccountId("100")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T08:10:00.100Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        aTransactionFixture()
+                .withGatewayAccountId("100")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T08:20:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.SUBMITTED)
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        aTransactionFixture()
+                .withGatewayAccountId("100")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T09:00:00.000Z"))
+                .withAmount(1000L)
+                .withState(TransactionState.ERROR_GATEWAY)
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("from_date", "2019-09-30T00:00:00.000Z")
+                .queryParam("to_date", "2019-09-30T23:59:59.999Z")
+                .get("/v1/report/transactions-by-hour")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("size()", is(2))
+                .body("[0].all_payments", is(2))
+                .body("[0].completed_payments", is(1))
+                .body("[1].all_payments", is(1))
+                .body("[1].errored_payments", is(1));
+    }
 }
