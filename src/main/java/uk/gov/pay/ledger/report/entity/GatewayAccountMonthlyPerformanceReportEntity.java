@@ -1,0 +1,55 @@
+package uk.gov.pay.ledger.report.entity;
+
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import java.math.BigDecimal;
+
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+public class GatewayAccountMonthlyPerformanceReportEntity {
+
+    private final long gatewayAccountId;
+    private final long totalVolume;
+    private final BigDecimal totalAmount;
+    private final BigDecimal averageAmount;
+    private final BigDecimal minimumAmount;
+    private final BigDecimal maximumAmount;
+
+    public GatewayAccountMonthlyPerformanceReportEntity(long gatewayAccountId,
+                                                        long totalVolume,
+                                                        BigDecimal totalAmount,
+                                                        BigDecimal averageAmount,
+                                                        BigDecimal minimumAmount,
+                                                        BigDecimal maximumAmount) {
+        this.gatewayAccountId = gatewayAccountId;
+        this.totalVolume = totalVolume;
+        this.totalAmount = totalAmount;
+        this.averageAmount = averageAmount;
+        this.minimumAmount = minimumAmount;
+        this.maximumAmount = maximumAmount;
+    }
+
+    public long getGatewayAccountId() {
+        return gatewayAccountId;
+    }
+
+    public long getTotalVolume() {
+        return totalVolume;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public BigDecimal getAverageAmount() {
+        return averageAmount;
+    }
+
+    public BigDecimal getMinimumAmount() {
+        return minimumAmount;
+    }
+
+    public BigDecimal getMaximumAmount() {
+        return maximumAmount;
+    }
+}

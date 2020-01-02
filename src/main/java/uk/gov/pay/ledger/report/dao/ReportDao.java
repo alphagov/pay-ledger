@@ -54,6 +54,8 @@ public class ReportDao {
         });
     }
 
+
+
     public TransactionsStatisticsResult getTransactionSummaryStatistics(TransactionSummaryParams params, TransactionType transactionType) {
         return jdbi.withHandle(handle -> {
             String template = createSearchTemplate(params.getFilterTemplates(), TRANSACTION_SUMMARY_STATISTICS);

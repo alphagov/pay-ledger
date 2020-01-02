@@ -131,4 +131,59 @@ public class PerformanceReportResourceIT {
                         .body("message", contains("Both from_date and to_date must be provided"))
                         .body("error_identifier", Matchers.is(ErrorIdentifier.GENERIC.toString())));
     }
+
+    @Test
+    public void report_volume_total_amount_and_average_amount_for_date_range_per_gateway_account() {
+        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionFixture()
+                .withCreatedDate(ZonedDateTime.parse(time))
+                .withAmount(1000L)
+                .withGatewayAccountId("1")
+                .withState(TransactionState.SUCCESS)
+                .withTransactionType("PAYMENT")
+                .withLive(true)
+                .insert(rule.getJdbi()));
+
+        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionFixture()
+                .withCreatedDate(ZonedDateTime.parse(time))
+                .withAmount(1000L)
+                .withGatewayAccountId("2")
+                .withState(TransactionState.SUCCESS)
+                .withTransactionType("PAYMENT")
+                .withLive(true)
+                .insert(rule.getJdbi()));
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("from_date", "2017-11-30T10:00:00Z")
+                .queryParam("to_date", "2019-12-11T10:00:00Z")
+                .get("/v1/report/gateway-performance-report")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON).log().body()
+                .body("[0].gateway_account_id", is(1))
+                .body("[0].total_volume", is(2))
+                .body("[0].total_amount", is(2000))
+                .body("[0].average_amount", is(1000.0f))
+                .body("[0].minimum_amount", is(1000))
+                .body("[0].maximum_amount", is(1000))
+                .body("[1].gateway_account_id", is(2))
+                .body("[1].total_volume", is(2))
+                .body("[1].total_amount", is(2000))
+                .body("[1].average_amount", is(1000.0f))
+                .body("[1].minimum_amount", is(1000))
+                .body("[1].maximum_amount", is(1000));
+    }
+
+    @Test
+    public void should_return_400_when_only_one_date_is_provided_for_gateway_performance_report() {
+        Stream.of("from_date", "to_date").forEach(queryParam ->
+                given().port(port)
+                        .contentType(JSON)
+                        .queryParam(queryParam, "2017-11-30T00:00:00Z")
+                        .get("/v1/report/gateway-performance-report")
+                        .then()
+                        .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                        .body("message", contains("Both from_date and to_date must be provided"))
+                        .body("error_identifier", Matchers.is(ErrorIdentifier.GENERIC.toString())));
+    }
 }

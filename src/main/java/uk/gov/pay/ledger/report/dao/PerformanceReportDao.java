@@ -2,11 +2,15 @@ package uk.gov.pay.ledger.report.dao;
 
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
+import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
 import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
+import uk.gov.pay.ledger.report.mapper.GatewayAccountMonthlyPerformanceReportEntityMapper;
 import uk.gov.pay.ledger.report.mapper.PerformanceReportEntityMapper;
 import uk.gov.pay.ledger.report.params.PerformanceReportParams;
 
 import javax.inject.Inject;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 public class PerformanceReportDao {
 
@@ -18,6 +22,21 @@ public class PerformanceReportDao {
     private static final String WITH_STATE = " and state=:state";
 
     private static final String WITH_DATE_RANGE = " and created_date between :startDate and :toDate";
+
+    private static final String MONTHLY_GATEWAY_ACCOUNT_PERFORMANCE_STATISTICS = "SELECT " +
+            "COALESCE(COUNT(t.amount), 0) AS volume, " +
+            "COALESCE(SUM(t.amount), 0) AS total_amount, " +
+            "COALESCE(AVG(t.amount), 0) AS avg_amount, " +
+            "COALESCE(MIN(t.amount), 0) AS min_amount, " +
+            "COALESCE(MAX(t.amount), 0) AS max_amount, " +
+            "t.gateway_account_id " +
+            "FROM transaction t " +
+            "WHERE t.state = 'SUCCESS' " +
+            "AND t.type = 'PAYMENT' " +
+            "AND t.live = TRUE " +
+            "AND created_date BETWEEN :startDate AND :endDate " +
+            "GROUP BY t.gateway_account_id " +
+            "ORDER BY t.gateway_account_id";
 
     private final Jdbi jdbi;
 
@@ -40,5 +59,14 @@ public class PerformanceReportDao {
             });
             return query.map(new PerformanceReportEntityMapper()).findOnly();
         });
+    }
+
+    public List<GatewayAccountMonthlyPerformanceReportEntity> monthlyPerformanceReportForGatewayAccounts(ZonedDateTime startDate, ZonedDateTime endDate) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery(MONTHLY_GATEWAY_ACCOUNT_PERFORMANCE_STATISTICS)
+                        .bind("startDate", startDate)
+                        .bind("endDate", endDate)
+                        .map(new GatewayAccountMonthlyPerformanceReportEntityMapper()).list());
     }
 }
