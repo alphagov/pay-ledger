@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventTicker;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
@@ -23,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.ZonedDateTimeTimestampMatcher.isDate;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
+import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class EventDaoIT {
 
@@ -217,4 +219,32 @@ public class EventDaoIT {
         List<Event> eventList = eventDao.findEventsForExternalIds(Set.of("some-ext-id-1", "some-ext-id-2"));
         assertThat(eventList.size(), is(0));
     }
+
+    @Test
+    public void findEventsTickerFromDate_ShouldGetAllEventsFromDateSpecified() {
+        aTransactionFixture()
+                .withExternalId("external-id-1")
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        Event event1 = anEventFixture()
+                .withResourceExternalId("external-id-1")
+                .insert(rule.getJdbi())
+                .toEntity();
+        Event event2 = anEventFixture()
+                .withResourceExternalId("external-id-1")
+                .withEventDate(event1.getEventDate().minusDays(1))
+                .insert(rule.getJdbi())
+                .toEntity();
+        anEventFixture()
+                .withResourceExternalId("external-id-1")
+                .withEventDate(event2.getEventDate().minusDays(1))
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        List<EventTicker> eventTickers = eventDao.findEventsTickerFromDate(event1.getEventDate().minusHours(1));
+        assertThat(eventTickers.size(), is(1));
+    }
+
 }

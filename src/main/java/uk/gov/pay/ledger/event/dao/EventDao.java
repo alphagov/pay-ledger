@@ -10,13 +10,17 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.jdbi.v3.sqlobject.transaction.Transaction;
 import uk.gov.pay.ledger.event.dao.mapper.EventMapper;
+import uk.gov.pay.ledger.event.dao.mapper.EventTickerMapper;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventTicker;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 @RegisterRowMapper(EventMapper.class)
+@RegisterRowMapper(EventTickerMapper.class)
 public interface EventDao {
     @CreateSqlObject
     ResourceTypeDao getResourceTypeDao();
@@ -73,4 +77,10 @@ public interface EventDao {
             " AND e.resource_type_id = rt.id" +
             " ORDER BY e.event_date ASC")
     List<Event> findEventsForExternalIds(@BindList("externalIds") Set<String> externalIds);
+
+    @SqlQuery("SELECT e.id, e.event_type, t.type, e.resource_external_id, e.event_date, t.card_brand, " +
+            "t.transaction_details->'payment_provider', t.gateway_account_id, t.type " +
+            "FROM event e LEFT JOIN transaction t ON e.resource_external_id = t.external_id " +
+            "WHERE e.event_date >= :fromDate AND t.live ORDER BY e.event_date DESC")
+    List<EventTicker> findEventsTickerFromDate(@Bind("fromDate") ZonedDateTime fromDate);
 }
