@@ -666,7 +666,7 @@ public class TransactionResourceIT {
         CSVRecord paymentRecord = csvRecords.get(0);
         assertPaymentTransactionDetails(paymentRecord, transactionFixture);
         assertThat(paymentRecord.get("Amount"), is("1.23"));
-        assertThat(paymentRecord.get("State"), is("error")); //todo: Map state to displayName as per selfservice and update test
+        assertThat(paymentRecord.get("State"), is("Error"));
         assertThat(paymentRecord.get("Finished"), is("true"));
         assertThat(paymentRecord.get("Error Code"), is("P0050"));
         assertThat(paymentRecord.get("Error Message"), is("Payment provider returned an error"));
@@ -679,7 +679,7 @@ public class TransactionResourceIT {
         CSVRecord refundRecord = csvRecords.get(1);
         assertPaymentTransactionDetails(refundRecord, transactionFixture);
         assertThat(refundRecord.get("Amount"), is("-1.00"));
-        assertThat(refundRecord.get("State"), is("error")); //todo: Map state to displayName as per selfservice and update test
+        assertThat(refundRecord.get("State"), is("Refund error"));
         assertThat(refundRecord.get("Finished"), is("true"));
         assertThat(refundRecord.get("Error Code"), is("P0050"));
         assertThat(refundRecord.get("Error Message"), is("Payment provider returned an error"));
@@ -689,7 +689,6 @@ public class TransactionResourceIT {
         assertThat(refundRecord.get("Total Amount"), is("-1.00"));
         assertThat(refundRecord.get("Wallet Type"), is(""));
         assertThat(refundRecord.get("Issued By"), is("refund-by-user-email@example.org"));
-
     }
 
     @Test
