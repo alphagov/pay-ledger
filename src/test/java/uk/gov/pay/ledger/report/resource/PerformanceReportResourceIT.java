@@ -1,7 +1,9 @@
 package uk.gov.pay.ledger.report.resource;
 
+import org.hamcrest.Matchers;
 import org.junit.ClassRule;
 import org.junit.Test;
+import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -13,6 +15,7 @@ import java.util.stream.Stream;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class PerformanceReportResourceIT {
@@ -57,11 +60,24 @@ public class PerformanceReportResourceIT {
                 .queryParam("from_date", "2017-11-30T10:00:00Z")
                 .queryParam("to_date", "2019-12-12T10:00:00Z")
                 .get("/v1/report/performance-report")
-                .then().log().body()
+                .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON).log().body()
                 .body("total_volume", is(3))
                 .body("total_amount", is(3000))
                 .body("average_amount", is(1000.0f));
+    }
+
+    @Test
+    public void should_return_422_when_only_one_date_is_provided() {
+        Stream.of("from_date", "to_date").forEach(queryParam ->
+                given().port(port)
+                        .contentType(JSON)
+                        .queryParam(queryParam, "2017-11-30T10:00:00Z")
+                        .get("/v1/report/performance-report")
+                        .then()
+                        .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                        .body("message", contains("Both from_date and to_date must be provided"))
+                        .body("error_identifier", Matchers.is(ErrorIdentifier.GENERIC.toString())));
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.report.resource;
 
 import com.codahale.metrics.annotation.Timed;
+import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.report.dao.PerformanceReportDao;
 import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 
@@ -13,6 +14,7 @@ import java.time.ZonedDateTime;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Path("/v1/report")
 @Produces(APPLICATION_JSON)
@@ -31,9 +33,13 @@ public class PerformanceReportResource {
     public PerformanceReportEntity getPerformanceReport(@QueryParam("from_date") String fromDate,
                                                         @QueryParam("to_date") String toDate) {
 
-        if (isBlank(fromDate) && isBlank(toDate)) {
-            return performanceReportDao.performanceReportForPaymentTransactions();
+        if ((isNotBlank(fromDate) && isBlank(toDate)) || (isNotBlank(toDate) && isBlank(fromDate))) {
+            throw new ValidationException("Both from_date and to_date must be provided");
         }
-        return performanceReportDao.performanceReportForPaymentTransactions(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
+
+        if (isNotBlank(fromDate) && isNotBlank(toDate)) {
+            return performanceReportDao.performanceReportForPaymentTransactions(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
+        }
+        return performanceReportDao.performanceReportForPaymentTransactions();
     }
 }
