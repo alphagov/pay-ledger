@@ -6,7 +6,9 @@ import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import javax.ws.rs.core.Response;
+import java.time.ZonedDateTime;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -38,5 +40,28 @@ public class PerformanceReportResourceIT {
                 .body("total_volume", is(3))
                 .body("total_amount", is(2970))
                 .body("average_amount", is(990.0f));
+    }
+
+    @Test
+    public void report_volume_total_amount_and_average_amount_for_date_range() {
+        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionFixture()
+                .withCreatedDate(ZonedDateTime.parse(time))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .withTransactionType("PAYMENT")
+                .withLive(true)
+                .insert(rule.getJdbi()));
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("from_date", "2017-11-30T10:00:00Z")
+                .queryParam("to_date", "2019-12-12T10:00:00Z")
+                .get("/v1/report/performance-report")
+                .then().log().body()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON).log().body()
+                .body("total_volume", is(3))
+                .body("total_amount", is(3000))
+                .body("average_amount", is(1000.0f));
     }
 }
