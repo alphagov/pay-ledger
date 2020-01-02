@@ -91,7 +91,6 @@ public class TransactionResource {
                                               @Context UriInfo uriInfo) {
         TransactionSearchParams csvSearchParams = Optional.ofNullable(searchParams)
                 .orElse(new TransactionSearchParams());
-        csvSearchParams.setWithCount(false);
         csvSearchParams.overrideMaxDisplaySize(100000L);
         csvSearchParams.setAccountId(gatewayAccountId);
         csvSearchParams.setWithParentTransaction(true);

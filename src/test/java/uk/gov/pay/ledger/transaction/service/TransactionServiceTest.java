@@ -105,7 +105,6 @@ public class TransactionServiceTest {
     @Test
     public void shouldReturnAListOfTransactionsWithStatusVersion2() {
         searchParams.setStatusVersion(2);
-        searchParams.setWithCount(true);
         List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 4);
         transactionViewList.add(aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity());
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
@@ -121,7 +120,6 @@ public class TransactionServiceTest {
     @Test
     public void shouldReturnAListOfTransactionsWithStatusVersion1() {
         searchParams.setStatusVersion(1);
-        searchParams.setWithCount(true);
         List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 4);
         transactionViewList.add(aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity());
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
@@ -134,7 +132,6 @@ public class TransactionServiceTest {
     public void shouldListTransactionsWithAllPaginationLinks() {
         List<TransactionEntity> transactionViewList = TransactionFixture
                 .aTransactionList(gatewayAccountId, 100);
-        searchParams.setWithCount(true);
         searchParams.setPageNumber(3L);
         searchParams.setDisplaySize(10L);
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
@@ -174,7 +171,6 @@ public class TransactionServiceTest {
         thrown.expectMessage("the requested page not found");
 
         searchParams.setPageNumber(2L);
-        searchParams.setWithCount(true);
 
         transactionService.searchTransactions(searchParams, mockUriInfo);
 
@@ -364,7 +360,6 @@ public class TransactionServiceTest {
     }
 
     private void setAllSearchParams() {
-        searchParams.setWithCount(true);
         searchParams.setEmail("test@email.com");
         searchParams.setCardHolderName("test");
         searchParams.setFromDate("2019-05-01T10:15:30Z");
