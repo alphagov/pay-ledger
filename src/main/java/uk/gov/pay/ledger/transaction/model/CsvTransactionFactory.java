@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -23,6 +24,8 @@ import java.util.TreeSet;
 
 import static java.math.BigDecimal.valueOf;
 import static net.logstash.logback.argument.StructuredArguments.kv;
+import static org.apache.commons.lang3.StringUtils.replaceChars;
+import static org.apache.commons.text.WordUtils.capitalizeFully;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
 import static uk.gov.pay.logging.LoggingKeys.PAYMENT_EXTERNAL_ID;
@@ -68,28 +71,42 @@ public class CsvTransactionFactory {
                     "dd MMM yyyy");
             String timeCreated = parseDateForPattern(transactionEntity.getCreatedDate(),
                     "HH:mm:ss");
+            Long totalAmount = transactionEntity.getTotalAmount() == null ? transactionEntity.getAmount() :
+                    transactionEntity.getTotalAmount();
+            Long netAmount = transactionEntity.getNetAmount() == null ? totalAmount :
+                    transactionEntity.getNetAmount();
 
             JsonNode transactionDetails = objectMapper.readTree(
                     Optional.ofNullable(transactionEntity.getTransactionDetails()).orElse("{}"));
 
-            result.put(FIELD_REFERENCE, transactionEntity.getReference());
-            result.put(FIELD_DESC, transactionEntity.getDescription());
-            result.put(FIELD_EMAIL, transactionEntity.getEmail());
-            result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount()));
-            result.put(FIELD_CARD_BRAND, safeGetAsString(transactionDetails, "card_brand_label"));
-            result.put(FIELD_CARDHOLDER_NAME, transactionEntity.getCardholderName());
-            result.put(FIELD_CARD_EXPIRY_DATE, safeGetAsString(transactionDetails, "expiry_date"));
-            result.put(FIELD_CARD_NUMBER, transactionEntity.getLastDigitsCardNumber());
-            result.put(FIELD_PROVIDER_ID, safeGetAsString(transactionDetails, "gateway_transaction_id"));
-            result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getExternalId());
-            result.put(FIELD_ISSUED_BY, safeGetAsString(transactionDetails, "user_email"));
+            if (TransactionType.PAYMENT.toString().equals(transactionEntity.getTransactionType())) {
+                result.putAll(
+                        getPaymentTransactionAttributes(transactionEntity)
+                );
+
+                result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount()));
+                result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalAmount));
+                result.put(FIELD_NET, penceToCurrency(netAmount));
+                result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
+            }
+            if (TransactionType.REFUND.toString().equals(transactionEntity.getTransactionType())) {
+                if (transactionEntity.getParentTransactionEntity() != null) {
+                    result.putAll(
+                            getPaymentTransactionAttributes(transactionEntity.getParentTransactionEntity())
+                    );
+                }
+
+                result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount() * -1));
+                result.put(FIELD_NET, penceToCurrency(netAmount * -1));
+                result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalAmount * -1));
+                result.put(FIELD_ISSUED_BY, safeGetAsString(transactionDetails, "user_email"));
+            }
+
             result.put(FIELD_DATE_CREATED, dateCreated);
             result.put(FIELD_TIME_CREATED, timeCreated);
-            result.put(FIELD_CORPORATE_CARD_SURCHARGE,
-                    penceToCurrency(safeGetAsLong(transactionDetails, "corporate_surcharge")));
-            result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(transactionEntity.getTotalAmount()));
-            result.put(FIELD_WALLET_TYPE, safeGetAsString(transactionDetails, "wallet_type"));
-            result.put(FIELD_CARD_TYPE, safeGetAsString(transactionDetails, "card_type"));
+            result.put(FIELD_CORPORATE_CARD_SURCHARGE, penceToCurrency(
+                    Optional.ofNullable(safeGetAsLong(transactionDetails, "corporate_surcharge")).orElse(0L)
+            ));
 
             if (transactionEntity.getState() != null) {
                 ExternalTransactionState state = ExternalTransactionState.from(transactionEntity.getState(), 2);
@@ -98,9 +115,6 @@ public class CsvTransactionFactory {
                 result.put(FIELD_ERROR_CODE, state.getCode());
                 result.put(FIELD_ERROR_MESSAGE, state.getMessage());
             }
-
-            result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
-            result.put(FIELD_NET, penceToCurrency(transactionEntity.getNetAmount()));
 
             Optional<Map<String, Object>> externalMetadata = getExternalMetadata(transactionEntity.getTransactionDetails());
 
@@ -111,6 +125,31 @@ public class CsvTransactionFactory {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]",
                     transactionEntity.getExternalId(), e.getMessage());
         }
+
+        return result;
+    }
+
+    private Map<String, Object> getPaymentTransactionAttributes(TransactionEntity transactionEntity) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+
+        JsonNode transactionDetails = objectMapper.readTree(
+                Optional.ofNullable(transactionEntity.getTransactionDetails()).orElse("{}"));
+
+        result.put(FIELD_REFERENCE, transactionEntity.getReference());
+        result.put(FIELD_DESC, transactionEntity.getDescription());
+        result.put(FIELD_EMAIL, transactionEntity.getEmail());
+        result.put(FIELD_CARDHOLDER_NAME, transactionEntity.getCardholderName());
+        result.put(FIELD_CARD_NUMBER, transactionEntity.getLastDigitsCardNumber());
+        result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getExternalId());
+
+        result.put(FIELD_CARD_BRAND, safeGetAsString(transactionDetails, "card_brand_label"));
+        result.put(FIELD_CARD_EXPIRY_DATE, safeGetAsString(transactionDetails, "expiry_date"));
+        result.put(FIELD_PROVIDER_ID, safeGetAsString(transactionDetails, "gateway_transaction_id"));
+        result.put(FIELD_CARD_TYPE, StringUtils.lowerCase(safeGetAsString(transactionDetails, "card_type")));
+
+        result.put(FIELD_WALLET_TYPE, capitalizeFully(
+                replaceChars(safeGetAsString(transactionDetails, "wallet"), '_', ' '))
+        );
 
         return result;
     }
