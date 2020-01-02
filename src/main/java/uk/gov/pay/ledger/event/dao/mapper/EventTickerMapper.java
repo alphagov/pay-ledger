@@ -19,7 +19,11 @@ public class EventTickerMapper implements RowMapper<EventTicker> {
                 ResourceType.valueOf(resultSet.getString("type").toUpperCase(Locale.UK)),
                 resultSet.getString("resource_external_id"),
                 ZonedDateTime.ofInstant(resultSet.getTimestamp("event_date").toInstant(), ZoneOffset.UTC),
-                resultSet.getString("event_type")
+                resultSet.getString("event_type"),
+                resultSet.getString("card_brand"),
+                resultSet.getString("type"),
+                resultSet.getString("payment_provider"),
+                resultSet.getString("gateway_account_id")
         );
     }
 }

@@ -224,12 +224,14 @@ public class EventDaoIT {
     public void findEventsTickerFromDate_ShouldGetAllEventsFromDateSpecified() {
         aTransactionFixture()
                 .withExternalId("external-id-1")
+                .withGatewayAccountId("100")
                 .withLive(true)
                 .insert(rule.getJdbi())
                 .toEntity();
 
         Event event1 = anEventFixture()
                 .withResourceExternalId("external-id-1")
+                .withEventType("PAYMENT_CREATED")
                 .insert(rule.getJdbi())
                 .toEntity();
         Event event2 = anEventFixture()
@@ -245,6 +247,9 @@ public class EventDaoIT {
 
         List<EventTicker> eventTickers = eventDao.findEventsTickerFromDate(event1.getEventDate().minusHours(1));
         assertThat(eventTickers.size(), is(1));
+        assertThat(eventTickers.get(0).getGatewayAccountId(), is("100"));
+        assertThat(eventTickers.get(0).getResourceExternalId(), is("external-id-1"));
+        assertThat(eventTickers.get(0).getEventType(), is("PAYMENT_CREATED"));
     }
 
 }
