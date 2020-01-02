@@ -19,21 +19,25 @@ public class EventTicker {
     @JsonSerialize(using = MicrosecondPrecisionDateTimeSerializer.class)
     private ZonedDateTime eventDate;
     private String eventType;
+    private String cardBrand;
+    private String transactionType;
+    private String paymentProvider;
+    private String gatewayAccountId;
+
 
     public EventTicker() { }
 
     public EventTicker(Long id, ResourceType resourceType, String resourceExternalId,
-                       ZonedDateTime eventDate, String eventType) {
+                       ZonedDateTime eventDate, String eventType, String cardBrand, String transactionType, String paymentProvider, String gatewayAccountId) {
         this.id = id;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
         this.eventDate = eventDate;
         this.eventType = eventType;
-    }
-
-    public EventTicker(ResourceType resourceType, String resourceExternalId, ZonedDateTime eventDate,
-                       String eventType) {
-        this(null, resourceType, resourceExternalId, eventDate, eventType);
+        this.cardBrand = cardBrand;
+        this.transactionType = transactionType;
+        this.paymentProvider = paymentProvider;
+        this.gatewayAccountId = gatewayAccountId;
     }
 
     public Long getId() {
@@ -86,5 +90,21 @@ public class EventTicker {
     @Override
     public int hashCode() {
         return Objects.hash(id, resourceType, resourceExternalId, eventDate, eventType);
+    }
+
+    public String getCardBrand() {
+        return cardBrand;
+    }
+
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public String getGatewayAccountId() {
+        return gatewayAccountId;
+    }
+
+    public String getPaymentProvider() {
+        return paymentProvider;
     }
 }
