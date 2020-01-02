@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.report.dao;
 
-import org.hamcrest.Matchers;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
@@ -46,7 +45,7 @@ public class PerformanceReportDaoIT {
 
         PerformanceReportEntity performanceReport = transactionDao.performanceReportForPaymentTransactions();
         assertThat(performanceReport.getTotalVolume(), is(3L));
-        assertThat(performanceReport.getTotalAmount(), Matchers.is(closeTo(expectedTotalAmount, ZERO)));
-        assertThat(performanceReport.getAverageAmount(), Matchers.is(closeTo(expectedAverageAmount, ZERO)));
+        assertThat(performanceReport.getTotalAmount(), is(closeTo(expectedTotalAmount, ZERO)));
+        assertThat(performanceReport.getAverageAmount(), is(closeTo(expectedAverageAmount, ZERO)));
     }
 }

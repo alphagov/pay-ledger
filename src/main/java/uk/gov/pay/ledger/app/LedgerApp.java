@@ -21,6 +21,7 @@ import uk.gov.pay.ledger.healthcheck.DependentResourceWaitCommand;
 import uk.gov.pay.ledger.healthcheck.HealthCheckResource;
 import uk.gov.pay.ledger.healthcheck.SQSHealthCheck;
 import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
+import uk.gov.pay.ledger.report.resource.PerformanceReportResource;
 import uk.gov.pay.ledger.report.resource.ReportResource;
 import uk.gov.pay.ledger.transaction.resource.TransactionResource;
 import uk.gov.pay.ledger.util.csv.CSVMessageBodyWriter;
@@ -67,6 +68,7 @@ public class LedgerApp extends Application<LedgerConfig> {
         environment.jersey().register(injector.getInstance(EventResource.class));
         environment.jersey().register(injector.getInstance(TransactionResource.class));
         environment.jersey().register(injector.getInstance(ReportResource.class));
+        environment.jersey().register(injector.getInstance(PerformanceReportResource.class));
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
 
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
