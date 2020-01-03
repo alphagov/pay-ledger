@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.report.dao.PerformanceReportDao;
 import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
+import uk.gov.pay.ledger.report.params.PerformanceReportParams.PerformanceReportParamsBuilder;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -41,7 +42,7 @@ public class PerformanceReportResource {
                 return performanceReportDao.performanceReportForPaymentTransactions(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
             }
         }
-        
-        return performanceReportDao.performanceReportForPaymentTransactions();
+
+        return performanceReportDao.performanceReportForPaymentTransactions(PerformanceReportParamsBuilder.builder().build());
     }
 }

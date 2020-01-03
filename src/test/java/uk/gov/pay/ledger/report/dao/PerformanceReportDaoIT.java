@@ -2,6 +2,8 @@ package uk.gov.pay.ledger.report.dao;
 
 import org.junit.ClassRule;
 import org.junit.Test;
+import uk.gov.pay.ledger.report.params.PerformanceReportParams;
+import uk.gov.pay.ledger.report.params.PerformanceReportParams.PerformanceReportParamsBuilder;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -49,7 +51,7 @@ public class PerformanceReportDaoIT {
     }
 
     @Test
-    public void report_volume_total_amount_and_average_amount() {
+    public void report_volume_total_amount_and_average_amount_by_state() {
         aTransactionFixture().withAmount(1000L).withState(TransactionState.STARTED).withTransactionType("PAYMENT")
                 .withLive(true).insert(rule.getJdbi());
 
@@ -69,9 +71,27 @@ public class PerformanceReportDaoIT {
         BigDecimal expectedTotalAmount = new BigDecimal(relevantAmounts.stream().mapToLong(amount -> amount).sum());
         BigDecimal expectedAverageAmount = new BigDecimal(relevantAmounts.stream().mapToLong(amount -> amount).average().getAsDouble());
 
-        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions();
+        var performanceReportParams = PerformanceReportParamsBuilder.builder().withState(TransactionState.SUCCESS).build();
+        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions(performanceReportParams);
         assertThat(performanceReportEntity.getTotalVolume(), is(3L));
         assertThat(performanceReportEntity.getTotalAmount(), is(closeTo(expectedTotalAmount, ZERO)));
         assertThat(performanceReportEntity.getAverageAmount(), is(closeTo(expectedAverageAmount, ZERO)));
+    }
+
+    @Test
+    public void report_volume_total_amount_and_average_amount_for_all_payments() {
+        Stream.of(TransactionState.STARTED, TransactionState.SUCCESS, TransactionState.SUBMITTED).forEach(state ->
+                aTransactionFixture()
+                        .withAmount(1000L)
+                        .withState(state)
+                        .withTransactionType("PAYMENT")
+                        .withLive(true)
+                        .insert(rule.getJdbi()));
+
+        var performanceReportParams = PerformanceReportParamsBuilder.builder().build();
+        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions(performanceReportParams);
+        assertThat(performanceReportEntity.getTotalVolume(), is(3L));
+        assertThat(performanceReportEntity.getTotalAmount(), is(closeTo(new BigDecimal(3000L), ZERO)));
+        assertThat(performanceReportEntity.getAverageAmount(), is(closeTo(new BigDecimal(1000L), ZERO)));
     }
 }
