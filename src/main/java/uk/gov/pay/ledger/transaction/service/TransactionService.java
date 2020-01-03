@@ -102,17 +102,14 @@ public class TransactionService {
                 .collect(Collectors.toList());
 
 
-        Long total = null;
-        if (searchParams.withCount()) {
-            total = transactionDao.getTotalForSearch(searchParams);
+        Long total = transactionDao.getTotalForSearch(searchParams);
 
-            long size = searchParams.getDisplaySize();
-            if (total > 0 && searchParams.getDisplaySize() > 0) {
-                long lastPage = (total + size - 1) / size;
-                if (searchParams.getPageNumber() > lastPage || searchParams.getPageNumber() < 1) {
-                    throw new WebApplicationException("the requested page not found",
-                            Response.Status.NOT_FOUND);
-                }
+        long size = searchParams.getDisplaySize();
+        if (total > 0 && searchParams.getDisplaySize() > 0) {
+            long lastPage = (total + size - 1) / size;
+            if (searchParams.getPageNumber() > lastPage || searchParams.getPageNumber() < 1) {
+                throw new WebApplicationException("the requested page not found",
+                        Response.Status.NOT_FOUND);
             }
         }
 
@@ -125,10 +122,7 @@ public class TransactionService {
                 .map(transactionFactory::createTransactionEntity)
                 .collect(Collectors.toList());
 
-        Long total = null;
-        if (searchParams.withCount()) {
-            total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
-        }
+        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
 
         return buildTransactionSearchResponse(searchParams, uriInfo, transactionList, total);
     }

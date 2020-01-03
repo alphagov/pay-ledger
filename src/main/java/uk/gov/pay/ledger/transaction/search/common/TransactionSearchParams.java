@@ -70,8 +70,6 @@ public class TransactionSearchParams {
     @QueryParam(TRANSACTION_TYPE_FIELD)
     private TransactionType transactionType;
     @DefaultValue("true")
-    @QueryParam("with_count")
-    private boolean withCount;
     private Long pageNumber = 1L;
 
     @DefaultValue("500")
@@ -81,14 +79,6 @@ public class TransactionSearchParams {
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
-    }
-
-    public void setWithCount(boolean withCount) {
-        this.withCount = withCount;
-    }
-
-    public boolean withCount() {
-        return this.withCount;
     }
 
     public void setEmail(String email) {
