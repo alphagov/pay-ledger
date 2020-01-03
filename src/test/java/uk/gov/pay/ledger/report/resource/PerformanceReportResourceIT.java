@@ -1,11 +1,13 @@
 package uk.gov.pay.ledger.report.resource;
 
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
@@ -16,6 +18,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
+import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class PerformanceReportResourceIT {
@@ -25,8 +28,55 @@ public class PerformanceReportResourceIT {
 
     private Integer port = rule.getAppRule().getLocalPort();
 
+    private DatabaseTestHelper databaseTestHelper = aDatabaseTestHelper(rule.getJdbi());
+
+    @After
+    public void tearDown() {
+        databaseTestHelper.truncateAllData();
+    }
+
     @Test
-    public void report_volume_total_amount_and_average_amount() {
+    public void should_return_400_when_invalid_state_provided() {
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("state", "wtf")
+                .get("/v1/report/performance-report")
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .body("message", contains("State provided must be one of uk.gov.pay.ledger.transaction.state.TransactionState"))
+                .body("error_identifier", Matchers.is(ErrorIdentifier.GENERIC.toString()));
+    }
+
+    @Test
+    public void report_volume_total_amount_and_average_amount_for_all_payments() {
+        Stream.of(TransactionState.STARTED, TransactionState.SUCCESS, TransactionState.SUBMITTED).forEach(state ->
+                aTransactionFixture()
+                        .withAmount(1000L)
+                        .withState(state)
+                        .withTransactionType("PAYMENT")
+                        .withLive(true)
+                        .insert(rule.getJdbi()));
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/report/performance-report")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON).log().body()
+                .body("total_volume", is(3))
+                .body("total_amount", is(3000))
+                .body("average_amount", is(1000.0f));
+    }
+
+    @Test
+    public void report_volume_total_amount_and_average_amount_by_state() {
+        aTransactionFixture()
+                .withAmount(1000L)
+                .withState(TransactionState.SUBMITTED)
+                .withTransactionType("PAYMENT")
+                .withLive(true)
+                .insert(rule.getJdbi());
+
         LongStream.of(1200L, 1020L, 750L).forEach(amount -> aTransactionFixture()
                 .withAmount(amount)
                 .withState(TransactionState.SUCCESS)
@@ -36,10 +86,11 @@ public class PerformanceReportResourceIT {
 
         given().port(port)
                 .contentType(JSON)
+                .queryParam("state", TransactionState.SUCCESS.name())
                 .get("/v1/report/performance-report")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON).log().body()
+                .contentType(JSON)
                 .body("total_volume", is(3))
                 .body("total_amount", is(2970))
                 .body("average_amount", is(990.0f));
@@ -69,7 +120,7 @@ public class PerformanceReportResourceIT {
     }
 
     @Test
-    public void should_return_422_when_only_one_date_is_provided() {
+    public void should_return_400_when_only_one_date_is_provided() {
         Stream.of("from_date", "to_date").forEach(queryParam ->
                 given().port(port)
                         .contentType(JSON)
