@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.transaction.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
@@ -37,6 +39,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class TransactionService {
 
     public static final int DEFAULT_STATUS_VERSION = 2;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvTransactionFactory.class);
     private final TransactionDao transactionDao;
     private final EventDao eventDao;
     private TransactionEntityFactory transactionEntityFactory;
@@ -128,16 +131,22 @@ public class TransactionService {
     }
 
     public List<Map<String, Object>> searchTransactionsForCsv(TransactionSearchParams searchParams) {
+        LOGGER.info("Search DB transactions for CSV - began");
         List<TransactionEntity> transactions = transactionDao.searchTransactionsAndParent(searchParams);
+        LOGGER.info("Search DB transactions for CSV - ended");
 
+        LOGGER.info("Mapping DB transactions to CSV data map - began");
         List<Map<String, Object>> transactionListForCsv = transactions.stream()
                 .map(csvTransactionFactory::toMap)
                 .collect(Collectors.toList());
+        LOGGER.info("Mapping DB transactions to CSV data map - ended");
 
+        LOGGER.info("Deriving CSV headers from transactions - began");
         if (!transactionListForCsv.isEmpty()) {
             Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeaders(transactions);
             transactionListForCsv.add(csvHeaders);
         }
+        LOGGER.info("Deriving CSV headers from transactions - ended");
 
         return transactionListForCsv;
     }
