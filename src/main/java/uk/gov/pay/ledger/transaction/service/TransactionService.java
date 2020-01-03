@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class TransactionService {
 
     public static final int DEFAULT_STATUS_VERSION = 2;
-    private static final Logger LOGGER = LoggerFactory.getLogger(CsvTransactionFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionService.class);
     private final TransactionDao transactionDao;
     private final EventDao eventDao;
     private TransactionEntityFactory transactionEntityFactory;
