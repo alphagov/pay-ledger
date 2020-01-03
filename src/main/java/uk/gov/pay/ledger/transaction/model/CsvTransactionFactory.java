@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.ExternalTransactionState;
+import uk.gov.pay.ledger.transaction.state.PaymentState;
+import uk.gov.pay.ledger.transaction.state.RefundState;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -88,6 +90,7 @@ public class CsvTransactionFactory {
                 result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalAmount));
                 result.put(FIELD_NET, penceToCurrency(netAmount));
                 result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
+                result.put(FIELD_STATE, PaymentState.getDisplayName(transactionEntity.getState()));
             }
             if (TransactionType.REFUND.toString().equals(transactionEntity.getTransactionType())) {
                 if (transactionEntity.getParentTransactionEntity() != null) {
@@ -100,6 +103,7 @@ public class CsvTransactionFactory {
                 result.put(FIELD_NET, penceToCurrency(netAmount * -1));
                 result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalAmount * -1));
                 result.put(FIELD_ISSUED_BY, safeGetAsString(transactionDetails, "user_email"));
+                result.put(FIELD_STATE, RefundState.getDisplayName(transactionEntity.getState()));
             }
 
             result.put(FIELD_DATE_CREATED, dateCreated);
@@ -110,7 +114,6 @@ public class CsvTransactionFactory {
 
             if (transactionEntity.getState() != null) {
                 ExternalTransactionState state = ExternalTransactionState.from(transactionEntity.getState(), 2);
-                result.put(FIELD_STATE, state.getStatus());
                 result.put(FIELD_FINISHED, state.isFinished());
                 result.put(FIELD_ERROR_CODE, state.getCode());
                 result.put(FIELD_ERROR_MESSAGE, state.getMessage());

@@ -59,7 +59,7 @@ public class CsvTransactionFactoryTest {
         assertPaymentDetails(csvDataMap, transactionEntity);
 
         assertThat(csvDataMap.get("Amount"), is("1.00"));
-        assertThat(csvDataMap.get("State"), is("declined"));
+        assertThat(csvDataMap.get("State"), is("Declined"));
         assertThat(csvDataMap.get("Finished"), is(true));
         assertThat(csvDataMap.get("Error Code"), is("P0010"));
         assertThat(csvDataMap.get("Error Message"), is("Payment method rejected"));
@@ -76,6 +76,7 @@ public class CsvTransactionFactoryTest {
         TransactionEntity refundTransactionEntity = transactionFixture.withTransactionType("REFUND")
                 .withAmount(99L)
                 .withTotalAmount(99L)
+                .withState(TransactionState.ERROR)
                 .withParentTransactionEntity(transactionEntity)
                 .withTransactionDetails(new GsonBuilder().create()
                         .toJson(ImmutableMap.builder().put("user_email", "refundedbyuser@example.org").build()))
@@ -85,10 +86,10 @@ public class CsvTransactionFactoryTest {
 
         assertPaymentDetails(csvDataMap, refundTransactionEntity.getParentTransactionEntity());
         assertThat(csvDataMap.get("Amount"), is("-0.99"));
-        assertThat(csvDataMap.get("State"), is("declined"));
+        assertThat(csvDataMap.get("State"), is("Refund error"));
         assertThat(csvDataMap.get("Finished"), is(true));
-        assertThat(csvDataMap.get("Error Code"), is("P0010"));
-        assertThat(csvDataMap.get("Error Message"), is("Payment method rejected"));
+        assertThat(csvDataMap.get("Error Code"), is("P0050"));
+        assertThat(csvDataMap.get("Error Message"), is("Payment provider returned an error"));
         assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
         assertThat(csvDataMap.get("Time Created"), is("16:25:01"));
         assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.00"));
