@@ -39,7 +39,11 @@ public class PerformanceReportResource {
             if (isBlank(fromDate) || isBlank(toDate)) {
                 throw new ValidationException("Both from_date and to_date must be provided");
             } else {
-                return performanceReportDao.performanceReportForPaymentTransactions(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
+                var params = PerformanceReportParamsBuilder.builder()
+                        .withFromDate(ZonedDateTime.parse(fromDate))
+                        .withToDate(ZonedDateTime.parse(toDate))
+                        .build();
+                return performanceReportDao.performanceReportForPaymentTransactions(params);
             }
         }
 

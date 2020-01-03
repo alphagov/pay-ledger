@@ -1,11 +1,12 @@
 package uk.gov.pay.ledger.report.dao;
 
+import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Test;
-import uk.gov.pay.ledger.report.params.PerformanceReportParams;
 import uk.gov.pay.ledger.report.params.PerformanceReportParams.PerformanceReportParamsBuilder;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -16,6 +17,7 @@ import static java.math.BigDecimal.ZERO;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.BigDecimalCloseTo.closeTo;
+import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class PerformanceReportDaoIT {
@@ -24,6 +26,13 @@ public class PerformanceReportDaoIT {
     public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
 
     private PerformanceReportDao transactionDao = new PerformanceReportDao(rule.getJdbi());
+
+    private DatabaseTestHelper databaseTestHelper = aDatabaseTestHelper(rule.getJdbi());
+
+    @After
+    public void tearDown() {
+        databaseTestHelper.truncateAllData();
+    }
 
     @Test
     public void report_volume_total_amount_and_average_amount_for_date_range() {
@@ -43,8 +52,11 @@ public class PerformanceReportDaoIT {
                 .withLive(true)
                 .insert(rule.getJdbi()));
 
-        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions(
-                ZonedDateTime.parse("2017-11-30T10:00:00Z"), ZonedDateTime.parse("2019-12-12T10:00:00Z"));
+        var performanceReportParams = PerformanceReportParamsBuilder.builder()
+                .withFromDate(ZonedDateTime.parse("2017-11-30T10:00:00Z"))
+                .withToDate(ZonedDateTime.parse("2019-12-12T10:00:00Z"))
+                .build();
+        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions(performanceReportParams);
         assertThat(performanceReportEntity.getTotalVolume(), is(3L));
         assertThat(performanceReportEntity.getTotalAmount(), is(closeTo(new BigDecimal(3000L), ZERO)));
         assertThat(performanceReportEntity.getAverageAmount(), is(closeTo(new BigDecimal(1000L), ZERO)));
