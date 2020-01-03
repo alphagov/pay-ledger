@@ -78,7 +78,7 @@ public interface EventDao {
             " ORDER BY e.event_date ASC")
     List<Event> findEventsForExternalIds(@BindList("externalIds") Set<String> externalIds);
 
-    @SqlQuery("SELECT e.id, e.event_type, e.resource_external_id, e.event_date, t.card_brand, " +
+    @SqlQuery("SELECT e.id, e.event_type, e.resource_external_id, e.event_date, t.card_brand, t.amount, " +
             "t.transaction_details->'payment_provider' as payment_provider, t.gateway_account_id, t.type " +
             "FROM event e LEFT JOIN transaction t ON e.resource_external_id = t.external_id " +
             "WHERE e.event_date >= :fromDate AND t.live ORDER BY e.event_date DESC")

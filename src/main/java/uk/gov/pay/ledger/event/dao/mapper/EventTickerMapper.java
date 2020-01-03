@@ -23,7 +23,7 @@ public class EventTickerMapper implements RowMapper<EventTicker> {
                 resultSet.getString("card_brand"),
                 resultSet.getString("type"),
                 resultSet.getString("payment_provider"),
-                resultSet.getString("gateway_account_id")
-        );
+                resultSet.getString("gateway_account_id"),
+                resultSet.getLong("amount"));
     }
 }

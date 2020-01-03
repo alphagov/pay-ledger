@@ -225,6 +225,7 @@ public class EventDaoIT {
         aTransactionFixture()
                 .withExternalId("external-id-1")
                 .withGatewayAccountId("100")
+                .withAmount(200L)
                 .withLive(true)
                 .insert(rule.getJdbi())
                 .toEntity();
@@ -250,6 +251,7 @@ public class EventDaoIT {
         assertThat(eventTickers.get(0).getGatewayAccountId(), is("100"));
         assertThat(eventTickers.get(0).getResourceExternalId(), is("external-id-1"));
         assertThat(eventTickers.get(0).getEventType(), is("PAYMENT_CREATED"));
+        assertThat(eventTickers.get(0).getAmount(), is(200L));
     }
 
 }

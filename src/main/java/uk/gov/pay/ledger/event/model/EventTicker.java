@@ -23,12 +23,12 @@ public class EventTicker {
     private String transactionType;
     private String paymentProvider;
     private String gatewayAccountId;
-
+    private Long amount;
 
     public EventTicker() { }
 
     public EventTicker(Long id, ResourceType resourceType, String resourceExternalId,
-                       ZonedDateTime eventDate, String eventType, String cardBrand, String transactionType, String paymentProvider, String gatewayAccountId) {
+                       ZonedDateTime eventDate, String eventType, String cardBrand, String transactionType, String paymentProvider, String gatewayAccountId, Long amount) {
         this.id = id;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
@@ -38,6 +38,7 @@ public class EventTicker {
         this.transactionType = transactionType;
         this.paymentProvider = paymentProvider;
         this.gatewayAccountId = gatewayAccountId;
+        this.amount = amount;
     }
 
     public Long getId() {
@@ -106,5 +107,9 @@ public class EventTicker {
 
     public String getPaymentProvider() {
         return paymentProvider;
+    }
+
+    public Long getAmount() {
+        return amount;
     }
 }
