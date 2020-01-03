@@ -26,6 +26,7 @@ import java.util.TreeSet;
 
 import static java.math.BigDecimal.valueOf;
 import static net.logstash.logback.argument.StructuredArguments.kv;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.replaceChars;
 import static org.apache.commons.text.WordUtils.capitalizeFully;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
@@ -138,10 +139,10 @@ public class CsvTransactionFactory {
         JsonNode transactionDetails = objectMapper.readTree(
                 Optional.ofNullable(transactionEntity.getTransactionDetails()).orElse("{}"));
 
-        result.put(FIELD_REFERENCE, transactionEntity.getReference());
-        result.put(FIELD_DESC, transactionEntity.getDescription());
-        result.put(FIELD_EMAIL, transactionEntity.getEmail());
-        result.put(FIELD_CARDHOLDER_NAME, transactionEntity.getCardholderName());
+        result.put(FIELD_REFERENCE, sanitiseAgainstSpreadsheetFormulaInjection(transactionEntity.getReference()));
+        result.put(FIELD_DESC, sanitiseAgainstSpreadsheetFormulaInjection(transactionEntity.getDescription()));
+        result.put(FIELD_EMAIL, sanitiseAgainstSpreadsheetFormulaInjection(transactionEntity.getEmail()));
+        result.put(FIELD_CARDHOLDER_NAME, sanitiseAgainstSpreadsheetFormulaInjection(transactionEntity.getCardholderName()));
         result.put(FIELD_CARD_NUMBER, transactionEntity.getLastDigitsCardNumber());
         result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getExternalId());
 
@@ -255,5 +256,13 @@ public class CsvTransactionFactory {
             }
         });
         return metadataHeaders;
+    }
+
+    private String sanitiseAgainstSpreadsheetFormulaInjection(String value) {
+        if (isBlank(value)) {
+            return value;
+        }
+
+        return value.replaceFirst("(^[=@+-])", "'$1");
     }
 }

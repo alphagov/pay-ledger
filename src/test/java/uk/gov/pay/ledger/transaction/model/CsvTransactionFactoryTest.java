@@ -210,6 +210,24 @@ public class CsvTransactionFactoryTest {
         assertThat(csvHeaders.get("Fee"), is(notNullValue()));
     }
 
+    @Test
+    public void shouldSanitiseValuesCorrectlyAgainstSpreadsheetFormulaInjection(){
+        TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
+                .withReference("=ref-1")
+                .withDescription("+desc-1")
+                .withEmail("@email.com")
+                .withCardholderName("-J Doe")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withFee(6).toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertThat(csvDataMap.get("Reference"), is("'=ref-1"));
+        assertThat(csvDataMap.get("Description"), is("'+desc-1"));
+        assertThat(csvDataMap.get("Email"), is("'@email.com"));
+        assertThat(csvDataMap.get("Cardholder Name"), is("'-J Doe"));
+    }
+
     private void assertPaymentDetails(Map<String, Object> csvDataMap, TransactionEntity transactionEntity) {
         assertThat(csvDataMap.get("Reference"), is(transactionEntity.getReference()));
         assertThat(csvDataMap.get("Description"), is(transactionEntity.getDescription()));
