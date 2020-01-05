@@ -57,9 +57,16 @@ public class EventResourceIT {
                 .insert(rule.getJdbi())
                 .toEntity();
 
+        anEventFixture()
+                .withResourceExternalId("an-external-id")
+                .withEventDate(event.getEventDate().plusHours(1))
+                .insert(rule.getJdbi())
+                .toEntity();
+
         given().port(port)
                 .contentType(JSON)
                 .queryParam("from_date", event.getEventDate().minusMinutes(1).toString())
+                .queryParam("to_date", event.getEventDate().plusMinutes(1).toString())
                 .get("/v1/event/ticker")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
