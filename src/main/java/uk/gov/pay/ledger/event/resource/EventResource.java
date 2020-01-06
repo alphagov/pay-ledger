@@ -48,11 +48,11 @@ public class EventResource {
     @Path("/ticker")
     @GET
     @Timed
-    public List<EventTicker> eventTickerList(@QueryParam("from_date") String fromDate) {
-        if(isBlank(fromDate)) {
-            throw new ValidationException("from_date is mandatory to receive event ticker");
+    public List<EventTicker> eventTickerList(@QueryParam("from_date") String fromDate, @QueryParam("to_date") String toDate) {
+        if(isBlank(fromDate) || isBlank(toDate)) {
+            throw new ValidationException("both from_date and to_date are mandatory to receive event ticker");
         }
 
-        return eventDao.findEventsTickerFromDate(ZonedDateTime.parse(fromDate));
+        return eventDao.findEventsTickerFromDate(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
     }
 }

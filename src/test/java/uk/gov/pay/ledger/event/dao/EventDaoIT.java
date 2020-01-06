@@ -246,7 +246,10 @@ public class EventDaoIT {
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        List<EventTicker> eventTickers = eventDao.findEventsTickerFromDate(event1.getEventDate().minusHours(1));
+        List<EventTicker> eventTickers = eventDao.findEventsTickerFromDate(
+                event1.getEventDate().minusHours(1),
+                event1.getEventDate().plusHours(1)
+        );
         assertThat(eventTickers.size(), is(1));
         assertThat(eventTickers.get(0).getGatewayAccountId(), is("100"));
         assertThat(eventTickers.get(0).getResourceExternalId(), is("external-id-1"));
