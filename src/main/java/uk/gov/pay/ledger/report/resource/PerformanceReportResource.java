@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.report.resource;
 import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.report.dao.PerformanceReportDao;
+import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
 import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 import uk.gov.pay.ledger.report.params.PerformanceReportParams.PerformanceReportParamsBuilder;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -13,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -63,5 +65,17 @@ public class PerformanceReportResource {
             }
         }
         return builder;
+    }
+
+    @Path("/gateway-performance-report")
+    @GET
+    @Timed
+    public List<GatewayAccountMonthlyPerformanceReportEntity> getGatewayMonthlyPerformanceReport(@QueryParam("from_date") String fromDate,
+                                                                                                 @QueryParam("to_date") String toDate) {
+        if (isBlank(fromDate) || isBlank(toDate)) {
+            throw new ValidationException("Both from_date and to_date must be provided");
+        }
+
+        return performanceReportDao.monthlyPerformanceReportForGatewayAccounts(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
     }
 }
