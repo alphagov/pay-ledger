@@ -38,6 +38,7 @@ pipeline {
                   string(credentialsId: 'pact_broker_password', variable: 'PACT_BROKER_PASSWORD')]
           ) {
               sh 'mvn -version'
+              sh 'mvn clean verify'
               sh "mvn clean package pact:publish -DrunContractTests=true -DPACT_BROKER_URL=https://pact-broker-test.cloudapps.digital -DPACT_CONSUMER_VERSION=${commit}" +
                       " -DPACT_BROKER_USERNAME=${PACT_BROKER_USERNAME} -DPACT_BROKER_PASSWORD=${PACT_BROKER_PASSWORD} -DPACT_CONSUMER_TAG=${branchName} -Dpact.provider.version=${commit} -Dpact.verifier.publishResults=true"
           }
