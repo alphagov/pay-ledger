@@ -165,12 +165,16 @@ public class PerformanceReportDaoIT {
         assertThat(gatewayAccountOnePerformanceReport.getAverageAmount(), is(closeTo(expectedValue, ZERO)));
         assertThat(gatewayAccountOnePerformanceReport.getMinimumAmount(), is(closeTo(expectedValue, ZERO)));
         assertThat(gatewayAccountOnePerformanceReport.getMaximumAmount(), is(closeTo(expectedValue, ZERO)));
+        assertThat(gatewayAccountOnePerformanceReport.getYear(), is(2019L));
+        assertThat(gatewayAccountOnePerformanceReport.getMonth(), is(1L));
 
         assertThat(gatewayAccountTwoPerformanceReport.getGatewayAccountId(), is(2L));
-        assertThat(gatewayAccountOnePerformanceReport.getTotalVolume(), is(1L));
-        assertThat(gatewayAccountOnePerformanceReport.getTotalAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountOnePerformanceReport.getAverageAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountOnePerformanceReport.getMinimumAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountOnePerformanceReport.getMaximumAmount(), is(closeTo(expectedValue, ZERO)));
+        assertThat(gatewayAccountTwoPerformanceReport.getTotalVolume(), is(1L));
+        assertThat(gatewayAccountTwoPerformanceReport.getTotalAmount(), is(closeTo(expectedValue, ZERO)));
+        assertThat(gatewayAccountTwoPerformanceReport.getAverageAmount(), is(closeTo(expectedValue, ZERO)));
+        assertThat(gatewayAccountTwoPerformanceReport.getMinimumAmount(), is(closeTo(expectedValue, ZERO)));
+        assertThat(gatewayAccountTwoPerformanceReport.getMaximumAmount(), is(closeTo(expectedValue, ZERO)));
+        assertThat(gatewayAccountTwoPerformanceReport.getYear(), is(2019L));
+        assertThat(gatewayAccountTwoPerformanceReport.getMonth(), is(1L));
     }
 }
