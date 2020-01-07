@@ -105,6 +105,7 @@ public class TransactionResourceIT {
 
         given().port(port)
                 .contentType(JSON)
+                .accept(JSON)
                 .get("/v1/transaction" +
                         "?account_id=123" +
                         "&state=cancelled"
@@ -154,6 +155,7 @@ public class TransactionResourceIT {
         Payment transactionToVerify = (Payment) transactionList.get(15);
         given().port(port)
                 .contentType(JSON)
+                .accept(JSON)
                 //todo: add more query params (refund_states, payment_states...) when search functionality is available
                 .get("/v1/transaction?" +
                         "account_id=" + gatewayAccountId +
@@ -243,8 +245,10 @@ public class TransactionResourceIT {
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
+
         given().port(port)
                 .contentType(JSON)
+                .accept(JSON)
                 .get("/v1/transaction?" +
                         "account_id=" + gatewayAccountId +
                         "&page=1" +
@@ -291,6 +295,7 @@ public class TransactionResourceIT {
 
         given().port(port)
                 .contentType(JSON)
+                .accept(JSON)
                 .get("/v1/transaction?" +
                         "account_id=" + gatewayAccountId +
                         "&page=1" +
@@ -337,6 +342,7 @@ public class TransactionResourceIT {
 
         given().port(port)
                 .contentType(JSON)
+                .accept(JSON)
                 .get("/v1/transaction?" +
                         "account_id=" + gatewayAccountId +
                         "&page=1" +
@@ -360,6 +366,7 @@ public class TransactionResourceIT {
 
         given().port(port)
                 .contentType(JSON)
+                .accept(JSON)
                 .get("/v1/transaction?" +
                         "account_id=" + submittedPayment.getGatewayAccountId() +
                         "&state=failed" +
@@ -381,6 +388,7 @@ public class TransactionResourceIT {
 
         given().port(port)
                 .contentType(JSON)
+                .accept(JSON)
                 .get("/v1/transaction?" +
                         "account_id=" + submittedPayment.getGatewayAccountId() +
                         "&state=declined"
@@ -413,6 +421,7 @@ public class TransactionResourceIT {
 
         given().port(port)
                 .contentType(JSON)
+                .accept(JSON)
                 .get("/v1/transaction?" +
                         "account_id=" + targetGatewayAccountId +
                         "&page=1" +
@@ -446,6 +455,7 @@ public class TransactionResourceIT {
 
         given().port(port)
                 .contentType(JSON)
+                .accept(JSON)
                 .get("/v1/transaction?" +
                         "override_account_id_restriction=true"
                 )
@@ -522,6 +532,7 @@ public class TransactionResourceIT {
 
         given().port(port)
                 .contentType(JSON)
+                .accept(JSON)
                 .get("/v1/transaction?" +
                         "account_id=" + gatewayAccountId +
                         "&with_parent_transaction=true" +
