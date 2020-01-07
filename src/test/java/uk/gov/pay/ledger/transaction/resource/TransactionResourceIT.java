@@ -77,6 +77,9 @@ public class TransactionResourceIT {
 
     @Test
     public void shouldReturn404ForNonExistentTransaction() {
+        transactionFixture = aTransactionFixture();
+        transactionFixture.insert(rule.getJdbi());
+
         given().port(port)
                 .contentType(JSON)
                 .get("/v1/transaction/does-not-exist?account_id=" + transactionFixture.getGatewayAccountId())
@@ -505,6 +508,7 @@ public class TransactionResourceIT {
                 .withCardBrand("visa")
                 .withCardBrandLabel("Visa")
                 .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
                 .withCreatedDate(ZonedDateTime.now(UTC).minusHours(1))
                 .insert(rule.getJdbi());
 
@@ -560,6 +564,7 @@ public class TransactionResourceIT {
                 .withState(TransactionState.SUCCESS)
                 .withAmount(1000L)
                 .withRefundedById("refund-by-user-id")
+                .withDefaultTransactionDetails()
                 .insert(rule.getJdbi())
                 .toEntity();
 

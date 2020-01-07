@@ -43,6 +43,7 @@ public class EventDaoIT {
         eventDao = rule.getJdbi().onDemand(EventDao.class);
         resourceTypeDao = rule.getJdbi().onDemand(ResourceTypeDao.class);
         dbHelper = aDatabaseTestHelper(rule.getJdbi());
+        dbHelper.truncateAllData();
     }
 
     @Test
