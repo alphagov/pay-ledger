@@ -117,6 +117,6 @@ public class TransactionResourceTest {
         List errors = (List) responseMessage.get("errors");
 
         assertThat(response.getStatus(), is(400));
-        assertThat(errors.get(0), is("query param gateway_account_id may not be empty"));
+        assertThat(errors.get(0), is("query param gateway_account_id must not be empty"));
     }
 }
