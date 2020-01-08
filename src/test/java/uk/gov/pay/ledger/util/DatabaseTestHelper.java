@@ -44,7 +44,7 @@ public class DatabaseTestHelper {
                         .createQuery("SELECT COUNT(*) FROM event WHERE resource_external_id = :external_id")
                         .bind("external_id", externalId)
                         .mapTo(Integer.class)
-                        .findOnly()
+                        .one()
         );
     }
 

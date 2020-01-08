@@ -72,7 +72,7 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.isLive(), is(true));
 
 
-        JsonObject transactionDetails = new JsonParser().parse(transactionEntity.getTransactionDetails()).getAsJsonObject();
+        JsonObject transactionDetails = JsonParser.parseString(transactionEntity.getTransactionDetails()).getAsJsonObject();
         assertThat(transactionDetails.get("language").getAsString(), is("en"));
         assertThat(transactionDetails.get("payment_provider").getAsString(), is("sandbox"));
         assertThat(transactionDetails.get("expiry_date").getAsString(), is("11/21"));

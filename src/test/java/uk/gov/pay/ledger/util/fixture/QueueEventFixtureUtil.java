@@ -47,7 +47,7 @@ public class QueueEventFixtureUtil {
             eventDetails.stringType("parent_resource_external_id", parentResourceExternalId);
         }
 
-        PactDslJsonBody eventDetailsPact = getNestedPact(new JsonParser().parse(eventData).getAsJsonObject());
+        PactDslJsonBody eventDetailsPact = getNestedPact(JsonParser.parseString(eventData).getAsJsonObject());
 
         eventDetails.object("event_details", eventDetailsPact);
 

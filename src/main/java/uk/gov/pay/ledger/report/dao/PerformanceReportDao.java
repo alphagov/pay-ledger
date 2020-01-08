@@ -59,7 +59,7 @@ public class PerformanceReportDao {
                 query.bind("startDate", dateRange.getFromDate());
                 query.bind("toDate", dateRange.getToDate());
             });
-            return query.map(new PerformanceReportEntityMapper()).findOnly();
+            return query.map(new PerformanceReportEntityMapper()).one();
         });
     }
 
