@@ -8,6 +8,7 @@ import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.google.gson.Gson;
 import org.junit.Rule;
 import org.junit.Test;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
@@ -47,7 +48,8 @@ public class CaptureSubmittedEventQueueContractTest {
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
                 .withGatewayAccountId(gatewayAccountId)
-                .withDefaultEventDataForEventType("CAPTURE_SUBMITTED");
+                .withEventType(SalientEventType.CAPTURE_SUBMITTED.toString())
+                .withDefaultEventDataForEventType(SalientEventType.CAPTURE_SUBMITTED.toString());
 
         Map<String, String> metadata = new HashMap<String, String>();
         metadata.put("contentType", "application/json");

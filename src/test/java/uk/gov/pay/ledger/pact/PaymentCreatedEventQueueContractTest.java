@@ -66,10 +66,10 @@ public class PaymentCreatedEventQueueContractTest {
         EventDao eventDao = appRule.getJdbi().onDemand(EventDao.class);
 
         await().atMost(1, TimeUnit.SECONDS).until(
-                () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
+                () -> transactionDao.findTransactionByExternalIdAndGatewayAccountId(externalId, gatewayAccountId).isPresent()
         );
 
-        Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
+        Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalIdAndGatewayAccountId(externalId, gatewayAccountId);
         assertThat(transaction.isPresent(), is(true));
         assertThat(transaction.get().getExternalId(), is(externalId));
         assertThat(transaction.get().getAmount(), is(1000L));

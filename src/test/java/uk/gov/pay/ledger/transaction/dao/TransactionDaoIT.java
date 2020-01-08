@@ -43,34 +43,55 @@ public class TransactionDaoIT {
 
         TransactionEntity retrievedTransaction = transactionDao.findTransactionByExternalId(transactionEntity.getExternalId()).get();
 
-        assertThat(retrievedTransaction.getId(), notNullValue());
-        assertThat(retrievedTransaction.getGatewayAccountId(), is(transactionEntity.getGatewayAccountId()));
-        assertThat(retrievedTransaction.getExternalId(), is(transactionEntity.getExternalId()));
-        assertThat(retrievedTransaction.getAmount(), is(transactionEntity.getAmount()));
-        assertThat(retrievedTransaction.getReference(), is(transactionEntity.getReference()));
-        assertThat(retrievedTransaction.getDescription(), is(transactionEntity.getDescription()));
-        assertThat(retrievedTransaction.getState(), is(transactionEntity.getState()));
-        assertThat(retrievedTransaction.getEmail(), is(transactionEntity.getEmail()));
-        assertThat(retrievedTransaction.getCardholderName(), is(transactionEntity.getCardholderName()));
-        assertThat(retrievedTransaction.getTransactionDetails(), containsString("\"external_metadata\": {\"key1\": \"value1\", \"anotherKey\": {\"nestedKey\": \"value\"}}"));
-        assertThat(retrievedTransaction.getCreatedDate(), is(transactionEntity.getCreatedDate()));
-        assertThat(retrievedTransaction.getTransactionDetails().contains(fixture.getLanguage()), is(true));
-        assertThat(retrievedTransaction.getTransactionDetails().contains(fixture.getReturnUrl()), is(true));
-        assertThat(retrievedTransaction.getTransactionDetails().contains(fixture.getPaymentProvider()), is(true));
-        assertThat(retrievedTransaction.getTransactionDetails().contains(fixture.getCardDetails().getBillingAddress().getAddressLine1()), is(true));
-        assertThat(retrievedTransaction.getEventCount(), is(transactionEntity.getEventCount()));
-        assertThat(retrievedTransaction.getCardBrand(), is(transactionEntity.getCardBrand()));
-        assertThat(retrievedTransaction.getLastDigitsCardNumber(), is(transactionEntity.getLastDigitsCardNumber()));
-        assertThat(retrievedTransaction.getFirstDigitsCardNumber(), is(transactionEntity.getFirstDigitsCardNumber()));
+        assertTransactionEntity(retrievedTransaction, fixture);
         assertThat(retrievedTransaction.getNetAmount(), is(transactionEntity.getNetAmount()));
         assertThat(retrievedTransaction.getTotalAmount(), is(transactionEntity.getTotalAmount()));
         assertThat(retrievedTransaction.getFee(), is(transactionEntity.getFee()));
-        assertThat(retrievedTransaction.getTransactionType(), is(transactionEntity.getTransactionType()));
-        assertThat(retrievedTransaction.getRefundAmountAvailable(), is(transactionEntity.getRefundAmountAvailable()));
-        assertThat(retrievedTransaction.getRefundAmountRefunded(), is(transactionEntity.getRefundAmountRefunded()));
-        assertThat(retrievedTransaction.getRefundStatus(), is(transactionEntity.getRefundStatus()));
-        assertThat(retrievedTransaction.getGatewayTransactionId(), is(transactionEntity.getGatewayTransactionId()));
         assertThat(retrievedTransaction.isLive(), is(true));
+    }
+
+    @Test
+    public void shouldRetrieveTransactionByExternalIdAndGatewayAccount() {
+        TransactionFixture fixture = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withExternalMetadata(ImmutableMap.of("key1", "value1", "anotherKey", ImmutableMap.of("nestedKey", "value")))
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+
+        TransactionEntity retrievedTransaction = transactionDao.findTransactionByExternalIdAndGatewayAccountId(
+                fixture.getExternalId(), fixture.getGatewayAccountId()).get();
+
+        assertTransactionEntity(retrievedTransaction, fixture);
+        assertThat(retrievedTransaction.getFee(), is(nullValue()));
+        assertThat(retrievedTransaction.getTotalAmount(), is(nullValue()));
+        assertThat(retrievedTransaction.getNetAmount(), is(nullValue()));
+    }
+
+    private void assertTransactionEntity(TransactionEntity transaction, TransactionFixture fixture) {
+        assertThat(transaction.getId(), notNullValue());
+        assertThat(transaction.getGatewayAccountId(), is(fixture.getGatewayAccountId()));
+        assertThat(transaction.getExternalId(), is(fixture.getExternalId()));
+        assertThat(transaction.getAmount(), is(fixture.getAmount()));
+        assertThat(transaction.getReference(), is(fixture.getReference()));
+        assertThat(transaction.getDescription(), is(fixture.getDescription()));
+        assertThat(transaction.getState(), is(fixture.getState()));
+        assertThat(transaction.getEmail(), is(fixture.getEmail()));
+        assertThat(transaction.getCardholderName(), is(fixture.getCardholderName()));
+        assertThat(transaction.getTransactionDetails(), containsString("\"external_metadata\": {\"key1\": \"value1\", \"anotherKey\": {\"nestedKey\": \"value\"}}"));
+        assertThat(transaction.getCreatedDate(), is(fixture.getCreatedDate()));
+        assertThat(transaction.getTransactionDetails().contains(fixture.getLanguage()), is(true));
+        assertThat(transaction.getTransactionDetails().contains(fixture.getReturnUrl()), is(true));
+        assertThat(transaction.getTransactionDetails().contains(fixture.getPaymentProvider()), is(true));
+        assertThat(transaction.getTransactionDetails().contains(fixture.getCardDetails().getBillingAddress().getAddressLine1()), is(true));
+        assertThat(transaction.getEventCount(), is(fixture.getEventCount()));
+        assertThat(transaction.getCardBrand(), is(fixture.getCardBrand()));
+        assertThat(transaction.getLastDigitsCardNumber(), is(fixture.getLastDigitsCardNumber()));
+        assertThat(transaction.getFirstDigitsCardNumber(), is(fixture.getFirstDigitsCardNumber()));
+        assertThat(transaction.getTransactionType(), is(fixture.getTransactionType()));
+        assertThat(transaction.getRefundAmountAvailable(), is(fixture.getRefundAmountAvailable()));
+        assertThat(transaction.getRefundAmountRefunded(), is(fixture.getRefundAmountRefunded()));
+        assertThat(transaction.getRefundStatus(), is(fixture.getRefundStatus()));
+        assertThat(transaction.getGatewayTransactionId(), is(fixture.getGatewayTransactionId()));
     }
 
     @Test
@@ -81,38 +102,16 @@ public class TransactionDaoIT {
                 .withExternalMetadata(ImmutableMap.of("key1", "value1", "anotherKey", ImmutableMap.of("nestedKey", "value")))
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
-        TransactionEntity transactionEntity = fixture.toEntity();
 
         TransactionEntity transaction = transactionDao
                 .findTransaction(
-                        transactionEntity.getExternalId(),
-                        transactionEntity.getGatewayAccountId(),
+                        fixture.getExternalId(),
+                        fixture.getGatewayAccountId(),
                         TransactionType.PAYMENT, null).get();
 
-        assertThat(transaction.getId(), notNullValue());
-        assertThat(transaction.getGatewayAccountId(), is(transactionEntity.getGatewayAccountId()));
-        assertThat(transaction.getExternalId(), is(transactionEntity.getExternalId()));
-        assertThat(transaction.getAmount(), is(transactionEntity.getAmount()));
-        assertThat(transaction.getReference(), is(transactionEntity.getReference()));
-        assertThat(transaction.getDescription(), is(transactionEntity.getDescription()));
-        assertThat(transaction.getState(), is(transactionEntity.getState()));
-        assertThat(transaction.getEmail(), is(transactionEntity.getEmail()));
-        assertThat(transaction.getCardholderName(), is(transactionEntity.getCardholderName()));
-        assertThat(transaction.getTransactionDetails(), containsString("\"external_metadata\": {\"key1\": \"value1\", \"anotherKey\": {\"nestedKey\": \"value\"}}"));
-        assertThat(transaction.getCreatedDate(), is(transactionEntity.getCreatedDate()));
-        assertThat(transaction.getTransactionDetails().contains(fixture.getLanguage()), is(true));
-        assertThat(transaction.getTransactionDetails().contains(fixture.getReturnUrl()), is(true));
-        assertThat(transaction.getTransactionDetails().contains(fixture.getPaymentProvider()), is(true));
-        assertThat(transaction.getTransactionDetails().contains(fixture.getCardDetails().getBillingAddress().getAddressLine1()), is(true));
-        assertThat(transaction.getEventCount(), is(transactionEntity.getEventCount()));
-        assertThat(transaction.getCardBrand(), is(transactionEntity.getCardBrand()));
-        assertThat(transaction.getLastDigitsCardNumber(), is(transactionEntity.getLastDigitsCardNumber()));
-        assertThat(transaction.getFirstDigitsCardNumber(), is(transactionEntity.getFirstDigitsCardNumber()));
-        assertThat(transaction.getTransactionType(), is(transactionEntity.getTransactionType()));
+        assertTransactionEntity(transaction, fixture);
         assertThat(transaction.getFee(), is(nullValue()));
         assertThat(transaction.getTotalAmount(), is(nullValue()));
-        assertThat(transaction.getRefundAmountAvailable(), is(transactionEntity.getRefundAmountAvailable()));
-        assertThat(transaction.getRefundAmountRefunded(), is(transactionEntity.getRefundAmountRefunded()));
     }
 
     @Test
