@@ -2,7 +2,6 @@ package uk.gov.pay.ledger.transaction.resource;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
@@ -15,6 +14,7 @@ import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
