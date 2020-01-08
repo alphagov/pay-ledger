@@ -590,6 +590,7 @@ public class TransactionResourceIT {
     public void getTransactionsForTransactionShouldReturnEmptyListIfParentTransactionHasNoTransactions() {
         transactionFixture = aTransactionFixture()
                 .withTransactionType("PAYMENT")
+                .withGatewayAccountId("1")
                 .withDefaultCardDetails()
                 .withDefaultTransactionDetails();
         transactionFixture.insert(rule.getJdbi());

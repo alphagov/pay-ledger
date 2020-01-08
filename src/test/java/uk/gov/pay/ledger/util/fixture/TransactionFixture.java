@@ -538,4 +538,24 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         this.refundedByUserEmail = refundedByUserEmail;
         return this;
     }
+
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public Long getRefundAmountAvailable() {
+        return refundAmountAvailable;
+    }
+
+    public Long getRefundAmountRefunded() {
+        return refundAmountRefunded;
+    }
+
+    public String getRefundStatus() {
+        return refundStatus;
+    }
+
+    public String getGatewayTransactionId() {
+        return gatewayTransactionId;
+    }
 }

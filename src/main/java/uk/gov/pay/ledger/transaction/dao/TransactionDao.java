@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 public class TransactionDao {
 
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID = "SELECT * FROM transaction " +
-            "WHERE external_id = :externalId";
+            "WHERE external_id = :externalId " +
+            "AND (:gatewayAccountId is NULL OR gateway_account_id = :gatewayAccountId)";
 
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
             "WHERE external_id = :externalId " +
@@ -176,9 +177,14 @@ public class TransactionDao {
     }
 
     public Optional<TransactionEntity> findTransactionByExternalId(String externalId) {
+        return findTransactionByExternalIdAndGatewayAccountId(externalId, null);
+    }
+
+    public Optional<TransactionEntity> findTransactionByExternalIdAndGatewayAccountId(String externalId, String gatewayAccountId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery(FIND_TRANSACTION_BY_EXTERNAL_ID)
                         .bind("externalId", externalId)
+                        .bind("gatewayAccountId", gatewayAccountId)
                         .map(new TransactionMapper())
                         .findFirst());
     }

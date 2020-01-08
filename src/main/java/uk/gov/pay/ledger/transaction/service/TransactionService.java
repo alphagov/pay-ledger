@@ -72,7 +72,7 @@ public class TransactionService {
     }
 
     public TransactionsForTransactionResponse getTransactions(String parentTransactionExternalId, String gatewayAccountId) {
-        return transactionDao.findTransactionByExternalId(parentTransactionExternalId)
+        return transactionDao.findTransactionByExternalIdAndGatewayAccountId(parentTransactionExternalId, gatewayAccountId)
                 .map(transactionEntity ->
                         findTransactionsForParentExternalId(
                                 transactionEntity.getExternalId(),
