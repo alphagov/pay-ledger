@@ -59,7 +59,7 @@ public class PaymentCreatedEventQueueContractTest {
 
     @Test
     @PactVerification({"connector"})
-    public void test() throws Exception {
+    public void test() {
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
 
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi());

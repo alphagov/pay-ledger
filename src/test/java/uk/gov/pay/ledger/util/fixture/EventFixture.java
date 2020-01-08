@@ -136,7 +136,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         resourceExternalId = event.getResourceExternalId();
         parentResourceExternalId = event.getParentResourceExternalId();
         eventDate = event.getEventDate();
-        eventType = event.getEventType().toString();
+        eventType = event.getEventType();
         eventData = event.getEventData();
         return this;
     }

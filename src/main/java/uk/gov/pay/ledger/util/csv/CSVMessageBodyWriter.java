@@ -7,7 +7,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -47,7 +46,7 @@ public class CSVMessageBodyWriter implements MessageBodyWriter<List> {
 
                 CsvSchema.Builder builder = CsvSchema.builder();
                 Map<String, Object> headerRow = (Map<String, Object>) data.get(data.size() - 1); // get last record which is header
-                headerRow.keySet().forEach(columnName -> builder.addColumn(columnName));
+                headerRow.keySet().forEach(builder::addColumn);
 
                 CsvSchema schema = builder.build().withoutHeader(); // without header to avoid writing header for each line
                 data.remove(data.size() - 1);

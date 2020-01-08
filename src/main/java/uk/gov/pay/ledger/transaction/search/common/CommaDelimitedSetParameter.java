@@ -16,8 +16,8 @@ public class CommaDelimitedSetParameter {
                 : List.of(queryString.split(","));
     }
 
-    public boolean isEmpty() {
-        return elements.isEmpty();
+    public boolean isNotEmpty() {
+        return !elements.isEmpty();
     }
 
     public String getRawString() {

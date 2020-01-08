@@ -172,7 +172,7 @@ public class TransactionSearchParams {
         if (isNotBlank(cardHolderName)) {
             filters.add(" lower(t.cardholder_name) LIKE lower(:" + CARDHOLDER_NAME_FIELD + ")");
         }
-        if (cardBrands != null && !cardBrands.isEmpty()) {
+        if (cardBrands != null && cardBrands.isNotEmpty()) {
             filters.add(" t.card_brand IN (<" + CARD_BRAND_FIELD + ">)");
         }
         if (isNotBlank(lastDigitsCardNumber)) {
@@ -199,7 +199,7 @@ public class TransactionSearchParams {
             filters.add(" (t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD +
                     " or parent.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD + ")");
         }
-        if (cardBrands != null && !cardBrands.isEmpty()) {
+        if (cardBrands != null && cardBrands.isNotEmpty()) {
             filters.add(" (lower(t.card_brand) IN (<" + CARD_BRAND_FIELD + ">)" +
                     " or lower(parent.card_brand) IN (<" + CARD_BRAND_FIELD + ">))");
         }
@@ -277,7 +277,7 @@ public class TransactionSearchParams {
                                 .map(TransactionState::name)
                                 .collect(Collectors.toList()));
             }
-            if (cardBrands != null && !cardBrands.isEmpty()) {
+            if (cardBrands != null && cardBrands.isNotEmpty()) {
                 queryMap.put(CARD_BRAND_FIELD, cardBrands.getParameters());
             }
             if (isSet(paymentStates)) {
@@ -372,10 +372,10 @@ public class TransactionSearchParams {
         if (isSet(paymentStates)) {
             queries.add(PAYMENT_STATES_FIELD + "=" + paymentStates.getRawString());
         }
-        if (refundStates != null && !refundStates.isEmpty()) {
+        if (refundStates != null && refundStates.isNotEmpty()) {
             queries.add(REFUND_STATES_FIELD + "=" + refundStates.getRawString());
         }
-        if (cardBrands != null && !cardBrands.isEmpty()) {
+        if (cardBrands != null && cardBrands.isNotEmpty()) {
             queries.add(CARD_BRAND_FIELD + "=" + cardBrands.getRawString());
         }
         if (isNotBlank(state)) {
@@ -433,7 +433,7 @@ public class TransactionSearchParams {
     }
 
     private boolean isSet(CommaDelimitedSetParameter commaDelimitedSetParameter) {
-        return commaDelimitedSetParameter != null && !commaDelimitedSetParameter.isEmpty();
+        return commaDelimitedSetParameter != null && commaDelimitedSetParameter.isNotEmpty();
     }
 
     public TransactionSearchParams setExactReferenceMatch(boolean exactReferenceMatch) {

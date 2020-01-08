@@ -21,7 +21,7 @@ public class SettlementSummary {
     @JsonProperty("capture_submit_time")
     public Optional<String> getSettlementSubmittedTime() {
         return Optional.ofNullable(settlementSubmittedTime)
-                .map(t -> ISO_INSTANT_MILLISECOND_PRECISION.format(t));
+                .map(ISO_INSTANT_MILLISECOND_PRECISION::format);
     }
 
     @JsonProperty("captured_date")
