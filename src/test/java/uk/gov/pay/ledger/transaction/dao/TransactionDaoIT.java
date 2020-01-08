@@ -198,12 +198,11 @@ public class TransactionDaoIT {
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        TransactionEntity transaction2 = aTransactionFixture()
+        aTransactionFixture()
                 .withState(TransactionState.SUBMITTED)
                 .withExternalId("external-id-2")
                 .withGatewayAccountId("gateway-account-id-2")
-                .insert(rule.getJdbi())
-                .toEntity();
+                .insert(rule.getJdbi());
 
         List<TransactionEntity> transactionEntityList =
                 transactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(
@@ -221,12 +220,11 @@ public class TransactionDaoIT {
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        TransactionEntity transaction2 = aTransactionFixture()
+        aTransactionFixture()
                 .withState(TransactionState.SUBMITTED)
                 .withGatewayAccountId(transaction1.getGatewayAccountId())
                 .withParentExternalId(transaction1.getExternalId())
-                .insert(rule.getJdbi())
-                .toEntity();
+                .insert(rule.getJdbi());
 
         List<TransactionEntity> transactionEntityList =
                 transactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(

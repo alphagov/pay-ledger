@@ -14,7 +14,6 @@ import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.queue.sqs.SqsQueueService;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -49,7 +48,7 @@ public class EventQueueTest {
         "}";
         SendMessageResult messageResult = mock(SendMessageResult.class);
 
-        List<QueueMessage> messages = Arrays.asList(
+        List<QueueMessage> messages = List.of(
                 QueueMessage.of(messageResult, validJsonMessage)
         );
         QueueMessageReceiverConfig queueMessageReceiverConfig = mock(QueueMessageReceiverConfig.class);

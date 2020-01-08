@@ -59,7 +59,7 @@ public class TransactionEvent {
                     .withResourceType(event.getResourceType())
                     .withEventType(event.getEventType())
                     .withTimestamp(event.getEventDate())
-                    .withData(objectMapper.readValue(event.getEventData(), new TypeReference<Map<String, Object>>() {
+                    .withData(objectMapper.readValue(event.getEventData(), new TypeReference<>() {
                     })).build();
         } catch (IOException e) {
             logger.error("Error parsing transaction event data [Transaction external ID - {}] [errorMessage={}]",

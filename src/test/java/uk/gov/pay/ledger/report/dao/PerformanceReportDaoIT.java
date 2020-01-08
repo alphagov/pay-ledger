@@ -83,7 +83,7 @@ public class PerformanceReportDaoIT {
                 .withLive(true)
                 .insert(rule.getJdbi()));
         BigDecimal expectedTotalAmount = new BigDecimal(relevantAmounts.stream().mapToLong(amount -> amount).sum());
-        BigDecimal expectedAverageAmount = new BigDecimal(relevantAmounts.stream().mapToLong(amount -> amount).average().getAsDouble());
+        BigDecimal expectedAverageAmount = BigDecimal.valueOf(relevantAmounts.stream().mapToLong(amount -> amount).average().getAsDouble());
 
         var performanceReportParams = PerformanceReportParamsBuilder.builder().withState(TransactionState.SUCCESS).build();
         var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions(performanceReportParams);

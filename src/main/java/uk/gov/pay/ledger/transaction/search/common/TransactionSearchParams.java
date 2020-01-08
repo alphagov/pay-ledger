@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -139,11 +140,7 @@ public class TransactionSearchParams {
 
     @QueryParam("page")
     public void setPageNumber(Long pageNumber) {
-        if (pageNumber == null) {
-            this.pageNumber = DEFAULT_PAGE_NUMBER;
-        } else {
-            this.pageNumber = pageNumber;
-        }
+        this.pageNumber = Objects.requireNonNullElse(pageNumber, DEFAULT_PAGE_NUMBER);
     }
 
     public void setDisplaySize(Long displaySize) {
@@ -217,7 +214,7 @@ public class TransactionSearchParams {
         return List.copyOf(filters);
     }
 
-    private List<String> addCommonFilterTemplates(List<String> filters) {
+    private void addCommonFilterTemplates(List<String> filters) {
 
         if (isNotBlank(accountId)) {
             filters.add(" t.gateway_account_id = :" + GATEWAY_ACCOUNT_EXTERNAL_FIELD);
@@ -241,7 +238,6 @@ public class TransactionSearchParams {
             filters.add(" t.first_digits_card_number = :" + FIRST_DIGITS_CARD_NUMBER_FIELD);
         }
 
-        return filters;
     }
 
     public Map<String, Object> getQueryMap() {
@@ -392,7 +388,7 @@ public class TransactionSearchParams {
     }
 
     public Long getOffset() {
-        Long offset = 0L;
+        long offset = 0L;
 
         if (pageNumber != null) {
             offset = (pageNumber - 1) * getDisplaySize();
@@ -436,8 +432,7 @@ public class TransactionSearchParams {
         return commaDelimitedSetParameter != null && commaDelimitedSetParameter.isNotEmpty();
     }
 
-    public TransactionSearchParams setExactReferenceMatch(boolean exactReferenceMatch) {
+    public void setExactReferenceMatch(boolean exactReferenceMatch) {
         this.exactReferenceMatch = exactReferenceMatch;
-        return this;
     }
 }

@@ -201,11 +201,10 @@ public class EventDaoIT {
                 .withEventDate(event1.getEventDate().plusDays(1))
                 .insert(rule.getJdbi())
                 .toEntity();
-        Event event3 = anEventFixture()
+        anEventFixture()
                 .withResourceExternalId("external-id-3")
                 .withEventDate(event2.getEventDate().plusDays(1))
-                .insert(rule.getJdbi())
-                .toEntity();
+                .insert(rule.getJdbi());
 
         List<Event> eventList = eventDao.findEventsForExternalIds(Set.of("external-id-1", "external-id-2"));
 
