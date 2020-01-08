@@ -69,7 +69,7 @@ public class ReportDao {
                 long count = rs.getLong("count");
                 long grossAmount = rs.getLong("grossAmount");
                 return new TransactionsStatisticsResult(count, grossAmount);
-            }).findOnly();
+            }).one();
         });
     }
 

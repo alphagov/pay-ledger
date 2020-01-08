@@ -33,14 +33,12 @@ public class SQSHealthCheck extends HealthCheck {
     }
 
     @Override
-    protected Result check() throws Exception {
+    protected Result check() {
         Optional<String> result = checkQueue(sqsHealthCheckHolder);
 
-        if (result.isPresent()) {
-            return Result.unhealthy(format("Failed %s queue attribute check: %s", sqsHealthCheckHolder.getName(), result.get()));
-        }
-
-        return Result.healthy();
+        return result
+                .map(s -> Result.unhealthy(format("Failed %s queue attribute check: %s", sqsHealthCheckHolder.getName(), s)))
+                .orElseGet(Result::healthy);
     }
 
     private Optional<String> checkQueue(NameValuePair nameValuePair) {

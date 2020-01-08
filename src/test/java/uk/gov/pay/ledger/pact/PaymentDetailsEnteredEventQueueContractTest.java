@@ -61,7 +61,7 @@ public class PaymentDetailsEnteredEventQueueContractTest {
 
     @Test
     @PactVerification({"connector"})
-    public void test() throws Exception {
+    public void test() {
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi());
         setupTransaction(transactionDao);
 

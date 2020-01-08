@@ -227,7 +227,7 @@ public class TransactionDao {
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             return query
                     .mapTo(Long.class)
-                    .findOnly();
+                    .one();
         });
     }
 
@@ -250,7 +250,7 @@ public class TransactionDao {
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             return query
                     .mapTo(Long.class)
-                    .findOnly();
+                    .one();
         });
     }
 

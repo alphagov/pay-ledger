@@ -68,7 +68,7 @@ public class RefundCreatedByUserEventQueueContractTest {
 
     @Test
     @PactVerification({"connector"})
-    public void test() throws Exception {
+    public void test() {
         aTransactionFixture()  // adds parent payment transaction for refund to be inserted
                 .withExternalId(refundFixture.getParentResourceExternalId())
                 .withTransactionType("PAYMENT")

@@ -181,7 +181,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     }
 
     public TransactionFixture withExternalMetadata(String externalMetadata) {
-        this.externalMetadata = new JsonParser().parse(externalMetadata);
+        this.externalMetadata = JsonParser.parseString(externalMetadata);
         return this;
     }
 

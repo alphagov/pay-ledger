@@ -76,7 +76,7 @@ public class PerformanceReportDaoIT {
                 .withLive(false).insert(rule.getJdbi());
 
         List<Long> relevantAmounts = List.of(1200L, 1020L, 750L);
-        relevantAmounts.stream().forEach(amount -> aTransactionFixture()
+        relevantAmounts.forEach(amount -> aTransactionFixture()
                 .withAmount(amount)
                 .withState(TransactionState.SUCCESS)
                 .withTransactionType("PAYMENT")
@@ -139,7 +139,7 @@ public class PerformanceReportDaoIT {
                 .insert(rule.getJdbi());
 
         List<String> relevantGatewayAccounts = List.of("1", "2");
-        relevantGatewayAccounts.stream().forEach(account -> aTransactionFixture()
+        relevantGatewayAccounts.forEach(account -> aTransactionFixture()
                 .withGatewayAccountId(account)
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)

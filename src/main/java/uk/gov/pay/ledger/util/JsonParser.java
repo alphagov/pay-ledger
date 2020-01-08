@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.util;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 public class JsonParser {
@@ -37,6 +38,6 @@ public class JsonParser {
 
     private static Optional<JsonNode> safeGetJsonElement(JsonNode object, String fieldName) {
         return Optional.ofNullable(object.get(fieldName))
-                .filter(p -> p != null);
+                .filter(Objects::nonNull);
     }
 }

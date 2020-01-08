@@ -62,7 +62,7 @@ public class EventDaoIT {
         assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
         assertThat(result.get("parent_resource_external_id"), is(event.getParentResourceExternalId()));
         assertThat((Timestamp) result.get("event_date"), isDate(CREATED_AT));
-        assertThat(result.get("event_type").toString(), is(event.getEventType().toString()));
+        assertThat(result.get("event_type").toString(), is(event.getEventType()));
         assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
     }
 
@@ -82,7 +82,7 @@ public class EventDaoIT {
         assertThat(result.get("resource_type_id"), is(resourceTypeId));
         assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
         assertThat((Timestamp) result.get("event_date"), isDate(CREATED_AT));
-        assertThat(result.get("event_type").toString(), is(event.getEventType().toString()));
+        assertThat(result.get("event_type").toString(), is(event.getEventType()));
         assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
     }
 
@@ -131,7 +131,7 @@ public class EventDaoIT {
         assertThat(result.get("resource_type_id"), is(resourceTypeId));
         assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
         assertThat((Timestamp) result.get("event_date"), isDate(event.getEventDate()));
-        assertThat(result.get("event_type").toString(), is(event.getEventType().toString()));
+        assertThat(result.get("event_type").toString(), is(event.getEventType()));
         assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
     }
 
@@ -148,7 +148,7 @@ public class EventDaoIT {
         assertThat(retrievedEvent.getResourceExternalId(), is(event.getResourceExternalId()));
         assertThat(retrievedEvent.getResourceType().name(), is(event.getResourceType().name()));
         assertThat(retrievedEvent.getSqsMessageId(), is(event.getSqsMessageId()));
-        assertThat(retrievedEvent.getEventType().toString(), is(event.getEventType().toString()));
+        assertThat(retrievedEvent.getEventType(), is(event.getEventType()));
         assertThat(retrievedEvent.getEventDate(), is(event.getEventDate()));
         assertThat(retrievedEvent.getEventData(), is(event.getEventData()));
     }

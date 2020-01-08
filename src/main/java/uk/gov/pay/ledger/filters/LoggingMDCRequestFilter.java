@@ -15,7 +15,7 @@ public class LoggingMDCRequestFilter implements ContainerRequestFilter {
     public static final String TRANSACTION_EXTERNAL_ID = "transaction_external_id";
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         getPathParameterFromRequest("eventId", requestContext)
                 .ifPresent(eventId -> MDC.put(LEDGER_EVENT_ID, eventId));
 
