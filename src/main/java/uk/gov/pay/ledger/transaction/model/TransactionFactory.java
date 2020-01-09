@@ -59,7 +59,8 @@ public class TransactionFactory {
             if (transactionDetails.has("external_metadata")) {
                 metadata = objectMapper.readValue(
                         objectMapper.treeAsTokens(transactionDetails.get("external_metadata")),
-                        new TypeReference<Map<String, Object>>() {});
+                        new TypeReference<>() {
+                        });
             }
 
             RefundSummary refundSummary = RefundSummary.from(entity);

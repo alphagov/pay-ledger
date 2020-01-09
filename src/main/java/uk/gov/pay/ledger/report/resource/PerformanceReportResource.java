@@ -39,32 +39,31 @@ public class PerformanceReportResource {
                                                         @QueryParam("to_date") String toDate,
                                                         @QueryParam("state") String state) {
 
-        var params = addDateRangeParamsOrThrow(PerformanceReportParamsBuilder.builder(), fromDate, toDate);
-        params = addStateParamOrThrow(params, state);
-        return performanceReportDao.performanceReportForPaymentTransactions(params.build());
+        var paramsBuilder = PerformanceReportParamsBuilder.builder();
+        addDateRangeParamsOrThrow(paramsBuilder, fromDate, toDate);
+        addStateParamOrThrow(paramsBuilder, state);
+        return performanceReportDao.performanceReportForPaymentTransactions(paramsBuilder.build());
     }
 
-    private PerformanceReportParamsBuilder addStateParamOrThrow(PerformanceReportParamsBuilder builder, String state) {
+    private void addStateParamOrThrow(PerformanceReportParamsBuilder builder, String state) {
         if (isNotBlank(state)) {
             Optional.ofNullable(TransactionState.from(state))
                     .map(builder::withState)
                     .orElseThrow(() -> new ValidationException("State provided must be one of uk.gov.pay.ledger.transaction.state.TransactionState"));
         }
-        return builder;
     }
 
-    private PerformanceReportParamsBuilder addDateRangeParamsOrThrow(PerformanceReportParamsBuilder builder,
-                                                                     String fromDate,
-                                                                     String toDate) {
+    private void addDateRangeParamsOrThrow(PerformanceReportParamsBuilder builder,
+                                           String fromDate,
+                                           String toDate) {
         boolean dateParamsProvided = isNotBlank(fromDate) || isNotBlank(toDate);
         if (dateParamsProvided) {
             if (isBlank(fromDate) || isBlank(toDate)) {
                 throw new ValidationException("Both from_date and to_date must be provided");
             } else {
-                builder.withFromDate(ZonedDateTime.parse(fromDate)).withToDate(ZonedDateTime.parse(toDate)).build();
+                builder.withFromDate(ZonedDateTime.parse(fromDate)).withToDate(ZonedDateTime.parse(toDate));
             }
         }
-        return builder;
     }
 
     @Path("/gateway-performance-report")

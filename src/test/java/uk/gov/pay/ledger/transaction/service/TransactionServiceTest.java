@@ -272,8 +272,7 @@ public class TransactionServiceTest {
         thrown.expect(WebApplicationException.class);
         thrown.expectMessage("Transaction with id [external-id] not found");
 
-        TransactionEventResponse transactionEventResponse
-                = transactionService.findTransactionEvents("external-id", gatewayAccountId, false, 1);
+        transactionService.findTransactionEvents("external-id", gatewayAccountId, false, 1);
     }
 
     @Test

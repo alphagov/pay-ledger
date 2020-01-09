@@ -53,7 +53,7 @@ public class CaptureConfirmedEventQueueContractTest {
                 .withEventType(eventType)
                 .withDefaultEventDataForEventType(eventType);
 
-        Map<String, String> metadata = new HashMap<String, String>();
+        Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         PactDslJsonBody pactBody = captureConfirmedEvent.getAsPact();

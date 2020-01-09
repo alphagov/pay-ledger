@@ -48,11 +48,12 @@ public class PaymentCreatedEventQueueContractTest {
                 .withGatewayAccountId(gatewayAccountId)
                 .withDefaultEventDataForEventType("PAYMENT_CREATED");
 
-        Map<String, String> metadata = new HashMap<String, String>();
+        Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         return builder
                 .expectsToReceive("a payment created message")
+                .withMetadata(metadata)
                 .withContent(paymentCreatedEventFixture.getAsPact())
                 .toPact();
     }

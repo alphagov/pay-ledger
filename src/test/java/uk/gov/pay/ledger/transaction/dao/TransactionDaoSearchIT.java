@@ -687,8 +687,7 @@ public class TransactionDaoSearchIT {
         transactionFixture = aTransactionFixture()
                 .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
                 .insert(rule.getJdbi());
-        TransactionFixture transactionFixtureChild = insertRefundChildTransaction(transactionFixture,
-                now(ZoneOffset.UTC).plusDays(1));
+        insertRefundChildTransaction(transactionFixture, now(ZoneOffset.UTC).plusDays(1));
 
         searchParams.setAccountId(transactionFixture.getGatewayAccountId());
         searchParams.setToDate(now(ZoneOffset.UTC).toString());
@@ -726,7 +725,7 @@ public class TransactionDaoSearchIT {
         transactionFixture = insertTransaction();
         TransactionFixture transactionFixtureChild = insertRefundChildTransaction(transactionFixture,
                 now(ZoneOffset.UTC).plusDays(1));
-        TransactionFixture transactionFixture2 = aTransactionFixture()
+        aTransactionFixture()
                 .withGatewayAccountId(transactionFixture.getGatewayAccountId())
                 .withCreatedDate(now(ZoneOffset.UTC).plusDays(2))
                 .insert(rule.getJdbi());
@@ -790,8 +789,7 @@ public class TransactionDaoSearchIT {
         transactionFixture = aTransactionFixture()
                 .withFirstDigitsCardNumber("424242")
                 .insert(rule.getJdbi());
-        TransactionFixture transactionFixtureChild = insertRefundChildTransaction(transactionFixture,
-                now(ZoneOffset.UTC).plusDays(2));
+        insertRefundChildTransaction(transactionFixture, now(ZoneOffset.UTC).plusDays(2));
 
         searchParams.setAccountId(transactionFixture.getGatewayAccountId());
         searchParams.setFirstDigitsCardNumber("424242");

@@ -4,7 +4,6 @@ import org.slf4j.MDC;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import java.io.IOException;
 import java.util.Optional;
 
 import static uk.gov.pay.logging.LoggingKeys.LEDGER_EVENT_ID;

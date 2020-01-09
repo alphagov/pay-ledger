@@ -233,7 +233,7 @@ public class CsvTransactionFactory {
         if (transactionDetailsJsonNode.has("external_metadata")) {
             metadata = objectMapper.readValue(
                     objectMapper.treeAsTokens(transactionDetailsJsonNode.get("external_metadata")),
-                    new TypeReference<Map<String, Object>>() {
+                    new TypeReference<>() {
                     });
         }
         return Optional.ofNullable(metadata);

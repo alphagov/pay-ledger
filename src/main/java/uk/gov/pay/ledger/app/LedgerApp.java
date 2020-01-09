@@ -45,7 +45,7 @@ public class LedgerApp extends Application<LedgerConfig> {
                         new EnvironmentVariableSubstitutor(false))
         );
 
-        bootstrap.addBundle(new MigrationsBundle<LedgerConfig>() {
+        bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public DataSourceFactory getDataSourceFactory(LedgerConfig configuration) {
                 return configuration.getDataSourceFactory();

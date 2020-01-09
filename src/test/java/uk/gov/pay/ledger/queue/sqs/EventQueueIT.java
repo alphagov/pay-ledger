@@ -40,9 +40,7 @@ public class EventQueueIT {
 
     @Test
     public void shouldGetEventMessageDtoFromTheQueue() throws QueueException {
-        Event event = aQueuePaymentEventFixture()
-                .insert(client)
-                .toEntity();
+        aQueuePaymentEventFixture().insert(client);
 
         SqsConfig sqsConfig = mock(SqsConfig.class);
         when(sqsConfig.getMessageMaximumBatchSize()).thenReturn(10);

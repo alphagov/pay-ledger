@@ -51,11 +51,12 @@ public class CaptureSubmittedEventQueueContractTest {
                 .withEventType(SalientEventType.CAPTURE_SUBMITTED.toString())
                 .withDefaultEventDataForEventType(SalientEventType.CAPTURE_SUBMITTED.toString());
 
-        Map<String, String> metadata = new HashMap<String, String>();
+        Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         return builder
                 .expectsToReceive("a capture submitted message")
+                .withMetadata(metadata)
                 .withContent(paymentCreatedEventFixture.getAsPact())
                 .toPact();
     }

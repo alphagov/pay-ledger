@@ -169,7 +169,6 @@ public class TransactionFactoryTest {
 
     @Test
     public void createsRefundFromTransactionEntityWithMinimalData() {
-        Payment payment = (Payment) transactionFactory.createTransactionEntity(fullDataObject);
         TransactionEntity refund = new TransactionEntity.Builder()
                 .withTransactionType("REFUND")
                 .withId(id)
