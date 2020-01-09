@@ -73,6 +73,8 @@ public class PerformanceReportResource {
                                                                                                  @QueryParam("to_date") String toDate) {
         if (isBlank(fromDate) || isBlank(toDate)) {
             throw new ValidationException("Both from_date and to_date must be provided");
+        } else if (ZonedDateTime.parse(fromDate).isAfter(ZonedDateTime.parse(toDate))) {
+            throw new ValidationException("from_date must be earlier or equal to to_date");
         }
 
         return performanceReportDao.monthlyPerformanceReportForGatewayAccounts(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));

@@ -206,4 +206,18 @@ public class PerformanceReportResourceIT {
                         .body("message", contains("Both from_date and to_date must be provided"))
                         .body("error_identifier", Matchers.is(ErrorIdentifier.GENERIC.toString())));
     }
+
+    @Test
+    public void should_return_400_when_from_date_is_later_than_to_date_for_gateway_performance_report() {
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam( "from_date", "2019-11-30T00:00:00Z")
+                .queryParam( "to_date", "2017-11-30T00:00:00Z")
+                .get("/v1/report/gateway-performance-report")
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .body("message", contains("from_date must be earlier or equal to to_date"))
+                .body("error_identifier", Matchers.is(ErrorIdentifier.GENERIC.toString()));
+    }
 }
