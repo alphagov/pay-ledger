@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.dao;
 import com.google.common.collect.ImmutableMap;
 import org.junit.ClassRule;
 import org.junit.Test;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
@@ -48,6 +49,25 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getTotalAmount(), is(transactionEntity.getTotalAmount()));
         assertThat(retrievedTransaction.getFee(), is(transactionEntity.getFee()));
         assertThat(retrievedTransaction.isLive(), is(true));
+    }
+
+    @Test
+    public void shouldInsertTransactionWithSourceCardApi() {
+        TransactionFixture fixture = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withNetAmount(55)
+                .withTotalAmount(55)
+                .withTransactionType("PAYMENT")
+                .withLive(true)
+                .withSource(Source.CARD_API.toString())
+                .withDefaultTransactionDetails();
+        TransactionEntity transactionEntity = fixture.toEntity();
+
+        transactionDao.upsert(transactionEntity);
+
+        TransactionEntity retrievedTransaction = transactionDao.findTransactionByExternalId(transactionEntity.getExternalId()).get();
+
+        assertThat(retrievedTransaction.getSource(), is(Source.CARD_API));
     }
 
     @Test

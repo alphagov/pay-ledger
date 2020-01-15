@@ -9,6 +9,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jetbrains.annotations.NotNull;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
@@ -68,6 +69,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private boolean live;
     private String refundedByUserEmail;
     private TransactionEntity parentTransactionEntity;
+    private String source;
 
     private TransactionFixture() {
     }
@@ -285,6 +287,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withSource(String source) {
+        this.source = source;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -315,9 +322,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        refund_amount_available,\n" +
                                 "        type,\n" +
                                 "        live,\n" +
-                                "        gateway_transaction_id\n" +
+                                "        gateway_transaction_id,\n" +
+                                "        source\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?, ?::source)\n",
                         id,
                         externalId,
                         parentExternalId,
@@ -342,7 +350,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         refundAmountAvailable,
                         transactionType,
                         live,
-                        gatewayTransactionId
+                        gatewayTransactionId,
+                        source
                 )
         );
         return this;
@@ -390,7 +399,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public TransactionEntity toEntity() {
-        return new TransactionEntity.Builder()
+        var builder = new TransactionEntity.Builder()
                 .withId(id)
                 .withGatewayAccountId(gatewayAccountId)
                 .withExternalId(externalId)
@@ -416,8 +425,9 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withTransactionType(transactionType)
                 .withLive(live)
                 .withGatewayTransactionId(gatewayTransactionId)
-                .withParentTransactionEntity(parentTransactionEntity)
-                .build();
+                .withParentTransactionEntity(parentTransactionEntity);
+        Source.from(source).ifPresent(builder::withSource);
+        return builder.build();
     }
 
     public String getExternalId() {

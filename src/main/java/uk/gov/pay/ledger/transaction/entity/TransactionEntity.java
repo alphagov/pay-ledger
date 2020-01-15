@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
@@ -44,6 +45,7 @@ public class TransactionEntity {
     private boolean live;
     private TransactionEntity parentTransactionEntity;
     private String gatewayTransactionId;
+    private Source source;
 
     public TransactionEntity() {
     }
@@ -75,6 +77,7 @@ public class TransactionEntity {
         this.parentTransactionEntity = builder.parentTransactionEntity;
         this.live = builder.live;
         this.gatewayTransactionId = builder.gatewayTransactionId;
+        this.source = builder.source;
     }
 
     public Long getId() {
@@ -209,6 +212,10 @@ public class TransactionEntity {
         return gatewayTransactionId;
     }
 
+    public Source getSource() {
+        return source;
+    }
+
     public static class Builder {
         private Long fee;
         private Long id;
@@ -235,7 +242,8 @@ public class TransactionEntity {
         private String transactionType;
         private boolean live;
         private TransactionEntity parentTransactionEntity;
-        public String gatewayTransactionId;
+        private Source source;
+        private String gatewayTransactionId;
 
         public Builder() {
         }
@@ -371,6 +379,11 @@ public class TransactionEntity {
 
         public Builder withGatewayTransactionId(String gatewayTransactionId) {
             this.gatewayTransactionId = gatewayTransactionId;
+            return this;
+        }
+
+        public Builder withSource(Source source) {
+            this.source = source;
             return this;
         }
     }

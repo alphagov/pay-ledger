@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
 import java.io.IOException;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
@@ -37,6 +40,7 @@ public class TransactionEntityFactoryTest {
                 .withEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withResourceType(ResourceType.PAYMENT)
+                .withSource(Source.CARD_API)
                 .toEntity();
         Event paymentDetailsEvent = aQueuePaymentEventFixture()
                 .withEventType("PAYMENT_DETAILS_ENTERED")
@@ -69,8 +73,8 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getTotalAmount(), is(((Integer)eventDigest.getEventPayload().get("total_amount")).longValue()));
         assertThat(transactionEntity.getFee(), is(((Integer)eventDigest.getEventPayload().get("fee")).longValue()));
         assertThat(transactionEntity.getTransactionType(), is("PAYMENT"));
+        assertThat(transactionEntity.getSource(), is(notNullValue()));
         assertThat(transactionEntity.isLive(), is(true));
-
 
         JsonObject transactionDetails = JsonParser.parseString(transactionEntity.getTransactionDetails()).getAsJsonObject();
         assertThat(transactionDetails.get("language").getAsString(), is("en"));
@@ -84,7 +88,6 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionDetails.get("corporate_surcharge").getAsInt(), is(5));
         assertThat(transactionDetails.get("gateway_transaction_id").getAsString(), is(eventDigest.getEventPayload().get("gateway_transaction_id")));
         assertThat(transactionDetails.get("external_metadata").getAsJsonObject().get("key").getAsString(), is("value"));
-
     }
 
     @Test
@@ -140,4 +143,18 @@ public class TransactionEntityFactoryTest {
 
         assertThat(transactionEntity.getState().toString(), is("UNDEFINED"));
     }
+
+    @Test
+    public void createWithNoSourceParameter_ShouldHandleNullValueCorrectly() {
+        Event paymentCreatedEvent = aQueuePaymentEventFixture()
+                .withEventType("PAYMENT_CREATED")
+                .withEventData("{\"amount\":50}")
+                .toEntity();
+
+        EventDigest eventDigest = EventDigest.fromEventList(List.of(paymentCreatedEvent));
+        TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
+
+        assertThat(transactionEntity.getSource(), is(nullValue()));
+    }
+
 }
