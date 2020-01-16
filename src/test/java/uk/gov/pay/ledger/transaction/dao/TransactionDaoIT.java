@@ -10,13 +10,18 @@ import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class TransactionDaoIT {
@@ -279,5 +284,11 @@ public class TransactionDaoIT {
 
         assertThat(transactionEntity.getId(), is(transactionWithParentExternalId.getId()));
 
+    }
+
+    @Test
+    public void sourceTypeInDatabase_shouldMatchValuesInEnum() {
+        var sourceArray = Arrays.stream(Source.values()).map(Enum::toString).collect(Collectors.toList());
+        transactionDao.getSourceTypeValues().forEach(x -> assertThat(sourceArray.contains(x), is(true)));
     }
 }

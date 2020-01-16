@@ -131,35 +131,45 @@ public class TransactionDao {
                     ":live, " +
                     ":gatewayTransactionId, " +
                     ":source::source" +
-            ") " +
-            "ON CONFLICT (external_id) " +
-            "DO UPDATE SET " +
-                "external_id = EXCLUDED.external_id," +
-                "parent_external_id = EXCLUDED.parent_external_id," +
-                "gateway_account_id = EXCLUDED.gateway_account_id," +
-                "amount = EXCLUDED.amount," +
-                "description = EXCLUDED.description," +
-                "reference = EXCLUDED.reference," +
-                "state = EXCLUDED.state," +
-                "email = EXCLUDED.email," +
-                "cardholder_name = EXCLUDED.cardholder_name," +
-                "created_date = EXCLUDED.created_date," +
-                "transaction_details = EXCLUDED.transaction_details," +
-                "event_count = EXCLUDED.event_count," +
-                "card_brand = EXCLUDED.card_brand," +
-                "last_digits_card_number = EXCLUDED.last_digits_card_number," +
-                "first_digits_card_number = EXCLUDED.first_digits_card_number," +
-                "net_amount = EXCLUDED.net_amount," +
-                "total_amount = EXCLUDED.total_amount," +
-                "fee = EXCLUDED.fee," +
-                "type = EXCLUDED.type, " +
-                "refund_amount_available = EXCLUDED.refund_amount_available, " +
-                "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
-                "refund_status = EXCLUDED.refund_status, " +
-                "live = EXCLUDED.live, " +
-                "gateway_transaction_id = EXCLUDED.gateway_transaction_id, " +
-                "source = EXCLUDED.source " +
-                "WHERE EXCLUDED.event_count >= transaction.event_count;";
+                    ") " +
+                    "ON CONFLICT (external_id) " +
+                    "DO UPDATE SET " +
+                    "external_id = EXCLUDED.external_id," +
+                    "parent_external_id = EXCLUDED.parent_external_id," +
+                    "gateway_account_id = EXCLUDED.gateway_account_id," +
+                    "amount = EXCLUDED.amount," +
+                    "description = EXCLUDED.description," +
+                    "reference = EXCLUDED.reference," +
+                    "state = EXCLUDED.state," +
+                    "email = EXCLUDED.email," +
+                    "cardholder_name = EXCLUDED.cardholder_name," +
+                    "created_date = EXCLUDED.created_date," +
+                    "transaction_details = EXCLUDED.transaction_details," +
+                    "event_count = EXCLUDED.event_count," +
+                    "card_brand = EXCLUDED.card_brand," +
+                    "last_digits_card_number = EXCLUDED.last_digits_card_number," +
+                    "first_digits_card_number = EXCLUDED.first_digits_card_number," +
+                    "net_amount = EXCLUDED.net_amount," +
+                    "total_amount = EXCLUDED.total_amount," +
+                    "fee = EXCLUDED.fee," +
+                    "type = EXCLUDED.type, " +
+                    "refund_amount_available = EXCLUDED.refund_amount_available, " +
+                    "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
+                    "refund_status = EXCLUDED.refund_status, " +
+                    "live = EXCLUDED.live, " +
+                    "gateway_transaction_id = EXCLUDED.gateway_transaction_id, " +
+                    "source = EXCLUDED.source " +
+                    "WHERE EXCLUDED.event_count >= transaction.event_count;";
+
+    private static final String GET_SOURCE_TYPE_ENUM_VALUES =
+            "SELECT " +
+                    "pg_enum.enumlabel " +
+                    "FROM " +
+                    "pg_type " +
+                    "JOIN " +
+                    "pg_enum ON pg_enum.enumtypid = pg_type.oid " +
+                    "WHERE pg_type.typname = 'source';";
+
 
     private final Jdbi jdbi;
 
@@ -284,7 +294,13 @@ public class TransactionDao {
     public void upsert(TransactionEntity transaction) {
         jdbi.withHandle(handle ->
                 handle.createUpdate(UPSERT_STRING)
-                .bindBean(transaction)
-                .execute());
+                        .bindBean(transaction)
+                        .execute());
+    }
+
+    public List<String> getSourceTypeValues() {
+        return jdbi.withHandle(handle -> handle.createQuery(GET_SOURCE_TYPE_ENUM_VALUES)
+                .mapTo(String.class)
+                .collect(Collectors.toList()));
     }
 }
