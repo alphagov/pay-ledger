@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.transaction.dao.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -16,7 +17,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
 
     @Override
     public TransactionEntity map(ResultSet rs, StatementContext ctx) throws SQLException {
-        return new TransactionEntity.Builder()
+        var builder = new TransactionEntity.Builder()
                 .withId(rs.getLong("id"))
                 .withGatewayAccountId(rs.getString("gateway_account_id"))
                 .withExternalId(rs.getString("external_id"))
@@ -41,8 +42,9 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withFee(getLongWithNullCheck(rs, "fee"))
                 .withTransactionType(rs.getString("type"))
                 .withLive(rs.getBoolean("live"))
-                .withGatewayTransactionId(rs.getString("gateway_transaction_id"))
-                .build();
+                .withGatewayTransactionId(rs.getString("gateway_transaction_id"));
+        Source.from(rs.getString("source")).ifPresent(builder::withSource);
+        return builder.build();
     }
 
     private Long getLongWithNullCheck(ResultSet rs, String columnName) throws SQLException {

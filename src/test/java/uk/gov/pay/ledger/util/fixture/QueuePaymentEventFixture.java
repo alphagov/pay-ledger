@@ -7,10 +7,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
 import java.time.ZonedDateTime;
+
+import static uk.gov.pay.commons.model.Source.CARD_API;
 
 public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventFixture, Event> {
     private String sqsMessageId;
@@ -21,6 +24,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(5);
+    private Source source;
 
     private QueuePaymentEventFixture() {
     }
@@ -64,6 +68,11 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
         return this;
     }
 
+    public QueuePaymentEventFixture withSource(Source source) {
+        this.source = source;
+        return this;
+    }
+
     public QueuePaymentEventFixture withDefaultEventDataForEventType(String eventType) {
         switch (eventType) {
             case "PAYMENT_CREATED":
@@ -87,6 +96,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("address_line1", "12 Rouge Avenue")
                                 .put("address_postcode", "N1 3QU")
                                 .put("address_city", "London")
+                                .put("source", CARD_API)
                                 .put("address_country", "GB")
                                 .build());
                 break;
