@@ -60,9 +60,11 @@ public class CSVMessageBodyWriter implements MessageBodyWriter<List> {
                     rowsStreamed++;
 
                     if (rowsStreamed % 1000 == 0) {
+                        Thread.sleep(1200);
                         bufferedWriter.flush();
                     }
                 }
+            } catch (InterruptedException e) {
             }
         }
     }
