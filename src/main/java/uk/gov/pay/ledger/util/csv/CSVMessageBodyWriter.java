@@ -54,14 +54,8 @@ public class CSVMessageBodyWriter implements MessageBodyWriter<List> {
                 ObjectWriter objectWriter = mapper.writer(schema);
 
                 bufferedWriter.write(objectWriter.writeValueAsString(headerRow));
-                int rowsStreamed = 0;
                 for (Object row : data) {
                     bufferedWriter.write(objectWriter.writeValueAsString(row));
-                    rowsStreamed++;
-
-                    if (rowsStreamed % 1000 == 0) {
-                        bufferedWriter.flush();
-                    }
                 }
             }
         }
