@@ -39,6 +39,11 @@ public class TransactionDao {
             ":searchExtraFields " +
             "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
 
+    private static final String SEARCH_FOR_METADATA_KEYS = "SELECT name FROM metadata m, transaction_metadata tm, transaction t " +
+            " where m.id = tm.metadata_id and t.id = tm.transaction_id" +
+            ":searchExtraFields " +
+            "";
+
     private static final String COUNT_TRANSACTIONS = "SELECT count(1) " +
             "FROM transaction t " +
             ":searchExtraFields ";
@@ -255,6 +260,31 @@ public class TransactionDao {
                     .map(new TransactionWithParentMapper())
                     .list();
         });
+    }
+
+    public List<String> getMetadataKeysForTransactions(TransactionSearchParams searchParams) {
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(createMetadataSearchTemplate(searchParams.getFilterTemplatesWithParentTransactionSearch(), SEARCH_FOR_METADATA_KEYS));
+            searchParams.getQueryMap().forEach(bindSearchParameter(query));
+
+            return query
+                    .mapTo(String.class)
+                    .list();
+        });
+    }
+
+    private String createMetadataSearchTemplate(
+            List<String> filterTemplates,
+            String baseQueryString
+    ) {
+        String searchClauseTemplate = String.join(" AND ", filterTemplates);
+        searchClauseTemplate = StringUtils.isNotBlank(searchClauseTemplate) ?
+                " and " + searchClauseTemplate :
+                "";
+
+        return baseQueryString.replace(
+                ":searchExtraFields",
+                searchClauseTemplate);
     }
 
     public Long getTotalForSearchTransactionAndParent(TransactionSearchParams searchParams) {

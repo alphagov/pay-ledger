@@ -148,6 +148,8 @@ public class TransactionService {
         }
         LOGGER.info("Deriving CSV headers from transactions - ended");
 
+        List<String> metadataKeysForTransactions = transactionDao.getMetadataKeysForTransactions(searchParams);
+        LOGGER.info("Metadata keys for transactions - {}", metadataKeysForTransactions);
         return transactionListForCsv;
     }
 
