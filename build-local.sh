@@ -4,5 +4,5 @@ set -e
 
 cd "$(dirname "$0")"
 
-mvn -DskipITs clean verify
+mvn -DskipITs -DskipTests clean verify
 docker build -t govukpay/ledger:local .

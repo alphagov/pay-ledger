@@ -13,9 +13,11 @@ import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
+import uk.gov.pay.ledger.metadata.dao.MetadataDao;
 import uk.gov.pay.ledger.report.dao.PerformanceReportDao;
 import uk.gov.pay.ledger.report.dao.ReportDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
+import uk.gov.pay.ledger.transactionmetadata.dao.TransactionMetadataDao;
 
 public class LedgerModule extends AbstractModule {
     private final LedgerConfig configuration;
@@ -51,6 +53,18 @@ public class LedgerModule extends AbstractModule {
     @Singleton
     public EventDao provideEventDao() {
         return jdbi.onDemand(EventDao.class);
+    }
+
+    @Provides
+    @Singleton
+    public MetadataDao provideMetadataDao() {
+        return jdbi.onDemand(MetadataDao.class);
+    }
+
+    @Provides
+    @Singleton
+    public TransactionMetadataDao provideTransactionMetadataDao() {
+        return jdbi.onDemand(TransactionMetadataDao.class);
     }
 
     @Provides
