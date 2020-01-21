@@ -88,6 +88,28 @@ public class TransactionResourceIT {
     }
 
     @Test
+    public void shouldReturnTransactionSearchResponseObjectForNonExistentTransactionByReference() {
+        transactionFixture = aTransactionFixture()
+                .withReference("existing");
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction" +
+                        "?reference=not-existing" +
+                        "&account_id=" + transactionFixture.getGatewayAccountId()
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("page", is(1))
+                .body("total", is(0))
+                .body("count", is(0))
+                .body("results.size()", is(0));
+    }
+
+    @Test
     public void shouldGetAllTransactionsForAmbiguousExternalState() {
 
         TransactionFixture cancelledTransaction1 = aTransactionFixture()
