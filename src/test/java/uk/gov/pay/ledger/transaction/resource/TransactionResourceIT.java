@@ -333,6 +333,45 @@ public class TransactionResourceIT {
     }
 
     @Test
+    public void shouldSearchForAllExistingRefundsWithDisplaySizeTwo() {
+        String gatewayAccountId = "2";
+        TransactionFixture createdTransaction = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .withCreatedDate(ZonedDateTime.now())
+                .insert(rule.getJdbi());
+
+        TransactionFixture submittedTransaction = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUBMITTED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=2"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(2))
+                .body("page", is(1))
+                .body("total", is(2))
+                .body("results[0].transaction_id", is(createdTransaction.getExternalId()))
+                .body("results[1].transaction_id", is(submittedTransaction.getExternalId()));
+    }
+
+    @Test
     public void shouldSearchCorrectlyUsingBothPaymentAndRefundStates() {
         String gatewayAccountId = "3";
         TransactionFixture successfulRefund = aTransactionFixture()
