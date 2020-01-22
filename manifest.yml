@@ -1,0 +1,47 @@
+---
+applications:
+  - name: ledger
+    buildpacks:
+      - java_buildpack
+    path: target/pay-ledger-0.1-SNAPSHOT-allinone.jar
+    health-check-type: http
+    health-check-http-endpoint: '/healthcheck'
+    health-check-invocation-timeout: 5
+    memory: ((memory))
+    disk_quota: ((disk_quota))
+    env:
+      ADMIN_PORT: '10701'
+      DISABLE_INTERNAL_HTTPS: ((disable_internal_https))
+      ENVIRONMENT: ((space))
+      JAVA_OPTS: -Xms512m -Xmx1G
+      JBP_CONFIG_JAVA_MAIN: '{ arguments: "server /home/vcap/app/config/config.yaml" }'
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+ } }'
+      JPA_LOG_LEVEL: 'INFO'
+      JPA_SQL_LOG_LEVEL: 'INFO'
+
+      # Provide via ledger-db service
+      DB_HOST: postgres-((space)).apps.internal
+      DB_NAME: ((db_name))
+      DB_PASSWORD: ((db_password))
+      DB_USER: ((db_user))
+      DB_SSL_OPTION: ((db_ssl_option))
+
+      AWS_XRAY_CONTEXT_MISSING: LOG_ERROR
+
+      # Provide via aws-sqs service
+      AWS_ACCESS_KEY: ((aws_access_key))
+      AWS_SECRET_KEY: ((aws_secret_key))
+      AWS_SQS_ENDPOINT: http://sqs-((space)).apps.internal:9324
+      AWS_SQS_MESSAGE_MAXIMUM_WAIT_TIME_IN_SECONDS: '20'
+      QUEUE_MESSAGE_RECEIVER_THREAD_DELAY_IN_MILLISECONDS: '1000'
+      AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT: 'true'
+      AWS_SQS_PAYMENT_EVENT_QUEUE_URL: http://sqs-((space)).apps.internal:9324/queue/pay_event_queue
+      AWS_SQS_REGION: region-1
+
+      # Provide via Sentry service
+      SENTRY_DSN: noop://localhost
+
+      RUN_APP: 'true'
+      RUN_MIGRATION: ((run_migration))
+    routes:
+      - route: ((ledger_route))
