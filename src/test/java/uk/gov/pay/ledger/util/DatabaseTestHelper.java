@@ -54,4 +54,12 @@ public class DatabaseTestHelper {
                         .mapToMap()
                         .list());
     }
+
+    public List<Map<String, Object>> getMetadataKey(String key) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT * FROM metadata_key where key = :key")
+                        .bind("key", key)
+                        .mapToMap()
+                        .list());
+    }
 }
