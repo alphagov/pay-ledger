@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
@@ -25,7 +26,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -98,6 +102,37 @@ public class TransactionResource {
         validateSearchParams(csvSearchParams, gatewayAccountId);
 
         return transactionService.searchTransactionsForCsv(searchParams);
+    }
+
+    @Path("/stream")
+    @GET
+    @Produces("text/csv")
+    @Timed
+    public Response streamCsv(@Valid @BeanParam TransactionSearchParams searchParams,
+                              @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
+                              @QueryParam("account_id") String gatewayAccountId,
+                              @Context UriInfo uriInfo) {
+        StreamingOutput stream = outputStream -> {
+
+            // @TODO(sfount) in memory count limit of 200,000
+            List<TransactionEntity> page;
+            String startingAfterCreatedDate = null;
+            Long startingAfterId = null;
+            int count = 0;
+            int max = 10000;
+
+            do {
+                page = transactionService.searchTransactionAfter(searchParams, startingAfterCreatedDate, startingAfterId);
+                count += page.size();
+
+                var lastEntity = page.get(page.size() - 1);
+                startingAfterCreatedDate = lastEntity.getCreatedDate().toString();
+                startingAfterId = lastEntity.getId();
+            } while (!page.isEmpty() || count < max);
+
+            outputStream.close();
+        };
+        return Response.ok(stream).build();
     }
 
     private TransactionSearchResponse searchForTransactions(TransactionSearchParams searchParams, Boolean overrideAccountRestriction, String gatewayAccountId, UriInfo uriInfo) {

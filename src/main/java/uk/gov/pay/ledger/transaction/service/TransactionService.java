@@ -151,6 +151,14 @@ public class TransactionService {
         return transactionListForCsv;
     }
 
+    public List<TransactionEntity> searchTransactionAfter(TransactionSearchParams searchParams) {
+        return transactionDao.cursorTransactionSearch(searchParams, null, null);
+    }
+
+    public List<TransactionEntity> searchTransactionAfter(TransactionSearchParams searchParams, String startingAfterCreatedDate, Long startingAfterId) {
+        return transactionDao.cursorTransactionSearch(searchParams, startingAfterCreatedDate, startingAfterId);
+    }
+
     private TransactionSearchResponse buildTransactionSearchResponse(TransactionSearchParams searchParams, UriInfo uriInfo, List<Transaction> transactionList, Long totalCount) {
         Long total = Optional.ofNullable(totalCount).orElse(0L);
         PaginationBuilder paginationBuilder = new PaginationBuilder(searchParams, uriInfo);

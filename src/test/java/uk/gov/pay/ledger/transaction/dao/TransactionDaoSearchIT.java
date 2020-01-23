@@ -802,6 +802,21 @@ public class TransactionDaoSearchIT {
         assertThat(total, is(1L));
     }
 
+    @Test
+    public void searchTransactionsByCursor() {
+        transactionFixture = aTransactionFixture()
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .insert(rule.getJdbi());
+
+        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+//        searchParams.setFromDate(now(ZoneOffset.UTC).toString());
+
+        List<TransactionEntity> transactionList = transactionDao.cursorTransactionSearch(searchParams, null, null);
+
+        assertThat(transactionList.size(), is(1));
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+    }
+
     private void assertTransactionEquals(TransactionEntity actualTransactionEntity, TransactionFixture transactionFixture) {
         assertThat(actualTransactionEntity.getId(), is(transactionFixture.getId()));
         assertThat(actualTransactionEntity.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
