@@ -62,4 +62,14 @@ public class DatabaseTestHelper {
                         .mapToMap()
                         .list());
     }
+
+    public List<Map<String, Object>> getTransactionMetadata(Long transactionId, String key) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT * FROM transaction_metadata where transaction_id = :transactionId" +
+                        " and metadata_key_id = (select id from metadata_key where key = :key)")
+                        .bind("transactionId", transactionId)
+                        .bind("key", key)
+                        .mapToMap()
+                        .list());
+    }
 }

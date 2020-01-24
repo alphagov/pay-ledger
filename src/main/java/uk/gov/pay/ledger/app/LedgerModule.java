@@ -17,6 +17,7 @@ import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
 import uk.gov.pay.ledger.report.dao.PerformanceReportDao;
 import uk.gov.pay.ledger.report.dao.ReportDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
+import uk.gov.pay.ledger.transactionmetadata.dao.TransactionMetadataDao;
 
 public class LedgerModule extends AbstractModule {
     private final LedgerConfig configuration;
@@ -82,6 +83,12 @@ public class LedgerModule extends AbstractModule {
     @Singleton
     public MetadataKeyDao provideMetadataKeyDao() {
         return jdbi.onDemand(MetadataKeyDao.class);
+    }
+
+    @Provides
+    @Singleton
+    public TransactionMetadataDao provideTransactionMetadataDao() {
+        return jdbi.onDemand(TransactionMetadataDao.class);
     }
 
     @Provides
