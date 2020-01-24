@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.metadatakey.dao;
 
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
 import java.util.Optional;
@@ -17,4 +18,7 @@ public interface MetadataKeyDao {
             "    WHERE key = :key )")
     @GetGeneratedKeys
     Optional<Long> insertIfNotExist(@Bind("key") String key);
+
+    @SqlQuery("SELECT id FROM metadata_key WHERE key = :key")
+    Optional<Long> getByKey(@Bind("key") String key);
 }

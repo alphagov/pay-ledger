@@ -8,6 +8,7 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,7 +42,7 @@ public class MetadataKeyDaoIT {
 
     @Test
     public void shouldNotInsertMetadataKeyIfAlreadyExists() {
-        String key = "key-1";
+        String key = "key-2";
         String duplicateKey = "key-1";
 
         metadataKeyDao.insertIfNotExist(key);
@@ -51,5 +52,15 @@ public class MetadataKeyDaoIT {
 
         assertThat(metadataKeyRecord.size(), is(1));
         assertThat(metadataKeyRecord.get(0).get("key"), is(key));
+    }
+
+    @Test
+    public void shouldGetIdFromKeyName() {
+        String key = "key-3";
+
+        Optional<Long> id = metadataKeyDao.insertIfNotExist(key);
+        var generatedId = metadataKeyDao.getByKey(key);
+
+        assertThat(generatedId, is(id.get()));
     }
 }

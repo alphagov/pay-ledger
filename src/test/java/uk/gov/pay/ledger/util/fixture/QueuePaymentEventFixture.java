@@ -12,6 +12,8 @@ import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import static uk.gov.pay.commons.model.Source.CARD_API;
 
@@ -25,6 +27,8 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     private String eventData = "{\"event_data\": \"event data\"}";
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(5);
     private Source source;
+    private Map<String, Object> metadata = new HashMap<>();
+    private boolean includeMetada = true;
 
     private QueuePaymentEventFixture() {
     }
@@ -73,11 +77,26 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
         return this;
     }
 
+    public QueuePaymentEventFixture withMetadata(String key, Object value) {
+        metadata.put(key, value);
+        return this;
+    }
+
+    public QueuePaymentEventFixture includeMetadata(boolean includeMetada) {
+        this.includeMetada = includeMetada;
+        return this;
+    }
+
     public QueuePaymentEventFixture withDefaultEventDataForEventType(String eventType) {
         switch (eventType) {
             case "PAYMENT_CREATED":
                 var externalMetadata = new JsonObject();
-                externalMetadata.addProperty("key", "value");
+                if (!metadata.isEmpty()) {
+                    metadata.forEach((key, value) ->
+                            externalMetadata.addProperty(key, String.valueOf(value)));
+                } else if (includeMetada) {
+                    externalMetadata.addProperty("key", "value");
+                }
 
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
