@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -266,25 +267,21 @@ public class TransactionDao {
         });
     }
 
-    public List<TransactionEntity> cursorTransactionSearch(
-            TransactionSearchParams searchParams,
-            String startingAfterCreatedDate,
-            Long startingAfterId
-    ) {
-        int cursorPageSize = 1000;
+    public List<TransactionEntity> cursorTransactionSearch(TransactionSearchParams searchParams, ZonedDateTime startingAfterCreatedDate, Long startingAfterId) {
+        Long cursorPageSize = searchParams.getDisplaySize();
         String cursorTemplate = "";
         String searchTemplate = createSearchTemplate(searchParams.getFilterTemplatesWithParentTransactionSearch(), SEARCH_TRANSACTIONS_CURSOR);
 
         if (startingAfterCreatedDate != null && startingAfterId != null) {
-            // if we're following a previous where condition
             cursorTemplate = searchParams.getQueryMap().isEmpty() ? "WHERE " : "AND ";
-            cursorTemplate += "t.created_date < :startingAfterCreatedDate and t.id < :startingAfterId ";
+            cursorTemplate += "t.created_date < :startingAfterCreatedDate AND NOT (t.created_date = :startingAfterCreatedDate AND t.id < :startingAfterId) ";
         }
 
-        searchTemplate.replace(":cursorFields", cursorTemplate);
+        searchTemplate = searchTemplate.replace(":cursorFields", cursorTemplate);
 
+        String finalSearchTemplate = searchTemplate;
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(searchTemplate);
+            Query query = handle.createQuery(finalSearchTemplate);
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             query.bind("startingAfterCreatedDate", startingAfterCreatedDate);
             query.bind("startingAfterId", startingAfterId);

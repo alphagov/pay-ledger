@@ -686,9 +686,10 @@ public class TransactionResourceIT {
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
+        // @TODO(sfount) parameterised tests if both methods will be supported long term
         InputStream csvResponseStream = given().port(port)
                 .accept("text/csv")
-                .get("/v1/transaction?" +
+                .get("/v1/transaction/stream?" +
                         "account_id=" + targetGatewayAccountId +
                         "&page=1" +
                         "&display_size=5"
@@ -775,6 +776,39 @@ public class TransactionResourceIT {
         assertThat(header.get(18), is("Total Amount"));
         assertThat(header.get(19), is("Wallet Type"));
         assertThat(header.get(20), is("Card Type"));
+    }
+
+    public void assertHealthyCsvResponse(InputStream csvStream) throws IOException {
+        List<CSVRecord> csvRecords = CSVParser.parse(csvStream, Charset.defaultCharset(), RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(2));
+
+        CSVRecord paymentRecord = csvRecords.get(0);
+        assertPaymentTransactionDetails(paymentRecord, transactionFixture);
+        assertThat(paymentRecord.get("Amount"), is("1.23"));
+        assertThat(paymentRecord.get("State"), is("Error"));
+        assertThat(paymentRecord.get("Finished"), is("true"));
+        assertThat(paymentRecord.get("Error Code"), is("P0050"));
+        assertThat(paymentRecord.get("Error Message"), is("Payment provider returned an error"));
+        assertThat(paymentRecord.get("Date Created"), is("12 Mar 2018"));
+        assertThat(paymentRecord.get("Time Created"), is("16:25:01"));
+        assertThat(paymentRecord.get("Corporate Card Surcharge"), is("0.05"));
+        assertThat(paymentRecord.get("Total Amount"), is("1.23"));
+        assertThat(paymentRecord.get("Wallet Type"), is(""));
+
+        CSVRecord refundRecord = csvRecords.get(1);
+        assertPaymentTransactionDetails(refundRecord, transactionFixture);
+        assertThat(refundRecord.get("Amount"), is("-1.00"));
+        assertThat(refundRecord.get("State"), is("Refund error"));
+        assertThat(refundRecord.get("Finished"), is("true"));
+        assertThat(refundRecord.get("Error Code"), is("P0050"));
+        assertThat(refundRecord.get("Error Message"), is("Payment provider returned an error"));
+        assertThat(refundRecord.get("Date Created"), is("12 Mar 2018"));
+        assertThat(refundRecord.get("Time Created"), is("16:24:01"));
+        assertThat(refundRecord.get("Corporate Card Surcharge"), is("0.00"));
+        assertThat(refundRecord.get("Total Amount"), is("-1.00"));
+        assertThat(refundRecord.get("Wallet Type"), is(""));
+        assertThat(refundRecord.get("Issued By"), is("refund-by-user-email@example.org"));
     }
 
     private void assertPaymentTransactionDetails(CSVRecord csvRecord, TransactionFixture transactionFixture) {

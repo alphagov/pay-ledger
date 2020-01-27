@@ -11,6 +11,7 @@ import io.dropwizard.jdbi3.bundles.JdbiExceptionsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.glassfish.jersey.server.ServerProperties;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.event.resource.EventResource;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
@@ -64,6 +65,9 @@ public class LedgerApp extends Application<LedgerConfig> {
         final Jdbi jdbi = jdbiFactory.build(environment, config.getDataSourceFactory(), "postgresql");
 
         final Injector injector = Guice.createInjector(new LedgerModule(config, environment, jdbi));
+
+        // @TODO(sfount) default buffer is 8192 bytes - does this need to be overridden for headers? Originally added for POC
+        environment.jersey().property(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, 0);
 
         environment.jersey().register(injector.getInstance(EventResource.class));
         environment.jersey().register(injector.getInstance(TransactionResource.class));

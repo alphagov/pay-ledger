@@ -1,6 +1,12 @@
 package uk.gov.pay.ledger.transaction.service;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,6 +32,7 @@ import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -155,8 +162,38 @@ public class TransactionService {
         return transactionDao.cursorTransactionSearch(searchParams, null, null);
     }
 
-    public List<TransactionEntity> searchTransactionAfter(TransactionSearchParams searchParams, String startingAfterCreatedDate, Long startingAfterId) {
+    public List<TransactionEntity> searchTransactionAfter(TransactionSearchParams searchParams, ZonedDateTime startingAfterCreatedDate, Long startingAfterId) {
         return transactionDao.cursorTransactionSearch(searchParams, startingAfterCreatedDate, startingAfterId);
+    }
+
+    public Map<String, Object> csvHeaderFrom(TransactionEntity sample) {
+        return csvTransactionFactory.getSimpleCsvHeaders();
+    }
+
+    public String csvStringFrom(Map<String, Object> headers) throws JsonProcessingException {
+        return csvString(List.of(headers), headers);
+    }
+
+    public String csvStringFrom(List<TransactionEntity> page, Map<String, Object> headers) throws JsonProcessingException {
+        List<Map<String, Object>> csvTransactions = page
+                .stream()
+                .map(csvTransactionFactory::toMap)
+                .collect(Collectors.toList());
+
+        return csvString(csvTransactions, headers);
+    }
+
+    private String csvString(List<Map<String, Object>> page, Map<String, Object> headers) throws JsonProcessingException {
+        CsvMapper mapper = new CsvMapper();
+        mapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
+        mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
+
+        CsvSchema.Builder builder = CsvSchema.builder();
+        headers.keySet().forEach(builder::addColumn);
+
+        CsvSchema schema = builder.build().withoutHeader();
+        ObjectWriter objectWriter = mapper.writer(schema);
+        return objectWriter.writeValueAsString(page);
     }
 
     private TransactionSearchResponse buildTransactionSearchResponse(TransactionSearchParams searchParams, UriInfo uriInfo, List<Transaction> transactionList, Long totalCount) {

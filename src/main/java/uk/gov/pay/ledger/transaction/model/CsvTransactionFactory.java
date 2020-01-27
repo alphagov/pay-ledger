@@ -158,6 +158,33 @@ public class CsvTransactionFactory {
         return result;
     }
 
+    public Map<String, Object> getSimpleCsvHeaders() {
+        LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+
+        headers.put(FIELD_REFERENCE, FIELD_REFERENCE);
+        headers.put(FIELD_DESC, FIELD_DESC);
+        headers.put(FIELD_EMAIL, FIELD_EMAIL);
+        headers.put(FIELD_AMOUNT, FIELD_AMOUNT);
+        headers.put(FIELD_CARD_BRAND, FIELD_CARD_BRAND);
+        headers.put(FIELD_CARDHOLDER_NAME, FIELD_CARDHOLDER_NAME);
+        headers.put(FIELD_CARD_EXPIRY_DATE, FIELD_CARD_EXPIRY_DATE);
+        headers.put(FIELD_CARD_NUMBER, FIELD_CARD_NUMBER);
+        headers.put(FIELD_STATE, FIELD_STATE);
+        headers.put(FIELD_FINISHED, FIELD_FINISHED);
+        headers.put(FIELD_ERROR_CODE, FIELD_ERROR_CODE);
+        headers.put(FIELD_ERROR_MESSAGE, FIELD_ERROR_MESSAGE);
+        headers.put(FIELD_PROVIDER_ID, FIELD_PROVIDER_ID);
+        headers.put(FIELD_GOVUK_PAYMENT_ID, FIELD_GOVUK_PAYMENT_ID);
+        headers.put(FIELD_ISSUED_BY, FIELD_ISSUED_BY);
+        headers.put(FIELD_DATE_CREATED, FIELD_DATE_CREATED);
+        headers.put(FIELD_TIME_CREATED, FIELD_TIME_CREATED);
+        headers.put(FIELD_CORPORATE_CARD_SURCHARGE, FIELD_CORPORATE_CARD_SURCHARGE);
+        headers.put(FIELD_TOTAL_AMOUNT, FIELD_TOTAL_AMOUNT);
+        headers.put(FIELD_WALLET_TYPE, FIELD_WALLET_TYPE);
+        headers.put(FIELD_CARD_TYPE, FIELD_CARD_TYPE);
+        return headers;
+    }
+
     public Map<String, Object> getCsvHeaders(List<TransactionEntity> transactions) {
         LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 

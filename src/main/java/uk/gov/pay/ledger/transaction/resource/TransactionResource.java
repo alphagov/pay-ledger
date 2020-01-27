@@ -9,6 +9,7 @@ import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
+
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
@@ -28,8 +29,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -113,23 +113,31 @@ public class TransactionResource {
                               @QueryParam("account_id") String gatewayAccountId,
                               @Context UriInfo uriInfo) {
         StreamingOutput stream = outputStream -> {
-
-            // @TODO(sfount) in memory count limit of 200,000
+            TransactionSearchParams csvSearchParams = Optional.ofNullable(searchParams).orElse(new TransactionSearchParams());
+            csvSearchParams.overrideMaxDisplaySize(1000L);
+            csvSearchParams.setAccountId(gatewayAccountId);
             List<TransactionEntity> page;
-            String startingAfterCreatedDate = null;
+            ZonedDateTime startingAfterCreatedDate = null;
             Long startingAfterId = null;
             int count = 0;
-            int max = 10000;
 
+            Map<String, Object> headers = transactionService.csvHeaderFrom(null);
+            outputStream.write(transactionService.csvStringFrom(headers).getBytes());
             do {
-                page = transactionService.searchTransactionAfter(searchParams, startingAfterCreatedDate, startingAfterId);
+                page = transactionService.searchTransactionAfter(csvSearchParams, startingAfterCreatedDate, startingAfterId);
                 count += page.size();
 
-                var lastEntity = page.get(page.size() - 1);
-                startingAfterCreatedDate = lastEntity.getCreatedDate().toString();
-                startingAfterId = lastEntity.getId();
-            } while (!page.isEmpty() || count < max);
+                if (!page.isEmpty()) {
+                    var lastEntity = page.get(page.size() - 1);
+                    startingAfterCreatedDate = lastEntity.getCreatedDate();
+                    startingAfterId = lastEntity.getId();
 
+                    outputStream.write(
+                            transactionService.csvStringFrom(page, headers).getBytes()
+                    );
+                    outputStream.flush();
+                }
+            } while (!page.isEmpty() && count < 200000);
             outputStream.close();
         };
         return Response.ok(stream).build();
