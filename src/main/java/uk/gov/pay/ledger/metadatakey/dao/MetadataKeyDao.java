@@ -18,7 +18,4 @@ public interface MetadataKeyDao {
             "    WHERE key = :key )")
     @GetGeneratedKeys
     Optional<Long> insertIfNotExist(@Bind("key") String key);
-
-    @SqlQuery("SELECT id FROM metadata_key WHERE key = :key")
-    Optional<Long> getByKey(@Bind("key") String key);
 }

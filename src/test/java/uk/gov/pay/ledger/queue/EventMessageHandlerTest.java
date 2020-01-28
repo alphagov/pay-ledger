@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
+import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import java.util.List;
@@ -30,6 +31,9 @@ public class EventMessageHandlerTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private TransactionMetadataService transactionMetadataService;
 
     @Mock
     private CreateEventResponse createEventResponse;

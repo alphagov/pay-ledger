@@ -8,13 +8,12 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 
-public class MetadataKeyDaoIT {
+public class TransactionMetadataKeyDaoIT {
 
     @ClassRule
     public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
@@ -52,15 +51,5 @@ public class MetadataKeyDaoIT {
 
         assertThat(metadataKeyRecord.size(), is(1));
         assertThat(metadataKeyRecord.get(0).get("key"), is(key));
-    }
-
-    @Test
-    public void shouldGetIdFromKeyName() {
-        String key = "key-3";
-
-        Optional<Long> id = metadataKeyDao.insertIfNotExist(key);
-        var generatedId = metadataKeyDao.getByKey(key);
-
-        assertThat(generatedId, is(id.get()));
     }
 }
