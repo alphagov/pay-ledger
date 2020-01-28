@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.transaction.resource;
 
 import com.codahale.metrics.annotation.Timed;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
+import uk.gov.pay.ledger.transaction.service.CsvService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import javax.validation.Valid;
@@ -43,10 +45,12 @@ public class TransactionResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
     private final TransactionService transactionService;
+    private final CsvService csvService;
 
     @Inject
-    public TransactionResource(TransactionService transactionService) {
+    public TransactionResource(TransactionService transactionService, CsvService csvService) {
         this.transactionService = transactionService;
+        this.csvService = csvService;
     }
 
     @Path("/{transactionExternalId}")
@@ -121,8 +125,10 @@ public class TransactionResource {
             Long startingAfterId = null;
             int count = 0;
 
-            Map<String, Object> headers = transactionService.csvHeaderFrom(null);
-            outputStream.write(transactionService.csvStringFrom(headers).getBytes());
+            Map<String, Object> headers = csvService.csvHeaderFrom(null);
+            ObjectWriter writer = csvService.writerFrom(headers);
+
+            outputStream.write(csvService.csvStringFrom(headers, writer).getBytes());
             do {
                 page = transactionService.searchTransactionAfter(csvSearchParams, startingAfterCreatedDate, startingAfterId);
                 count += page.size();
@@ -133,7 +139,7 @@ public class TransactionResource {
                     startingAfterId = lastEntity.getId();
 
                     outputStream.write(
-                            transactionService.csvStringFrom(page, headers).getBytes()
+                            csvService.csvStringFrom(page, writer).getBytes()
                     );
                     outputStream.flush();
                 }

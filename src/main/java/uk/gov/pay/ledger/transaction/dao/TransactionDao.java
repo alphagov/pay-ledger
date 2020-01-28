@@ -274,7 +274,7 @@ public class TransactionDao {
 
         if (startingAfterCreatedDate != null && startingAfterId != null) {
             cursorTemplate = searchParams.getQueryMap().isEmpty() ? "WHERE " : "AND ";
-            cursorTemplate += "t.created_date < :startingAfterCreatedDate AND NOT (t.created_date = :startingAfterCreatedDate AND t.id < :startingAfterId) ";
+            cursorTemplate += "t.created_date <= :startingAfterCreatedDate AND NOT (t.created_date = :startingAfterCreatedDate AND t.id >= :startingAfterId) ";
         }
 
         searchTemplate = searchTemplate.replace(":cursorFields", cursorTemplate);

@@ -830,22 +830,22 @@ public class TransactionDaoSearchIT {
                 .withCreatedDate(now(ZoneOffset.UTC).minusDays(3))
                 .insert(rule.getJdbi());
 
-        aTransactionFixture()
+        TransactionFixture transactionFixture2 = aTransactionFixture()
                 .withId(6L)
                 .withGatewayAccountId("1")
-                .withCreatedDate(now(ZoneOffset.UTC).minusDays(4))
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(5))
                 .insert(rule.getJdbi());
 
         aTransactionFixture()
                 .withId(50L)
                 .withGatewayAccountId("1")
-                .withCreatedDate(now(ZoneOffset.UTC).minusDays(5))
+                .withCreatedDate(transactionFixture2.getCreatedDate())
                 .insert(rule.getJdbi());
 
         aTransactionFixture()
                 .withId(200L)
                 .withGatewayAccountId("1")
-                .withCreatedDate(now(ZoneOffset.UTC).minusDays(5))
+                .withCreatedDate(transactionFixture2.getCreatedDate())
                 .insert(rule.getJdbi());
 
         aTransactionFixture()
@@ -869,7 +869,7 @@ public class TransactionDaoSearchIT {
         List<TransactionEntity> fourthPage = transactionDao.cursorTransactionSearch(searchParams, thirdLastEntity.getCreatedDate(), thirdLastEntity.getId());
 
         assertThat(firstPage.size(), is(2));
-        assertThat(firstLastEntity.getId(), is(6L));
+        assertThat(firstLastEntity.getId(), is(200L));
         assertThat(secondPage.size(), is (2));
         assertThat(thirdPage.size(), is(1));
         assertThat(thirdLastEntity.getId(), is(3L));

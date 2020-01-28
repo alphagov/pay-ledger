@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.transaction.service.CsvService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import javax.ws.rs.WebApplicationException;
@@ -29,10 +30,11 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionResourceTest {
     private static final TransactionService mockTransactionService = mock(TransactionService.class);
+    private static final CsvService mockCsvService = mock(CsvService.class);
 
     @ClassRule
     public static final ResourceTestRule resources = ResourceTestRule.builder()
-            .addResource(new TransactionResource(mockTransactionService))
+            .addResource(new TransactionResource(mockTransactionService, mockCsvService))
             .addProvider(BadRequestExceptionMapper.class)
             .build();
 
