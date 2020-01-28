@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -17,33 +18,7 @@ import java.util.stream.Collectors;
 
 public class TransactionDao {
 
-    private static final String FIND_TRANSACTION_BY_EXTERNAL_ID = "SELECT * FROM transaction " +
-            "WHERE external_id = :externalId " +
-            "AND (:gatewayAccountId is NULL OR gateway_account_id = :gatewayAccountId)";
-
-    private static final String FIND_TRANSACTION_BY_EXTERNAL_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
-            "WHERE external_id = :externalId " +
-            "AND gateway_account_id = :gatewayAccountId " +
-            "AND (:transactionType::transaction_type is NULL OR type = :transactionType::transaction_type) " +
-            "AND (:parentExternalId is NULL OR parent_external_id = :parentExternalId)";
-
-    private static final String FIND_TRANSACTIONS_BY_EXTERNAL_OR_PARENT_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
-            "WHERE (external_id = :externalId or parent_external_id = :externalId) " +
-            "  AND gateway_account_id = :gatewayAccountId";
-
-    private static final String FIND_TRANSACTIONS_BY_PARENT_EXT_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
-            " WHERE parent_external_id = :parentExternalId" +
-            "   AND gateway_account_id = :gatewayAccountId";
-
-    private static final String SEARCH_TRANSACTIONS = "SELECT * FROM transaction t " +
-            ":searchExtraFields " +
-            "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
-
-    private static final String COUNT_TRANSACTIONS = "SELECT count(1) " +
-            "FROM transaction t " +
-            ":searchExtraFields ";
-
-    private static final String SEARCH_TRANSACTIONS_WITH_PARENT_TRANSACTION = "select " +
+    private static final String SEARCH_TRANSACTIONS_WITH_PARENT_BASE = "SELECT " +
             " t.*," +
             " parent.id as parent_id, " +
             " parent.gateway_account_id as parent_gateway_account_id, " +
@@ -68,8 +43,43 @@ public class TransactionDao {
             " parent.refund_amount_available as parent_refund_amount_available, " +
             " parent.fee as parent_fee," +
             " parent.type as parent_type " +
-            " from transaction t left outer join transaction parent " +
-            " on t.parent_external_id = parent.external_id " +
+            " FROM transaction t LEFT OUTER JOIN transaction parent " +
+            " ON t.parent_external_id = parent.external_id ";
+
+    private static final String FIND_TRANSACTION_BY_EXTERNAL_ID = "SELECT * FROM transaction " +
+            "WHERE external_id = :externalId " +
+            "AND (:gatewayAccountId is NULL OR gateway_account_id = :gatewayAccountId)";
+
+    private static final String FIND_TRANSACTION_BY_EXTERNAL_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
+            "WHERE external_id = :externalId " +
+            "AND gateway_account_id = :gatewayAccountId " +
+            "AND (:transactionType::transaction_type is NULL OR type = :transactionType::transaction_type) " +
+            "AND (:parentExternalId is NULL OR parent_external_id = :parentExternalId)";
+
+    private static final String FIND_TRANSACTIONS_BY_EXTERNAL_OR_PARENT_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
+            "WHERE (external_id = :externalId or parent_external_id = :externalId) " +
+            "  AND gateway_account_id = :gatewayAccountId";
+
+    private static final String FIND_TRANSACTIONS_BY_PARENT_EXT_ID_AND_GATEWAY_ACCOUNT_ID = "SELECT * FROM transaction " +
+            " WHERE parent_external_id = :parentExternalId" +
+            "   AND gateway_account_id = :gatewayAccountId";
+
+    private static final String SEARCH_TRANSACTIONS = "SELECT * FROM transaction t " +
+            ":searchExtraFields " +
+            "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
+
+    private static final String SEARCH_TRANSACTIONS_CURSOR =
+            SEARCH_TRANSACTIONS_WITH_PARENT_BASE +
+            ":searchExtraFields " +
+            ":cursorFields " +
+            "ORDER BY t.created_date DESC, t.id DESC LIMIT :limit";
+
+    private static final String COUNT_TRANSACTIONS = "SELECT count(1) " +
+            "FROM transaction t " +
+            ":searchExtraFields ";
+
+    private static final String SEARCH_TRANSACTIONS_WITH_PARENT_TRANSACTION =
+            SEARCH_TRANSACTIONS_WITH_PARENT_BASE +
             ":searchExtraFields " +
             "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
 
@@ -254,6 +264,30 @@ public class TransactionDao {
             return query
                     .map(new TransactionWithParentMapper())
                     .list();
+        });
+    }
+
+    public List<TransactionEntity> cursorTransactionSearch(TransactionSearchParams searchParams, ZonedDateTime startingAfterCreatedDate, Long startingAfterId) {
+        Long cursorPageSize = searchParams.getDisplaySize();
+        String cursorTemplate = "";
+        String searchTemplate = createSearchTemplate(searchParams.getFilterTemplatesWithParentTransactionSearch(), SEARCH_TRANSACTIONS_CURSOR);
+
+        if (startingAfterCreatedDate != null && startingAfterId != null) {
+            cursorTemplate = searchParams.getQueryMap().isEmpty() ? "WHERE " : "AND ";
+            cursorTemplate += "t.created_date <= :startingAfterCreatedDate AND NOT (t.created_date = :startingAfterCreatedDate AND t.id >= :startingAfterId) ";
+        }
+
+        searchTemplate = searchTemplate.replace(":cursorFields", cursorTemplate);
+
+        String finalSearchTemplate = searchTemplate;
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(finalSearchTemplate);
+            searchParams.getQueryMap().forEach(bindSearchParameter(query));
+            query.bind("startingAfterCreatedDate", startingAfterCreatedDate);
+            query.bind("startingAfterId", startingAfterId);
+            query.bind("limit", cursorPageSize);
+
+            return query.map(new TransactionWithParentMapper()).list();
         });
     }
 

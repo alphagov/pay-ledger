@@ -802,6 +802,80 @@ public class TransactionDaoSearchIT {
         assertThat(total, is(1L));
     }
 
+    @Test
+    public void searchTransactionsByCursor() {
+
+        transactionFixture = aTransactionFixture()
+                .withGatewayAccountId("1")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId("1")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .insert(rule.getJdbi());
+
+        searchParams.setAccountId("1");
+
+        List<TransactionEntity> transactionList = transactionDao.cursorTransactionSearch(searchParams, null, null);
+
+        assertThat(transactionList.size(), is(2));
+    }
+
+    @Test
+    public void searchTransactionsByCursor_shouldSplitCursorPages() {
+        transactionFixture = aTransactionFixture()
+                .withId(9L)
+                .withGatewayAccountId("1")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(3))
+                .insert(rule.getJdbi());
+
+        TransactionFixture transactionFixture2 = aTransactionFixture()
+                .withId(6L)
+                .withGatewayAccountId("1")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(5))
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withId(50L)
+                .withGatewayAccountId("1")
+                .withCreatedDate(transactionFixture2.getCreatedDate())
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withId(200L)
+                .withGatewayAccountId("1")
+                .withCreatedDate(transactionFixture2.getCreatedDate())
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withId(3L)
+                .withGatewayAccountId("1")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(6))
+                .insert(rule.getJdbi());
+
+        searchParams.setAccountId("1");
+        searchParams.setDisplaySize(2L);
+
+        List<TransactionEntity> firstPage = transactionDao.cursorTransactionSearch(searchParams, null, null);
+        TransactionEntity firstLastEntity = firstPage.get(firstPage.size() - 1);
+
+        List<TransactionEntity> secondPage = transactionDao.cursorTransactionSearch(searchParams, firstLastEntity.getCreatedDate(), firstLastEntity.getId());
+        TransactionEntity secondLastEntity = secondPage.get(secondPage.size() - 1);
+
+        List<TransactionEntity> thirdPage = transactionDao.cursorTransactionSearch(searchParams, secondLastEntity.getCreatedDate(), secondLastEntity.getId());
+        TransactionEntity thirdLastEntity = thirdPage.get(thirdPage.size() - 1);
+
+        List<TransactionEntity> fourthPage = transactionDao.cursorTransactionSearch(searchParams, thirdLastEntity.getCreatedDate(), thirdLastEntity.getId());
+
+        assertThat(firstPage.size(), is(2));
+        assertThat(firstLastEntity.getId(), is(200L));
+        assertThat(secondPage.size(), is (2));
+        assertThat(thirdPage.size(), is(1));
+        assertThat(thirdLastEntity.getId(), is(3L));
+        assertThat(fourthPage.size(), is(0));
+    }
+
     private void assertTransactionEquals(TransactionEntity actualTransactionEntity, TransactionFixture transactionFixture) {
         assertThat(actualTransactionEntity.getId(), is(transactionFixture.getId()));
         assertThat(actualTransactionEntity.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));

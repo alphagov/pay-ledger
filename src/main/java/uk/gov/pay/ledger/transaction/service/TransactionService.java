@@ -26,6 +26,7 @@ import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -149,6 +150,10 @@ public class TransactionService {
         LOGGER.info("Deriving CSV headers from transactions - ended");
 
         return transactionListForCsv;
+    }
+
+    public List<TransactionEntity> searchTransactionAfter(TransactionSearchParams searchParams, ZonedDateTime startingAfterCreatedDate, Long startingAfterId) {
+        return transactionDao.cursorTransactionSearch(searchParams, startingAfterCreatedDate, startingAfterId);
     }
 
     private TransactionSearchResponse buildTransactionSearchResponse(TransactionSearchParams searchParams, UriInfo uriInfo, List<Transaction> transactionList, Long totalCount) {
