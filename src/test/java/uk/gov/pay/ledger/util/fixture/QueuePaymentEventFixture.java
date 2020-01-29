@@ -108,6 +108,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("payment_provider", "sandbox")
                                 .put("delayed_capture", false)
+                                .put("moto", false)
                                 .put("live", true)
                                 .put("external_metadata", externalMetadata)
                                 .put("email", "j.doe@example.org")
