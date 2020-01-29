@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.resource;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -8,12 +9,14 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.transactionmetadata.dao.TransactionMetadataDao;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
@@ -48,9 +51,13 @@ public class TransactionResourceIT {
 
     private TransactionFixture transactionFixture;
     private EventFixture eventFixture;
+    private MetadataKeyDao metadataKeyDao;
+    private TransactionMetadataDao transactionMetadataDao;
 
     @Before
     public void setUp() {
+        transactionMetadataDao = new TransactionMetadataDao(rule.getJdbi());
+        metadataKeyDao = rule.getJdbi().onDemand(MetadataKeyDao.class);
         aDatabaseTestHelper(rule.getJdbi()).truncateAllData();
     }
 
@@ -665,6 +672,7 @@ public class TransactionResourceIT {
                 .withCardBrandLabel("Diners Club")
                 .withDefaultCardDetails().withCardholderName("J Doe")
                 .withGatewayTransactionId("gateway-transaction-id")
+                .withExternalMetadata(ImmutableMap.of("test-key-1", "value1"))
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
@@ -685,6 +693,11 @@ public class TransactionResourceIT {
                 .withState(TransactionState.ERROR_GATEWAY)
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
+
+        metadataKeyDao.insertIfNotExist("test-key-1");
+        metadataKeyDao.insertIfNotExist("test-key-2");
+
+        transactionMetadataDao.insertIfNotExist(transactionFixture.getId(), "test-key-1");
 
         InputStream csvResponseStream = given().port(port)
                 .accept("text/csv")
@@ -777,6 +790,7 @@ public class TransactionResourceIT {
         assertThat(paymentRecord.get("Time Created"), is("16:25:01"));
         assertThat(paymentRecord.get("Corporate Card Surcharge"), is("0.05"));
         assertThat(paymentRecord.get("Total Amount"), is("1.23"));
+        assertThat(paymentRecord.get("test-key-1 (metadata)"), is("value1"));
         assertThat(paymentRecord.get("Wallet Type"), is(""));
 
         CSVRecord refundRecord = csvRecords.get(1);

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.CsvTransactionFactory;
+import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
 import java.util.List;
 import java.util.Map;
@@ -17,11 +18,13 @@ import java.util.stream.Collectors;
 public class CsvService {
 
     private final CsvTransactionFactory csvTransactionFactory;
+    private final TransactionMetadataService transactionMetadataService;
 
     @Inject
-    public CsvService(CsvTransactionFactory csvTransactionFactory) {
-
+    public CsvService(CsvTransactionFactory csvTransactionFactory,
+                      TransactionMetadataService transactionMetadataService) {
         this.csvTransactionFactory = csvTransactionFactory;
+        this.transactionMetadataService = transactionMetadataService;
     }
 
     public ObjectWriter writerFrom(Map<String, Object> headers) {
@@ -36,8 +39,9 @@ public class CsvService {
         return mapper.writer(schema);
     }
 
-    public Map<String, Object> csvHeaderFrom(TransactionEntity sample) {
-        return csvTransactionFactory.getSimpleCsvHeaders();
+    public Map<String, Object> csvHeaderFrom(TransactionSearchParams searchParams) {
+        List<String> metadataKeys = transactionMetadataService.findMetadataKeysForTransactions(searchParams);
+        return csvTransactionFactory.getCsvHeadersWithMedataKeys(metadataKeys);
     }
 
     public String csvStringFrom(Map<String, Object> headers, ObjectWriter writer) throws JsonProcessingException {
