@@ -125,7 +125,7 @@ public class TransactionResource {
             Long startingAfterId = null;
             int count = 0;
 
-            Map<String, Object> headers = csvService.csvHeaderFrom(null);
+            Map<String, Object> headers = csvService.csvHeaderFrom(searchParams);
             ObjectWriter writer = csvService.writerFrom(headers);
 
             outputStream.write(csvService.csvStringFrom(headers, writer).getBytes());
