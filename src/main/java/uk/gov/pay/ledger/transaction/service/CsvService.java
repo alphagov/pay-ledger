@@ -39,9 +39,9 @@ public class CsvService {
         return mapper.writer(schema);
     }
 
-    public Map<String, Object> csvHeaderFrom(TransactionSearchParams searchParams) {
+    public Map<String, Object> csvHeaderFrom(TransactionSearchParams searchParams, boolean includeFeeHeaders) {
         List<String> metadataKeys = transactionMetadataService.findMetadataKeysForTransactions(searchParams);
-        return csvTransactionFactory.getCsvHeadersWithMedataKeys(metadataKeys);
+        return csvTransactionFactory.getCsvHeadersWithMedataKeys(metadataKeys, includeFeeHeaders);
     }
 
     public String csvStringFrom(Map<String, Object> headers, ObjectWriter writer) throws JsonProcessingException {
