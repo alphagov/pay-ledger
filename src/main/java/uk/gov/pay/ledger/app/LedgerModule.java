@@ -88,7 +88,7 @@ public class LedgerModule extends AbstractModule {
     @Provides
     @Singleton
     public TransactionMetadataDao provideTransactionMetadataDao() {
-        return jdbi.onDemand(TransactionMetadataDao.class);
+        return new TransactionMetadataDao(jdbi);
     }
 
     @Provides
