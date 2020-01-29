@@ -8,6 +8,7 @@ import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
+import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import java.time.ZonedDateTime;
@@ -23,16 +24,19 @@ public class EventMessageHandler {
     private final EventQueue eventQueue;
     private final EventService eventService;
     private final TransactionService transactionService;
+    private final TransactionMetadataService transactionMetadataService;
     private final MetricRegistry metricRegistry;
 
     @Inject
     public EventMessageHandler(EventQueue eventQueue,
                                EventService eventService,
                                TransactionService transactionService,
+                               TransactionMetadataService transactionMetadataService,
                                MetricRegistry metricRegistry) {
         this.eventQueue = eventQueue;
         this.eventService = eventService;
         this.transactionService = transactionService;
+        this.transactionMetadataService = transactionMetadataService;
         this.metricRegistry = metricRegistry;
     }
 
@@ -61,6 +65,7 @@ public class EventMessageHandler {
         if(response.isSuccessful()) {
             EventDigest eventDigest = eventService.getEventDigestForResource(event.getResourceExternalId());
             transactionService.upsertTransactionFor(eventDigest);
+            transactionMetadataService.upsertMetadataFor(event);
             eventQueue.markMessageAsProcessed(message);
             metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
             LOGGER.info("The event message has been processed.",
