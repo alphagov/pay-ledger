@@ -165,6 +165,50 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
+    public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithoutFeeColumns() {
+        var keys = List.of("test-key-1", "test-key-2");
+
+        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false);
+
+        assertThat(csvHeaders.get("Reference"), is(notNullValue()));
+        assertThat(csvHeaders.get("Description"), is(notNullValue()));
+        assertThat(csvHeaders.get("Email"), is(notNullValue()));
+        assertThat(csvHeaders.get("Amount"), is(notNullValue()));
+        assertThat(csvHeaders.get("Card Brand"), is(notNullValue()));
+        assertThat(csvHeaders.get("Cardholder Name"), is(notNullValue()));
+        assertThat(csvHeaders.get("Card Expiry Date"), is(notNullValue()));
+        assertThat(csvHeaders.get("Card Number"), is(notNullValue()));
+        assertThat(csvHeaders.get("State"), is(notNullValue()));
+        assertThat(csvHeaders.get("Finished"), is(notNullValue()));
+        assertThat(csvHeaders.get("Error Code"), is(notNullValue()));
+        assertThat(csvHeaders.get("Error Message"), is(notNullValue()));
+        assertThat(csvHeaders.get("Provider ID"), is(notNullValue()));
+        assertThat(csvHeaders.get("GOV.UK Payment ID"), is(notNullValue()));
+        assertThat(csvHeaders.get("Issued By"), is(notNullValue()));
+        assertThat(csvHeaders.get("Date Created"), is(notNullValue()));
+        assertThat(csvHeaders.get("Time Created"), is(notNullValue()));
+        assertThat(csvHeaders.get("Corporate Card Surcharge"), is(notNullValue()));
+        assertThat(csvHeaders.get("Wallet Type"), is(notNullValue()));
+        assertThat(csvHeaders.get("Card Type"), is(notNullValue()));
+
+        assertThat(csvHeaders.get("test-key-1 (metadata)"), is(notNullValue()));
+        assertThat(csvHeaders.get("test-key-2 (metadata)"), is(notNullValue()));
+
+        assertThat(csvHeaders.get("Net"), is(nullValue()));
+        assertThat(csvHeaders.get("Fee"), is(nullValue()));
+    }
+
+    @Test
+    public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithFeeColumns() {
+        var keys = List.of("test-key-1", "test-key-2");
+
+        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, true);
+
+        assertThat(csvHeaders.get("Net"), is(notNullValue()));
+        assertThat(csvHeaders.get("Fee"), is(notNullValue()));
+    }
+
+    @Test
     public void getCsvHeadersShouldIncludeExternalMetadataFieldsInHeader() {
         TransactionEntity transactionEntity = transactionFixture.withTransactionDetails(
                 new GsonBuilder().create().toJson(ImmutableMap.builder()

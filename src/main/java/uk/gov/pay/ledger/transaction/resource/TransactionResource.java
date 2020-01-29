@@ -115,6 +115,7 @@ public class TransactionResource {
     public Response streamCsv(@Valid @BeanParam TransactionSearchParams searchParams,
                               @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
                               @QueryParam("account_id") String gatewayAccountId,
+                              @QueryParam("fee_headers") boolean includeFeeHeaders,
                               @Context UriInfo uriInfo) {
         StreamingOutput stream = outputStream -> {
             TransactionSearchParams csvSearchParams = Optional.ofNullable(searchParams).orElse(new TransactionSearchParams());
@@ -125,7 +126,7 @@ public class TransactionResource {
             Long startingAfterId = null;
             int count = 0;
 
-            Map<String, Object> headers = csvService.csvHeaderFrom(searchParams);
+            Map<String, Object> headers = csvService.csvHeaderFrom(searchParams, includeFeeHeaders);
             ObjectWriter writer = csvService.writerFrom(headers);
 
             outputStream.write(csvService.csvStringFrom(headers, writer).getBytes());

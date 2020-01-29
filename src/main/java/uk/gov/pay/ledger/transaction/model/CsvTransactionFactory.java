@@ -158,7 +158,7 @@ public class CsvTransactionFactory {
         return result;
     }
 
-    public Map<String, Object> getCsvHeadersWithMedataKeys(List<String> metadataKeys) {
+    public Map<String, Object> getCsvHeadersWithMedataKeys(List<String> metadataKeys, boolean includeFeeHeaders) {
         LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 
         headers.put(FIELD_REFERENCE, FIELD_REFERENCE);
@@ -182,6 +182,13 @@ public class CsvTransactionFactory {
         headers.put(FIELD_TOTAL_AMOUNT, FIELD_TOTAL_AMOUNT);
         headers.put(FIELD_WALLET_TYPE, FIELD_WALLET_TYPE);
 
+        if (includeFeeHeaders) {
+            headers.put(FIELD_FEE, FIELD_FEE);
+            headers.put(FIELD_NET, FIELD_NET);
+        }
+
+        headers.put(FIELD_CARD_TYPE, FIELD_CARD_TYPE);
+
         if (metadataKeys != null) {
             metadataKeys.stream().sorted()
                     .forEach(key -> {
@@ -189,8 +196,6 @@ public class CsvTransactionFactory {
                         headers.put(header, header);
                     });
         }
-
-        headers.put(FIELD_CARD_TYPE, FIELD_CARD_TYPE);
         return headers;
     }
 
