@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.resource;
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.inject.Inject;
+import jersey.repackaged.com.google.common.base.Stopwatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -10,7 +11,6 @@ import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
-
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
@@ -35,8 +35,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static net.logstash.logback.argument.StructuredArguments.kv;
 import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParamsValidator.validateSearchParams;
 
 @Path("/v1/transaction")
@@ -92,26 +94,6 @@ public class TransactionResource {
     @GET
     @Produces("text/csv")
     @Timed
-    public List<Map<String,Object>> searchCsv(@Valid
-                                            @BeanParam TransactionSearchParams searchParams,
-                                              @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
-                                              @QueryParam("account_id") String gatewayAccountId,
-                                              @Context UriInfo uriInfo) {
-        TransactionSearchParams csvSearchParams = Optional.ofNullable(searchParams)
-                .orElse(new TransactionSearchParams());
-        csvSearchParams.overrideMaxDisplaySize(100000L);
-        csvSearchParams.setAccountId(gatewayAccountId);
-        csvSearchParams.setWithParentTransaction(true);
-
-        validateSearchParams(csvSearchParams, gatewayAccountId);
-
-        return transactionService.searchTransactionsForCsv(searchParams);
-    }
-
-    @Path("/stream")
-    @GET
-    @Produces("text/csv")
-    @Timed
     public Response streamCsv(@Valid @BeanParam TransactionSearchParams searchParams,
                               @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
                               @QueryParam("account_id") String gatewayAccountId,
@@ -128,7 +110,7 @@ public class TransactionResource {
 
             Map<String, Object> headers = csvService.csvHeaderFrom(searchParams, includeFeeHeaders);
             ObjectWriter writer = csvService.writerFrom(headers);
-
+            Stopwatch stopwatch = Stopwatch.createStarted();
             outputStream.write(csvService.csvStringFrom(headers, writer).getBytes());
             do {
                 page = transactionService.searchTransactionAfter(csvSearchParams, startingAfterCreatedDate, startingAfterId);
@@ -146,6 +128,10 @@ public class TransactionResource {
                 }
             } while (!page.isEmpty() && count < 200000);
             outputStream.close();
+            long elapsed = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
+            LOGGER.info("CSV stream took:",
+                    kv("time_taken_in_milli_seconds", elapsed),
+                    kv("number_of_transactions_streamed", count));
         };
         return Response.ok(stream).build();
     }

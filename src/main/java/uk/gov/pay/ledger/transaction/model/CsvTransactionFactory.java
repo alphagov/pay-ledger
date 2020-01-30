@@ -199,57 +199,6 @@ public class CsvTransactionFactory {
         return headers;
     }
 
-    public Map<String, Object> getCsvHeaders(List<TransactionEntity> transactions) {
-        LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
-
-        headers.put(FIELD_REFERENCE, FIELD_REFERENCE);
-        headers.put(FIELD_DESC, FIELD_DESC);
-        headers.put(FIELD_EMAIL, FIELD_EMAIL);
-        headers.put(FIELD_AMOUNT, FIELD_AMOUNT);
-        headers.put(FIELD_CARD_BRAND, FIELD_CARD_BRAND);
-        headers.put(FIELD_CARDHOLDER_NAME, FIELD_CARDHOLDER_NAME);
-        headers.put(FIELD_CARD_EXPIRY_DATE, FIELD_CARD_EXPIRY_DATE);
-        headers.put(FIELD_CARD_NUMBER, FIELD_CARD_NUMBER);
-        headers.put(FIELD_STATE, FIELD_STATE);
-        headers.put(FIELD_FINISHED, FIELD_FINISHED);
-        headers.put(FIELD_ERROR_CODE, FIELD_ERROR_CODE);
-        headers.put(FIELD_ERROR_MESSAGE, FIELD_ERROR_MESSAGE);
-        headers.put(FIELD_PROVIDER_ID, FIELD_PROVIDER_ID);
-        headers.put(FIELD_GOVUK_PAYMENT_ID, FIELD_GOVUK_PAYMENT_ID);
-        headers.put(FIELD_ISSUED_BY, FIELD_ISSUED_BY);
-        headers.put(FIELD_DATE_CREATED, FIELD_DATE_CREATED);
-        headers.put(FIELD_TIME_CREATED, FIELD_TIME_CREATED);
-        headers.put(FIELD_CORPORATE_CARD_SURCHARGE, FIELD_CORPORATE_CARD_SURCHARGE);
-        headers.put(FIELD_TOTAL_AMOUNT, FIELD_TOTAL_AMOUNT);
-        headers.put(FIELD_WALLET_TYPE, FIELD_WALLET_TYPE);
-
-        if (isStripeTransaction(transactions.get(0))) {
-            headers.put(FIELD_FEE, FIELD_FEE);
-            headers.put(FIELD_NET, FIELD_NET);
-        }
-
-        Set<String> metadataHeaders = deriveMetadataHeaders(transactions);
-        metadataHeaders.forEach(key -> headers.put(key, key));
-
-        headers.put(FIELD_CARD_TYPE, FIELD_CARD_TYPE);
-        return headers;
-    }
-
-    private boolean isStripeTransaction(TransactionEntity aTransaction) {
-        try {
-            JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(
-                    aTransaction.getTransactionDetails()).orElse("{}"));
-            String paymentProvider = safeGetAsString(transactionDetails, "payment_provider");
-
-            return "stripe".equals(paymentProvider);
-        } catch (IOException e) {
-            LOGGER.error("Error parsing transaction for Stripe specific CSV headers [{}] [errorMessage={}]",
-                    kv(PAYMENT_EXTERNAL_ID, aTransaction.getExternalId()),
-                    e.getMessage());
-            return false;
-        }
-    }
-
     private String penceToCurrency(Long amount) {
         if (amount != null) {
             DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
@@ -278,25 +227,6 @@ public class CsvTransactionFactory {
                     });
         }
         return Optional.ofNullable(metadata);
-    }
-
-    private Set<String> deriveMetadataHeaders(List<TransactionEntity> transactions) {
-        Set<String> metadataHeaders = new TreeSet<>();
-        transactions.forEach(transactionEntity -> {
-            try {
-                Optional<Map<String, Object>> externalMetadata = getExternalMetadata(
-                        transactionEntity.getTransactionDetails());
-
-                externalMetadata.ifPresent(metadata ->
-                        metadata.forEach((key, value) ->
-                                metadataHeaders.add(String.format("%s (metadata)", key))));
-            } catch (IOException e) {
-                LOGGER.error("Error parsing transaction for metadata headers [{}] [errorMessage={}]",
-                        kv(PAYMENT_EXTERNAL_ID, transactionEntity.getExternalId()),
-                        e.getMessage());
-            }
-        });
-        return metadataHeaders;
     }
 
     private String sanitiseAgainstSpreadsheetFormulaInjection(String value) {

@@ -127,44 +127,6 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void getCsvHeadersShouldReturnMapWithCorrectCsvHeaders() {
-        TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
-                .withState(TransactionState.FAILED_REJECTED)
-                .withTransactionType(TransactionType.PAYMENT.name())
-                .withPaymentProvider("sandbox")
-                .withFee(6).toEntity();
-
-        List transactionEntities = List.of(transactionEntity);
-
-        LinkedHashMap<String, Object> csvHeaders = (LinkedHashMap<String, Object>) csvTransactionFactory.getCsvHeaders(transactionEntities);
-
-        assertThat(csvHeaders.get("Reference"), is(notNullValue()));
-        assertThat(csvHeaders.get("Description"), is(notNullValue()));
-        assertThat(csvHeaders.get("Email"), is(notNullValue()));
-        assertThat(csvHeaders.get("Amount"), is(notNullValue()));
-        assertThat(csvHeaders.get("Card Brand"), is(notNullValue()));
-        assertThat(csvHeaders.get("Cardholder Name"), is(notNullValue()));
-        assertThat(csvHeaders.get("Card Expiry Date"), is(notNullValue()));
-        assertThat(csvHeaders.get("Card Number"), is(notNullValue()));
-        assertThat(csvHeaders.get("State"), is(notNullValue()));
-        assertThat(csvHeaders.get("Finished"), is(notNullValue()));
-        assertThat(csvHeaders.get("Error Code"), is(notNullValue()));
-        assertThat(csvHeaders.get("Error Message"), is(notNullValue()));
-        assertThat(csvHeaders.get("Provider ID"), is(notNullValue()));
-        assertThat(csvHeaders.get("GOV.UK Payment ID"), is(notNullValue()));
-        assertThat(csvHeaders.get("Issued By"), is(notNullValue()));
-        assertThat(csvHeaders.get("Date Created"), is(notNullValue()));
-        assertThat(csvHeaders.get("Time Created"), is(notNullValue()));
-        assertThat(csvHeaders.get("Corporate Card Surcharge"), is(notNullValue()));
-        assertThat(csvHeaders.get("Wallet Type"), is(notNullValue()));
-        assertThat(csvHeaders.get("Card Type"), is(notNullValue()));
-
-        // Stripe specific should not available for other payment providers
-        assertThat(csvHeaders.get("Net"), is(nullValue()));
-        assertThat(csvHeaders.get("Fee"), is(nullValue()));
-    }
-
-    @Test
     public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithoutFeeColumns() {
         var keys = List.of("test-key-1", "test-key-2");
 
@@ -203,52 +165,6 @@ public class CsvTransactionFactoryTest {
         var keys = List.of("test-key-1", "test-key-2");
 
         Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, true);
-
-        assertThat(csvHeaders.get("Net"), is(notNullValue()));
-        assertThat(csvHeaders.get("Fee"), is(notNullValue()));
-    }
-
-    @Test
-    public void getCsvHeadersShouldIncludeExternalMetadataFieldsInHeader() {
-        TransactionEntity transactionEntity = transactionFixture.withTransactionDetails(
-                new GsonBuilder().create().toJson(ImmutableMap.builder()
-                        .put("external_metadata",
-                                ImmutableMap.builder()
-                                        .put("key-1", "value-1").put("key-2", "value-2").build())
-                        .build()
-                )).toEntity();
-
-        TransactionEntity anotherTransactionEntity = transactionFixture.withTransactionDetails(
-                new GsonBuilder().create().toJson(ImmutableMap.builder()
-                        .put("external_metadata",
-                                ImmutableMap.builder().put("key-0", "value-0").build())
-                        .build()
-                )).toEntity();
-
-        List transactionEntities = List.of(transactionEntity, anotherTransactionEntity);
-
-        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeaders(transactionEntities);
-
-        assertThat(csvHeaders.get("key-0 (metadata)"), is(notNullValue()));
-        assertThat(csvHeaders.get("key-1 (metadata)"), is(notNullValue()));
-        assertThat(csvHeaders.get("key-2 (metadata)"), is(notNullValue()));
-    }
-
-    @Test
-    public void getCsvHeadersShouldIncludeFeeAndNetForStripePayments() {
-        TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
-                .withFee(6)
-                .withTransactionDetails(
-                        new GsonBuilder().create()
-                                .toJson(ImmutableMap.builder()
-                                        .put("payment_provider", "stripe")
-                                        .build())
-                )
-                .toEntity();
-
-        List transactionEntities = List.of(transactionEntity);
-
-        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeaders(transactionEntities);
 
         assertThat(csvHeaders.get("Net"), is(notNullValue()));
         assertThat(csvHeaders.get("Fee"), is(notNullValue()));
