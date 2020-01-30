@@ -210,6 +210,7 @@ public class TransactionResourceIT {
                 .body("results[0].state.status", is(transactionToVerify.getState().getStatus()))
                 .body("results[0].description", is(transactionToVerify.getDescription()))
                 .body("results[0].reference", is(transactionToVerify.getReference()))
+                .body("results[0].moto", is(transactionToVerify.getMoto()))
                 .body("results[0].language", is(transactionToVerify.getLanguage()))
                 .body("results[0].return_url", is(transactionToVerify.getReturnUrl()))
                 .body("results[0].email", is(transactionToVerify.getEmail()))
