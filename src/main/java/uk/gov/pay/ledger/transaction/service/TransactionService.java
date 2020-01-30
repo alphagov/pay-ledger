@@ -131,27 +131,6 @@ public class TransactionService {
         return buildTransactionSearchResponse(searchParams, uriInfo, transactionList, total);
     }
 
-    public List<Map<String, Object>> searchTransactionsForCsv(TransactionSearchParams searchParams) {
-        LOGGER.info("Search DB transactions for CSV - began");
-        List<TransactionEntity> transactions = transactionDao.searchTransactionsAndParent(searchParams);
-        LOGGER.info("Search DB transactions for CSV - ended");
-
-        LOGGER.info("Mapping DB transactions to CSV data map - began");
-        List<Map<String, Object>> transactionListForCsv = transactions.stream()
-                .map(csvTransactionFactory::toMap)
-                .collect(Collectors.toList());
-        LOGGER.info("Mapping DB transactions to CSV data map - ended");
-
-        LOGGER.info("Deriving CSV headers from transactions - began");
-        if (!transactionListForCsv.isEmpty()) {
-            Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeaders(transactions);
-            transactionListForCsv.add(csvHeaders);
-        }
-        LOGGER.info("Deriving CSV headers from transactions - ended");
-
-        return transactionListForCsv;
-    }
-
     public List<TransactionEntity> searchTransactionAfter(TransactionSearchParams searchParams, ZonedDateTime startingAfterCreatedDate, Long startingAfterId) {
         return transactionDao.cursorTransactionSearch(searchParams, startingAfterCreatedDate, startingAfterId);
     }

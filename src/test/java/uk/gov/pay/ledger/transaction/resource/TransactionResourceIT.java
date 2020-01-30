@@ -701,19 +701,7 @@ public class TransactionResourceIT {
 
         InputStream csvResponseStream = given().port(port)
                 .accept("text/csv")
-                .get("/v1/transaction/stream?" +
-                        "account_id=" + targetGatewayAccountId +
-                        "&page=1" +
-                        "&display_size=5"
-                )
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType("text/csv")
-                .extract().asInputStream();
-
-        InputStream csvResponse = given().port(port)
-                .accept("text/csv")
-                .get("/v1/transaction?" +
+                .get("/v1/transaction/?" +
                         "account_id=" + targetGatewayAccountId +
                         "&page=1" +
                         "&display_size=5"
@@ -724,7 +712,6 @@ public class TransactionResourceIT {
                 .extract().asInputStream();
 
         assertHealthyCsvResponse(csvResponseStream, transactionFixture);
-        assertHealthyCsvResponse(csvResponse, transactionFixture);
     }
 
     @Test
