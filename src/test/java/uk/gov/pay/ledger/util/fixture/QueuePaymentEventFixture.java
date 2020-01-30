@@ -29,6 +29,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     private Source source;
     private Map<String, Object> metadata = new HashMap<>();
     private boolean includeMetada = true;
+    private GsonBuilder gsonBuilder = new GsonBuilder();
 
     private QueuePaymentEventFixture() {
     }
@@ -98,7 +99,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                     externalMetadata.addProperty("key", "value");
                 }
 
-                eventData = new GsonBuilder().create()
+                eventData = gsonBuilder.create()
                         .toJson(ImmutableMap.builder()
                                 .put("amount", 1000)
                                 .put("description", "a description")
@@ -121,7 +122,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":
-                eventData = new GsonBuilder().create()
+                eventData = gsonBuilder.create()
                         .toJson(ImmutableMap.builder()
                                 .put("email", "j.doe@example.org")
                                 .put("last_digits_card_number", "4242")
@@ -140,19 +141,14 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .build());
                 break;
             case "CAPTURE_CONFIRMED":
-                eventData = new GsonBuilder().create()
-                        .toJson(ImmutableMap.builder()
-                                .put("gateway_event_date", eventDate.toString())
-                                .put("captured_date", eventDate.toString())
-                                .put("fee", 5)
-                                .put("net_amount", 1069)
-                                .build());
+                eventData = gsonBuilder.create()
+                        .toJson(Map.of("gateway_event_date", eventDate.toString(),
+                                "captured_date", eventDate.toString(),
+                                "fee", 5,
+                                "net_amount", 1069));
                 break;
             case "CAPTURE_SUBMITTED":
-                eventData = new GsonBuilder().create()
-                        .toJson(ImmutableMap.builder()
-                                .put("capture_submitted_date", eventDate.toString())
-                                .build());
+                eventData = gsonBuilder.create().toJson(Map.of("capture_submitted_date", eventDate.toString()));
                 break;
             case "PAYMENT_NOTIFICATION_CREATED":
                 externalMetadata = new JsonObject();
@@ -162,7 +158,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 externalMetadata.addProperty("created_date", "2018-02-21T15:05:13Z");
                 externalMetadata.addProperty("auth_code", "authCode");
                 externalMetadata.addProperty("status", "success");
-                eventData = new GsonBuilder().create()
+                eventData = gsonBuilder.create()
                     .toJson(ImmutableMap.builder()
                             .put("amount", 1000)
                             .put("description", "New passport application")
@@ -180,8 +176,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                             .build());
                 break;
             default:
-                eventData = new GsonBuilder().create()
-                        .toJson(ImmutableMap.of("event_data", "event_data"));
+                eventData = gsonBuilder.create().toJson(Map.of("event_data", "event_data"));
         }
         return this;
     }
