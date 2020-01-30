@@ -60,3 +60,7 @@ queueMessageReceiverConfig:
   threadDelayInMilliseconds: ${QUEUE_MESSAGE_RECEIVER_THREAD_DELAY_IN_MILLISECONDS:-1}
   numberOfThreads: ${QUEUE_MESSAGE_RECEIVER_NUMBER_OF_THREADS:-1}
   messageRetryDelayInSeconds: ${QUEUE_MESSAGE_RETRY_DELAY_IN_SECONDS:-900}
+
+reportingConfig:
+  maximumCsvRowsSize: ${REPORTING_MAX_CSV_ROWS_SIZE:-100000}
+  streamingCsvPageSize: ${STREAMING_CSV_PAGE_SIZE:-5000}

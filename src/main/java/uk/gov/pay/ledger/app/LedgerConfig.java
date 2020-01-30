@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
+import uk.gov.pay.ledger.app.config.ReportingConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
 
 import javax.validation.Valid;
@@ -32,11 +33,19 @@ public class LedgerConfig extends Configuration {
     @JsonProperty("queueMessageReceiverConfig")
     private QueueMessageReceiverConfig queueMessageReceiverConfig;
 
+    @NotNull
+    @JsonProperty("reportingConfig")
+    private ReportingConfig reportingConfig;
+
     public SqsConfig getSqsConfig() {
         return sqsConfig;
     }
 
     public QueueMessageReceiverConfig getQueueMessageReceiverConfig() {
         return queueMessageReceiverConfig;
+    }
+
+    public ReportingConfig getReportingConfig() {
+        return reportingConfig;
     }
 }

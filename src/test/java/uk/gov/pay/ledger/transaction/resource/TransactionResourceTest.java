@@ -1,10 +1,13 @@
 package uk.gov.pay.ledger.transaction.resource;
 
 import io.dropwizard.testing.junit.ResourceTestRule;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.ledger.app.LedgerConfig;
+import uk.gov.pay.ledger.app.config.ReportingConfig;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.CsvService;
@@ -31,10 +34,11 @@ import static org.mockito.Mockito.when;
 public class TransactionResourceTest {
     private static final TransactionService mockTransactionService = mock(TransactionService.class);
     private static final CsvService mockCsvService = mock(CsvService.class);
+    private static final LedgerConfig mockConfig = mock(LedgerConfig.class);
 
     @ClassRule
     public static final ResourceTestRule resources = ResourceTestRule.builder()
-            .addResource(new TransactionResource(mockTransactionService, mockCsvService))
+            .addResource(new TransactionResource(mockTransactionService, mockCsvService, mockConfig))
             .addProvider(BadRequestExceptionMapper.class)
             .build();
 

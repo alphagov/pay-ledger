@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import jersey.repackaged.com.google.common.base.Stopwatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
@@ -48,11 +49,13 @@ public class TransactionResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
     private final TransactionService transactionService;
     private final CsvService csvService;
+    private final LedgerConfig configuration;
 
     @Inject
-    public TransactionResource(TransactionService transactionService, CsvService csvService) {
+    public TransactionResource(TransactionService transactionService, CsvService csvService, LedgerConfig configuration) {
         this.transactionService = transactionService;
         this.csvService = csvService;
+        this.configuration = configuration;
     }
 
     @Path("/{transactionExternalId}")
@@ -101,7 +104,7 @@ public class TransactionResource {
                               @Context UriInfo uriInfo) {
         StreamingOutput stream = outputStream -> {
             TransactionSearchParams csvSearchParams = Optional.ofNullable(searchParams).orElse(new TransactionSearchParams());
-            csvSearchParams.overrideMaxDisplaySize(1000L);
+            csvSearchParams.overrideMaxDisplaySize((long) configuration.getReportingConfig().getStreamingCsvPageSize());
             csvSearchParams.setAccountId(gatewayAccountId);
             List<TransactionEntity> page;
             ZonedDateTime startingAfterCreatedDate = null;
@@ -126,7 +129,7 @@ public class TransactionResource {
                     );
                     outputStream.flush();
                 }
-            } while (!page.isEmpty() && count < 200000);
+            } while (!page.isEmpty() && count < configuration.getReportingConfig().getMaximumCsvRowsSize());
             outputStream.close();
             long elapsed = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
             LOGGER.info("CSV stream took:",
