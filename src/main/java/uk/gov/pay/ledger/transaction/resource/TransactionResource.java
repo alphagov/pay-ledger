@@ -122,7 +122,7 @@ public class TransactionResource {
                               @Context UriInfo uriInfo) {
         StreamingOutput stream = outputStream -> {
             TransactionSearchParams csvSearchParams = Optional.ofNullable(searchParams).orElse(new TransactionSearchParams());
-            csvSearchParams.overrideMaxDisplaySize(1000L);
+            csvSearchParams.overrideMaxDisplaySize((long) configuration.getReportingConfig().getStreamingCsvPageSize());
             csvSearchParams.setAccountId(gatewayAccountId);
             List<TransactionEntity> page;
             ZonedDateTime startingAfterCreatedDate = null;

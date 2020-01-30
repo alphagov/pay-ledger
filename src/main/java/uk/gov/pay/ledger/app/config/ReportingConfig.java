@@ -10,7 +10,14 @@ public class ReportingConfig extends Configuration {
     @Valid
     private int maximumCsvRowsSize;
 
+    @Valid
+    private int streamingCsvPageSize;
+
     public int getMaximumCsvRowsSize() {
         return maximumCsvRowsSize;
+    }
+
+    public int getStreamingCsvPageSize() {
+        return streamingCsvPageSize;
     }
 }

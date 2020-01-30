@@ -77,3 +77,4 @@ queueMessageReceiverConfig:
 
 reportingConfig:
   maximumCsvRowsSize: ${REPORTING_MAX_CSV_ROWS_SIZE:-100000}
+  streamingCsvPageSize: ${STREAMING_CSV_PAGE_SIZE:-5000}
