@@ -112,6 +112,7 @@ public class TransactionDao {
                     "refund_amount_refunded, " +
                     "refund_status, " +
                     "live, " +
+                    "moto, " +
                     "gateway_transaction_id, " +
                     "source" +
                     ") " +
@@ -139,6 +140,7 @@ public class TransactionDao {
                     ":refundAmountRefunded," +
                     ":refundStatus," +
                     ":live, " +
+                    ":moto, " +
                     ":gatewayTransactionId, " +
                     ":source::source" +
                     ") " +
@@ -167,6 +169,7 @@ public class TransactionDao {
                     "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
                     "refund_status = EXCLUDED.refund_status, " +
                     "live = EXCLUDED.live, " +
+                    "moto = EXCLUDED.moto, " +
                     "gateway_transaction_id = EXCLUDED.gateway_transaction_id, " +
                     "source = EXCLUDED.source " +
                     "WHERE EXCLUDED.event_count >= transaction.event_count;";

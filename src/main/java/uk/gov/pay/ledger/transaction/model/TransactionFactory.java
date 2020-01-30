@@ -91,7 +91,8 @@ public class TransactionFactory {
                     entity.getNetAmount(),
                     refundSummary,
                     entity.getTotalAmount(),
-                    settlementSummary
+                    settlementSummary,
+                    entity.isMoto()
             );
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());

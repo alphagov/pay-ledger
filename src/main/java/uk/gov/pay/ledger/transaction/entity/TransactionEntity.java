@@ -43,6 +43,7 @@ public class TransactionEntity {
     private Long refundAmountRefunded;
     private Long refundAmountAvailable;
     private boolean live;
+    private boolean moto;
     private TransactionEntity parentTransactionEntity;
     private String gatewayTransactionId;
     private Source source;
@@ -76,6 +77,7 @@ public class TransactionEntity {
         this.transactionType = builder.transactionType;
         this.parentTransactionEntity = builder.parentTransactionEntity;
         this.live = builder.live;
+        this.moto = builder.moto;
         this.gatewayTransactionId = builder.gatewayTransactionId;
         this.source = builder.source;
     }
@@ -204,6 +206,10 @@ public class TransactionEntity {
         return live;
     }
 
+    public boolean isMoto() {
+        return moto;
+    }
+
     public TransactionEntity getParentTransactionEntity() {
         return parentTransactionEntity;
     }
@@ -244,6 +250,7 @@ public class TransactionEntity {
         private TransactionEntity parentTransactionEntity;
         private Source source;
         private String gatewayTransactionId;
+        private boolean moto;
 
         public Builder() {
         }
@@ -384,6 +391,11 @@ public class TransactionEntity {
 
         public Builder withSource(Source source) {
             this.source = source;
+            return this;
+        }
+
+        public Builder withMoto(boolean moto) {
+            this.moto = moto;
             return this;
         }
     }

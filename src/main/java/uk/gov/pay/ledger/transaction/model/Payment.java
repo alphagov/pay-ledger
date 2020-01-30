@@ -17,6 +17,7 @@ import java.util.Map;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Payment extends Transaction{
 
+    private Boolean moto;
     private String reference;
     private String description;
     @JsonSerialize(using = ToStringSerializer.class)
@@ -50,7 +51,8 @@ public class Payment extends Transaction{
                    String email, String paymentProvider, ZonedDateTime createdDate,
                    CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
                    Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
-                   Long netAmount, Long totalAmount, RefundSummary refundSummary, SettlementSummary settlementSummary) {
+                   Long netAmount, Long totalAmount, RefundSummary refundSummary, SettlementSummary settlementSummary,
+                   Boolean moto) {
         super(id, gatewayAccountId, amount, externalId);
         this.corporateCardSurcharge = corporateCardSurcharge;
         this.fee = fee;
@@ -75,6 +77,7 @@ public class Payment extends Transaction{
         this.externalMetaData = externalMetaData;
         this.eventCount = eventCount;
         this.gatewayTransactionId = gatewayTransactionId;
+        this.moto = moto;
     }
 
     public Payment(String gatewayAccountId, Long amount,
@@ -83,11 +86,12 @@ public class Payment extends Transaction{
                    String email, String paymentProvider, ZonedDateTime createdDate,
                    CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
                    Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
-                   Long netAmount, RefundSummary refundSummary, Long totalAmount, SettlementSummary settlementSummary) {
+                   Long netAmount, RefundSummary refundSummary, Long totalAmount, SettlementSummary settlementSummary,
+                   Boolean moto) {
 
         this(null, gatewayAccountId, amount, reference, description, state, language, externalId, returnUrl, email,
                 paymentProvider, createdDate, cardDetails, delayedCapture, externalMetaData, eventCount,
-                gatewayTransactionId, corporateCardSurcharge, fee, netAmount, totalAmount, refundSummary, settlementSummary);
+                gatewayTransactionId, corporateCardSurcharge, fee, netAmount, totalAmount, refundSummary, settlementSummary, moto);
     }
 
     @Override
@@ -139,6 +143,10 @@ public class Payment extends Transaction{
 
     public Boolean getDelayedCapture() {
         return delayedCapture;
+    }
+
+    public Boolean getMoto() {
+        return moto;
     }
 
     public Map<String, Object> getExternalMetadata() {
