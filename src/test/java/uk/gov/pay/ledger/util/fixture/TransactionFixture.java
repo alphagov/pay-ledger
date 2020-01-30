@@ -67,6 +67,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String refundedById;
     private String cardBrandLabel;
     private boolean live;
+    private boolean moto;
     private String refundedByUserEmail;
     private TransactionEntity parentTransactionEntity;
     private String source;
@@ -224,6 +225,13 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public boolean getMoto() { return moto;}
+
+    public TransactionFixture withMoto(boolean moto) {
+        this.moto = moto;
+        return this;
+    }
+
     public TransactionFixture withLanguage(String language) {
         this.language = language;
         return this;
@@ -322,10 +330,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        refund_amount_available,\n" +
                                 "        type,\n" +
                                 "        live,\n" +
+                                "        moto,\n" +
                                 "        gateway_transaction_id,\n" +
                                 "        source\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?, ?::source)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?, ?, ?::source)\n",
                         id,
                         externalId,
                         parentExternalId,
@@ -350,6 +359,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         refundAmountAvailable,
                         transactionType,
                         live,
+                        moto,
                         gatewayTransactionId,
                         source
                 )
@@ -424,6 +434,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withFee(fee)
                 .withTransactionType(transactionType)
                 .withLive(live)
+                .withMoto(moto)
                 .withGatewayTransactionId(gatewayTransactionId)
                 .withParentTransactionEntity(parentTransactionEntity);
         Source.from(source).ifPresent(builder::withSource);
