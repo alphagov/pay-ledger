@@ -24,6 +24,7 @@ import java.util.Objects;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TransactionView {
 
+    private Boolean moto;
     @JsonIgnore
     private Long id;
     private String gatewayAccountId;
@@ -82,6 +83,7 @@ public class TransactionView {
         this.refundedByUserEmail = builder.refundedByUserEmail;
         this.transactionType = builder.transactionType;
         this.parentTransaction = builder.parentTransaction;
+        this.moto = builder.moto;
     }
 
     public TransactionView() {
@@ -116,6 +118,7 @@ public class TransactionView {
                     .withMetadata(payment.getExternalMetadata())
                     .withTransactionType(payment.getTransactionType())
                     .withGatewayTransactionId(payment.getGatewayTransactionId())
+                    .withMoto(payment.getMoto())
                     .build();
         }
 
@@ -197,6 +200,10 @@ public class TransactionView {
 
     public Boolean getDelayedCapture() {
         return delayedCapture;
+    }
+
+    public Boolean getMoto() {
+        return moto;
     }
 
     public String getGatewayTransactionId() {
@@ -289,6 +296,7 @@ public class TransactionView {
         private String refundedByUserEmail;
         private TransactionType transactionType;
         private List<Link> links = new ArrayList<>();
+        private Boolean moto;
 
         public Builder() {
         }
@@ -432,5 +440,9 @@ public class TransactionView {
             return this;
         }
 
+        public Builder withMoto(Boolean moto) {
+            this.moto = moto;
+            return this;
+        }
     }
 }
