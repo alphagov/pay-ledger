@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.sqlobject.customizer.Bind;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
 import java.util.List;
