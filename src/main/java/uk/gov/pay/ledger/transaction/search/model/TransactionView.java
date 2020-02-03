@@ -24,7 +24,6 @@ import java.util.Objects;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TransactionView {
 
-    private Boolean moto;
     @JsonIgnore
     private Long id;
     private String gatewayAccountId;
@@ -54,6 +53,7 @@ public class TransactionView {
     private String refundedByUserEmail;
     private TransactionType transactionType;
     private TransactionView parentTransaction;
+    private Boolean moto;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
