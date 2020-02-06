@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Refund;
@@ -54,6 +55,8 @@ public class TransactionView {
     private TransactionType transactionType;
     private TransactionView parentTransaction;
     private Boolean moto;
+    private Boolean live;
+    private Source source;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -84,6 +87,8 @@ public class TransactionView {
         this.transactionType = builder.transactionType;
         this.parentTransaction = builder.parentTransaction;
         this.moto = builder.moto;
+        this.live = builder.live;
+        this.source = builder.source;
     }
 
     public TransactionView() {
@@ -119,6 +124,8 @@ public class TransactionView {
                     .withTransactionType(payment.getTransactionType())
                     .withGatewayTransactionId(payment.getGatewayTransactionId())
                     .withMoto(payment.getMoto())
+                    .withLive(payment.isLive())
+                    .withSource(payment.getSource())
                     .build();
         }
 
@@ -267,6 +274,14 @@ public class TransactionView {
         return parentTransaction;
     }
 
+    public Boolean getLive() {
+        return live;
+    }
+
+    public Source getSource() {
+        return source;
+    }
+
     public static class Builder {
         private TransactionView parentTransaction;
         private Long id;
@@ -297,6 +312,8 @@ public class TransactionView {
         private TransactionType transactionType;
         private List<Link> links = new ArrayList<>();
         private Boolean moto;
+        private Boolean live;
+        private Source source;
 
         public Builder() {
         }
@@ -442,6 +459,16 @@ public class TransactionView {
 
         public Builder withMoto(Boolean moto) {
             this.moto = moto;
+            return this;
+        }
+
+        public Builder withLive(Boolean live) {
+            this.live = live;
+            return this;
+        }
+
+        public Builder withSource(Source source) {
+            this.source = source;
             return this;
         }
     }
