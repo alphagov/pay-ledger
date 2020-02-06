@@ -108,6 +108,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     .withCardBrand(i % 2 == 0 ? "visa" : "mastercard")
                     .withTransactionType(i % 2 == 0 ? "REFUND" : "PAYMENT")
                     .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusHours(1L).plusMinutes(i))
+                    .withLive(true)
+                    .withSource(String.valueOf(Source.CARD_API))
                     .insert(jdbi)
                     .toEntity();
             transactionList.add(new TransactionFactory(Jackson.newObjectMapper()).createTransactionEntity(entity));

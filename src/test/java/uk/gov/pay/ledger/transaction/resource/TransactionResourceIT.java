@@ -8,6 +8,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
@@ -66,7 +67,9 @@ public class TransactionResourceIT {
 
         transactionFixture = aTransactionFixture()
                 .withDefaultCardDetails()
-                .withDefaultTransactionDetails();
+                .withDefaultTransactionDetails()
+                .withLive(true)
+                .withSource(String.valueOf(Source.CARD_PAYMENT_LINK));
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -75,6 +78,8 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
+                .body("live", is(true))
+                .body("source", is("CARD_PAYMENT_LINK"))
                 .body("transaction_id", is(transactionFixture.getExternalId()))
                 .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
                 .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
@@ -230,6 +235,9 @@ public class TransactionResourceIT {
                 .body("results[0].net_amount", is(nullValue()))
                 .body("results[0].total_amount", is(nullValue()))
                 .body("results[0].fee", is(nullValue()))
+                .body("results[0].live", is(true))
+                .body("results[0].source", is("CARD_API"))
+
                 .body("results[0].refund_summary.amount_available", is(transactionToVerify.getRefundSummary().getAmountAvailable().intValue()))
                 .body("results[0].refund_summary.amount_submitted", is(transactionToVerify.getRefundSummary().getAmountSubmitted().intValue()))
                 .body("results[0].refund_summary.amount_refunded", is(transactionToVerify.getRefundSummary().getAmountRefunded().intValue()))

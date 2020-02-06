@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -40,6 +41,8 @@ public class Payment extends Transaction{
     private Long totalAmount;
     private RefundSummary refundSummary;
     private SettlementSummary settlementSummary;
+    private Boolean live;
+    private Source source;
 
     public Payment() {
 
@@ -52,7 +55,7 @@ public class Payment extends Transaction{
                    CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
                    Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
                    Long netAmount, Long totalAmount, RefundSummary refundSummary, SettlementSummary settlementSummary,
-                   Boolean moto) {
+                   Boolean moto, Boolean live, Source source) {
         super(id, gatewayAccountId, amount, externalId);
         this.corporateCardSurcharge = corporateCardSurcharge;
         this.fee = fee;
@@ -78,6 +81,8 @@ public class Payment extends Transaction{
         this.eventCount = eventCount;
         this.gatewayTransactionId = gatewayTransactionId;
         this.moto = moto;
+        this.live = live;
+        this.source = source;
     }
 
     public Payment(String gatewayAccountId, Long amount,
@@ -87,11 +92,12 @@ public class Payment extends Transaction{
                    CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
                    Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
                    Long netAmount, RefundSummary refundSummary, Long totalAmount, SettlementSummary settlementSummary,
-                   Boolean moto) {
+                   Boolean moto, Boolean live, Source source) {
 
         this(null, gatewayAccountId, amount, reference, description, state, language, externalId, returnUrl, email,
                 paymentProvider, createdDate, cardDetails, delayedCapture, externalMetaData, eventCount,
-                gatewayTransactionId, corporateCardSurcharge, fee, netAmount, totalAmount, refundSummary, settlementSummary, moto);
+                gatewayTransactionId, corporateCardSurcharge, fee, netAmount, totalAmount, refundSummary,
+                settlementSummary, moto, live, source);
     }
 
     @Override
@@ -183,5 +189,13 @@ public class Payment extends Transaction{
 
     public SettlementSummary getSettlementSummary() {
         return settlementSummary;
+    }
+
+    public boolean getLive() {
+        return live;
+    }
+
+    public Source getSource() {
+        return source;
     }
 }

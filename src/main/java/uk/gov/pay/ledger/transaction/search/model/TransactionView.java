@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Refund;
@@ -51,9 +52,11 @@ public class TransactionView {
     private Map<String, Object> metadata;
     private String refundedBy;
     private String refundedByUserEmail;
+    private Boolean live;
+    private Source source;
+    private Boolean moto;
     private TransactionType transactionType;
     private TransactionView parentTransaction;
-    private Boolean moto;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -84,6 +87,8 @@ public class TransactionView {
         this.transactionType = builder.transactionType;
         this.parentTransaction = builder.parentTransaction;
         this.moto = builder.moto;
+        this.live = builder.live;
+        this.source = builder.source;
     }
 
     public TransactionView() {
@@ -118,6 +123,8 @@ public class TransactionView {
                     .withMetadata(payment.getExternalMetadata())
                     .withTransactionType(payment.getTransactionType())
                     .withGatewayTransactionId(payment.getGatewayTransactionId())
+                    .withSource(payment.getSource())
+                    .withLive(payment.getLive())
                     .withMoto(payment.getMoto())
                     .build();
         }
@@ -267,6 +274,14 @@ public class TransactionView {
         return parentTransaction;
     }
 
+    public boolean isLive() {
+        return live;
+    }
+
+    public Source getSource() {
+        return source;
+    }
+
     public static class Builder {
         private TransactionView parentTransaction;
         private Long id;
@@ -295,8 +310,10 @@ public class TransactionView {
         private String refundedBy;
         private String refundedByUserEmail;
         private TransactionType transactionType;
-        private List<Link> links = new ArrayList<>();
         private Boolean moto;
+        private Boolean live;
+        private Source source;
+        private List<Link> links = new ArrayList<>();
 
         public Builder() {
         }
@@ -437,6 +454,16 @@ public class TransactionView {
 
         public Builder withParentTransaction(TransactionView parentTransaction) {
             this.parentTransaction = parentTransaction;
+            return this;
+        }
+
+        public Builder withSource(Source source) {
+            this.source = source;
+            return this;
+        }
+
+        public Builder withLive(boolean live) {
+            this.live = live;
             return this;
         }
 
