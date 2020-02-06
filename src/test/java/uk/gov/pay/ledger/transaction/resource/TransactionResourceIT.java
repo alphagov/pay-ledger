@@ -8,6 +8,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
@@ -66,7 +67,9 @@ public class TransactionResourceIT {
 
         transactionFixture = aTransactionFixture()
                 .withDefaultCardDetails()
-                .withDefaultTransactionDetails();
+                .withDefaultTransactionDetails()
+                .withLive(Boolean.TRUE)
+                .withSource(String.valueOf(Source.CARD_API));
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -79,7 +82,9 @@ public class TransactionResourceIT {
                 .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
                 .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
                 .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
-                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()));
+                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
+                .body("live", is(Boolean.TRUE))
+                .body("source", is(String.valueOf(Source.CARD_API)));
     }
 
     @Test
@@ -713,6 +718,32 @@ public class TransactionResourceIT {
                 .extract().asInputStream();
 
         assertHealthyCsvResponse(csvResponseStream, transactionFixture);
+    }
+
+    @Test
+    public void returnedTransactionsShould_haveCorrectSourceAndLive() {
+        TransactionFixture cancelledTransaction1 = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withGatewayAccountId("123")
+                .withDefaultTransactionDetails()
+                .withSource(String.valueOf(Source.CARD_API))
+                .withLive(Boolean.TRUE)
+                .withState(TransactionState.FAILED_CANCELLED)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction" +
+                        "?account_id=123" +
+                        "&state=cancelled"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("page", is(1))
+                .body("results[0].live", is(Boolean.TRUE))
+                .body("results[0].source", is(String.valueOf(Source.CARD_API)));
     }
 
     @Test
