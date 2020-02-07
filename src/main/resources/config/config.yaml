@@ -1,7 +1,7 @@
 server:
   applicationConnectors:
     - type: http
-      port: ${PORT}
+      port: ${PORT:-8080}
   requestLog:
     appenders:
       - type: console
