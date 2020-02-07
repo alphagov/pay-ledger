@@ -84,7 +84,6 @@ public class TransactionResource {
 
     @Path("/")
     @GET
-    @Produces("application/json")
     @Timed
     public TransactionSearchResponse search(@Valid
                                             @BeanParam TransactionSearchParams searchParams,
