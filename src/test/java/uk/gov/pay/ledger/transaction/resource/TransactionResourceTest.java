@@ -92,7 +92,10 @@ public class TransactionResourceTest {
 
     @Test
     public void shouldReturn400IfTransactionGatewayAccountIdIsNotProvidedForSearch() {
-        Response response = resources.target("/v1/transaction/").request().get();
+        Response response = resources.target("/v1/transaction/")
+                .request()
+                .header("Accept", "application/json")
+                .get();
         assertThat(response.getStatus(), is(400));
     }
 
