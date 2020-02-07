@@ -67,27 +67,6 @@ public abstract class ContractTest {
                 .insert(app.getJdbi());
     }
 
-    @State("a transaction with created state exist")
-    public void createTransactionWithCardDetails(Map<String, String> params) {
-        String transactionExternalId = params.get("transaction_external_id");
-        String gatewayAccountId = params.get("gateway_account_id");
-
-        aTransactionFixture()
-                .withExternalId(transactionExternalId)
-                .withGatewayAccountId(gatewayAccountId)
-                .withAmount(1000L)
-                .withReference("aReference")
-                .withDescription("Test description")
-                .withState(TransactionState.CREATED)
-                .withTransactionType(TransactionType.PAYMENT.name())
-                .withReturnUrl("https://example.org")
-                .withCardBrand(null)
-                .withDefaultCardDetails()
-                .withDefaultTransactionDetails()
-                .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:13:16.067Z"))
-                .insert(app.getJdbi());
-    }
-
     @State("a refund transaction for a transaction exists")
     public void createRefundTransactionForATransaction(Map<String, String> params) {
         String transactionExternalId = params.get("transaction_external_id");
