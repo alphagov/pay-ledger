@@ -104,9 +104,12 @@ public class TransactionResource {
                               @Context UriInfo uriInfo) {
         StreamingOutput stream = outputStream -> {
             TransactionSearchParams csvSearchParams = Optional.ofNullable(searchParams).orElse(new TransactionSearchParams());
-            LOGGER.error("debugging travis",
-                    kv("reporting config", configuration.getReportingConfig()),
+            LOGGER.error("debugging travis - reporting config",
+                    kv("reporting config", configuration.getReportingConfig()));
+
+            LOGGER.error("debugging travis - csv page size",
                     kv("streaming csv page size", configuration.getReportingConfig().getStreamingCsvPageSize()));
+
             csvSearchParams.overrideMaxDisplaySize((long) configuration.getReportingConfig().getStreamingCsvPageSize());
             csvSearchParams.setAccountId(gatewayAccountId);
             List<TransactionEntity> page;
