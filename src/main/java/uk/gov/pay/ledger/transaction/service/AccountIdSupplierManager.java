@@ -13,7 +13,7 @@ public class AccountIdSupplierManager<T> {
 
     private static final String GATEWAY_ACCOUNT_ID = "account_id";
 
-    private final boolean overrideAccountRestriction;
+    public final boolean overrideAccountRestriction;
     private final String gatewayAccountId;
 
     private Supplier<T> privilegedSupplier;
@@ -39,7 +39,10 @@ public class AccountIdSupplierManager<T> {
     }
 
     public T validateAndGet() {
+         System.out.println(String.format("Override account restriction = %s", overrideAccountRestriction));
+         System.out.println(String.format("gatewayAccountId = %s", gatewayAccountId));
         if(!overrideAccountRestriction && isBlank(gatewayAccountId)) {
+            System.out.println("Throwing a validation exception");
             throw new ValidationException(format("Field [%s] cannot be empty", GATEWAY_ACCOUNT_ID));
         }
 

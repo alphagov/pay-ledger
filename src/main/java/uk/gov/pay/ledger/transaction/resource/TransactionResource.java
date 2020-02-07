@@ -150,6 +150,9 @@ public class TransactionResource {
         AccountIdSupplierManager<TransactionSearchResponse> accountIdSupplierManager =
                 AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId);
 
+        LOGGER.error("Should be validating the account id next",
+                kv("account id", gatewayAccountId),
+                kv("override account restriction",accountIdSupplierManager.overrideAccountRestriction));
         return accountIdSupplierManager
                 .withSupplier(accountId -> transactionService.searchTransactions(gatewayAccountId, transactionSearchParams, uriInfo))
                 .withPrivilegedSupplier(() -> transactionService.searchTransactions(transactionSearchParams, uriInfo))
