@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -92,7 +93,11 @@ public class TransactionResourceTest {
 
     @Test
     public void shouldReturn400IfTransactionGatewayAccountIdIsNotProvidedForSearch() {
-        Response response = resources.target("/v1/transaction/").request().get();
+        Response response = resources.target("/v1/transaction/")
+                .request()
+                .header("Accept", APPLICATION_JSON)
+                .get();
+
         assertThat(response.getStatus(), is(400));
     }
 
