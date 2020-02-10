@@ -54,8 +54,6 @@ public class ReportDao {
         });
     }
 
-
-
     public TransactionsStatisticsResult getTransactionSummaryStatistics(TransactionSummaryParams params, TransactionType transactionType) {
         return jdbi.withHandle(handle -> {
             String template = createSearchTemplate(params.getFilterTemplates(), TRANSACTION_SUMMARY_STATISTICS);
@@ -64,6 +62,23 @@ public class ReportDao {
                     .bind("transactionType", transactionType)
                     .bind("state", TransactionState.SUCCESS);
             params.getQueryMap().forEach(query::bind);
+
+            return query.map((rs, rowNum) -> {
+                long count = rs.getLong("count");
+                long grossAmount = rs.getLong("grossAmount");
+                return new TransactionsStatisticsResult(count, grossAmount);
+            }).one();
+        });
+    }
+
+    public TransactionsStatisticsResult getMotoStatistics(TransactionSummaryParams params, TransactionType transactionType) {
+        return jdbi.withHandle(handle -> {
+            String template = createSearchTemplate(params.getFilterTemplatesWithMoto(), TRANSACTION_SUMMARY_STATISTICS);
+
+            Query query = handle.createQuery(template)
+                    .bind("transactionType", transactionType)
+                    .bind("state", TransactionState.SUCCESS);
+            params.getQueryMapWithMoto().forEach(query::bind);
 
             return query.map((rs, rowNum) -> {
                 long count = rs.getLong("count");

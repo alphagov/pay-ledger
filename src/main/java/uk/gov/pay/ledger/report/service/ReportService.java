@@ -38,6 +38,11 @@ public class ReportService {
     public TransactionSummaryResult getTransactionsSummary(TransactionSummaryParams params) {
         TransactionsStatisticsResult payments = reportDao.getTransactionSummaryStatistics(params, TransactionType.PAYMENT);
         TransactionsStatisticsResult refunds = reportDao.getTransactionSummaryStatistics(params, TransactionType.REFUND);
+
+        if (params.isMoto()) {
+            TransactionsStatisticsResult motoPayments = reportDao.getMotoStatistics(params, TransactionType.PAYMENT);
+            return new TransactionSummaryResult(payments, motoPayments, refunds, payments.getGrossAmount() - refunds.getGrossAmount());
+        }
         return new TransactionSummaryResult(payments, refunds, payments.getGrossAmount() - refunds.getGrossAmount());
     }
 

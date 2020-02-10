@@ -87,9 +87,43 @@ public class ReportResourceIT {
                 )
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON).log().body()
+                .body("payments.count", is(2))
+                .body("payments.gross_amount", is(3000))
+                .body("net_income", is(3000));
+    }
+
+    @Test
+    public void shouldGetTransactionSummaryStatisticsWithMotoForToolbox() {
+        aTransactionFixture()
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withAmount(2000L)
+                .withMoto(true)
+                .withState(TransactionState.SUCCESS)
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/report/transactions-summary?account_id=" + gatewayAccountId +
+                        "&moto=true" +
+                        "&from_date=2019-10-01T09:00:00.000Z" +
+                        "&to_date=2019-10-01T11:00:00.000Z" +
+                        "&override_from_date_validation=true"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("payments.count", is(2))
                 .body("payments.gross_amount", is(3000))
+                .body("moto_payments.count", is(1))
+                .body("moto_payments.amount", is(2000))
                 .body("net_income", is(3000));
     }
 
