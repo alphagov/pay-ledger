@@ -8,12 +8,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.report.dao.ReportDao;
+import uk.gov.pay.ledger.report.dao.builder.TransactionStatisticQuery;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
 import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
 import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +38,7 @@ public class ReportServiceTest {
     private ReportDao mockReportDao;
 
     @Captor
-    private ArgumentCaptor<TransactionSummaryParams> transactionSummaryParamsArgumentCaptor;
+    private ArgumentCaptor<TransactionStatisticQuery> transactionStatisticQueryArgumentCaptor;
 
     @InjectMocks
     private ReportService reportService;
@@ -44,14 +46,15 @@ public class ReportServiceTest {
     @Test
     public void shouldReturnPaymentCountsByState_whenGatewayAccountIdProvided() {
         String gatewayAccountId = "1";
-        String fromDate = "2019-10-1T10:00:00.000Z";
-        String toDate = "2019-10-1T11:00:00.000Z";
+        String fromDate = "2019-10-01T10:00:00.000Z";
+        String toDate = "2019-10-01T11:00:00.000Z";
+
         var params = new TransactionSummaryParams();
         params.setFromDate(fromDate);
         params.setToDate(toDate);
         params.setAccountId(gatewayAccountId);
 
-        when(mockReportDao.getPaymentCountsByState(transactionSummaryParamsArgumentCaptor.capture())).thenReturn(List.of(
+        when(mockReportDao.getPaymentCountsByState(transactionStatisticQueryArgumentCaptor.capture())).thenReturn(List.of(
                 new PaymentCountByStateResult(CREATED.name(), 2L),
                 new PaymentCountByStateResult(SUCCESS.name(), 1L),
                 new PaymentCountByStateResult(ERROR.name(), 3L)
@@ -59,9 +62,9 @@ public class ReportServiceTest {
 
         Map<String, Long> response = reportService.getPaymentCountsByState(params);
 
-        assertThat(transactionSummaryParamsArgumentCaptor.getValue().getAccountId(), is(gatewayAccountId));
-        assertThat(transactionSummaryParamsArgumentCaptor.getValue().getFromDate(), is(fromDate));
-        assertThat(transactionSummaryParamsArgumentCaptor.getValue().getToDate(), is(toDate));
+        assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("account_id"), is(gatewayAccountId));
+        assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("from_date"), is(ZonedDateTime.parse(fromDate)));
+        assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("to_date"), is(ZonedDateTime.parse(toDate)));
 
         assertThat(response, allOf(
                 aMapWithSize(10),
@@ -81,41 +84,82 @@ public class ReportServiceTest {
     @Test
     public void shouldReturnPaymentCountsByState_whenGatewayAccountIdNotProvided() {
         var params = new TransactionSummaryParams();
-        params.setFromDate("2019-10-1T10:00:00.000Z");
-        params.setToDate("2019-10-1T11:00:00.000Z");
+        params.setFromDate("2019-10-01T10:00:00.000Z");
+        params.setToDate("2019-10-01T11:00:00.000Z");
 
-        when(mockReportDao.getPaymentCountsByState(transactionSummaryParamsArgumentCaptor.capture())).thenReturn(List.of(
+        when(mockReportDao.getPaymentCountsByState(transactionStatisticQueryArgumentCaptor.capture())).thenReturn(List.of(
                 new PaymentCountByStateResult(CREATED.name(), 2L),
                 new PaymentCountByStateResult(SUCCESS.name(), 1L)
         ));
 
         Map<String, Long> response = reportService.getPaymentCountsByState(params);
 
-        assertThat(transactionSummaryParamsArgumentCaptor.getValue().getAccountId(), is(nullValue()));
+        assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("account_id"), is(nullValue()));
         assertThat(response, aMapWithSize(10));
+    }
+
+    @Test
+    public void shouldReturnTransactionSummaryStatistics_whenMotoProvided() {
+        String gatewayAccountId = "1";
+        String fromDate = "2019-10-01T10:00:00.000Z";
+        String toDate = "2019-10-01T11:00:00.000Z";
+        var params = new TransactionSummaryParams();
+        params.setFromDate(fromDate);
+        params.setToDate(toDate);
+        params.setAccountId(gatewayAccountId);
+        params.setIncludeMotoStatistics(true);
+
+        var result = new TransactionSummaryResult(
+                new TransactionsStatisticsResult(10L, 10000L),
+                new TransactionsStatisticsResult(5L, 2000L),
+                new TransactionsStatisticsResult(0L, 0L),
+                10000L
+        );
+
+        var transactionStatisticQueryWithoutMoto = new TransactionStatisticQuery()
+                .withAccountId(params.getAccountId())
+                .withFromDate(params.getFromDate())
+                .withToDate(params.getToDate());
+
+        var transactionStatisticQueryWithMoto = new TransactionStatisticQuery()
+                .withAccountId(params.getAccountId())
+                .withFromDate(params.getFromDate())
+                .withToDate(params.getToDate())
+                .withMoto(params.isIncludeMotoStatistics());
+
+        when(mockReportDao.getTransactionSummaryStatistics(eq(transactionStatisticQueryWithoutMoto), eq(TransactionType.PAYMENT)))
+                .thenReturn(result.getPayments());
+        when(mockReportDao.getTransactionSummaryStatistics(eq(transactionStatisticQueryWithoutMoto), eq(TransactionType.REFUND)))
+                .thenReturn(result.getRefunds());
+        when(mockReportDao.getTransactionSummaryStatistics(eq(transactionStatisticQueryWithMoto), eq(TransactionType.PAYMENT)))
+                .thenReturn(result.getMotoPayments());
+
+        var transactionStatistics = reportService.getTransactionsSummary(params);
+
+        assertThat(transactionStatistics, is(result));
     }
 
     @Test
     public void shouldReturnTransactionSummaryStatistics_whenGatewayAccountIdProvided() {
         String gatewayAccountId = "1";
-        String fromDate = "2019-10-1T10:00:00.000Z";
-        String toDate = "2019-10-1T11:00:00.000Z";
+        String fromDate = "2019-10-01T10:00:00.000Z";
+        String toDate = "2019-10-01T11:00:00.000Z";
         var params = new TransactionSummaryParams();
         params.setFromDate(fromDate);
         params.setToDate(toDate);
         params.setAccountId(gatewayAccountId);
 
-        var result = new TransactionSummaryResult(new TransactionsStatisticsResult(5L, 10000L), new TransactionsStatisticsResult(0L, 0L), 10000L);
-        when(mockReportDao.getTransactionSummaryStatistics(transactionSummaryParamsArgumentCaptor.capture(), eq(TransactionType.PAYMENT)))
+        var result = new TransactionSummaryResult(new TransactionsStatisticsResult(5L, 10000L), new TransactionsStatisticsResult(0L, 0L), new TransactionsStatisticsResult(0L, 0L), 10000L);
+        when(mockReportDao.getTransactionSummaryStatistics(transactionStatisticQueryArgumentCaptor.capture(), eq(TransactionType.PAYMENT)))
                 .thenReturn(result.getPayments());
-        when(mockReportDao.getTransactionSummaryStatistics(transactionSummaryParamsArgumentCaptor.capture(), eq(TransactionType.REFUND)))
+        when(mockReportDao.getTransactionSummaryStatistics(transactionStatisticQueryArgumentCaptor.capture(), eq(TransactionType.REFUND)))
                 .thenReturn(result.getRefunds());
 
         var transactionStatistics = reportService.getTransactionsSummary(params);
 
-        assertThat(transactionSummaryParamsArgumentCaptor.getValue().getAccountId(), is(gatewayAccountId));
-        assertThat(transactionSummaryParamsArgumentCaptor.getValue().getFromDate(), is(fromDate));
-        assertThat(transactionSummaryParamsArgumentCaptor.getValue().getToDate(), is(toDate));
+        assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("account_id"), is(gatewayAccountId));
+        assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("from_date"), is(ZonedDateTime.parse(fromDate)));
+        assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("to_date"), is(ZonedDateTime.parse(toDate)));
 
         assertThat(transactionStatistics, is(result));
     }

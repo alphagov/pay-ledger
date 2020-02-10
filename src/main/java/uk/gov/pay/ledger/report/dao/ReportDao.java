@@ -4,11 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import uk.gov.pay.ledger.report.dao.builder.TransactionStatisticQuery;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
 import uk.gov.pay.ledger.report.entity.TimeseriesReportSlice;
 import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.mapper.ReportMapper;
-import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -37,14 +37,14 @@ public class ReportDao {
         this.jdbi = jdbi;
     }
 
-    public List<PaymentCountByStateResult> getPaymentCountsByState(TransactionSummaryParams params) {
+    public List<PaymentCountByStateResult> getPaymentCountsByState(TransactionStatisticQuery transactionStatisticQuery) {
         return jdbi.withHandle(handle -> {
-            String template = createSearchTemplate(params.getFilterTemplates(),
+            String template = createSearchTemplate(transactionStatisticQuery.getFilterTemplates(),
                     COUNT_TRANSACTIONS_BY_STATE);
 
             Query query = handle.createQuery(template)
                     .bind("transactionType", TransactionType.PAYMENT);
-            params.getQueryMap().forEach(query::bind);
+            transactionStatisticQuery.getQueryMap().forEach(query::bind);
 
             return query.map((rs, rowNum) -> {
                 String state = rs.getString("state");
@@ -54,16 +54,14 @@ public class ReportDao {
         });
     }
 
-
-
-    public TransactionsStatisticsResult getTransactionSummaryStatistics(TransactionSummaryParams params, TransactionType transactionType) {
+    public TransactionsStatisticsResult getTransactionSummaryStatistics(TransactionStatisticQuery transactionStatisticQuery, TransactionType transactionType) {
         return jdbi.withHandle(handle -> {
-            String template = createSearchTemplate(params.getFilterTemplates(), TRANSACTION_SUMMARY_STATISTICS);
+            String template = createSearchTemplate(transactionStatisticQuery.getFilterTemplates(), TRANSACTION_SUMMARY_STATISTICS);
 
             Query query = handle.createQuery(template)
                     .bind("transactionType", transactionType)
                     .bind("state", TransactionState.SUCCESS);
-            params.getQueryMap().forEach(query::bind);
+            transactionStatisticQuery.getQueryMap().forEach(query::bind);
 
             return query.map((rs, rowNum) -> {
                 long count = rs.getLong("count");
