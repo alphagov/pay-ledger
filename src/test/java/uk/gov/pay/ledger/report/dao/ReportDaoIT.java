@@ -4,10 +4,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import uk.gov.pay.ledger.report.dao.builder.TransactionStatisticQuery;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
 import uk.gov.pay.ledger.report.entity.TimeseriesReportSlice;
 import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
-import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -44,9 +44,9 @@ public class ReportDaoIT {
         aTransactionFixture().withState(TransactionState.ERROR).insert(rule.getJdbi());
         aTransactionFixture().withState(TransactionState.SUCCESS).insert(rule.getJdbi());
 
-        var params = new TransactionSummaryParams();
+        var query = new TransactionStatisticQuery();
 
-        List<PaymentCountByStateResult> paymentCountsByState = reportDao.getPaymentCountsByState(params);
+        List<PaymentCountByStateResult> paymentCountsByState = reportDao.getPaymentCountsByState(query);
 
         assertThat(paymentCountsByState, hasSize(3));
         assertThat(paymentCountsByState, containsInAnyOrder(
@@ -74,10 +74,10 @@ public class ReportDaoIT {
                 .withState(TransactionState.ERROR)
                 .insert(rule.getJdbi());
 
-        var params = new TransactionSummaryParams();
-        params.setAccountId(gatewayAccountId1);
+        var query = new TransactionStatisticQuery()
+                .withAccountId(gatewayAccountId1);
 
-        List<PaymentCountByStateResult> paymentCountsByState = reportDao.getPaymentCountsByState(params);
+        List<PaymentCountByStateResult> paymentCountsByState = reportDao.getPaymentCountsByState(query);
 
         assertThat(paymentCountsByState, hasSize(2));
         assertThat(paymentCountsByState, containsInAnyOrder(
@@ -109,11 +109,11 @@ public class ReportDaoIT {
                 .withCreatedDate(ZonedDateTime.parse("2019-09-29T00:00:00.000Z"))
                 .insert(rule.getJdbi());
 
-        var params = new TransactionSummaryParams();
-        params.setFromDate("2019-09-29T23:59:59.000Z");
-        params.setToDate("2019-10-01T00:00:00.000Z");
+        var query = new TransactionStatisticQuery()
+                .withFromDate("2019-09-29T23:59:59.000Z")
+                .withToDate("2019-10-01T00:00:00.000Z");
 
-        List<PaymentCountByStateResult> paymentCountsByState = reportDao.getPaymentCountsByState(params);
+        List<PaymentCountByStateResult> paymentCountsByState = reportDao.getPaymentCountsByState(query);
 
         assertThat(paymentCountsByState, hasSize(2));
         assertThat(paymentCountsByState, containsInAnyOrder(
@@ -153,12 +153,12 @@ public class ReportDaoIT {
                 .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
                 .insert(rule.getJdbi());
 
-        var params = new TransactionSummaryParams();
-        params.setAccountId(gatewayAccountId1);
-        params.setFromDate("2019-09-29T23:59:59.000Z");
-        params.setToDate("2019-10-01T00:00:00.000Z");
+        var query = new TransactionStatisticQuery()
+                .withAccountId(gatewayAccountId1)
+                .withFromDate("2019-09-29T23:59:59.000Z")
+                .withToDate("2019-10-01T00:00:00.000Z");
 
-        List<PaymentCountByStateResult> paymentCountsByState = reportDao.getPaymentCountsByState(params);
+        List<PaymentCountByStateResult> paymentCountsByState = reportDao.getPaymentCountsByState(query);
 
         assertThat(paymentCountsByState, hasSize(2));
         assertThat(paymentCountsByState, containsInAnyOrder(
@@ -182,9 +182,9 @@ public class ReportDaoIT {
                 .withState(TransactionState.CREATED)
                 .insert(rule.getJdbi());
 
-        var params = new TransactionSummaryParams();
+        var query = new TransactionStatisticQuery();
 
-        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(params, TransactionType.PAYMENT);
+        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(query, TransactionType.PAYMENT);
 
         assertThat(paymentsStatistics.getCount(), is(2L));
         assertThat(paymentsStatistics.getGrossAmount(), is(3000L));
@@ -211,10 +211,10 @@ public class ReportDaoIT {
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
 
-        var params = new TransactionSummaryParams();
-        params.setAccountId(gatewayAccountId1);
+        var query = new TransactionStatisticQuery()
+                .withAccountId(gatewayAccountId1);
 
-        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(params, TransactionType.PAYMENT);
+        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(query, TransactionType.PAYMENT);
 
         assertThat(paymentsStatistics.getCount(), is(2L));
         assertThat(paymentsStatistics.getGrossAmount(), is(3000L));
@@ -244,11 +244,11 @@ public class ReportDaoIT {
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
 
-        var params = new TransactionSummaryParams();
-        params.setFromDate("2019-09-29T23:59:59.000Z");
-        params.setToDate("2019-10-01T00:00:00.000Z");
+        var query = new TransactionStatisticQuery()
+                .withFromDate("2019-09-29T23:59:59.000Z")
+                .withToDate("2019-10-01T00:00:00.000Z");
 
-        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(params, TransactionType.PAYMENT);
+        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(query, TransactionType.PAYMENT);
 
         assertThat(paymentsStatistics.getCount(), is(2L));
         assertThat(paymentsStatistics.getGrossAmount(), is(5000L));
@@ -313,18 +313,35 @@ public class ReportDaoIT {
                 .withAmount(2000L)
                 .withState(TransactionState.FAILED_REJECTED)
                 .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withAmount(1000L)
+                .withMoto(true)
+                .withState(TransactionState.SUCCESS)
+                .insert(rule.getJdbi());
 
-        var transactionParams = new TransactionSummaryParams();
-        transactionParams.setAccountId(gatewayAccountId);
-        transactionParams.setFromDate("2019-09-29T23:59:59.000Z");
+        var queryWithoutMoto = new TransactionStatisticQuery()
+                .withAccountId(gatewayAccountId)
+                .withFromDate("2019-09-29T23:59:59.000Z");
 
-        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(transactionParams, TransactionType.PAYMENT);
-        assertThat(paymentsStatistics.getCount(), is(1L));
-        assertThat(paymentsStatistics.getGrossAmount(), is(4000L));
+        var queryWithMoto = new TransactionStatisticQuery()
+                .withAccountId(gatewayAccountId)
+                .withMoto(true)
+                .withFromDate("2019-09-29T23:59:59.000Z");
 
-        TransactionsStatisticsResult refundsStatistics = reportDao.getTransactionSummaryStatistics(transactionParams, TransactionType.REFUND);
+        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(queryWithoutMoto, TransactionType.PAYMENT);
+        assertThat(paymentsStatistics.getCount(), is(2L));
+        assertThat(paymentsStatistics.getGrossAmount(), is(5000L));
+
+        TransactionsStatisticsResult refundsStatistics = reportDao.getTransactionSummaryStatistics(queryWithoutMoto, TransactionType.REFUND);
         assertThat(refundsStatistics.getCount(), is(1L));
         assertThat(refundsStatistics.getGrossAmount(), is(1000L));
+
+        TransactionsStatisticsResult motoPaymentsStatistics = reportDao.getTransactionSummaryStatistics(queryWithMoto, TransactionType.PAYMENT);
+        assertThat(motoPaymentsStatistics.getCount(), is(1L));
+        assertThat(motoPaymentsStatistics.getGrossAmount(), is(1000L));
     }
 
     @Test
@@ -367,15 +384,16 @@ public class ReportDaoIT {
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
                 .insert(rule.getJdbi());
-        var transactionParams = new TransactionSummaryParams();
-        transactionParams.setAccountId(gatewayAccountId);
-        transactionParams.setFromDate("2019-09-29T23:59:59.000Z");
 
-        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(transactionParams, TransactionType.PAYMENT);
+        var query = new TransactionStatisticQuery()
+                .withAccountId(gatewayAccountId)
+                .withFromDate("2019-09-29T23:59:59.000Z");
+
+        TransactionsStatisticsResult paymentsStatistics = reportDao.getTransactionSummaryStatistics(query, TransactionType.PAYMENT);
         assertThat(paymentsStatistics.getCount(), is(4L));
         assertThat(paymentsStatistics.getGrossAmount(), is(4400L));
 
-        TransactionsStatisticsResult refundsStatistics = reportDao.getTransactionSummaryStatistics(transactionParams, TransactionType.REFUND);
+        TransactionsStatisticsResult refundsStatistics = reportDao.getTransactionSummaryStatistics(query, TransactionType.REFUND);
         assertThat(refundsStatistics.getCount(), is(1L));
         assertThat(refundsStatistics.getGrossAmount(), is(1000L));
     }

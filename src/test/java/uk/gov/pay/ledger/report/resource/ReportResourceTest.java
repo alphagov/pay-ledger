@@ -106,7 +106,7 @@ public class ReportResourceTest {
     @Test
     public void getTransactionSummary_shouldReturn200IfGatewayAccountIdIsNotProvidedButNotRequiredFlag() {
         when(mockReportService.getTransactionsSummary(new TransactionSummaryParams()))
-                .thenReturn(new TransactionSummaryResult(new TransactionsStatisticsResult(200L, 20000L), new TransactionsStatisticsResult(0L, 0L), 20000L));
+                .thenReturn(new TransactionSummaryResult(new TransactionsStatisticsResult(200L, 20000L), new TransactionsStatisticsResult(0L, 0L), new TransactionsStatisticsResult(0L, 0L), 20000L));
 
         Response response = resources
                 .target("/v1/report/transactions-summary")
