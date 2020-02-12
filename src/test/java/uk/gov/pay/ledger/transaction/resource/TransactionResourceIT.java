@@ -717,7 +717,107 @@ public class TransactionResourceIT {
                 .contentType("text/csv")
                 .extract().asInputStream();
 
-        assertHealthyCsvResponse(csvResponseStream, transactionFixture);
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(2));
+
+        CSVRecord paymentRecord = csvRecords.get(0);
+        assertThat(paymentRecord.size(), is(22));
+        assertPaymentTransactionDetails(paymentRecord, transactionFixture);
+        assertThat(paymentRecord.get("Amount"), is("1.23"));
+        assertThat(paymentRecord.get("State"), is("Error"));
+        assertThat(paymentRecord.get("Finished"), is("true"));
+        assertThat(paymentRecord.get("Error Code"), is("P0050"));
+        assertThat(paymentRecord.get("Error Message"), is("Payment provider returned an error"));
+        assertThat(paymentRecord.get("Date Created"), is("12 Mar 2018"));
+        assertThat(paymentRecord.get("Time Created"), is("16:25:01"));
+        assertThat(paymentRecord.get("Corporate Card Surcharge"), is("0.05"));
+        assertThat(paymentRecord.get("Total Amount"), is("1.23"));
+        assertThat(paymentRecord.get("test-key-1 (metadata)"), is("value1"));
+        assertThat(paymentRecord.get("Wallet Type"), is(""));
+        assertThat(paymentRecord.isMapped("Net"), is(false));
+        assertThat(paymentRecord.isMapped("Fee"), is(false));
+        assertThat(paymentRecord.isMapped("MOTO"), is(false));
+
+        CSVRecord refundRecord = csvRecords.get(1);
+        assertPaymentTransactionDetails(refundRecord, transactionFixture);
+        assertThat(refundRecord.get("Amount"), is("-1.00"));
+        assertThat(refundRecord.get("State"), is("Refund error"));
+        assertThat(refundRecord.get("Finished"), is("true"));
+        assertThat(refundRecord.get("Error Code"), is("P0050"));
+        assertThat(refundRecord.get("Error Message"), is("Payment provider returned an error"));
+        assertThat(refundRecord.get("Date Created"), is("12 Mar 2018"));
+        assertThat(refundRecord.get("Time Created"), is("16:24:01"));
+        assertThat(refundRecord.get("Corporate Card Surcharge"), is("0.00"));
+        assertThat(refundRecord.get("Total Amount"), is("-1.00"));
+        assertThat(refundRecord.get("Wallet Type"), is(""));
+        assertThat(refundRecord.get("Issued By"), is("refund-by-user-email@example.org"));
+    }
+
+    @Test
+    public void shouldGetAllTransactionsAsCSVWithAcceptTypeWithFeeHeaders() throws IOException {
+        String gatewayAccountId = "123";
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType("PAYMENT")
+                .withFee(100)
+                .withNetAmount(1100)
+                .insert(rule.getJdbi());
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction/?" +
+                        "account_id=" + gatewayAccountId +
+                        "&fee_headers=true" +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(1));
+
+        CSVRecord paymentRecord = csvRecords.get(0);
+        assertThat(paymentRecord.size(), is(23));
+        assertThat(paymentRecord.get("Net"), is("11.00"));
+        assertThat(paymentRecord.get("Fee"), is("1.00"));
+    }
+
+    @Test
+    public void shouldGetAllTransactionsAsCSVWithAcceptTypeWithMotoHeader() throws IOException {
+        String gatewayAccountId = "123";
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType("PAYMENT")
+                .withMoto(true)
+                .insert(rule.getJdbi());
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction/?" +
+                        "account_id=" + gatewayAccountId +
+                        "&moto_header=true" +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(1));
+
+        CSVRecord paymentRecord = csvRecords.get(0);
+        assertThat(paymentRecord.size(), is(22));
+        assertThat(paymentRecord.get("MOTO"), is("true"));
     }
 
     @Test
@@ -750,15 +850,25 @@ public class TransactionResourceIT {
     public void shouldReturnCSVHeadersInCorrectOrder() throws IOException {
         String targetGatewayAccountId = "123";
 
-        aTransactionFixture()
+        String metadataKey = "a-metadata-key";
+        TransactionFixture transactionFixture = aTransactionFixture()
                 .withTransactionType("PAYMENT")
                 .withGatewayAccountId(targetGatewayAccountId)
+                .withExternalMetadata(ImmutableMap.of(metadataKey, "value1"))
+                .withFee(100)
+                .withNetAmount(1100)
+                .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
+
+        metadataKeyDao.insertIfNotExist(metadataKey);
+        transactionMetadataDao.insertIfNotExist(transactionFixture.getId(), metadataKey);
 
         InputStream csvResponseStream = given().port(port)
                 .accept("text/csv")
                 .get("/v1/transaction?" +
                         "account_id=" + targetGatewayAccountId +
+                        "&fee_headers=true" +
+                        "&moto_header=true" +
                         "&page=1" +
                         "&display_size=5"
                 )
@@ -770,6 +880,7 @@ public class TransactionResourceIT {
         List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), DEFAULT).getRecords();
 
         CSVRecord header = csvRecords.get(0);
+        assertThat(header.size(), is(25));
         assertThat(header.get(0), is("Reference"));
         assertThat(header.get(1), is("Description"));
         assertThat(header.get(2), is("Email"));
@@ -790,41 +901,11 @@ public class TransactionResourceIT {
         assertThat(header.get(17), is("Corporate Card Surcharge"));
         assertThat(header.get(18), is("Total Amount"));
         assertThat(header.get(19), is("Wallet Type"));
-        assertThat(header.get(20), is("Card Type"));
-    }
-
-    public void assertHealthyCsvResponse(InputStream csvStream, TransactionFixture transactionFixture) throws IOException {
-        List<CSVRecord> csvRecords = CSVParser.parse(csvStream, Charset.defaultCharset(), RFC4180.withFirstRecordAsHeader()).getRecords();
-
-        assertThat(csvRecords.size(), is(2));
-
-        CSVRecord paymentRecord = csvRecords.get(0);
-        assertPaymentTransactionDetails(paymentRecord, transactionFixture);
-        assertThat(paymentRecord.get("Amount"), is("1.23"));
-        assertThat(paymentRecord.get("State"), is("Error"));
-        assertThat(paymentRecord.get("Finished"), is("true"));
-        assertThat(paymentRecord.get("Error Code"), is("P0050"));
-        assertThat(paymentRecord.get("Error Message"), is("Payment provider returned an error"));
-        assertThat(paymentRecord.get("Date Created"), is("12 Mar 2018"));
-        assertThat(paymentRecord.get("Time Created"), is("16:25:01"));
-        assertThat(paymentRecord.get("Corporate Card Surcharge"), is("0.05"));
-        assertThat(paymentRecord.get("Total Amount"), is("1.23"));
-        assertThat(paymentRecord.get("test-key-1 (metadata)"), is("value1"));
-        assertThat(paymentRecord.get("Wallet Type"), is(""));
-
-        CSVRecord refundRecord = csvRecords.get(1);
-        assertPaymentTransactionDetails(refundRecord, transactionFixture);
-        assertThat(refundRecord.get("Amount"), is("-1.00"));
-        assertThat(refundRecord.get("State"), is("Refund error"));
-        assertThat(refundRecord.get("Finished"), is("true"));
-        assertThat(refundRecord.get("Error Code"), is("P0050"));
-        assertThat(refundRecord.get("Error Message"), is("Payment provider returned an error"));
-        assertThat(refundRecord.get("Date Created"), is("12 Mar 2018"));
-        assertThat(refundRecord.get("Time Created"), is("16:24:01"));
-        assertThat(refundRecord.get("Corporate Card Surcharge"), is("0.00"));
-        assertThat(refundRecord.get("Total Amount"), is("-1.00"));
-        assertThat(refundRecord.get("Wallet Type"), is(""));
-        assertThat(refundRecord.get("Issued By"), is("refund-by-user-email@example.org"));
+        assertThat(header.get(20), is("Fee"));
+        assertThat(header.get(21), is("Net"));
+        assertThat(header.get(22), is("Card Type"));
+        assertThat(header.get(23), is("MOTO"));
+        assertThat(header.get(24), is("a-metadata-key (metadata)"));
     }
 
     private void assertPaymentTransactionDetails(CSVRecord csvRecord, TransactionFixture transactionFixture) {
