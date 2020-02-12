@@ -42,6 +42,7 @@ public class TransactionWithParentMapper implements RowMapper<TransactionEntity>
                 .withFee(getLongWithNullCheck(rs, "parent_fee"))
                 .withTransactionType(rs.getString("parent_type"))
                 .withLive(rs.getBoolean("live"))
+                .withMoto(rs.getBoolean("parent_moto"))
                 .build();
 
         return new TransactionEntity.Builder()
@@ -69,6 +70,7 @@ public class TransactionWithParentMapper implements RowMapper<TransactionEntity>
                 .withFee(getLongWithNullCheck(rs, "fee"))
                 .withTransactionType(rs.getString("type"))
                 .withLive(rs.getBoolean("live"))
+                .withMoto(rs.getBoolean("moto"))
                 .withParentTransactionEntity(parentTransactionEntity)
                 .build();
     }

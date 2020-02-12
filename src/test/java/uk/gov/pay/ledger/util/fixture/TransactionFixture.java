@@ -225,7 +225,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public boolean getMoto() { return moto;}
+    public boolean isMoto() { return moto;}
 
     public TransactionFixture withMoto(boolean moto) {
         this.moto = moto;
