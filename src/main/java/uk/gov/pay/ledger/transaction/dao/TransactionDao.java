@@ -42,7 +42,8 @@ public class TransactionDao {
             " parent.refund_amount_refunded as parent_refund_amount_refunded," +
             " parent.refund_amount_available as parent_refund_amount_available, " +
             " parent.fee as parent_fee," +
-            " parent.type as parent_type " +
+            " parent.type as parent_type, " +
+            " parent.moto as parent_moto " +
             " FROM transaction t LEFT OUTER JOIN transaction parent " +
             " ON t.parent_external_id = parent.external_id ";
 

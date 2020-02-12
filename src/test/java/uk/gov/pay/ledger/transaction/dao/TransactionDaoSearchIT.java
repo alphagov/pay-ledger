@@ -21,7 +21,7 @@ import java.util.List;
 import static java.time.ZonedDateTime.now;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
@@ -49,6 +49,7 @@ public class TransactionDaoSearchIT {
 
         transactionFixture = aTransactionFixture()
                 .withDefaultCardDetails()
+                .withMoto(true)
                 .insert(rule.getJdbi());
 
         searchParams.setAccountId(transactionFixture.getGatewayAccountId());
@@ -69,6 +70,7 @@ public class TransactionDaoSearchIT {
         assertThat(transaction.getCardholderName(), is(transactionFixture.getCardDetails().getCardHolderName()));
         assertThat(transaction.getCardBrand(), is(transactionFixture.getCardDetails().getCardBrand()));
         assertThat(transaction.getCreatedDate(), is(transactionFixture.getCreatedDate()));
+        assertThat(transaction.isMoto(), is(transactionFixture.isMoto()));
 
         Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(1L));
@@ -894,12 +896,14 @@ public class TransactionDaoSearchIT {
         assertThat(actualTransactionEntity.getCardBrand(), is(transactionFixture.getCardBrand()));
         assertThat(actualTransactionEntity.getLastDigitsCardNumber(), is(transactionFixture.getLastDigitsCardNumber()));
         assertThat(actualTransactionEntity.getFirstDigitsCardNumber(), is(transactionFixture.getFirstDigitsCardNumber()));
+        assertThat(actualTransactionEntity.isMoto(), is(transactionFixture.isMoto()));
     }
 
     private TransactionFixture insertTransaction() {
         return aTransactionFixture()
                 .withState(TransactionState.CREATED)
                 .withDefaultCardDetails()
+                .withMoto(true)
                 .insert(rule.getJdbi());
     }
 
