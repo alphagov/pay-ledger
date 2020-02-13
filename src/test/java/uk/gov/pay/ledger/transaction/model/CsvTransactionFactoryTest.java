@@ -72,7 +72,9 @@ public class CsvTransactionFactoryTest {
     @Test
     public void toMapShouldReturnMapWithCorrectCsvDataForRefundTransaction() {
 
-        TransactionEntity transactionEntity = transactionFixture.toEntity();
+        TransactionEntity transactionEntity = transactionFixture
+                .withMoto(true)
+                .toEntity();
         TransactionEntity refundTransactionEntity = transactionFixture.withTransactionType("REFUND")
                 .withAmount(99L)
                 .withTotalAmount(99L)
@@ -95,6 +97,7 @@ public class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.00"));
         assertThat(csvDataMap.get("Total Amount"), is("-0.99"));
         assertThat(csvDataMap.get("Net"), is("-0.99"));
+        assertThat(csvDataMap.get("MOTO"), is(true));
     }
 
     @Test

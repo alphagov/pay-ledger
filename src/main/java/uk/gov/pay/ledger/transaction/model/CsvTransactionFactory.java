@@ -109,7 +109,6 @@ public class CsvTransactionFactory {
             result.put(FIELD_CORPORATE_CARD_SURCHARGE, penceToCurrency(
                     Optional.ofNullable(safeGetAsLong(transactionDetails, "corporate_surcharge")).orElse(0L)
             ));
-            result.put(FIELD_MOTO, transactionEntity.isMoto());
 
             if (transactionEntity.getState() != null) {
                 ExternalTransactionState state = ExternalTransactionState.from(transactionEntity.getState(), 2);
@@ -148,6 +147,7 @@ public class CsvTransactionFactory {
         result.put(FIELD_CARD_EXPIRY_DATE, safeGetAsString(transactionDetails, "expiry_date"));
         result.put(FIELD_PROVIDER_ID, safeGetAsString(transactionDetails, "gateway_transaction_id"));
         result.put(FIELD_CARD_TYPE, StringUtils.lowerCase(safeGetAsString(transactionDetails, "card_type")));
+        result.put(FIELD_MOTO, transactionEntity.isMoto());
 
         result.put(FIELD_WALLET_TYPE, capitalizeFully(
                 replaceChars(safeGetAsString(transactionDetails, "wallet"), '_', ' '))
