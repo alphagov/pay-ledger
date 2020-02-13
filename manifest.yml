@@ -11,6 +11,7 @@ applications:
     memory: ((memory))
     disk_quota: ((disk_quota))
     services:
+      - ledger-secret-service
       - ledger-db
       - sqs
     env:
@@ -27,14 +28,16 @@ applications:
       AWS_SQS_ENDPOINT: ''
       AWS_SQS_PAYMENT_EVENT_QUEUE_URL: ''
 
+      # Provided by ledger-secret-service see src/main/resource/env-map.yml
+      AWS_ACCESS_KEY: ""
+      AWS_SECRET_KEY: ""
+      SENTRY_DSN: ""
+
       # Other sqs settings
-      AWS_ACCESS_KEY: ((aws_access_key))
-      AWS_SECRET_KEY: ((aws_secret_key))
       AWS_SQS_MESSAGE_MAXIMUM_WAIT_TIME_IN_SECONDS: '20'
       QUEUE_MESSAGE_RECEIVER_THREAD_DELAY_IN_MILLISECONDS: '1000'
       AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT: 'true'
       AWS_SQS_REGION: region-1
-
 
       ADMIN_PORT: '10701'
       DISABLE_INTERNAL_HTTPS: ((disable_internal_https))
@@ -46,11 +49,5 @@ applications:
       JPA_SQL_LOG_LEVEL: 'INFO'
 
       AWS_XRAY_CONTEXT_MISSING: LOG_ERROR
-
-      # Provide via Sentry service
-      SENTRY_DSN: noop://localhost
-
       RUN_APP: 'true'
-      RUN_MIGRATION: ((run_migration))
-    routes:
-      - route: ((ledger_route))
+      RUN_MIGRATION: 'false'
