@@ -30,6 +30,7 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.csv.CSVFormat.DEFAULT;
 import static org.apache.commons.csv.CSVFormat.RFC4180;
@@ -717,7 +718,7 @@ public class TransactionResourceIT {
                 .contentType("text/csv")
                 .extract().asInputStream();
 
-        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), RFC4180.withFirstRecordAsHeader()).getRecords();
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
 
         assertThat(csvRecords.size(), is(2));
 
@@ -778,7 +779,7 @@ public class TransactionResourceIT {
                 .contentType("text/csv")
                 .extract().asInputStream();
 
-        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), RFC4180.withFirstRecordAsHeader()).getRecords();
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
 
         assertThat(csvRecords.size(), is(1));
 
@@ -811,7 +812,7 @@ public class TransactionResourceIT {
                 .contentType("text/csv")
                 .extract().asInputStream();
 
-        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), RFC4180.withFirstRecordAsHeader()).getRecords();
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
 
         assertThat(csvRecords.size(), is(1));
 
@@ -877,7 +878,7 @@ public class TransactionResourceIT {
                 .contentType("text/csv")
                 .extract().asInputStream();
 
-        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, Charset.defaultCharset(), DEFAULT).getRecords();
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, DEFAULT).getRecords();
 
         CSVRecord header = csvRecords.get(0);
         assertThat(header.size(), is(25));
