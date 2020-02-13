@@ -55,6 +55,7 @@ public class CsvTransactionFactory {
     private static final String FIELD_CARD_TYPE = "Card Type";
     private static final String FIELD_FEE = "Fee";
     private static final String FIELD_NET = "Net";
+    private static final String FIELD_MOTO = "MOTO";
     private ObjectMapper objectMapper;
 
     @Inject
@@ -108,6 +109,7 @@ public class CsvTransactionFactory {
             result.put(FIELD_CORPORATE_CARD_SURCHARGE, penceToCurrency(
                     Optional.ofNullable(safeGetAsLong(transactionDetails, "corporate_surcharge")).orElse(0L)
             ));
+            result.put(FIELD_MOTO, transactionEntity.isMoto());
 
             if (transactionEntity.getState() != null) {
                 ExternalTransactionState state = ExternalTransactionState.from(transactionEntity.getState(), 2);
@@ -154,7 +156,9 @@ public class CsvTransactionFactory {
         return result;
     }
 
-    public Map<String, Object> getCsvHeadersWithMedataKeys(List<String> metadataKeys, boolean includeFeeHeaders) {
+    public Map<String, Object> getCsvHeadersWithMedataKeys(List<String> metadataKeys,
+                                                           boolean includeFeeHeaders,
+                                                           boolean includeMotoHeader) {
         LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 
         headers.put(FIELD_REFERENCE, FIELD_REFERENCE);
@@ -184,6 +188,10 @@ public class CsvTransactionFactory {
         }
 
         headers.put(FIELD_CARD_TYPE, FIELD_CARD_TYPE);
+
+        if (includeMotoHeader) {
+            headers.put(FIELD_MOTO, FIELD_MOTO);
+        }
 
         if (metadataKeys != null) {
             metadataKeys.stream().sorted()
