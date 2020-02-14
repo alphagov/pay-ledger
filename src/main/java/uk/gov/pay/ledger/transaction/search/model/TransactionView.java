@@ -57,6 +57,7 @@ public class TransactionView {
     private Boolean moto;
     private Boolean live;
     private Source source;
+    private String walletType;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -89,6 +90,7 @@ public class TransactionView {
         this.moto = builder.moto;
         this.live = builder.live;
         this.source = builder.source;
+        this.walletType = builder.walletType;
     }
 
     public TransactionView() {
@@ -126,6 +128,7 @@ public class TransactionView {
                     .withMoto(payment.getMoto())
                     .withLive(payment.isLive())
                     .withSource(payment.getSource())
+                    .withWalletType(payment.getWalletType())
                     .build();
         }
 
@@ -282,7 +285,12 @@ public class TransactionView {
         return source;
     }
 
+    public String getWalletType() {
+        return walletType;
+    }
+
     public static class Builder {
+        public String walletType;
         private TransactionView parentTransaction;
         private Long id;
         private String gatewayAccountId;
@@ -469,6 +477,11 @@ public class TransactionView {
 
         public Builder withSource(Source source) {
             this.source = source;
+            return this;
+        }
+
+        public Builder withWalletType(String walletType) {
+            this.walletType = walletType;
             return this;
         }
     }

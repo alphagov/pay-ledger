@@ -16,7 +16,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class Payment extends Transaction{
+public class Payment extends Transaction {
 
     private Boolean moto;
     private String reference;
@@ -43,6 +43,7 @@ public class Payment extends Transaction{
     private SettlementSummary settlementSummary;
     private Boolean live;
     private Source source;
+    private String walletType;
 
     public Payment() {
 
@@ -55,7 +56,7 @@ public class Payment extends Transaction{
                    CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
                    Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
                    Long netAmount, Long totalAmount, RefundSummary refundSummary, SettlementSummary settlementSummary,
-                   Boolean moto, Boolean live, Source source) {
+                   Boolean moto, Boolean live, Source source, String walletType) {
         super(id, gatewayAccountId, amount, externalId);
         this.corporateCardSurcharge = corporateCardSurcharge;
         this.fee = fee;
@@ -83,6 +84,7 @@ public class Payment extends Transaction{
         this.moto = moto;
         this.live = live;
         this.source = source;
+        this.walletType = walletType;
     }
 
     public Payment(String gatewayAccountId, Long amount,
@@ -92,12 +94,12 @@ public class Payment extends Transaction{
                    CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
                    Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
                    Long netAmount, RefundSummary refundSummary, Long totalAmount, SettlementSummary settlementSummary,
-                   Boolean moto, Boolean live, Source source) {
+                   Boolean moto, Boolean live, Source source, String walletType) {
 
         this(null, gatewayAccountId, amount, reference, description, state, language, externalId, returnUrl, email,
                 paymentProvider, createdDate, cardDetails, delayedCapture, externalMetaData, eventCount,
                 gatewayTransactionId, corporateCardSurcharge, fee, netAmount, totalAmount, refundSummary,
-                settlementSummary, moto, live, source);
+                settlementSummary, moto, live, source, walletType);
     }
 
     @Override
@@ -197,5 +199,9 @@ public class Payment extends Transaction{
 
     public Source getSource() {
         return source;
+    }
+
+    public String getWalletType() {
+        return walletType;
     }
 }
