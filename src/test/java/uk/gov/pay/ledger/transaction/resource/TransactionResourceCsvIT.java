@@ -116,7 +116,7 @@ public class TransactionResourceCsvIT {
         assertThat(paymentRecord.get("Corporate Card Surcharge"), is("0.05"));
         assertThat(paymentRecord.get("Total Amount"), is("1.23"));
         assertThat(paymentRecord.get("test-key-1 (metadata)"), is("value1"));
-        assertThat(paymentRecord.get("Wallet Type"), is(""));
+        assertThat(paymentRecord.get("Wallet Type"), is("Apple Pay"));
         assertThat(paymentRecord.isMapped("Net"), is(false));
         assertThat(paymentRecord.isMapped("Fee"), is(false));
         assertThat(paymentRecord.isMapped("MOTO"), is(false));
@@ -132,7 +132,7 @@ public class TransactionResourceCsvIT {
         assertThat(refundRecord.get("Time Created"), is("16:24:01"));
         assertThat(refundRecord.get("Corporate Card Surcharge"), is("0.00"));
         assertThat(refundRecord.get("Total Amount"), is("-1.00"));
-        assertThat(refundRecord.get("Wallet Type"), is(""));
+        assertThat(refundRecord.get("Wallet Type"), is("Apple Pay"));
         assertThat(refundRecord.get("Issued By"), is("refund-by-user-email@example.org"));
     }
 

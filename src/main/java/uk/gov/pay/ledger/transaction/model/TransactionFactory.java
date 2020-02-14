@@ -94,7 +94,8 @@ public class TransactionFactory {
                     settlementSummary,
                     entity.isMoto(),
                     entity.isLive(),
-                    entity.getSource()
+                    entity.getSource(),
+                    safeGetAsString(transactionDetails, "wallet")
             );
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());

@@ -45,6 +45,7 @@ public class TransactionFactoryTest {
     private Long refundAmountAvailable = 99L;
     private Long fee = 66L;
     private String cardExpiryDate = "10/27";
+    private String walletType = "APPLE_PAY";
 
     @Before
     public void setUp() {
@@ -71,6 +72,7 @@ public class TransactionFactoryTest {
         fullTransactionDetails.addProperty("captured_date", "2017-09-09T09:35:45.695951+01");
         fullTransactionDetails.add("external_metadata", metadata);
         fullTransactionDetails.addProperty("expiry_date", cardExpiryDate);
+        fullTransactionDetails.addProperty("wallet", walletType);
 
 
         fullDataObject = new TransactionEntity.Builder()
@@ -239,5 +241,6 @@ public class TransactionFactoryTest {
         assertThat(payment.getSettlementSummary(), notNullValue());
         assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.of("2017-09-09")));
         assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.of("2017-09-09T08:35:45.695Z")));
+        assertThat(payment.getWalletType(), is(walletType));
     }
 }

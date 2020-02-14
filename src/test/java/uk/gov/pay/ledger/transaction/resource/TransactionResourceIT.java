@@ -58,6 +58,7 @@ public class TransactionResourceIT {
                 .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
                 .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
                 .body("live", is(Boolean.TRUE))
+                .body("wallet_type", is("APPLE_PAY"))
                 .body("source", is(String.valueOf(Source.CARD_API)));
     }
 

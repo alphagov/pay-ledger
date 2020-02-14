@@ -380,6 +380,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("refunded_by", refundedById);
         transactionDetails.addProperty("user_email", refundedByUserEmail);
         transactionDetails.addProperty("card_type", String.valueOf(CREDIT));
+        transactionDetails.addProperty("wallet", "APPLE_PAY");
         Optional.ofNullable(cardBrandLabel)
                 .ifPresent(cardBrandLabel -> transactionDetails.addProperty("card_brand_label", cardBrandLabel));
         Optional.ofNullable(externalMetadata)
