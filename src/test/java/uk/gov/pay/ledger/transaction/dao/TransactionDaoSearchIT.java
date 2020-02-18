@@ -489,6 +489,32 @@ public class TransactionDaoSearchIT {
     }
 
     @Test
+    public void shouldFilterByGatewayTransactionIdWhenSpecified() {
+        String gatewayAccountId = "account-id-" + nextLong();
+        String gatewayTransactionId = "transaction-id-" + nextLong();
+
+        TransactionFixture transaction = aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayTransactionId(gatewayTransactionId)
+                .withTransactionType("PAYMENT")
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayTransactionId(gatewayTransactionId + "different-id")
+                .withTransactionType("PAYMENT")
+                .insert(rule.getJdbi());
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setGatewayTransactionId(gatewayTransactionId);
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(1));
+        assertThat(transactionList.get(0).getExternalId(), is(transaction.getExternalId()));
+        assertThat(transactionList.get(0).getGatewayTransactionId(), is(transaction.getGatewayTransactionId()));
+    }
+
+    @Test
     public void shouldNotFilterByGatewayAccountIdWhenNotSpecified() {
         String gatewayAccountId = "account-id-" + nextLong();
 

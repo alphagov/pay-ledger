@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
+import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 
 public class TransactionService {
 
@@ -177,6 +178,20 @@ public class TransactionService {
         } else {
             return TransactionEventResponse.of(externalId, removeDuplicates(transactionEvents));
         }
+    }
+
+    public Optional<TransactionView> findByGatewayTransactionId(String gatewayTransactionId, String paymentProvider
+                                                                ) {
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setGatewayTransactionId(gatewayTransactionId);
+        searchParams.setTransactionType(PAYMENT);
+
+        return transactionDao.searchTransactions(searchParams)
+                .stream()
+                .map(transactionEntity ->
+                        TransactionView.from(transactionFactory.createTransactionEntity(transactionEntity), DEFAULT_STATUS_VERSION))
+                .filter(transaction -> paymentProvider.equalsIgnoreCase(transaction.getPaymentProvider()))
+                .findFirst();
     }
 
     private Map<String, TransactionEntity> getTransactionsAsMap(String externalId, String gatewayAccountId) {
