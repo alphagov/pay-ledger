@@ -51,15 +51,14 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionServiceTest {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
     @Mock
     private TransactionDao mockTransactionDao;
     @Mock
     private EventDao mockEventDao;
     @Mock
     private UriInfo mockUriInfo;
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private TransactionService transactionService;
     private String gatewayAccountId = "gateway_account_id";
     private TransactionSearchParams searchParams;
@@ -343,6 +342,30 @@ public class TransactionServiceTest {
         assertTransactionEvent(event1ForStateSubmitted, transactionEvents.get(0), transactionEntityList.get(0).getAmount(), "submitted");
         assertTransactionEvent(event2ForStateSubmitted, transactionEvents.get(1), transactionEntityList.get(0).getAmount(), "capturable");
         assertTransactionEvent(eventForUnknownType, transactionEvents.get(2), transactionEntityList.get(0).getAmount(), null);
+    }
+
+    @Test
+    public void findByGatewayTransactionId_shouldReturnOneTransactionForPaymentProvider() {
+        String gatewayTransactionId = "gateway_transaction_id";
+
+        TransactionEntity transactionEntitySandbox = aTransactionFixture().withPaymentProvider("sandbox")
+                .withGatewayTransactionId(gatewayTransactionId)
+                .withDefaultTransactionDetails()
+                .toEntity();
+        TransactionEntity transactionEntityWorldPay = aTransactionFixture().withPaymentProvider("worldpay")
+                .withGatewayTransactionId(gatewayTransactionId)
+                .withDefaultTransactionDetails()
+                .toEntity();
+
+        List<TransactionEntity> transactionViewList = List.of(transactionEntitySandbox, transactionEntityWorldPay);
+        when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
+
+        Optional<TransactionView> mayBeTransactionView = transactionService.
+                findByGatewayTransactionId(gatewayTransactionId, "sandbox");
+
+        verify(mockTransactionDao).searchTransactions(any());
+        assertThat(mayBeTransactionView.isPresent(), is(true));
+        assertThat(mayBeTransactionView.get().getPaymentProvider(), is("sandbox"));
     }
 
     private void assertTransactionEvent(Event event, TransactionEvent transactionEvent, Long amount, String state) {

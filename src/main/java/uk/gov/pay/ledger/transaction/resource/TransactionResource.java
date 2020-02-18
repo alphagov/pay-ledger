@@ -179,4 +179,14 @@ public class TransactionResource {
 
         return transactionService.getTransactions(parentTransactionExternalId, gatewayAccountId);
     }
+
+    @Path("/gateway-transaction/{gatewayTransactionId}")
+    @GET
+    @Timed
+    public TransactionView findByGatewayTransactionId(@PathParam("gatewayTransactionId") String gatewayTransactionId,
+                                                      @QueryParam("payment_provider") @NotEmpty String paymentProvider
+                                                      ) {
+        return transactionService.findByGatewayTransactionId(gatewayTransactionId, paymentProvider)
+                .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
+    }
 }

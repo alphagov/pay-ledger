@@ -31,6 +31,7 @@ public class TransactionSearchParams {
     private static final String CARD_BRAND_FIELD = "card_brand";
     private static final String STATE_FIELD = "state";
     private static final String TRANSACTION_TYPE_FIELD = "transaction_type";
+    private static final String GATEWAY_TRANSACTION_ID_FIELD = "gateway_transaction_id";
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
 
@@ -77,6 +78,7 @@ public class TransactionSearchParams {
     @QueryParam("display_size")
     private Long displaySize = DEFAULT_MAX_DISPLAY_SIZE;
     private Map<String, Object> queryMap;
+    private String gatewayTransactionId;
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
@@ -174,6 +176,9 @@ public class TransactionSearchParams {
         }
         if (isNotBlank(lastDigitsCardNumber)) {
             filters.add(" t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD);
+        }
+        if (isNotBlank(gatewayTransactionId)) {
+            filters.add(" t.gateway_transaction_id = :" + GATEWAY_TRANSACTION_ID_FIELD);
         }
 
         return List.copyOf(filters);
@@ -290,6 +295,9 @@ public class TransactionSearchParams {
             }
             if (transactionType != null) {
                 queryMap.put(TRANSACTION_TYPE_FIELD, transactionType);
+            }
+            if (gatewayTransactionId != null) {
+                queryMap.put(GATEWAY_TRANSACTION_ID_FIELD, gatewayTransactionId);
             }
         }
         return queryMap;
@@ -434,5 +442,9 @@ public class TransactionSearchParams {
 
     public void setExactReferenceMatch(boolean exactReferenceMatch) {
         this.exactReferenceMatch = exactReferenceMatch;
+    }
+
+    public void setGatewayTransactionId(String gatewayTransactionId) {
+        this.gatewayTransactionId = gatewayTransactionId;
     }
 }

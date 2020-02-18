@@ -1,13 +1,11 @@
 package uk.gov.pay.ledger.transaction.resource;
 
 import io.dropwizard.testing.junit.ResourceTestRule;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.app.LedgerConfig;
-import uk.gov.pay.ledger.app.config.ReportingConfig;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.CsvService;
@@ -23,11 +21,12 @@ import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -129,5 +128,37 @@ public class TransactionResourceTest {
 
         assertThat(response.getStatus(), is(400));
         assertThat(errors.get(0), is("query param gateway_account_id must not be empty"));
+    }
+
+    @Test
+    public void findByGatewayTransactionId_ShouldReturn404IfTransactionNotFound() {
+        when(mockTransactionService.findByGatewayTransactionId(anyString(), anyString()))
+                .thenReturn(Optional.empty());
+
+        Response response = resources
+                .target("/v1/transaction/gateway-transaction/example-gateway-transaction-id")
+                .queryParam("payment_provider", "sandbox")
+                .request()
+                .get();
+
+        System.out.println(response.readEntity(String.class));
+        assertThat(response.getStatus(), is(404));
+    }
+
+    @Test
+    public void findByGatewayTransactionId_ShouldReturn400IfPaymentProviderQueryParamIsEmpty() {
+        Response response = resources
+                .target("/v1/transaction/gateway-transaction/exampleGatewayTransactionId")
+                .queryParam("transaction_type", "PAYMENT")
+                .request()
+                .get();
+
+        Map responseMessage = response.readEntity(new GenericType<HashMap>() {
+        });
+        List errors = (List) responseMessage.get("errors");
+
+        System.out.println(errors);
+        assertThat(response.getStatus(), is(400));
+        assertThat(errors.get(0), is("query param payment_provider must not be empty"));
     }
 }
