@@ -12,8 +12,10 @@ import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
+import uk.gov.pay.ledger.transaction.search.common.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.transaction.service.AccountIdListSupplierManager;
 import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
 import uk.gov.pay.ledger.transaction.service.CsvService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
@@ -88,9 +90,9 @@ public class TransactionResource {
     public TransactionSearchResponse search(@Valid
                                             @BeanParam TransactionSearchParams searchParams,
                                             @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
-                                            @QueryParam("account_id") String gatewayAccountId,
+                                            @QueryParam("account_id") CommaDelimitedSetParameter gatewayAccountIds,
                                             @Context UriInfo uriInfo) {
-        return searchForTransactions(searchParams, overrideAccountRestriction, gatewayAccountId, uriInfo);
+        return searchForTransactions(searchParams, overrideAccountRestriction, gatewayAccountIds, uriInfo);
     }
 
     @Path("/")
@@ -99,14 +101,14 @@ public class TransactionResource {
     @Timed
     public Response streamCsv(@Valid @BeanParam TransactionSearchParams searchParams,
                               @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
-                              @QueryParam("account_id") String gatewayAccountId,
+                              @QueryParam("account_id") CommaDelimitedSetParameter gatewayAccountIds,
                               @QueryParam("fee_headers") boolean includeFeeHeaders,
                               @QueryParam("moto_header") boolean includeMotoHeader,
                               @Context UriInfo uriInfo) {
         StreamingOutput stream = outputStream -> {
             TransactionSearchParams csvSearchParams = Optional.ofNullable(searchParams).orElse(new TransactionSearchParams());
             csvSearchParams.overrideMaxDisplaySize((long) configuration.getReportingConfig().getStreamingCsvPageSize());
-            csvSearchParams.setAccountId(gatewayAccountId);
+            csvSearchParams.setAccountIds(gatewayAccountIds.getParameters());
             List<TransactionEntity> page;
             ZonedDateTime startingAfterCreatedDate = null;
             Long startingAfterId = null;
@@ -140,16 +142,15 @@ public class TransactionResource {
         return Response.ok(stream).build();
     }
 
-    private TransactionSearchResponse searchForTransactions(TransactionSearchParams searchParams, Boolean overrideAccountRestriction, String gatewayAccountId, UriInfo uriInfo) {
+    private TransactionSearchResponse searchForTransactions(TransactionSearchParams searchParams, Boolean overrideAccountRestriction, CommaDelimitedSetParameter commaSeparatedGatewayAccountIds, UriInfo uriInfo) {
         TransactionSearchParams transactionSearchParams = Optional.ofNullable(searchParams)
                 .orElse(new TransactionSearchParams());
-
-        validateSearchParams(transactionSearchParams, gatewayAccountId);
-        AccountIdSupplierManager<TransactionSearchResponse> accountIdSupplierManager =
-                AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId);
-
+        validateSearchParams(transactionSearchParams, commaSeparatedGatewayAccountIds);
+        List<String> gatewayAccountIds = commaSeparatedGatewayAccountIds != null ? commaSeparatedGatewayAccountIds.getParameters() : List.of();
+        AccountIdListSupplierManager<TransactionSearchResponse> accountIdSupplierManager =
+                AccountIdListSupplierManager.of(overrideAccountRestriction, gatewayAccountIds);
         return accountIdSupplierManager
-                .withSupplier(accountId -> transactionService.searchTransactions(gatewayAccountId, transactionSearchParams, uriInfo))
+                .withSupplier(accountId -> transactionService.searchTransactions(gatewayAccountIds, transactionSearchParams, uriInfo))
                 .withPrivilegedSupplier(() -> transactionService.searchTransactions(transactionSearchParams, uriInfo))
                 .validateAndGet();
     }
@@ -185,7 +186,7 @@ public class TransactionResource {
     @Timed
     public TransactionView findByGatewayTransactionId(@PathParam("gatewayTransactionId") String gatewayTransactionId,
                                                       @QueryParam("payment_provider") @NotEmpty String paymentProvider
-                                                      ) {
+    ) {
         return transactionService.findByGatewayTransactionId(gatewayTransactionId, paymentProvider)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }

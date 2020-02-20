@@ -114,7 +114,7 @@ public class TransactionMetadataDaoIT {
         transactionMetadataDao.insertIfNotExist(transaction1.getId(), "test-key-1");
         transactionMetadataDao.insertIfNotExist(transaction2.getId(), "test-key-2");
 
-        searchParams.setAccountId(transaction1.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transaction1.getGatewayAccountId()));
         searchParams.setFromDate(ZonedDateTime.now().minusDays(10).toString());
         searchParams.setToDate(ZonedDateTime.now().plusDays(1).toString());
         searchParams.setFirstDigitsCardNumber(transaction1.getFirstDigitsCardNumber());

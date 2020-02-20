@@ -45,14 +45,20 @@ public class TransactionSearchParamsValidatorTest {
     @Test
     public void shouldNotThrowException_whenGatewayAccountIdAvailableAndWithParentTransactionIsTrue() {
         searchParams.setWithParentTransaction(true);
-        TransactionSearchParamsValidator.validateSearchParams(searchParams,"account-id");
+        TransactionSearchParamsValidator.validateSearchParams(searchParams, new CommaDelimitedSetParameter("account-id"));
     }
 
     @Test
-    public void shouldThrowException_whenGatewayAccountIdIsNotAvailableAndWithParentTransactionIsTrue() {
+    public void shouldNotThrowException_whenGatewayAccountIdsAvailableAndWithParentTransactionIsTrue() {
         searchParams.setWithParentTransaction(true);
         thrown.expect(ValidationException.class);
         thrown.expectMessage("gateway_account_id is mandatory to search with parent transaction");
-        TransactionSearchParamsValidator.validateSearchParams(searchParams,"");
+        TransactionSearchParamsValidator.validateSearchParams(searchParams,new CommaDelimitedSetParameter(""));
+    }
+
+    @Test
+    public void shouldNotThrowException_whenGatewayAccountIdIsNotAvailableAndWithParentTransactionIsTrue() {
+        searchParams.setWithParentTransaction(true);
+        TransactionSearchParamsValidator.validateSearchParams(searchParams,new CommaDelimitedSetParameter("1,2"));
     }
 }

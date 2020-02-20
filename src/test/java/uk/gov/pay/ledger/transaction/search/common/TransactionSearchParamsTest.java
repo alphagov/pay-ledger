@@ -133,9 +133,9 @@ public class TransactionSearchParamsTest {
 
     @Test
     public void getFilterTemplateWithParentTxnSearch_shouldReturnFilterWithGatewayAccountId() {
-        transactionSearchParams.setAccountId("1");
-        assertThat(transactionSearchParams.getFilterTemplatesWithParentTransactionSearch().get(0), is(" t.gateway_account_id = :account_id"));
-        assertThat(transactionSearchParams.getQueryMap().get("account_id"), is("1"));
+        transactionSearchParams.setAccountIds(List.of("1"));
+        assertThat(transactionSearchParams.getFilterTemplatesWithParentTransactionSearch().get(0), is(" t.gateway_account_id IN (<account_id>)"));
+        assertThat(transactionSearchParams.getQueryMap().get("account_id"), is(List.of("1")));
     }
 
     @Test
@@ -214,13 +214,13 @@ public class TransactionSearchParamsTest {
 
     @Test
     public void getsEmptyQueryParamStringWhenEmptyAccountId() {
-        transactionSearchParams.setAccountId("");
+        transactionSearchParams.setAccountIds(List.of());
         assertThat(transactionSearchParams.buildQueryParamString(1L), not(containsString("account_id")));
     }
 
     @Test
     public void getsQueryParamStringWhenNotEmptyAccountId() {
-        transactionSearchParams.setAccountId("xyz");
+        transactionSearchParams.setAccountIds(List.of("xyz"));
         assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("account_id=xyz"));
     }
 

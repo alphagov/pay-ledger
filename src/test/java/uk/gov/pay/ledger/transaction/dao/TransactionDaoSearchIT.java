@@ -52,7 +52,7 @@ public class TransactionDaoSearchIT {
                 .withMoto(true)
                 .insert(rule.getJdbi());
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -89,7 +89,7 @@ public class TransactionDaoSearchIT {
                 .insert(rule.getJdbi());
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -113,7 +113,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setEmail("testemail1");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -140,7 +140,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setExactReferenceMatch(true);
         searchParams.setReference("reference 1");
 
@@ -168,7 +168,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setExactReferenceMatch(false);
         searchParams.setReference("1");
 
@@ -197,7 +197,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setCardHolderName("name1");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -222,7 +222,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setFromDate(now().minusDays(1).minusMinutes(10).toString());
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -245,7 +245,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setToDate(now().minusDays(2).plusMinutes(10).toString());
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -267,7 +267,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setDisplaySize(10L);
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -292,7 +292,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setDisplaySize(2L);
         searchParams.setPageNumber(3L);
 
@@ -324,7 +324,7 @@ public class TransactionDaoSearchIT {
 
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setState("created");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -346,7 +346,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setLastDigitsCardNumber("1234");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -365,7 +365,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setFirstDigitsCardNumber("123456");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -384,7 +384,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setCardBrands(new CommaDelimitedSetParameter("visa,mastercard"));
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -402,7 +402,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setCardBrands(new CommaDelimitedSetParameter("visa"));
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -420,7 +420,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setCardHolderName("smith");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -439,7 +439,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setTransactionType(TransactionType.REFUND);
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -459,7 +459,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -480,7 +480,7 @@ public class TransactionDaoSearchIT {
                 .withTransactionType("PAYMENT")
                 .insert(rule.getJdbi());
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -545,7 +545,7 @@ public class TransactionDaoSearchIT {
                 now(ZoneOffset.UTC).plusDays(1));
         TransactionFixture transactionThatShouldBeExcluded = insertTransaction();
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
         assertThat(transactionList.size(), is(2));
 
@@ -566,7 +566,7 @@ public class TransactionDaoSearchIT {
                 now(ZoneOffset.UTC).plusDays(1));
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setEmail("test");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
@@ -588,7 +588,7 @@ public class TransactionDaoSearchIT {
         TransactionFixture transactionFixtureChild = insertRefundChildTransaction(transactionFixture,
                 now(ZoneOffset.UTC).plusDays(1));
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setReference("ref");
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
         assertThat(transactionList.size(), is(2));
@@ -613,7 +613,7 @@ public class TransactionDaoSearchIT {
                 .withGatewayAccountId(transactionFixture.getGatewayAccountId())
                 .insert(rule.getJdbi());
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setExactReferenceMatch(true);
         searchParams.setReference("reference");
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
@@ -635,7 +635,7 @@ public class TransactionDaoSearchIT {
         TransactionFixture transactionFixtureChild = insertRefundChildTransaction(transactionFixture,
                 now(ZoneOffset.UTC).plusDays(1));
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setCardHolderName("mr");
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
         assertThat(transactionList.size(), is(2));
@@ -656,7 +656,7 @@ public class TransactionDaoSearchIT {
         TransactionFixture transactionFixtureChild = insertRefundChildTransaction(transactionFixture,
                 now(ZoneOffset.UTC).plusDays(1));
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setLastDigitsCardNumber("4242");
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
         assertThat(transactionList.size(), is(2));
@@ -677,7 +677,7 @@ public class TransactionDaoSearchIT {
         TransactionFixture transactionFixtureChild = insertRefundChildTransaction(transactionFixture,
                 now(ZoneOffset.UTC).plusDays(2));
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setCardBrands(new CommaDelimitedSetParameter("visa"));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
@@ -698,7 +698,7 @@ public class TransactionDaoSearchIT {
         TransactionFixture transactionFixtureChild = insertRefundChildTransaction(transactionFixture,
                 now(ZoneOffset.UTC).plusDays(1));
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setFromDate(now(ZoneOffset.UTC).toString());
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
         assertThat(transactionList.size(), is(1));
@@ -717,7 +717,7 @@ public class TransactionDaoSearchIT {
                 .insert(rule.getJdbi());
         insertRefundChildTransaction(transactionFixture, now(ZoneOffset.UTC).plusDays(1));
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setToDate(now(ZoneOffset.UTC).toString());
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
         assertThat(transactionList.size(), is(1));
@@ -738,7 +738,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
 
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
         searchParams.setDisplaySize(10L);
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
@@ -759,7 +759,7 @@ public class TransactionDaoSearchIT {
                 .insert(rule.getJdbi());
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setDisplaySize(1L);
         searchParams.setPageNumber(2L);
 
@@ -781,7 +781,7 @@ public class TransactionDaoSearchIT {
         insertRefundChildTransaction(transactionFixture, now(ZoneOffset.UTC).plusDays(2));
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setPaymentStates(new CommaDelimitedSetParameter("created"));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
@@ -801,7 +801,7 @@ public class TransactionDaoSearchIT {
         TransactionFixture transactionFixtureChild = insertRefundChildTransaction(transactionFixture,
                 now(ZoneOffset.UTC).plusDays(2));
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setRefundStates(new CommaDelimitedSetParameter("created"));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
@@ -819,7 +819,7 @@ public class TransactionDaoSearchIT {
                 .insert(rule.getJdbi());
         insertRefundChildTransaction(transactionFixture, now(ZoneOffset.UTC).plusDays(2));
 
-        searchParams.setAccountId(transactionFixture.getGatewayAccountId());
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
         searchParams.setFirstDigitsCardNumber("424242");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
@@ -843,13 +843,56 @@ public class TransactionDaoSearchIT {
                 .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
                 .insert(rule.getJdbi());
 
-        searchParams.setAccountId("1");
+        searchParams.setAccountIds(List.of("1"));
 
         List<TransactionEntity> transactionList = transactionDao.cursorTransactionSearch(searchParams, null, null);
 
         assertThat(transactionList.size(), is(2));
     }
 
+    @Test
+    public void searchTransactionsByMultipleGatewayAccounts() {
+        aTransactionFixture()
+                .withGatewayAccountId("1")
+                .withExternalId("ex-1")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId("1")
+                .withExternalId("ex-2")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId("2")
+                .withExternalId("ex-3")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId("1")
+                .withExternalId("ex-4")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId("1337")
+                .withExternalId("ex-5")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .insert(rule.getJdbi());
+
+        searchParams.setAccountIds(List.of("1","2"));
+
+        var searchParamsList = List.of("ex-1", "ex-2", "ex-3", "ex-4");
+        var doNotIncludeList = List.of("ex-5");
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), is(4));
+        assertThat(transactionList.stream().filter(x -> searchParamsList.contains(x.getExternalId())).count(), is(4L));
+        assertThat(transactionList.stream().filter(x -> doNotIncludeList.contains(x.getExternalId())).count(), is(0L));
+    }
     @Test
     public void searchTransactionsByCursor_shouldSplitCursorPages() {
         transactionFixture = aTransactionFixture()
@@ -882,7 +925,7 @@ public class TransactionDaoSearchIT {
                 .withCreatedDate(now(ZoneOffset.UTC).minusDays(6))
                 .insert(rule.getJdbi());
 
-        searchParams.setAccountId("1");
+        searchParams.setAccountIds(List.of("1"));
         searchParams.setDisplaySize(2L);
 
         List<TransactionEntity> firstPage = transactionDao.cursorTransactionSearch(searchParams, null, null);

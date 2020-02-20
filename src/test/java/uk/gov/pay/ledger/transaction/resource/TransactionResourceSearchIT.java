@@ -408,4 +408,42 @@ public class TransactionResourceSearchIT {
                 .body("results[1].transaction_id", is(payment.getExternalId()))
                 .body("results[1].parent_transaction", is(nullValue()));
     }
+
+    @Test
+    public void shouldSearchUsingMultipleGatewayAccountIds() {
+        String targetGatewayAccountId = "123";
+        String targetGatewayAccountId2 = "456";
+        String targetGatewayAccountId3 = "1337";
+
+        TransactionFixture targetPayment = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(targetGatewayAccountId)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(targetGatewayAccountId2)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(targetGatewayAccountId3)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + targetGatewayAccountId+ "," + targetGatewayAccountId2+
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(2));
+    }
 }

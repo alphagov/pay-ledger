@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -24,7 +25,7 @@ public class AccountIdSupplierManagerTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private Function<String, Optional<TransactionView>> supplier;
+    private Function<List<String>, Optional<TransactionView>> supplier;
 
     @Mock
     private Supplier<Optional<TransactionView>> privilegedSupplier;
@@ -42,17 +43,17 @@ public class AccountIdSupplierManagerTest {
 
     @Test
     public void givenAccountIdProvidedWhenRequiredUsesSupplier() {
-        setUpAndGet(null, "some-id");
+        setUpAndGet(null, List.of("some-id"));
 
-        verify(supplier).apply("some-id");
+        verify(supplier).apply(List.of("some-id"));
         verify(privilegedSupplier, never()).get();
     }
 
     @Test
     public void givenAccountIdProvidedWhenNotRequiredUsesSupplier() {
-        setUpAndGet(true, "some-id");
+        setUpAndGet(true, List.of("some-id"));
 
-        verify(supplier).apply("some-id");
+        verify(supplier).apply(List.of("some-id"));
         verify(privilegedSupplier, never()).get();
     }
 
@@ -64,8 +65,8 @@ public class AccountIdSupplierManagerTest {
         verify(privilegedSupplier).get();
     }
 
-    private void setUpAndGet(Boolean overrideAccountRestriction, String gatewayAccountId) {
-        new AccountIdSupplierManager(overrideAccountRestriction, gatewayAccountId)
+    private void setUpAndGet(Boolean overrideAccountRestriction, List<String> gatewayAccountId) {
+        new AccountIdListSupplierManager(overrideAccountRestriction, gatewayAccountId)
                 .withPrivilegedSupplier(privilegedSupplier)
                 .withSupplier(supplier)
                 .validateAndGet();

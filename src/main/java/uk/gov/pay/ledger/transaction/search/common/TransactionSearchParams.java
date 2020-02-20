@@ -46,7 +46,7 @@ public class TransactionSearchParams {
     @DefaultValue("false")
     @QueryParam("with_parent_transaction")
     private boolean withParentTransaction;
-    private String accountId;
+    private List<String> accountIds;
     @QueryParam("email")
     private String email;
     @QueryParam("reference")
@@ -80,8 +80,8 @@ public class TransactionSearchParams {
     private Map<String, Object> queryMap;
     private String gatewayTransactionId;
 
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
+    public void setAccountIds(List<String> accountIds) {
+        this.accountIds = List.copyOf(accountIds);
     }
 
     public void setEmail(String email) {
@@ -221,8 +221,8 @@ public class TransactionSearchParams {
 
     private void addCommonFilterTemplates(List<String> filters) {
 
-        if (isNotBlank(accountId)) {
-            filters.add(" t.gateway_account_id = :" + GATEWAY_ACCOUNT_EXTERNAL_FIELD);
+        if (accountIds != null && !accountIds.isEmpty()) {
+            filters.add(" t.gateway_account_id IN (<" + GATEWAY_ACCOUNT_EXTERNAL_FIELD + ">)");
         }
         if (transactionType != null) {
             filters.add(" t.type = :" + TRANSACTION_TYPE_FIELD + "::transaction_type");
@@ -249,8 +249,8 @@ public class TransactionSearchParams {
         if (queryMap == null) {
             queryMap = new HashMap<>();
 
-            if (isNotBlank(accountId)) {
-                queryMap.put(GATEWAY_ACCOUNT_EXTERNAL_FIELD, accountId);
+            if (accountIds != null && !accountIds.isEmpty()) {
+                queryMap.put(GATEWAY_ACCOUNT_EXTERNAL_FIELD, accountIds);
             }
 
             if (isNotBlank(email)) {
@@ -309,8 +309,8 @@ public class TransactionSearchParams {
                 TransactionState.getStatesForOldStatus(status);
     }
 
-    public String getAccountId() {
-        return accountId;
+    public List<String> getAccountIds() {
+        return accountIds;
     }
 
     public Long getPageNumber() {
@@ -348,8 +348,8 @@ public class TransactionSearchParams {
     public String buildQueryParamString(Long forPage) {
         List<String> queries = new ArrayList<>();
 
-        if (isNotBlank(accountId)) {
-            queries.add(GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + accountId);
+        if (accountIds != null && !accountIds.isEmpty()) {
+            queries.add(GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + String.join(",", accountIds));
         }
         if (isNotBlank(fromDate)) {
             queries.add(FROM_DATE_FIELD + "=" + fromDate);
