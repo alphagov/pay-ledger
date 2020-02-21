@@ -2,7 +2,6 @@ package uk.gov.pay.ledger.transaction.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.dao.EventDao;
@@ -85,12 +84,13 @@ public class TransactionService {
     }
 
     public TransactionSearchResponse searchTransactions(TransactionSearchParams searchParams, UriInfo uriInfo) {
-        return searchTransactions(null, searchParams, uriInfo);
+        return searchTransactions(List.of(), searchParams, uriInfo);
     }
 
-    public TransactionSearchResponse searchTransactions(String gatewayAccountId, TransactionSearchParams searchParams, UriInfo uriInfo) {
-        if (StringUtils.isNotBlank(gatewayAccountId)) {
-            searchParams.setAccountId(gatewayAccountId);
+    public TransactionSearchResponse searchTransactions(List<String> gatewayAccountIds,
+                                                        TransactionSearchParams searchParams, UriInfo uriInfo) {
+        if (!gatewayAccountIds.isEmpty()) {
+            searchParams.setAccountIds(gatewayAccountIds);
         }
 
         if (searchParams.getWithParentTransaction()) {

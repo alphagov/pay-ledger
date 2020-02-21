@@ -73,7 +73,7 @@ public class TransactionServiceTest {
         transactionService = new TransactionService(mockTransactionDao, mockEventDao, transactionEntityFactory,
                 transactionFactory, csvTransactionFactory, objectMapper);
         searchParams = new TransactionSearchParams();
-        searchParams.setAccountId(gatewayAccountId);
+        searchParams.setAccountIds(List.of(gatewayAccountId));
 
         when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://app.com"));
         when(mockUriInfo.getPath()).thenReturn("/v1/transaction");
@@ -136,7 +136,7 @@ public class TransactionServiceTest {
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
         when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(100L);
 
-        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(gatewayAccountId, searchParams, mockUriInfo);
+        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(List.of(gatewayAccountId), searchParams, mockUriInfo);
         PaginationBuilder paginationBuilder = transactionSearchResponse.getPaginationBuilder();
 
         assertThat(paginationBuilder.getFirstLink().getHref(), is("http://app.com/v1/transaction?account_id=gateway_account_id&page=1&display_size=10"));
@@ -188,7 +188,7 @@ public class TransactionServiceTest {
         setAllSearchParams();
         searchParams.setWithParentTransaction(true);
 
-        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(gatewayAccountId, searchParams, mockUriInfo);
+        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(List.of(gatewayAccountId), searchParams, mockUriInfo);
 
         verify(mockTransactionDao).searchTransactionsAndParent(searchParams);
         verify(mockTransactionDao).getTotalForSearchTransactionAndParent(searchParams);
