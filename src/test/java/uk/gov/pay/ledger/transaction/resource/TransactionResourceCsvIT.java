@@ -203,6 +203,58 @@ public class TransactionResourceCsvIT {
     }
 
     @Test
+    public void shouldReturnMultipleAccountTransactions_whenRequestedAsCsv() throws IOException {
+        String gatewayAccountId = "123";
+        String gatewayAccountId2 = "456";
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType("PAYMENT")
+                .withFee(100)
+                .withNetAmount(1100)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId2)
+                .withTransactionType("PAYMENT")
+                .withFee(200)
+                .withNetAmount(1000)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId("789")
+                .withTransactionType("PAYMENT")
+                .withFee(100)
+                .withNetAmount(1100)
+                .insert(rule.getJdbi());
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .queryParam("account_id", gatewayAccountId + "," +gatewayAccountId2)
+                .queryParam("fee_headers", true)
+                .queryParam("page",1)
+                .queryParam("display_size", 5)
+                .get("/v1/transaction/")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(2));
+
+        CSVRecord paymentRecord = csvRecords.get(0);
+        assertThat(paymentRecord.size(), is(23));
+        assertThat(paymentRecord.get("Net"), is("10.00"));
+        assertThat(paymentRecord.get("Fee"), is("2.00"));
+        CSVRecord paymentRecord2 = csvRecords.get(1);
+        assertThat(paymentRecord2.size(), is(23));
+        assertThat(paymentRecord2.get("Net"), is("11.00"));
+        assertThat(paymentRecord2.get("Fee"), is("1.00"));
+    }
+
+    @Test
     public void shouldReturnCSVHeadersInCorrectOrder() throws IOException {
         String targetGatewayAccountId = "123";
 
