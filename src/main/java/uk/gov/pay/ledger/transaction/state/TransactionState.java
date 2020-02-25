@@ -107,7 +107,8 @@ public enum TransactionState {
                     Map.entry(SalientEventType.REFUND_CREATED_BY_USER, SUBMITTED),
                     Map.entry(SalientEventType.REFUND_SUBMITTED, SUBMITTED),
                     Map.entry(SalientEventType.REFUND_SUCCEEDED, SUCCESS),
-                    Map.entry(SalientEventType.REFUND_ERROR, ERROR)
+                    Map.entry(SalientEventType.REFUND_ERROR, ERROR),
+                    Map.entry(SalientEventType.STATUS_CORRECTED_TO_CAPTURED_TO_MATCH_GATEWAY_STATUS, SUCCESS)
             );
 
     public static TransactionState fromEventType(SalientEventType salientEventType) {
