@@ -155,4 +155,42 @@ public class QueueMessageReceiverIT {
                 .body("transaction_id", is(resourceExternalId))
                 .body("refund_summary.amount_available", is(200));
     }
+
+    @Test
+    public void shouldHandleForceCaptureEvent() throws InterruptedException {
+        final String resourceExternalId = "rexid2";
+        final String gatewayAccountId = "test_accountId";
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("AUTHORISATION_REJECTED")
+                .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
+                .insert(rule.getSqsClient());
+
+        given().port(rule.getAppRule().getLocalPort())
+                .contentType(JSON)
+                .get("/v1/transaction/" + resourceExternalId + "?account_id=" + gatewayAccountId)
+                .then()
+                .statusCode(200)
+                .body("transaction_id", is(resourceExternalId))
+                .body("state.status", is("declined"));
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("EXPUNGED_CHARGE_STATUS_CORRECTED_TO_CAPTURED_TO_MATCH_GATEWAY_STATUS")
+                .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
+
+        given().port(rule.getAppRule().getLocalPort())
+                .contentType(JSON)
+                .get("/v1/transaction/" + resourceExternalId + "?account_id=" + gatewayAccountId)
+                .then()
+                .statusCode(200)
+                .body("transaction_id", is(resourceExternalId))
+                .body("state.status", is("success"));
+
+    }
 }
