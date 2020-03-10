@@ -158,7 +158,7 @@ public class QueueMessageReceiverIT {
 
     @Test
     public void shouldHandleForceCaptureEvent() throws InterruptedException {
-        final String resourceExternalId = "rexid2";
+        final String resourceExternalId = "rexid3";
         final String gatewayAccountId = "test_accountId";
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
@@ -166,6 +166,8 @@ public class QueueMessageReceiverIT {
                 .withEventType("AUTHORISATION_REJECTED")
                 .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
                 .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
 
         given().port(rule.getAppRule().getLocalPort())
                 .contentType(JSON)
