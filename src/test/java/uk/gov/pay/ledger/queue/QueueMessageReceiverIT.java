@@ -180,7 +180,7 @@ public class QueueMessageReceiverIT {
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
-                .withEventType("EXPUNGED_CHARGE_STATUS_CORRECTED_TO_CAPTURED_TO_MATCH_GATEWAY_STATUS")
+                .withEventType("CAPTURE_CONFIRMED_BY_GATEWAY_NOTIFICATION")
                 .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
                 .insert(rule.getSqsClient());
 
