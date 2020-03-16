@@ -109,7 +109,7 @@ public enum TransactionState {
                     Map.entry(SalientEventType.REFUND_SUCCEEDED, SUCCESS),
                     Map.entry(SalientEventType.REFUND_ERROR, ERROR),
                     Map.entry(SalientEventType.STATUS_CORRECTED_TO_CAPTURED_TO_MATCH_GATEWAY_STATUS, SUCCESS),
-                    Map.entry(SalientEventType.EXPUNGED_CHARGE_STATUS_CORRECTED_TO_CAPTURED_TO_MATCH_GATEWAY_STATUS, SUCCESS)
+                    Map.entry(SalientEventType.CAPTURE_CONFIRMED_BY_GATEWAY_NOTIFICATION, SUCCESS)
             );
 
     public static TransactionState fromEventType(SalientEventType salientEventType) {
