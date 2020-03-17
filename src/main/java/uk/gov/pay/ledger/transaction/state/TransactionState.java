@@ -82,14 +82,18 @@ public enum TransactionState {
                     Map.entry(SalientEventType.PAYMENT_STARTED, STARTED),
                     Map.entry(SalientEventType.PAYMENT_EXPIRED, FAILED_EXPIRED),
                     Map.entry(SalientEventType.AUTHORISATION_REJECTED, FAILED_REJECTED),
+                    Map.entry(SalientEventType.STATUS_CORRECTED_TO_AUTHORISATION_REJECTED_TO_MATCH_GATEWAY_STATUS, FAILED_REJECTED),
                     Map.entry(SalientEventType.AUTHORISATION_SUCCEEDED, SUBMITTED),
                     Map.entry(SalientEventType.AUTHORISATION_CANCELLED, FAILED_REJECTED),
                     Map.entry(SalientEventType.GATEWAY_ERROR_DURING_AUTHORISATION, ERROR_GATEWAY),
                     Map.entry(SalientEventType.GATEWAY_TIMEOUT_DURING_AUTHORISATION, ERROR_GATEWAY),
                     Map.entry(SalientEventType.UNEXPECTED_GATEWAY_ERROR_DURING_AUTHORISATION, ERROR_GATEWAY),
+                    Map.entry(SalientEventType.STATUS_CORRECTED_TO_AUTHORISATION_ERROR_TO_MATCH_GATEWAY_STATUS, ERROR_GATEWAY),
                     Map.entry(SalientEventType.GATEWAY_REQUIRES_3DS_AUTHORISATION, STARTED),
                     Map.entry(SalientEventType.CAPTURE_CONFIRMED, SUCCESS),
                     Map.entry(SalientEventType.CAPTURE_SUBMITTED, SUCCESS),
+                    Map.entry(SalientEventType.STATUS_CORRECTED_TO_CAPTURED_TO_MATCH_GATEWAY_STATUS, SUCCESS),
+                    Map.entry(SalientEventType.CAPTURE_CONFIRMED_BY_GATEWAY_NOTIFICATION, SUCCESS),
                     Map.entry(SalientEventType.CAPTURE_ERRORED, ERROR_GATEWAY),
                     Map.entry(SalientEventType.CAPTURE_ABANDONED_AFTER_TOO_MANY_RETRIES, ERROR_GATEWAY),
                     Map.entry(SalientEventType.USER_APPROVED_FOR_CAPTURE, SUCCESS),
@@ -107,9 +111,7 @@ public enum TransactionState {
                     Map.entry(SalientEventType.REFUND_CREATED_BY_USER, SUBMITTED),
                     Map.entry(SalientEventType.REFUND_SUBMITTED, SUBMITTED),
                     Map.entry(SalientEventType.REFUND_SUCCEEDED, SUCCESS),
-                    Map.entry(SalientEventType.REFUND_ERROR, ERROR),
-                    Map.entry(SalientEventType.STATUS_CORRECTED_TO_CAPTURED_TO_MATCH_GATEWAY_STATUS, SUCCESS),
-                    Map.entry(SalientEventType.CAPTURE_CONFIRMED_BY_GATEWAY_NOTIFICATION, SUCCESS)
+                    Map.entry(SalientEventType.REFUND_ERROR, ERROR)
             );
 
     public static TransactionState fromEventType(SalientEventType salientEventType) {
