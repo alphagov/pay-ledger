@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
+import io.sentry.Sentry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.Event;
@@ -47,6 +48,7 @@ public class EventMessageHandler {
             try {
                 processSingleMessage(message);
             } catch (Exception e) {
+                Sentry.capture(e);
                 LOGGER.warn("Error during handling the event message. [id={}] [queueMessageId={}] [errorMessage={}]",
                         message.getId(),
                         message.getQueueMessageId(),
