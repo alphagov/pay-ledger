@@ -51,7 +51,6 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                 .withStatementDescriptor(statementDescriptor)
                 .withStatus(status)
                 .withType(type)
-                .withVersion(version)
                 .build();
     }
 
@@ -64,7 +63,6 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
         private String statementDescriptor;
         private String status;
         private String type;
-        private Long version;
 
         private PayoutFixtureBuilder() {
         }
@@ -113,11 +111,6 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             return this;
         }
 
-        public PayoutFixtureBuilder withVersion(Long version) {
-            this.version = version;
-            return this;
-        }
-
         public PayoutFixture build() {
             PayoutFixture payoutFixture = new PayoutFixture();
             payoutFixture.amount = this.amount;
@@ -125,7 +118,6 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             payoutFixture.id = this.id;
             payoutFixture.status = this.status;
             payoutFixture.statementDescriptor = this.statementDescriptor;
-            payoutFixture.version = this.version;
             payoutFixture.createdDate = this.createdDate;
             payoutFixture.paidOutDate = this.paidOutDate;
             payoutFixture.type = this.type;

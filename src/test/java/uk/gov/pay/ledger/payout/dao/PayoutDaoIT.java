@@ -34,7 +34,6 @@ public class PayoutDaoIT {
                 .withStatementDescriptor("a statement descriptor")
                 .withStatus("PAYOUT")
                 .withType("Bank Account")
-                .withVersion(0L)
                 .build().insert(rule.getJdbi());
         var payout = payoutDao.findByGatewayPayoutId("po_asdasdasd").get();
         assertThat(payout.getId(), is(Long.valueOf(id)));
@@ -59,7 +58,6 @@ public class PayoutDaoIT {
                 .withStatementDescriptor("a statement descriptor")
                 .withStatus("PAYOUT")
                 .withType("Bank Account")
-                .withVersion(0L)
                 .build();
 
         payoutDao.upsert(payoutEntity);
@@ -87,7 +85,6 @@ public class PayoutDaoIT {
                 .withStatementDescriptor("a statement descriptor")
                 .withStatus("PAYOUT")
                 .withType("Bank Account")
-                .withVersion(0L)
                 .build();
 
         payoutDao.upsert(payoutEntity);
@@ -99,7 +96,6 @@ public class PayoutDaoIT {
                 .withStatementDescriptor("a descriptor")
                 .withStatus("PAID")
                 .withType("Test Account")
-                .withVersion(0L)
                 .build();
 
         payoutDao.upsert(payoutEntity2);
