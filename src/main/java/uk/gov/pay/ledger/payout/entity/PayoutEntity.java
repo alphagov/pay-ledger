@@ -12,7 +12,6 @@ public class PayoutEntity {
     private final String statementDescriptor;
     private final String status;
     private final String type;
-    private final Long version;
 
     public PayoutEntity(PayoutEntityBuilder builder) {
         this.id = builder.id;
@@ -23,7 +22,6 @@ public class PayoutEntity {
         this.statementDescriptor = builder.statementDescriptor;
         this.status = builder.status;
         this.type = builder.type;
-        this.version = builder.version;
     }
 
     public Long getId() {
@@ -58,10 +56,6 @@ public class PayoutEntity {
         return type;
     }
 
-    public Long getVersion() {
-        return version;
-    }
-
     public static final class PayoutEntityBuilder {
         private Long id;
         private String gatewayPayoutId;
@@ -71,7 +65,6 @@ public class PayoutEntity {
         private String statementDescriptor;
         private String status;
         private String type;
-        private Long version;
 
         private PayoutEntityBuilder() {
         }
@@ -117,11 +110,6 @@ public class PayoutEntity {
 
         public PayoutEntityBuilder withType(String type) {
             this.type = type;
-            return this;
-        }
-
-        public PayoutEntityBuilder withVersion(Long version) {
-            this.version = version;
             return this;
         }
 
