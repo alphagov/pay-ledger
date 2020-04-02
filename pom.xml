@@ -10,11 +10,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>uk.gov.pay.ledger.app.LedgerApp</mainClass>
 
-        <dropwizard.version>2.0.3</dropwizard.version>
+        <dropwizard.version>2.0.2</dropwizard.version>
         <jackson.version>2.10.3</jackson.version>
         <testcontainers.version>1.13.0</testcontainers.version>
         <postgresql.version>42.2.11</postgresql.version>
-        <pay-java-commons.version>1.0.20200327101352</pay-java-commons.version>
+        <pay-java-commons.version>1.0.20200316101949</pay-java-commons.version>
         <surefire.version>3.0.0-M3</surefire.version>
         <guice.version>4.2.3</guice.version>
         <rest-assured.version>4.3.0</rest-assured.version>
@@ -138,7 +138,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-sqs</artifactId>
-            <version>1.11.754</version>
+            <version>1.11.750</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
