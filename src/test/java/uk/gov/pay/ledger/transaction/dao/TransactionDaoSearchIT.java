@@ -947,6 +947,53 @@ public class TransactionDaoSearchIT {
         assertThat(fourthPage.size(), is(0));
     }
 
+    @Test
+    public void shouldOnlyReturnLiveTransactions_whenLiveParameterIsSetToTrue() {
+        transactionFixture = aTransactionFixture()
+                .withId(1337L)
+                .withLive(true)
+                .withGatewayAccountId("1")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(3))
+                .insert(rule.getJdbi());
+
+        transactionFixture = aTransactionFixture()
+                .withId(1336L)
+                .withLive(false)
+                .withGatewayAccountId("1")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(3))
+                .insert(rule.getJdbi());
+
+        searchParams.setLive(true);
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), is(1));
+        assertThat(transactionList.get(0).getId(), is(1337L));
+    }
+
+    @Test
+    public void shouldReturnAllTransactions_whenLiveParameterIsSetToNull() {
+        transactionFixture = aTransactionFixture()
+                .withId(1337L)
+                .withLive(true)
+                .withGatewayAccountId("1")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(3))
+                .insert(rule.getJdbi());
+
+        transactionFixture = aTransactionFixture()
+                .withId(1336L)
+                .withLive(false)
+                .withGatewayAccountId("1")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(3))
+                .insert(rule.getJdbi());
+
+        searchParams.setLive(null);
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), is(2));
+    }
+
     private void assertTransactionEquals(TransactionEntity actualTransactionEntity, TransactionFixture transactionFixture) {
         assertThat(actualTransactionEntity.getId(), is(transactionFixture.getId()));
         assertThat(actualTransactionEntity.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));

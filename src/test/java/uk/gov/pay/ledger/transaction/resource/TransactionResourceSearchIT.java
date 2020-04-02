@@ -446,4 +446,45 @@ public class TransactionResourceSearchIT {
                 .contentType(JSON)
                 .body("count", is(2));
     }
+
+    @Test
+    public void shouldReturnOnlyLiveTransactionsWhenLiveParameterIsSet() {
+        String targetGatewayAccountId = "1030";
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withLive(true)
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(targetGatewayAccountId)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withLive(true)
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(targetGatewayAccountId)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withLive(false)
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(targetGatewayAccountId)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=1030" +
+                        "&live=true" +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(2));
+    }
+
 }
