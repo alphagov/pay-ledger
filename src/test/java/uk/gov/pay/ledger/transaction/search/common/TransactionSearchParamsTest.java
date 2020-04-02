@@ -247,16 +247,4 @@ public class TransactionSearchParamsTest {
         transactionSearchParams.setToDate("2018-09-22T10:14:16.067Z");
         assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("to_date=2018-09-22T10:14:16.067Z"));
     }
-
-    @Test
-    public void getsQueryParamStringWithLiveNotIncludedWhenItIsNull() {
-        transactionSearchParams.setLive(null);
-        assertThat(transactionSearchParams.buildQueryParamString(1L), not(containsString("live")));
-    }
-
-    @Test
-    public void getsQueryParamStringWithLiveSetWhenItIsSet() {
-        transactionSearchParams.setLive(true);
-        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("live=true"));
-    }
 }
