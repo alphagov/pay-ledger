@@ -32,7 +32,6 @@ public class TransactionSearchParams {
     private static final String STATE_FIELD = "state";
     private static final String TRANSACTION_TYPE_FIELD = "transaction_type";
     private static final String GATEWAY_TRANSACTION_ID_FIELD = "gateway_transaction_id";
-    private static final String LIVE_FIELD = "live";
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
 
@@ -70,8 +69,6 @@ public class TransactionSearchParams {
     private String fromDate;
     @QueryParam("to_date")
     private String toDate;
-    @QueryParam("live")
-    private Boolean live;
     @QueryParam(TRANSACTION_TYPE_FIELD)
     private TransactionType transactionType;
     @DefaultValue("true")
@@ -156,10 +153,6 @@ public class TransactionSearchParams {
         this.maxDisplaySize = maxDisplaySize;
     }
 
-    public void setLive(Boolean live) {
-        this.live = live;
-    }
-
     public List<String> getFilterTemplates() {
         List<String> filters = new ArrayList<>();
 
@@ -186,9 +179,6 @@ public class TransactionSearchParams {
         }
         if (isNotBlank(gatewayTransactionId)) {
             filters.add(" t.gateway_transaction_id = :" + GATEWAY_TRANSACTION_ID_FIELD);
-        }
-        if (live != null) {
-            filters.add(" t.live = :"+LIVE_FIELD);
         }
 
         return List.copyOf(filters);
@@ -309,9 +299,6 @@ public class TransactionSearchParams {
             if (gatewayTransactionId != null) {
                 queryMap.put(GATEWAY_TRANSACTION_ID_FIELD, gatewayTransactionId);
             }
-            if (live != null) {
-                queryMap.put(LIVE_FIELD, live);
-            }
         }
         return queryMap;
     }
@@ -400,9 +387,6 @@ public class TransactionSearchParams {
         }
         if (transactionType != null) {
             queries.add(TRANSACTION_TYPE_FIELD + "=" + transactionType);
-        }
-        if (live != null) {
-            queries.add(LIVE_FIELD + "=" + live);
         }
         queries.add("page=" + forPage);
         queries.add("display_size=" + getDisplaySize());
