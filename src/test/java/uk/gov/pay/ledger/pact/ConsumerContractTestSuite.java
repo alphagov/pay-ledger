@@ -8,12 +8,10 @@ import org.junit.runners.AllTests;
 import uk.gov.pay.commons.testing.pact.provider.CreateTestSuite;
 
 @RunWith(AllTests.class)
-public class ContractTestSuite {
+public class ConsumerContractTestSuite {
 
     public static TestSuite suite() {
         ImmutableSetMultimap.Builder<String, JUnit4TestAdapter> consumerToJUnitTest = ImmutableSetMultimap.builder();
-        consumerToJUnitTest.put("publicapi", new JUnit4TestAdapter(PublicApiContractTest.class));
-        consumerToJUnitTest.put("selfservice", new JUnit4TestAdapter(SelfServiceContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(PaymentCreatedEventQueueContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(PaymentDetailsEnteredEventQueueContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(CaptureConfirmedEventQueueContractTest.class));

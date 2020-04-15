@@ -1,5 +1,38 @@
 #!/usr/bin/env groovy
 
+def runConsumerContractTests(consumerTag) {
+  runTypedContractTests("consumer", consumerTag)
+}
+
+def runProviderContractTests() {
+  runTypedContractTests("provider")
+}
+
+def runTypedContractTests(contractTestType, consumerTag = "master") {
+  def commit = gitCommit()
+  withCredentials([
+          string(credentialsId: 'pact_broker_username', variable: 'PACT_BROKER_USERNAME'),
+          string(credentialsId: 'pact_broker_password', variable: 'PACT_BROKER_PASSWORD')]
+  ) {
+      def contractTestTypeFilter = ""
+      if (contractTestType == "consumer") {
+        contractTestTypeFilter = "-DrunConsumerContractTests=true"
+      } else if (contractTestType == "provider") {
+        contractTestTypeFilter = "-DrunContractTests=true"
+      }
+
+      sh "mvn clean package pact:publish " +
+          "-DPACT_BROKER_URL=https://pact-broker-test.cloudapps.digital " +
+          "-DPACT_BROKER_USERNAME=${PACT_BROKER_USERNAME} " +
+          "-DPACT_BROKER_PASSWORD=${PACT_BROKER_PASSWORD} " +
+          "-DPACT_CONSUMER_VERSION=${commit} " +
+          "-DPACT_CONSUMER_TAG=${consumerTag} " +
+          "-Dpact.provider.version=${commit} " +
+          "-Dpact.verifier.publishResults=true " +
+          "${contractTestTypeFilter}"
+  }
+}
+
 pipeline {
   agent any
 
@@ -23,35 +56,35 @@ pipeline {
   }
 
   stages {
-    stage('Maven Build Master') {
-      when {
-        branch 'master'
-      }
+    stage('Unit and Integration Tests') {
       steps {
         script {
           def stepBuildTime = System.currentTimeMillis()
-          def commit = gitCommit()
-          def branchName = 'master'
-
-          withCredentials([
-                  string(credentialsId: 'pact_broker_username', variable: 'PACT_BROKER_USERNAME'),
-                  string(credentialsId: 'pact_broker_password', variable: 'PACT_BROKER_PASSWORD')]
-          ) {
-              sh 'mvn -version'
-              sh 'mvn clean verify'
-              sh "mvn clean package pact:publish -DrunContractTests=true -DPACT_BROKER_URL=https://pact-broker-test.cloudapps.digital -DPACT_CONSUMER_VERSION=${commit}" +
-                      " -DPACT_BROKER_USERNAME=${PACT_BROKER_USERNAME} -DPACT_BROKER_PASSWORD=${PACT_BROKER_PASSWORD} -DPACT_CONSUMER_TAG=${branchName} -Dpact.provider.version=${commit} -Dpact.verifier.publishResults=true"
-          }
-          postSuccessfulMetrics("ledger.maven-build", stepBuildTime)
+          sh 'mvn clean verify'
+          postSuccessfulMetrics("ledger.unit-it-test", stepBuildTime)
         }
       }
       post {
         failure {
-          postMetric("ledger.maven-build.failure", 1)
+          postMetric("ledger.unit-test.failure", 1)
         }
       }
     }
-    stage('Maven Build Branch') {
+    stage('Contract Tests: Ledger as Provider') {
+      steps {
+        script {
+          def stepBuildTime = System.currentTimeMillis()
+          runProviderContractTests()
+          postSuccessfulMetrics("ledger.provider-contract-tests", stepBuildTime)
+        }
+      }
+      post {
+        failure {
+          postMetric("ledger.provider-contract-tests.failure", 1)
+        }
+      }
+    }
+    stage('Contract Tests: Ledger as Consumer (branch build)') {
       when {
         not {
           branch 'master'
@@ -60,28 +93,35 @@ pipeline {
       steps {
         script {
           def stepBuildTime = System.currentTimeMillis()
-          def commit = gitCommit()
           def branchName = gitBranchName()
-
-          withCredentials([
-                  string(credentialsId: 'pact_broker_username', variable: 'PACT_BROKER_USERNAME'),
-                  string(credentialsId: 'pact_broker_password', variable: 'PACT_BROKER_PASSWORD')]
-          ) {
-              sh 'mvn -version'
-              sh 'mvn clean verify'
-              sh "mvn clean package pact:publish -DrunContractTests=true -DPACT_BROKER_URL=https://pact-broker-test.cloudapps.digital -DPACT_CONSUMER_VERSION=${commit}" +
-                      " -DPACT_BROKER_USERNAME=${PACT_BROKER_USERNAME} -DPACT_BROKER_PASSWORD=${PACT_BROKER_PASSWORD} -DPACT_CONSUMER_TAG=${branchName}"
-          }
-          postSuccessfulMetrics("ledger.maven-build", stepBuildTime)
-      }
+          runConsumerContractTests(branchName)
+          postSuccessfulMetrics("ledger.consumer-contract-tests", stepBuildTime)
+        }
       }
       post {
-          failure {
-              postMetric("ledger.maven-build.failure", 1)
-          }
+        failure {
+          postMetric("ledger.maven-build.failure", 1)
+        }
       }
     }
-    stage('Contract Tests') {
+    stage('Contract Tests: Ledger as Consumer (master)') {
+      when {
+        branch 'master'
+      }
+      steps {
+        script {
+          def stepBuildTime = System.currentTimeMillis()
+          runConsumerContractTests("master")
+          postSuccessfulMetrics("ledger.consumer-contract-tests", stepBuildTime)
+        }
+      }
+      post {
+        failure {
+          postMetric("ledger.consumer-contract-tests.failure", 1)
+        }
+      }
+    }
+    stage('Contract Tests: Providers to Ledger') {
       steps {
         script {
           env.PACT_TAG = gitBranchName()
@@ -112,20 +152,15 @@ pipeline {
         }
       }
     }
-    stage('Tests') {
-      failFast true
-      stages {
-        stage('End-to-End Tests') {
-            when {
-                anyOf {
-                  branch 'master'
-                  environment name: 'RUN_END_TO_END_ON_PR', value: 'true'
-                }
-            }
-            steps {
-                runAppE2E("ledger", "card")
-            }
-        }
+    stage('End-to-End Tests') {
+      when {
+          anyOf {
+            branch 'master'
+            environment name: 'RUN_END_TO_END_ON_PR', value: 'true'
+          }
+      }
+      steps {
+          runAppE2E("ledger", "card")
       }
     }
     stage('Docker Tag') {
