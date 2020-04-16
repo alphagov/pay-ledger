@@ -403,9 +403,7 @@
         <profile>
             <id>default</id>
             <activation>
-                <property>
-                    <name>!runContractTests</name>
-                </property>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <plugins>
@@ -415,7 +413,8 @@
                         <configuration>
                             <excludes>
                                 <exclude>**/*ContractTest.java</exclude>
-                                <exclude>**/*ContractTestSuite.java</exclude>
+                                <exclude>**/*ProviderContractTestSuite.java</exclude>
+                                <exclude>**/*ConsumerContractTestSuite.java</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
@@ -423,7 +422,7 @@
             </build>
         </profile>
         <profile>
-            <id>contract-tests</id>
+            <id>provider-contract-tests</id>
             <activation>
                 <property>
                     <name>runContractTests</name>
@@ -436,7 +435,28 @@
                         <version>${surefire.version}</version>
                         <configuration>
                             <includes>
-                                <include>**/*ContractTestSuite.java</include>
+                                <include>**/*ProviderContractTestSuite.java</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>consumer-contract-tests</id>
+            <activation>
+                <property>
+                    <name>runConsumerContractTests</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${surefire.version}</version>
+                        <configuration>
+                            <includes>
+                                <include>**/*ConsumerContractTestSuite.java</include>
                             </includes>
                         </configuration>
                     </plugin>
@@ -444,5 +464,4 @@
             </build>
         </profile>
     </profiles>
-
 </project>
