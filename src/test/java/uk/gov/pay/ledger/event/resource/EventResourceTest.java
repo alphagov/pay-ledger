@@ -49,4 +49,10 @@ public class EventResourceTest {
         Response response = resources.target("/v1/event/" + nonExistentId).request().get();
         assertThat(response.getStatus(), is(404));
     }
+
+    @Test
+    public void shouldReturn400IfFromAndToDatesNotSuppliedToTickerEndpoint() {
+        Response response = resources.target("/v1/event/ticker").request().get();
+        assertThat(response.getStatus(), is(400));
+    }
 }
