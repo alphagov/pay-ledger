@@ -39,7 +39,12 @@ public enum SalientEventType {
     REFUND_CREATED_BY_SERVICE,
     REFUND_SUBMITTED,
     REFUND_SUCCEEDED,
-    REFUND_ERROR;
+    REFUND_ERROR,
+
+    PAYMENT_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN,
+    PAYMENT_STATUS_CORRECTED_TO_ERROR_BY_ADMIN,
+    REFUND_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN,
+    REFUND_STATUS_CORRECTED_TO_ERROR_BY_ADMIN;
 
     public static Optional<SalientEventType> from(String eventName) {
         return Arrays.stream(SalientEventType.values())

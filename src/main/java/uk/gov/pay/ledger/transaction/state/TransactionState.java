@@ -111,7 +111,11 @@ public enum TransactionState {
                     Map.entry(SalientEventType.REFUND_CREATED_BY_USER, SUBMITTED),
                     Map.entry(SalientEventType.REFUND_SUBMITTED, SUBMITTED),
                     Map.entry(SalientEventType.REFUND_SUCCEEDED, SUCCESS),
-                    Map.entry(SalientEventType.REFUND_ERROR, ERROR)
+                    Map.entry(SalientEventType.REFUND_ERROR, ERROR),
+                    Map.entry(SalientEventType.PAYMENT_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN, SUCCESS),
+                    Map.entry(SalientEventType.PAYMENT_STATUS_CORRECTED_TO_ERROR_BY_ADMIN, ERROR),
+                    Map.entry(SalientEventType.REFUND_STATUS_CORRECTED_TO_ERROR_BY_ADMIN, ERROR),
+                    Map.entry(SalientEventType.REFUND_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN, SUCCESS)
             );
 
     public static TransactionState fromEventType(SalientEventType salientEventType) {
