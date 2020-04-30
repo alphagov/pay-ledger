@@ -262,7 +262,7 @@
             <plugin>
                 <groupId>au.com.dius</groupId>
                 <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-                <version>3.6.14</version>
+                <version>3.6.15</version>
                 <configuration>
                     <pactDirectory>target/pacts</pactDirectory>
                     <pactBrokerUrl>${PACT_BROKER_URL}</pactBrokerUrl>
