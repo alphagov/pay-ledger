@@ -1,17 +1,36 @@
 package uk.gov.pay.ledger.payout.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import uk.gov.pay.ledger.event.model.serializer.MicrosecondPrecisionDateTimeDeserializer;
+import uk.gov.pay.ledger.event.model.serializer.MicrosecondPrecisionDateTimeSerializer;
+
 import java.time.ZonedDateTime;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class PayoutEntity {
 
-    private final Long id;
-    private final String gatewayPayoutId;
-    private final Long amount;
-    private final ZonedDateTime createdDate;
-    private final ZonedDateTime paidOutDate;
-    private final String statementDescriptor;
-    private final String status;
-    private final String type;
+    @JsonIgnore
+    private Long id;
+    private String gatewayPayoutId;
+    private Long amount;
+    @JsonIgnore
+    private ZonedDateTime createdDate;
+    @JsonSerialize(using = MicrosecondPrecisionDateTimeSerializer.class)
+    @JsonDeserialize(using = MicrosecondPrecisionDateTimeDeserializer.class)
+    private ZonedDateTime paidOutDate;
+    private String statementDescriptor;
+
+    private String status;
+    private String type;
+
+    public PayoutEntity() {
+    }
 
     public PayoutEntity(PayoutEntityBuilder builder) {
         this.id = builder.id;
@@ -54,6 +73,34 @@ public class PayoutEntity {
 
     public String getType() {
         return type;
+    }
+
+    public void setGatewayPayoutId(String gatewayPayoutId) {
+        this.gatewayPayoutId = gatewayPayoutId;
+    }
+
+    public void setAmount(Long amount) {
+        this.amount = amount;
+    }
+
+    public void setCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public void setPaidOutDate(ZonedDateTime paidOutDate) {
+        this.paidOutDate = paidOutDate;
+    }
+
+    public void setStatementDescriptor(String statementDescriptor) {
+        this.statementDescriptor = statementDescriptor;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public static final class PayoutEntityBuilder {
