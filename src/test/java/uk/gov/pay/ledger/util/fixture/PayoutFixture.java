@@ -24,7 +24,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
         jdbi.withHandle(handle ->
                 handle.execute(
                         "INSERT INTO" +
-                                " payouts(\n" +
+                                " payout(\n" +
                                 "   id,\n" +
                                 "   gateway_payout_id,\n" +
                                 "   amount,\n" +

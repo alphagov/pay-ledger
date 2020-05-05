@@ -9,10 +9,10 @@ import java.util.Optional;
 
 public class PayoutDao {
 
-    private final String SELECT_PAYOUT_BY_GATEWAY_PAYOUT_ID = "SELECT * FROM payouts " +
+    private final String SELECT_PAYOUT_BY_GATEWAY_PAYOUT_ID = "SELECT * FROM payout " +
             "WHERE gateway_payout_id = :gatewayPayoutId";
 
-    private final String UPSERT_PAYOUT = "INSERT INTO payouts " +
+    private final String UPSERT_PAYOUT = "INSERT INTO payout " +
             "(" +
             "gateway_payout_id,\n" +
             "amount,\n" +
