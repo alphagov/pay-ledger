@@ -41,7 +41,8 @@ public class PayoutDao {
             "status = EXCLUDED.status, " +
             "type = EXCLUDED.type, " +
             "event_count = EXCLUDED.event_count, " +
-            "payout_details = EXCLUDED.payout_details";
+            "payout_details = EXCLUDED.payout_details " +
+            "WHERE EXCLUDED.event_count >= payout.event_count";
 
     private Jdbi jdbi;
 
