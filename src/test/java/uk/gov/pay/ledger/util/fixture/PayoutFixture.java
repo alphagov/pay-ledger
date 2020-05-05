@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.util.fixture;
 
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
+import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.time.ZonedDateTime;
 
@@ -15,7 +16,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
     private ZonedDateTime createdDate;
     private ZonedDateTime paidOutDate;
     private String statementDescriptor;
-    private String status;
+    private PayoutState status;
     private String type;
     private Long version;
     private Integer eventCount;
@@ -68,7 +69,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
         private ZonedDateTime createdDate;
         private ZonedDateTime paidOutDate;
         private String statementDescriptor;
-        private String status;
+        private PayoutState status;
         private String type;
         private Integer eventCount;
         private String payoutDetails;
@@ -110,7 +111,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             return this;
         }
 
-        public PayoutFixtureBuilder withStatus(String status) {
+        public PayoutFixtureBuilder withStatus(PayoutState status) {
             this.status = status;
             return this;
         }

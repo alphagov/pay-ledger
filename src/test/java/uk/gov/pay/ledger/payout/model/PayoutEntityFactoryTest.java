@@ -8,6 +8,7 @@ import org.junit.rules.ExpectedException;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
+import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -59,4 +60,13 @@ public class PayoutEntityFactoryTest {
         assertThat(payoutEntity.getPaidOutDate(), is(paidOutDate));
     }
 
+    @Test
+    public void shouldDigestStateFromEvents() {
+        Event payoutCreatedEvent = aQueuePaymentEventFixture().withEventType("PAYOUT_CREATED").toEntity();
+        Event payoutPaidOutEvent = aQueuePaymentEventFixture().withEventType("PAYOUT_PAID_OUT").toEntity();
+        EventDigest eventDigest = EventDigest.fromEventList(List.of(payoutPaidOutEvent, payoutCreatedEvent));
+        PayoutEntity payoutEntity = payoutEntityFactory.create(eventDigest);
+
+        assertThat(payoutEntity.getStatus(), is(PayoutState.PAID_OUT));
+    }
 }
