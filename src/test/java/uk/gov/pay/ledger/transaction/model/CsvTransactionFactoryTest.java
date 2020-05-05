@@ -117,6 +117,23 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
+    public void toMapShouldIgnoreDuplicateCaseSensitiveMetadataFields() {
+        TransactionEntity transactionEntity = transactionFixture.withTransactionDetails(
+                new GsonBuilder().create().toJson(ImmutableMap.builder()
+                        .put("external_metadata",
+                                ImmutableMap.builder()
+                                        .put("some-key", "value-1").put("SOME-KEY", "value-2").put("Some-key", "value-1").build())
+                        .build()
+                )).toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertThat(csvDataMap.get("some-key (metadata)"), is("value-1"));
+        assertThat(csvDataMap.containsKey("SOME-KEY (metadata)"), is(false));
+        assertThat(csvDataMap.containsKey("Some-key (metadata)"), is(false));
+    }
+
+    @Test
     public void toMapShouldIncludeFeeAndNetAmountForStripePayments() {
         TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
                 .withPaymentProvider("stripe")
