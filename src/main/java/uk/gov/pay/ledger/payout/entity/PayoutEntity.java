@@ -25,9 +25,10 @@ public class PayoutEntity {
     @JsonDeserialize(using = MicrosecondPrecisionDateTimeDeserializer.class)
     private ZonedDateTime paidOutDate;
     private String statementDescriptor;
-
     private String status;
     private String type;
+    private Integer eventCount;
+    private String payoutDetails;
 
     public PayoutEntity() {
     }
@@ -41,6 +42,8 @@ public class PayoutEntity {
         this.statementDescriptor = builder.statementDescriptor;
         this.status = builder.status;
         this.type = builder.type;
+        this.eventCount = builder.eventCount;
+        this.payoutDetails = builder.payoutDetails;
     }
 
     public Long getId() {
@@ -73,6 +76,14 @@ public class PayoutEntity {
 
     public String getType() {
         return type;
+    }
+
+    public Integer getEventCount() {
+        return eventCount;
+    }
+
+    public String getPayoutDetails() {
+        return payoutDetails;
     }
 
     public void setGatewayPayoutId(String gatewayPayoutId) {
@@ -112,6 +123,8 @@ public class PayoutEntity {
         private String statementDescriptor;
         private String status;
         private String type;
+        private Integer eventCount;
+        private String payoutDetails;
 
         private PayoutEntityBuilder() {
         }
@@ -157,6 +170,16 @@ public class PayoutEntity {
 
         public PayoutEntityBuilder withType(String type) {
             this.type = type;
+            return this;
+        }
+
+        public PayoutEntityBuilder withEventCount(Integer eventCount) {
+            this.eventCount = eventCount;
+            return this;
+        }
+
+        public PayoutEntityBuilder withPayoutDetails(String payoutDetails) {
+            this.payoutDetails = payoutDetails;
             return this;
         }
 

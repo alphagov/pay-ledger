@@ -18,6 +18,8 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
     private String status;
     private String type;
     private Long version;
+    private Integer eventCount;
+    private String payoutDetails;
 
     @Override
     public PayoutFixture insert(Jdbi jdbi) {
@@ -32,10 +34,13 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                                 "   paid_out_date,\n" +
                                 "   statement_descriptor,\n" +
                                 "   status,\n" +
-                                "   type\n" +
+                                "   type,\n" +
+                                "   event_count,\n" +
+                                "   payout_details\n" +
                                 " )\n" +
-                                " VALUES (?,?,?,?,?,?,?,?)",
-                        id, gatewayPayoutId, amount, createdDate, paidOutDate, statementDescriptor, status, type
+                                " VALUES (?,?,?,?,?,?,?,?,?,CAST(? as jsonb))",
+                        id, gatewayPayoutId, amount, createdDate, paidOutDate, statementDescriptor, status, type,
+                        eventCount, payoutDetails
                 ));
         return this;
     }
@@ -51,6 +56,8 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                 .withStatementDescriptor(statementDescriptor)
                 .withStatus(status)
                 .withType(type)
+                .withEventCount(eventCount)
+                .withPayoutDetails(payoutDetails)
                 .build();
     }
 
@@ -63,6 +70,8 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
         private String statementDescriptor;
         private String status;
         private String type;
+        private Integer eventCount;
+        private String payoutDetails;
 
         private PayoutFixtureBuilder() {
         }
@@ -110,7 +119,14 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             this.type = type;
             return this;
         }
-
+        public PayoutFixtureBuilder withEventCount(Integer eventCount) {
+            this.eventCount = eventCount;
+            return this;
+        }
+        public PayoutFixtureBuilder withPayoutDetails(String payoutDetails) {
+            this.payoutDetails = payoutDetails;
+            return this;
+        }
         public PayoutFixture build() {
             PayoutFixture payoutFixture = new PayoutFixture();
             payoutFixture.amount = this.amount;
@@ -121,6 +137,8 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             payoutFixture.createdDate = this.createdDate;
             payoutFixture.paidOutDate = this.paidOutDate;
             payoutFixture.type = this.type;
+            payoutFixture.eventCount = this.eventCount;
+            payoutFixture.payoutDetails = this.payoutDetails;
             return payoutFixture;
         }
     }

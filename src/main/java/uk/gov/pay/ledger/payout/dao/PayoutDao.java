@@ -19,7 +19,9 @@ public class PayoutDao {
             "paid_out_date,\n" +
             "statement_descriptor,\n" +
             "status,\n" +
-            "type\n" +
+            "type,\n" +
+            "event_count,\n" +
+            "payout_details\n" +
             ")\n " +
             "VALUES (" +
             ":gateway_payout_id, " +
@@ -27,7 +29,9 @@ public class PayoutDao {
             ":paid_out_date, " +
             ":statement_descriptor, " +
             ":status, " +
-            ":type" +
+            ":type, " +
+            ":event_count, " +
+            "CAST(:payout_details as jsonb) " +
             ") " +
             "ON CONFLICT (gateway_payout_id) DO UPDATE SET " +
             "gateway_payout_id = EXCLUDED.gateway_payout_id, " +
@@ -35,7 +39,9 @@ public class PayoutDao {
             "paid_out_date = EXCLUDED.paid_out_date, " +
             "statement_descriptor = EXCLUDED.statement_descriptor, " +
             "status = EXCLUDED.status, " +
-            "type = EXCLUDED.type";
+            "type = EXCLUDED.type, " +
+            "event_count = EXCLUDED.event_count, " +
+            "payout_details = EXCLUDED.payout_details";
 
     private Jdbi jdbi;
 
@@ -60,6 +66,8 @@ public class PayoutDao {
                         .bind("statement_descriptor", payout.getStatementDescriptor())
                         .bind("status", payout.getStatus())
                         .bind("type", payout.getType())
+                        .bind("event_count", payout.getEventCount())
+                        .bind("payout_details", payout.getPayoutDetails())
                         .execute());
     }
 
