@@ -1,6 +1,9 @@
 package uk.gov.pay.ledger.payout.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,10 +28,12 @@ public class PayoutEntityFactoryTest {
     private PayoutEntityFactory payoutEntityFactory;
 
     private GsonBuilder gsonBuilder = new GsonBuilder();
+    private ObjectMapper objectMapper;
 
     @Before
     public void setUp() {
-        payoutEntityFactory = new PayoutEntityFactory();
+        objectMapper = new ObjectMapper();
+        payoutEntityFactory = new PayoutEntityFactory(objectMapper);
     }
 
     @Test
@@ -58,6 +63,12 @@ public class PayoutEntityFactoryTest {
         assertThat(payoutEntity.getAmount(), is(10000L));
         assertThat(payoutEntity.getCreatedDate(), is(payoutCreatedEvent.getEventDate()));
         assertThat(payoutEntity.getPaidOutDate(), is(paidOutDate));
+        assertThat(payoutEntity.getEventCount(), is(2));
+
+        JsonObject payoutDetails = JsonParser.parseString(payoutEntity.getPayoutDetails()).getAsJsonObject();
+        assertThat(payoutDetails.get("amount").getAsInt(), is(10000));
+        assertThat(payoutDetails.get("statement_descriptor").getAsString(), is("SPECIAL TEST SERVICE"));
+        assertThat(payoutDetails.get("paid_out_date").getAsString(), is(paidOutDate.toString()));
     }
 
     @Test

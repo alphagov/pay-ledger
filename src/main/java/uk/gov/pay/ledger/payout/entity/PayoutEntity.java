@@ -115,6 +115,14 @@ public class PayoutEntity {
         this.type = type;
     }
 
+    public void setPayoutDetails(String payoutDetails) {
+        this.payoutDetails = payoutDetails;
+    }
+
+    public void setEventCount(Integer eventCount) {
+        this.eventCount = eventCount;
+    }
+
     public static final class PayoutEntityBuilder {
         private Long id;
         private String gatewayPayoutId;
