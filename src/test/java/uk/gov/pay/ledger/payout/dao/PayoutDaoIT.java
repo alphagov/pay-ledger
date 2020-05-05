@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.payout.dao;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
+import uk.gov.pay.ledger.payout.state.PayoutState;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 
 import java.time.ZoneOffset;
@@ -32,7 +33,7 @@ public class PayoutDaoIT {
                 .withGatewayPayoutId("po_asdasdasd")
                 .withPaidOutDate(paidOutDate)
                 .withStatementDescriptor("a statement descriptor")
-                .withStatus("PAYOUT")
+                .withStatus(PayoutState.PAID_OUT)
                 .withType("Bank Account")
                 .withEventCount(1)
                 .withPayoutDetails("{\"key\": \"value\"}")
@@ -42,7 +43,7 @@ public class PayoutDaoIT {
         assertThat(payout.getAmount(), is(100L));
         assertThat(payout.getGatewayPayoutId(), is("po_asdasdasd"));
         assertThat(payout.getStatementDescriptor(), is("a statement descriptor"));
-        assertThat(payout.getStatus(), is("PAYOUT"));
+        assertThat(payout.getStatus(), is(PayoutState.PAID_OUT));
         assertThat(payout.getType(), is("Bank Account"));
         assertThat(payout.getCreatedDate(), is(notNullValue()));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));
@@ -60,7 +61,7 @@ public class PayoutDaoIT {
                 .withGatewayPayoutId("po_test2")
                 .withPaidOutDate(paidOutDate)
                 .withStatementDescriptor("a statement descriptor")
-                .withStatus("PAYOUT")
+                .withStatus(PayoutState.IN_TRANSIT)
                 .withType("Bank Account")
                 .withEventCount(1)
                 .withPayoutDetails("{\"key\": \"value\"}")
@@ -73,7 +74,7 @@ public class PayoutDaoIT {
         assertThat(payout.getAmount(), is(100L));
         assertThat(payout.getGatewayPayoutId(), is("po_test2"));
         assertThat(payout.getStatementDescriptor(), is("a statement descriptor"));
-        assertThat(payout.getStatus(), is("PAYOUT"));
+        assertThat(payout.getStatus(), is(PayoutState.IN_TRANSIT));
         assertThat(payout.getType(), is("Bank Account"));
         assertThat(payout.getCreatedDate(), is(notNullValue()));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));
@@ -91,7 +92,7 @@ public class PayoutDaoIT {
                 .withGatewayPayoutId("po_test2")
                 .withPaidOutDate(paidOutDate)
                 .withStatementDescriptor("a statement descriptor")
-                .withStatus("PAYOUT")
+                .withStatus(PayoutState.IN_TRANSIT)
                 .withType("Bank Account")
                 .build();
 
@@ -102,7 +103,7 @@ public class PayoutDaoIT {
                 .withGatewayPayoutId("po_test2")
                 .withPaidOutDate(paidOutDate)
                 .withStatementDescriptor("a descriptor")
-                .withStatus("PAID")
+                .withStatus(PayoutState.PAID_OUT)
                 .withType("Test Account")
                 .build();
 
@@ -113,7 +114,7 @@ public class PayoutDaoIT {
         assertThat(payout.getAmount(), is(1337L));
         assertThat(payout.getGatewayPayoutId(), is("po_test2"));
         assertThat(payout.getStatementDescriptor(), is("a descriptor"));
-        assertThat(payout.getStatus(), is("PAID"));
+        assertThat(payout.getStatus(), is(PayoutState.PAID_OUT));
         assertThat(payout.getType(), is("Test Account"));
         assertThat(payout.getCreatedDate(), is(notNullValue()));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));

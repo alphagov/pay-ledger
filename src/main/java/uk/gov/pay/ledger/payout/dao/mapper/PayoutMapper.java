@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.payout.dao.mapper;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
+import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,7 +22,7 @@ public class PayoutMapper implements RowMapper<PayoutEntity> {
                .withAmount(rs.getLong("amount"))
                .withStatementDescriptor(rs.getString("statement_descriptor"))
                .withType(rs.getString("type"))
-               .withStatus(rs.getString("status"))
+               .withStatus(PayoutState.from(rs.getString("status")))
                .withCreatedDate(getZonedDateTime(rs, "created_date").orElse(null))
                .withPaidOutDate(getZonedDateTime(rs, "paid_out_date").orElse(null))
                .withEventCount(rs.getInt("event_count"))

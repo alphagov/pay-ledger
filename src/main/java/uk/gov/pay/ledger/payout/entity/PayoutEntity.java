@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.ledger.event.model.serializer.MicrosecondPrecisionDateTimeDeserializer;
 import uk.gov.pay.ledger.event.model.serializer.MicrosecondPrecisionDateTimeSerializer;
+import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.time.ZonedDateTime;
 
@@ -25,7 +26,7 @@ public class PayoutEntity {
     @JsonDeserialize(using = MicrosecondPrecisionDateTimeDeserializer.class)
     private ZonedDateTime paidOutDate;
     private String statementDescriptor;
-    private String status;
+    private PayoutState status;
     private String type;
     private Integer eventCount;
     private String payoutDetails;
@@ -70,7 +71,7 @@ public class PayoutEntity {
         return statementDescriptor;
     }
 
-    public String getStatus() {
+    public PayoutState getStatus() {
         return status;
     }
 
@@ -106,7 +107,7 @@ public class PayoutEntity {
         this.statementDescriptor = statementDescriptor;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(PayoutState status) {
         this.status = status;
     }
 
@@ -121,7 +122,7 @@ public class PayoutEntity {
         private ZonedDateTime createdDate;
         private ZonedDateTime paidOutDate;
         private String statementDescriptor;
-        private String status;
+        private PayoutState status;
         private String type;
         private Integer eventCount;
         private String payoutDetails;
@@ -163,7 +164,7 @@ public class PayoutEntity {
             return this;
         }
 
-        public PayoutEntityBuilder withStatus(String status) {
+        public PayoutEntityBuilder withStatus(PayoutState status) {
             this.status = status;
             return this;
         }
