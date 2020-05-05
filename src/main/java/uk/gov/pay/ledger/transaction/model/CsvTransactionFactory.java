@@ -121,7 +121,7 @@ public class CsvTransactionFactory {
 
             externalMetadata.ifPresent(metadata ->
                     metadata.forEach((key, value) ->
-                            result.put(String.format("%s (metadata)", key), value)));
+                            result.put(String.format("%s (metadata)", key.toLowerCase()), value)));
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]",
                     transactionEntity.getExternalId(), e.getMessage());
@@ -194,7 +194,11 @@ public class CsvTransactionFactory {
         }
 
         if (metadataKeys != null) {
-            metadataKeys.stream().sorted()
+            metadataKeys
+                    .stream()
+                    .map(String::toLowerCase)
+                    .distinct()
+                    .sorted()
                     .forEach(key -> {
                         String header = String.format("%s (metadata)", key);
                         headers.put(header, header);
