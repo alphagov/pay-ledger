@@ -34,6 +34,8 @@ public class PayoutDaoIT {
                 .withStatementDescriptor("a statement descriptor")
                 .withStatus("PAYOUT")
                 .withType("Bank Account")
+                .withEventCount(1)
+                .withPayoutDetails("{\"key\": \"value\"}")
                 .build().insert(rule.getJdbi());
         var payout = payoutDao.findByGatewayPayoutId("po_asdasdasd").get();
         assertThat(payout.getId(), is(Long.valueOf(id)));
@@ -44,6 +46,8 @@ public class PayoutDaoIT {
         assertThat(payout.getType(), is("Bank Account"));
         assertThat(payout.getCreatedDate(), is(notNullValue()));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));
+        assertThat(payout.getEventCount(), is(1));
+        assertThat(payout.getPayoutDetails(), is("{\"key\": \"value\"}"));
     }
 
     @Test
@@ -58,6 +62,8 @@ public class PayoutDaoIT {
                 .withStatementDescriptor("a statement descriptor")
                 .withStatus("PAYOUT")
                 .withType("Bank Account")
+                .withEventCount(1)
+                .withPayoutDetails("{\"key\": \"value\"}")
                 .build();
 
         payoutDao.upsert(payoutEntity);
@@ -71,6 +77,8 @@ public class PayoutDaoIT {
         assertThat(payout.getType(), is("Bank Account"));
         assertThat(payout.getCreatedDate(), is(notNullValue()));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));
+        assertThat(payout.getEventCount(), is(1));
+        assertThat(payout.getPayoutDetails(), is("{\"key\": \"value\"}"));
     }
 
     @Test

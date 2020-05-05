@@ -23,7 +23,9 @@ public class PayoutMapper implements RowMapper<PayoutEntity> {
                .withType(rs.getString("type"))
                .withStatus(rs.getString("status"))
                .withCreatedDate(getZonedDateTime(rs, "created_date").orElse(null))
-               .withPaidOutDate(getZonedDateTime(rs, "paid_out_date").orElse(null));
+               .withPaidOutDate(getZonedDateTime(rs, "paid_out_date").orElse(null))
+               .withEventCount(rs.getInt("event_count"))
+               .withPayoutDetails(rs.getString("payout_details"));
         return builder.build();
     }
 
