@@ -46,7 +46,7 @@ public class PayoutDao {
     private Jdbi jdbi;
 
     @Inject
-    PayoutDao(Jdbi jdbi) {
+    public PayoutDao(Jdbi jdbi) {
         this.jdbi = jdbi;
     }
 

@@ -24,20 +24,17 @@ public class EventMessageHandler {
 
     private final EventQueue eventQueue;
     private final EventService eventService;
-    private final TransactionService transactionService;
-    private final TransactionMetadataService transactionMetadataService;
+    private final EventDigestHandler eventDigestHandler;
     private final MetricRegistry metricRegistry;
 
     @Inject
     public EventMessageHandler(EventQueue eventQueue,
                                EventService eventService,
-                               TransactionService transactionService,
-                               TransactionMetadataService transactionMetadataService,
+                               EventDigestHandler eventDigestHandler,
                                MetricRegistry metricRegistry) {
         this.eventQueue = eventQueue;
         this.eventService = eventService;
-        this.transactionService = transactionService;
-        this.transactionMetadataService = transactionMetadataService;
+        this.eventDigestHandler = eventDigestHandler;
         this.metricRegistry = metricRegistry;
     }
 
@@ -65,9 +62,7 @@ public class EventMessageHandler {
         final long ingestLag = event.getEventDate().until(ZonedDateTime.now(), ChronoUnit.MICROS);
 
         if(response.isSuccessful()) {
-            EventDigest eventDigest = eventService.getEventDigestForResource(event.getResourceExternalId());
-            transactionService.upsertTransactionFor(eventDigest);
-            transactionMetadataService.upsertMetadataFor(event);
+            eventDigestHandler.processEvent(event);
             eventQueue.markMessageAsProcessed(message);
             metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
             LOGGER.info("The event message has been processed.",

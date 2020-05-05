@@ -14,6 +14,7 @@ import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
+import uk.gov.pay.ledger.payout.dao.PayoutDao;
 import uk.gov.pay.ledger.report.dao.PerformanceReportDao;
 import uk.gov.pay.ledger.report.dao.ReportDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
@@ -65,6 +66,12 @@ public class LedgerModule extends AbstractModule {
     @Singleton
     public TransactionDao provideTransactionDao() {
         return new TransactionDao(jdbi);
+    }
+
+    @Provides
+    @Singleton
+    public PayoutDao providePayoutDao() {
+        return new PayoutDao(jdbi);
     }
 
     @Provides

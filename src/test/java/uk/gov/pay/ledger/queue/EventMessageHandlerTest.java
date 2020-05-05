@@ -30,10 +30,7 @@ public class EventMessageHandlerTest {
     private EventService eventService;
 
     @Mock
-    private TransactionService transactionService;
-
-    @Mock
-    private TransactionMetadataService transactionMetadataService;
+    private EventDigestHandler eventDigestHandler;
 
     @Mock
     private CreateEventResponse createEventResponse;
@@ -56,8 +53,6 @@ public class EventMessageHandlerTest {
     @Test
     public void shouldMarkMessageAsProcessed_WhenEventIsProcessedSuccessfully() throws QueueException {
         when(createEventResponse.isSuccessful()).thenReturn(true);
-        when(eventService.getEventDigestForResource(event.getResourceExternalId()))
-                .thenReturn(EventDigest.fromEventList(List.of(event)));
 
         eventMessageHandler.handle();
 
