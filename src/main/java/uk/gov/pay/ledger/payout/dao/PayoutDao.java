@@ -17,9 +17,7 @@ public class PayoutDao {
             "gateway_payout_id,\n" +
             "amount,\n" +
             "paid_out_date,\n" +
-            "statement_descriptor,\n" +
-            "status,\n" +
-            "type,\n" +
+            "state,\n" +
             "event_count,\n" +
             "payout_details\n" +
             ")\n " +
@@ -27,9 +25,7 @@ public class PayoutDao {
             ":gateway_payout_id, " +
             ":amount, " +
             ":paid_out_date, " +
-            ":statement_descriptor, " +
-            ":status, " +
-            ":type, " +
+            ":state, " +
             ":event_count, " +
             "CAST(:payout_details as jsonb) " +
             ") " +
@@ -37,9 +33,7 @@ public class PayoutDao {
             "gateway_payout_id = EXCLUDED.gateway_payout_id, " +
             "amount = EXCLUDED.amount, " +
             "paid_out_date = EXCLUDED.paid_out_date, " +
-            "statement_descriptor = EXCLUDED.statement_descriptor, " +
-            "status = EXCLUDED.status, " +
-            "type = EXCLUDED.type, " +
+            "state = EXCLUDED.state, " +
             "event_count = EXCLUDED.event_count, " +
             "payout_details = EXCLUDED.payout_details " +
             "WHERE EXCLUDED.event_count >= payout.event_count";
@@ -64,9 +58,7 @@ public class PayoutDao {
                         .bind("gateway_payout_id", payout.getGatewayPayoutId())
                         .bind("amount", payout.getAmount())
                         .bind("paid_out_date", payout.getPaidOutDate())
-                        .bind("statement_descriptor", payout.getStatementDescriptor())
-                        .bind("status", payout.getStatus())
-                        .bind("type", payout.getType())
+                        .bind("state", payout.getState())
                         .bind("event_count", payout.getEventCount())
                         .bind("payout_details", payout.getPayoutDetails())
                         .execute());

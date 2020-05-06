@@ -78,6 +78,6 @@ public class PayoutEntityFactoryTest {
         EventDigest eventDigest = EventDigest.fromEventList(List.of(payoutPaidOutEvent, payoutCreatedEvent));
         PayoutEntity payoutEntity = payoutEntityFactory.create(eventDigest);
 
-        assertThat(payoutEntity.getStatus(), is(PayoutState.PAID_OUT));
+        assertThat(payoutEntity.getState(), is(PayoutState.PAID_OUT));
     }
 }
