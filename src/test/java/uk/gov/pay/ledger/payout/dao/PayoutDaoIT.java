@@ -39,9 +39,7 @@ public class PayoutDaoIT {
                 .withCreatedDate(createdDate)
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withPaidOutDate(paidOutDate)
-                .withStatementDescriptor("a statement descriptor")
-                .withStatus(PayoutState.PAID_OUT)
-                .withType("Bank Account")
+                .withState(PayoutState.PAID_OUT)
                 .withEventCount(1)
                 .withPayoutDetails("{\"key\": \"value\"}")
                 .build().insert(rule.getJdbi());
@@ -49,9 +47,7 @@ public class PayoutDaoIT {
         assertThat(payout.getId(), is(Long.valueOf(id)));
         assertThat(payout.getAmount(), is(100L));
         assertThat(payout.getGatewayPayoutId(), is(gatewayPayoutId));
-        assertThat(payout.getStatementDescriptor(), is("a statement descriptor"));
-        assertThat(payout.getStatus(), is(PayoutState.PAID_OUT));
-        assertThat(payout.getType(), is("Bank Account"));
+        assertThat(payout.getState(), is(PayoutState.PAID_OUT));
         assertThat(payout.getCreatedDate(), is(notNullValue()));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));
         assertThat(payout.getEventCount(), is(1));
@@ -67,9 +63,7 @@ public class PayoutDaoIT {
                 .withAmount(100L)
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withPaidOutDate(paidOutDate)
-                .withStatementDescriptor("a statement descriptor")
-                .withStatus(PayoutState.IN_TRANSIT)
-                .withType("Bank Account")
+                .withState(PayoutState.IN_TRANSIT)
                 .withEventCount(1)
                 .withPayoutDetails("{\"key\": \"value\"}")
                 .build();
@@ -80,9 +74,7 @@ public class PayoutDaoIT {
         assertThat(payout.getId(), is(1L));
         assertThat(payout.getAmount(), is(100L));
         assertThat(payout.getGatewayPayoutId(), is(gatewayPayoutId));
-        assertThat(payout.getStatementDescriptor(), is("a statement descriptor"));
-        assertThat(payout.getStatus(), is(PayoutState.IN_TRANSIT));
-        assertThat(payout.getType(), is("Bank Account"));
+        assertThat(payout.getState(), is(PayoutState.IN_TRANSIT));
         assertThat(payout.getCreatedDate(), is(notNullValue()));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));
         assertThat(payout.getEventCount(), is(1));
@@ -98,10 +90,8 @@ public class PayoutDaoIT {
                 .withAmount(100L)
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withPaidOutDate(paidOutDate)
-                .withStatementDescriptor("a statement descriptor")
-                .withStatus(PayoutState.IN_TRANSIT)
+                .withState(PayoutState.IN_TRANSIT)
                 .withEventCount(1)
-                .withType("Bank Account")
                 .build();
 
         payoutDao.upsert(payoutEntity);
@@ -110,10 +100,8 @@ public class PayoutDaoIT {
                 .withAmount(1337L)
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withPaidOutDate(paidOutDate)
-                .withStatementDescriptor("a descriptor")
-                .withStatus(PayoutState.PAID_OUT)
+                .withState(PayoutState.PAID_OUT)
                 .withEventCount(2)
-                .withType("Test Account")
                 .build();
 
         payoutDao.upsert(payoutEntity2);
@@ -122,9 +110,7 @@ public class PayoutDaoIT {
 
         assertThat(payout.getAmount(), is(1337L));
         assertThat(payout.getGatewayPayoutId(), is(gatewayPayoutId));
-        assertThat(payout.getStatementDescriptor(), is("a descriptor"));
-        assertThat(payout.getStatus(), is(PayoutState.PAID_OUT));
-        assertThat(payout.getType(), is("Test Account"));
+        assertThat(payout.getState(), is(PayoutState.PAID_OUT));
         assertThat(payout.getCreatedDate(), is(notNullValue()));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));
     }
@@ -134,7 +120,7 @@ public class PayoutDaoIT {
         var payoutEntity = aPayoutEntity()
                 .withAmount(100L)
                 .withGatewayPayoutId(gatewayPayoutId)
-                .withStatus(PayoutState.IN_TRANSIT)
+                .withState(PayoutState.IN_TRANSIT)
                 .withEventCount(3)
                 .build();
 
@@ -143,7 +129,7 @@ public class PayoutDaoIT {
         var payoutEntity2 = aPayoutEntity()
                 .withAmount(1337L)
                 .withGatewayPayoutId(gatewayPayoutId)
-                .withStatus(PayoutState.PAID_OUT)
+                .withState(PayoutState.PAID_OUT)
                 .withEventCount(2)
                 .build();
 
@@ -153,6 +139,6 @@ public class PayoutDaoIT {
 
         assertThat(payout.getAmount(), is(100L));
         assertThat(payout.getGatewayPayoutId(), is(gatewayPayoutId));
-        assertThat(payout.getStatus(), is(PayoutState.IN_TRANSIT));
+        assertThat(payout.getState(), is(PayoutState.IN_TRANSIT));
     }
 }

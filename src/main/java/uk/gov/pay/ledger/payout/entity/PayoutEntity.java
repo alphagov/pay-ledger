@@ -25,9 +25,7 @@ public class PayoutEntity {
     @JsonSerialize(using = MicrosecondPrecisionDateTimeSerializer.class)
     @JsonDeserialize(using = MicrosecondPrecisionDateTimeDeserializer.class)
     private ZonedDateTime paidOutDate;
-    private String statementDescriptor;
-    private PayoutState status;
-    private String type;
+    private PayoutState state;
     private Integer eventCount;
     private String payoutDetails;
 
@@ -40,9 +38,7 @@ public class PayoutEntity {
         this.amount = builder.amount;
         this.createdDate = builder.createdDate;
         this.paidOutDate = builder.paidOutDate;
-        this.statementDescriptor = builder.statementDescriptor;
-        this.status = builder.status;
-        this.type = builder.type;
+        this.state = builder.state;
         this.eventCount = builder.eventCount;
         this.payoutDetails = builder.payoutDetails;
     }
@@ -67,16 +63,8 @@ public class PayoutEntity {
         return paidOutDate;
     }
 
-    public String getStatementDescriptor() {
-        return statementDescriptor;
-    }
-
-    public PayoutState getStatus() {
-        return status;
-    }
-
-    public String getType() {
-        return type;
+    public PayoutState getState() {
+        return state;
     }
 
     public Integer getEventCount() {
@@ -103,16 +91,8 @@ public class PayoutEntity {
         this.paidOutDate = paidOutDate;
     }
 
-    public void setStatementDescriptor(String statementDescriptor) {
-        this.statementDescriptor = statementDescriptor;
-    }
-
-    public void setStatus(PayoutState status) {
-        this.status = status;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    public void setState(PayoutState state) {
+        this.state = state;
     }
 
     public void setPayoutDetails(String payoutDetails) {
@@ -129,9 +109,7 @@ public class PayoutEntity {
         private Long amount;
         private ZonedDateTime createdDate;
         private ZonedDateTime paidOutDate;
-        private String statementDescriptor;
-        private PayoutState status;
-        private String type;
+        private PayoutState state;
         private Integer eventCount;
         private String payoutDetails;
 
@@ -167,18 +145,8 @@ public class PayoutEntity {
             return this;
         }
 
-        public PayoutEntityBuilder withStatementDescriptor(String statementDescriptor) {
-            this.statementDescriptor = statementDescriptor;
-            return this;
-        }
-
-        public PayoutEntityBuilder withStatus(PayoutState status) {
-            this.status = status;
-            return this;
-        }
-
-        public PayoutEntityBuilder withType(String type) {
-            this.type = type;
+        public PayoutEntityBuilder withState(PayoutState state) {
+            this.state = state;
             return this;
         }
 

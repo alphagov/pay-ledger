@@ -15,10 +15,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
     private Long amount;
     private ZonedDateTime createdDate;
     private ZonedDateTime paidOutDate;
-    private String statementDescriptor;
-    private PayoutState status;
-    private String type;
-    private Long version;
+    private PayoutState state;
     private Integer eventCount;
     private String payoutDetails;
 
@@ -33,15 +30,13 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                                 "   amount,\n" +
                                 "   created_date,\n" +
                                 "   paid_out_date,\n" +
-                                "   statement_descriptor,\n" +
-                                "   status,\n" +
-                                "   type,\n" +
+                                "   state,\n" +
                                 "   event_count,\n" +
                                 "   payout_details\n" +
                                 " )\n" +
-                                " VALUES (?,?,?,?,?,?,?,?,?,CAST(? as jsonb))",
-                        id, gatewayPayoutId, amount, createdDate, paidOutDate, statementDescriptor, status, type,
-                        eventCount, payoutDetails
+                                " VALUES (?,?,?,?,?,?,?,CAST(? as jsonb))",
+                        id, gatewayPayoutId, amount, createdDate, paidOutDate,
+                        state, eventCount, payoutDetails
                 ));
         return this;
     }
@@ -54,9 +49,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withId(id)
                 .withPaidOutDate(paidOutDate)
-                .withStatementDescriptor(statementDescriptor)
-                .withStatus(status)
-                .withType(type)
+                .withState(state)
                 .withEventCount(eventCount)
                 .withPayoutDetails(payoutDetails)
                 .build();
@@ -68,9 +61,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
         private Long amount;
         private ZonedDateTime createdDate;
         private ZonedDateTime paidOutDate;
-        private String statementDescriptor;
-        private PayoutState status;
-        private String type;
+        private PayoutState state;
         private Integer eventCount;
         private String payoutDetails;
 
@@ -106,20 +97,11 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             return this;
         }
 
-        public PayoutFixtureBuilder withStatementDescriptor(String statementDescriptor) {
-            this.statementDescriptor = statementDescriptor;
+        public PayoutFixtureBuilder withState(PayoutState state) {
+            this.state = state;
             return this;
         }
 
-        public PayoutFixtureBuilder withStatus(PayoutState status) {
-            this.status = status;
-            return this;
-        }
-
-        public PayoutFixtureBuilder withType(String type) {
-            this.type = type;
-            return this;
-        }
         public PayoutFixtureBuilder withEventCount(Integer eventCount) {
             this.eventCount = eventCount;
             return this;
@@ -133,11 +115,9 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             payoutFixture.amount = this.amount;
             payoutFixture.gatewayPayoutId = this.gatewayPayoutId;
             payoutFixture.id = this.id;
-            payoutFixture.status = this.status;
-            payoutFixture.statementDescriptor = this.statementDescriptor;
+            payoutFixture.state = this.state;
             payoutFixture.createdDate = this.createdDate;
             payoutFixture.paidOutDate = this.paidOutDate;
-            payoutFixture.type = this.type;
             payoutFixture.eventCount = this.eventCount;
             payoutFixture.payoutDetails = this.payoutDetails;
             return payoutFixture;
