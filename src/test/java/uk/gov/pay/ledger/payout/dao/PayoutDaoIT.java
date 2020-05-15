@@ -7,9 +7,10 @@ import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
 import uk.gov.pay.ledger.payout.state.PayoutState;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
+import static java.time.ZoneOffset.UTC;
+import static java.time.ZonedDateTime.now;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,13 +25,13 @@ public class PayoutDaoIT {
     private String gatewayPayoutId;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         gatewayPayoutId = RandomStringUtils.random(6);
     }
 
     @Test
     public void shouldFetchPayout() {
-        var createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+        var createdDate = now(UTC);
         var paidOutDate = createdDate.minusDays(1);
         var id = RandomStringUtils.randomNumeric(4);
         aPayoutFixture()
@@ -48,15 +49,15 @@ public class PayoutDaoIT {
         assertThat(payout.getAmount(), is(100L));
         assertThat(payout.getGatewayPayoutId(), is(gatewayPayoutId));
         assertThat(payout.getState(), is(PayoutState.PAID_OUT));
-        assertThat(payout.getCreatedDate(), is(notNullValue()));
+        assertThat(payout.getCreatedDate(), is(createdDate));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));
         assertThat(payout.getEventCount(), is(1));
         assertThat(payout.getPayoutDetails(), is("{\"key\": \"value\"}"));
     }
 
     @Test
-    public void shouldUpsertNonExistentPayout(){
-        var createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+    public void shouldUpsertNonExistentPayout() {
+        var createdDate = now(UTC);
         var paidOutDate = createdDate.minusDays(1);
 
         var payoutEntity = aPayoutEntity()
@@ -64,6 +65,7 @@ public class PayoutDaoIT {
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withPaidOutDate(paidOutDate)
                 .withState(PayoutState.IN_TRANSIT)
+                .withCreatedDate(createdDate)
                 .withEventCount(1)
                 .withPayoutDetails("{\"key\": \"value\"}")
                 .build();
@@ -71,11 +73,11 @@ public class PayoutDaoIT {
         payoutDao.upsert(payoutEntity);
 
         var payout = payoutDao.findByGatewayPayoutId(gatewayPayoutId).get();
-        assertThat(payout.getId(), is(1L));
+        assertThat(payout.getId(), is(notNullValue()));
         assertThat(payout.getAmount(), is(100L));
         assertThat(payout.getGatewayPayoutId(), is(gatewayPayoutId));
         assertThat(payout.getState(), is(PayoutState.IN_TRANSIT));
-        assertThat(payout.getCreatedDate(), is(notNullValue()));
+        assertThat(payout.getCreatedDate(), is(createdDate));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));
         assertThat(payout.getEventCount(), is(1));
         assertThat(payout.getPayoutDetails(), is("{\"key\": \"value\"}"));
@@ -83,7 +85,7 @@ public class PayoutDaoIT {
 
     @Test
     public void shouldUpsertExistingPayout() {
-        var createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+        var createdDate = now(UTC);
         var paidOutDate = createdDate.minusDays(1);
 
         var payoutEntity = aPayoutEntity()
@@ -91,6 +93,7 @@ public class PayoutDaoIT {
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withPaidOutDate(paidOutDate)
                 .withState(PayoutState.IN_TRANSIT)
+                .withCreatedDate(createdDate)
                 .withEventCount(1)
                 .build();
 
@@ -101,6 +104,7 @@ public class PayoutDaoIT {
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withPaidOutDate(paidOutDate)
                 .withState(PayoutState.PAID_OUT)
+                .withCreatedDate(createdDate)
                 .withEventCount(2)
                 .build();
 
@@ -111,16 +115,18 @@ public class PayoutDaoIT {
         assertThat(payout.getAmount(), is(1337L));
         assertThat(payout.getGatewayPayoutId(), is(gatewayPayoutId));
         assertThat(payout.getState(), is(PayoutState.PAID_OUT));
-        assertThat(payout.getCreatedDate(), is(notNullValue()));
+        assertThat(payout.getCreatedDate(), is(createdDate));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));
     }
 
     @Test
     public void shouldNotUpsertPayoutIfPayoutConsistsOfFewerEvents() {
+        ZonedDateTime createdDate = now(UTC);
         var payoutEntity = aPayoutEntity()
                 .withAmount(100L)
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withState(PayoutState.IN_TRANSIT)
+                .withCreatedDate(createdDate)
                 .withEventCount(3)
                 .build();
 
@@ -130,6 +136,7 @@ public class PayoutDaoIT {
                 .withAmount(1337L)
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withState(PayoutState.PAID_OUT)
+                .withCreatedDate(createdDate)
                 .withEventCount(2)
                 .build();
 
