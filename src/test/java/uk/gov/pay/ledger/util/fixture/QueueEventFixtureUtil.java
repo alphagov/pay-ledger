@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class QueueEventFixtureUtil {
 
@@ -39,8 +40,10 @@ public class QueueEventFixtureUtil {
                                      String parentResourceExternalId, ResourceType resourceType, String eventData) {
         PactDslJsonBody eventDetails = new PactDslJsonBody();
 
+        DateTimeFormatter formatToMicroseconds = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSSSSX");
+
         eventDetails.stringType("event_type", eventType);
-        eventDetails.stringType("timestamp", eventDate.toString());
+        eventDetails.stringType("timestamp", eventDate.format(formatToMicroseconds));
         eventDetails.stringType("resource_external_id", resourceExternalId);
         eventDetails.stringType("resource_type", resourceType.toString().toLowerCase());
         if (parentResourceExternalId != null && !parentResourceExternalId.isEmpty()) {
