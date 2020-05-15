@@ -6,6 +6,8 @@ import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.time.ZonedDateTime;
 
+import static java.time.ZoneOffset.UTC;
+import static java.time.ZonedDateTime.now;
 import static uk.gov.pay.ledger.payout.entity.PayoutEntity.PayoutEntityBuilder.aPayoutEntity;
 
 public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
@@ -13,7 +15,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
     private Long id;
     private String gatewayPayoutId;
     private Long amount;
-    private ZonedDateTime createdDate;
+    private ZonedDateTime createdDate = now(UTC);
     private ZonedDateTime paidOutDate;
     private PayoutState state;
     private Integer eventCount;

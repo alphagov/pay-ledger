@@ -14,20 +14,22 @@ public class PayoutDao {
 
     private final String UPSERT_PAYOUT = "INSERT INTO payout " +
             "(" +
-            "gateway_payout_id,\n" +
-            "amount,\n" +
-            "paid_out_date,\n" +
-            "state,\n" +
-            "event_count,\n" +
-            "payout_details\n" +
-            ")\n " +
+            "gateway_payout_id," +
+            "amount," +
+            "paid_out_date," +
+            "state," +
+            "event_count," +
+            "payout_details," +
+            "created_date" +
+            ") " +
             "VALUES (" +
-            ":gateway_payout_id, " +
+            ":gatewayPayoutId, " +
             ":amount, " +
-            ":paid_out_date, " +
+            ":paidOutDate, " +
             ":state, " +
-            ":event_count, " +
-            "CAST(:payout_details as jsonb) " +
+            ":eventCount, " +
+            "CAST(:payoutDetails as jsonb), " +
+            ":createdDate " +
             ") " +
             "ON CONFLICT (gateway_payout_id) DO UPDATE SET " +
             "gateway_payout_id = EXCLUDED.gateway_payout_id, " +
@@ -35,7 +37,8 @@ public class PayoutDao {
             "paid_out_date = EXCLUDED.paid_out_date, " +
             "state = EXCLUDED.state, " +
             "event_count = EXCLUDED.event_count, " +
-            "payout_details = EXCLUDED.payout_details " +
+            "payout_details = EXCLUDED.payout_details, " +
+            "created_date = EXCLUDED.created_date " +
             "WHERE EXCLUDED.event_count >= payout.event_count";
 
     private Jdbi jdbi;
@@ -55,12 +58,7 @@ public class PayoutDao {
     public void upsert(PayoutEntity payout) {
         jdbi.withHandle(handle ->
                 handle.createUpdate(UPSERT_PAYOUT)
-                        .bind("gateway_payout_id", payout.getGatewayPayoutId())
-                        .bind("amount", payout.getAmount())
-                        .bind("paid_out_date", payout.getPaidOutDate())
-                        .bind("state", payout.getState())
-                        .bind("event_count", payout.getEventCount())
-                        .bind("payout_details", payout.getPayoutDetails())
+                        .bindBean(payout)
                         .execute());
     }
 
