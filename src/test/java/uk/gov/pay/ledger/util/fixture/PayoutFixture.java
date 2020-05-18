@@ -1,5 +1,7 @@
 package uk.gov.pay.ledger.util.fixture;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.payout.state.PayoutState;
@@ -61,15 +63,15 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
     }
 
     public static final class PayoutFixtureBuilder {
-        private Long id;
-        private String gatewayPayoutId;
-        private Long amount;
-        private ZonedDateTime createdDate;
+        private Long id = RandomUtils.nextLong(1, 99999);
+        private String gatewayPayoutId = RandomStringUtils.randomAlphanumeric(10);
+        private Long amount = 1000L;
+        private ZonedDateTime createdDate = now(UTC);
         private ZonedDateTime paidOutDate;
-        private PayoutState state;
-        private Integer eventCount;
-        private String payoutDetails;
-        private String gatewayAccountId;
+        private PayoutState state = PayoutState.IN_TRANSIT;
+        private Integer eventCount = 1;
+        private String payoutDetails = "{}";
+        private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
 
         private PayoutFixtureBuilder() {
         }

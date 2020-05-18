@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.transaction.search.common;
 
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;

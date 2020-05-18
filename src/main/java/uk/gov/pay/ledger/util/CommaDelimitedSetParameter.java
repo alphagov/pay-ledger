@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.transaction.search.common;
+package uk.gov.pay.ledger.util;
 
 import java.util.ArrayList;
 import java.util.List;
