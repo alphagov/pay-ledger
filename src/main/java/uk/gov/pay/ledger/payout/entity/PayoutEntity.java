@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import uk.gov.pay.ledger.event.model.serializer.MicrosecondPrecisionDateTimeDeserializer;
-import uk.gov.pay.ledger.event.model.serializer.MicrosecondPrecisionDateTimeSerializer;
+import uk.gov.pay.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
+import uk.gov.pay.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
 import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.time.ZonedDateTime;

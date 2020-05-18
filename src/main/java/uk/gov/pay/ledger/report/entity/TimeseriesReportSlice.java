@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.report.entity;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import uk.gov.pay.ledger.event.model.serializer.MicrosecondPrecisionDateTimeSerializer;
+import uk.gov.pay.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
 
 import java.time.ZonedDateTime;
 
