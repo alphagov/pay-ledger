@@ -28,6 +28,7 @@ public class PayoutEntity {
     private PayoutState state;
     private Integer eventCount;
     private String payoutDetails;
+    private String gatewayAccountId;
 
     public PayoutEntity() {
     }
@@ -41,6 +42,7 @@ public class PayoutEntity {
         this.state = builder.state;
         this.eventCount = builder.eventCount;
         this.payoutDetails = builder.payoutDetails;
+        this.gatewayAccountId = builder.gatewayAccountId;
     }
 
     public Long getId() {
@@ -75,6 +77,10 @@ public class PayoutEntity {
         return payoutDetails;
     }
 
+    public String getGatewayAccountId() {
+        return gatewayAccountId;
+    }
+
     public void setGatewayPayoutId(String gatewayPayoutId) {
         this.gatewayPayoutId = gatewayPayoutId;
     }
@@ -103,6 +109,11 @@ public class PayoutEntity {
         this.eventCount = eventCount;
     }
 
+    public PayoutEntity setGatewayAccountId(String gatewayAccountId) {
+        this.gatewayAccountId = gatewayAccountId;
+        return this;
+    }
+
     public static final class PayoutEntityBuilder {
         private Long id;
         private String gatewayPayoutId;
@@ -112,6 +123,7 @@ public class PayoutEntity {
         private PayoutState state;
         private Integer eventCount;
         private String payoutDetails;
+        private String gatewayAccountId;
 
         private PayoutEntityBuilder() {
         }
@@ -152,6 +164,11 @@ public class PayoutEntity {
 
         public PayoutEntityBuilder withEventCount(Integer eventCount) {
             this.eventCount = eventCount;
+            return this;
+        }
+
+        public PayoutEntityBuilder withGatewayAccountId(String gatewayAccountId) {
+            this.gatewayAccountId = gatewayAccountId;
             return this;
         }
 
