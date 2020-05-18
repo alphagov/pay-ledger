@@ -24,7 +24,8 @@ public class PayoutMapper implements RowMapper<PayoutEntity> {
                .withCreatedDate(getZonedDateTime(rs, "created_date").orElse(null))
                .withPaidOutDate(getZonedDateTime(rs, "paid_out_date").orElse(null))
                .withEventCount(rs.getInt("event_count"))
-               .withPayoutDetails(rs.getString("payout_details"));
+               .withPayoutDetails(rs.getString("payout_details"))
+               .withGatewayAccountId(rs.getString("gateway_account_id"));
         return builder.build();
     }
 

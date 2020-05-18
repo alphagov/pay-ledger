@@ -20,6 +20,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
     private PayoutState state;
     private Integer eventCount;
     private String payoutDetails;
+    private String gatewayAccountId;
 
     @Override
     public PayoutFixture insert(Jdbi jdbi) {
@@ -34,11 +35,12 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                                 "   paid_out_date,\n" +
                                 "   state,\n" +
                                 "   event_count,\n" +
-                                "   payout_details\n" +
+                                "   payout_details,\n" +
+                                "   gateway_account_id\n" +
                                 " )\n" +
-                                " VALUES (?,?,?,?,?,?,?,CAST(? as jsonb))",
+                                " VALUES (?,?,?,?,?,?,?,CAST(? as jsonb),?)",
                         id, gatewayPayoutId, amount, createdDate, paidOutDate,
-                        state, eventCount, payoutDetails
+                        state, eventCount, payoutDetails, gatewayAccountId
                 ));
         return this;
     }
@@ -54,6 +56,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                 .withState(state)
                 .withEventCount(eventCount)
                 .withPayoutDetails(payoutDetails)
+                .withGatewayAccountId(gatewayAccountId)
                 .build();
     }
 
@@ -66,6 +69,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
         private PayoutState state;
         private Integer eventCount;
         private String payoutDetails;
+        private String gatewayAccountId;
 
         private PayoutFixtureBuilder() {
         }
@@ -108,8 +112,14 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             this.eventCount = eventCount;
             return this;
         }
+
         public PayoutFixtureBuilder withPayoutDetails(String payoutDetails) {
             this.payoutDetails = payoutDetails;
+            return this;
+        }
+
+        public PayoutFixtureBuilder withGatewayAccountId(String gatewayAccountId) {
+            this.gatewayAccountId = gatewayAccountId;
             return this;
         }
         public PayoutFixture build() {
@@ -122,6 +132,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             payoutFixture.paidOutDate = this.paidOutDate;
             payoutFixture.eventCount = this.eventCount;
             payoutFixture.payoutDetails = this.payoutDetails;
+            payoutFixture.gatewayAccountId = this.gatewayAccountId;
             return payoutFixture;
         }
     }

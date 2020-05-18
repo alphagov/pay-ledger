@@ -20,7 +20,8 @@ public class PayoutDao {
             "state," +
             "event_count," +
             "payout_details," +
-            "created_date" +
+            "created_date," +
+            "gateway_account_id" +
             ") " +
             "VALUES (" +
             ":gatewayPayoutId, " +
@@ -29,7 +30,8 @@ public class PayoutDao {
             ":state, " +
             ":eventCount, " +
             "CAST(:payoutDetails as jsonb), " +
-            ":createdDate " +
+            ":createdDate, " +
+            ":gatewayAccountId " +
             ") " +
             "ON CONFLICT (gateway_payout_id) DO UPDATE SET " +
             "gateway_payout_id = EXCLUDED.gateway_payout_id, " +
@@ -38,7 +40,8 @@ public class PayoutDao {
             "state = EXCLUDED.state, " +
             "event_count = EXCLUDED.event_count, " +
             "payout_details = EXCLUDED.payout_details, " +
-            "created_date = EXCLUDED.created_date " +
+            "created_date = EXCLUDED.created_date, " +
+            "gateway_account_id = EXCLUDED.gateway_account_id " +
             "WHERE EXCLUDED.event_count >= payout.event_count";
 
     private Jdbi jdbi;
