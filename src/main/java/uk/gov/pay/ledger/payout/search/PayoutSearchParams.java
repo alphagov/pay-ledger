@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.payout.search;
 
+import uk.gov.pay.ledger.common.search.SearchParams;
 import uk.gov.pay.ledger.payout.state.PayoutState;
 import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
@@ -14,25 +15,26 @@ import java.util.stream.Collectors;
 
 import static uk.gov.pay.ledger.payout.state.PayoutState.from;
 
-public class PayoutSearchParams {
+public class PayoutSearchParams extends SearchParams {
 
     private static final String GATEWAY_ACCOUNT_ID_FIELD = "gateway_account_id";
     private static final String STATE_FIELD = "state";
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
+    private static final long DEFAULT_DISPLAY_SIZE = 20L;
 
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
-    private List<String> accountIds;
+    private List<String> gatewayAccountIds;
     @QueryParam("payout_states")
     private CommaDelimitedSetParameter payoutStates;
     @DefaultValue("true")
     private Long pageNumber = 1L;
-    private Long displaySize = DEFAULT_MAX_DISPLAY_SIZE;
+    private Long displaySize = DEFAULT_DISPLAY_SIZE;
     private Map<String, Object> queryMap;
 
-    public void setAccountIds(List<String> accountIds) {
-        this.accountIds = List.copyOf(accountIds);
+    public void setGatewayAccountIds(List<String> gatewayAccountIds) {
+        this.gatewayAccountIds = List.copyOf(gatewayAccountIds);
     }
 
     public void setPayoutStates(CommaDelimitedSetParameter payoutStates) {
@@ -52,7 +54,7 @@ public class PayoutSearchParams {
     public List<String> getFilterTemplates() {
         List<String> filters = new ArrayList<>();
 
-        if (accountIds != null && !accountIds.isEmpty()) {
+        if (gatewayAccountIds != null && !gatewayAccountIds.isEmpty()) {
             filters.add(" p.gateway_account_id IN (<" + GATEWAY_ACCOUNT_ID_FIELD + ">)");
         }
 
@@ -66,8 +68,8 @@ public class PayoutSearchParams {
         if (queryMap == null) {
             queryMap = new HashMap<>();
 
-            if (accountIds != null && !accountIds.isEmpty()) {
-                queryMap.put(GATEWAY_ACCOUNT_ID_FIELD, accountIds);
+            if (gatewayAccountIds != null && !gatewayAccountIds.isEmpty()) {
+                queryMap.put(GATEWAY_ACCOUNT_ID_FIELD, gatewayAccountIds);
             }
 
             if (isSet(payoutStates)) {
@@ -77,18 +79,20 @@ public class PayoutSearchParams {
         return queryMap;
     }
 
-    public List<String> getAccountIds() {
-        return accountIds;
+    public List<String> getGatewayAccountIds() {
+        return gatewayAccountIds;
     }
 
     public CommaDelimitedSetParameter getPayoutStates() {
         return payoutStates;
     }
 
+    @Override
     public Long getPageNumber() {
         return pageNumber;
     }
 
+    @Override
     public Long getDisplaySize() {
         if (this.displaySize > this.maxDisplaySize) {
             return this.maxDisplaySize;
@@ -107,8 +111,22 @@ public class PayoutSearchParams {
         return offset;
     }
 
-    private boolean isSet(CommaDelimitedSetParameter commaDelimitedSetParameter) {
-        return commaDelimitedSetParameter != null && commaDelimitedSetParameter.isNotEmpty();
+    @Override
+    public String buildQueryParamString(Long forPage) {
+        List<String> queries = new ArrayList<>();
+
+        if (gatewayAccountIds != null && !gatewayAccountIds.isEmpty()) {
+            queries.add(GATEWAY_ACCOUNT_ID_FIELD + "=" + String.join(",", gatewayAccountIds));
+        }
+
+        if (isSet(payoutStates)) {
+            queries.add(STATE_FIELD + "=" + payoutStates.getRawString());
+        }
+
+        queries.add("page=" + forPage);
+        queries.add("display_size=" + getDisplaySize());
+
+        return String.join("&", queries);
     }
 
     private List<String> getPayoutStatesForStatuses(CommaDelimitedSetParameter payoutStates) {

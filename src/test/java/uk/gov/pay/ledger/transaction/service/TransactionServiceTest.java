@@ -23,7 +23,7 @@ import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
-import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
+import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.EventFixture;

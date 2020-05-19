@@ -63,7 +63,7 @@ public class PayoutDaoSearchIT {
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        searchParams.setAccountIds(List.of(payoutEntity2.getGatewayAccountId()));
+        searchParams.setGatewayAccountIds(List.of(payoutEntity2.getGatewayAccountId()));
 
         List<PayoutEntity> payoutList = payoutDao.searchPayouts(searchParams);
         assertThat(payoutList.size(), is(1));
@@ -108,7 +108,7 @@ public class PayoutDaoSearchIT {
                     .insert(rule.getJdbi());
         }
 
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setGatewayAccountIds(List.of(gatewayAccountId));
         searchParams.setDisplaySize(10L);
 
         searchParams.setPayoutStates(new CommaDelimitedSetParameter(PayoutState.IN_TRANSIT.name()));
@@ -131,7 +131,7 @@ public class PayoutDaoSearchIT {
                     .insert(rule.getJdbi());
         }
 
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setGatewayAccountIds(List.of(gatewayAccountId));
         searchParams.setDisplaySize(10L);
         searchParams.setPageNumber(2l);
 
@@ -179,7 +179,7 @@ public class PayoutDaoSearchIT {
                     .insert(rule.getJdbi());
         }
 
-        searchParams.setAccountIds(List.of(gatewayAccountId1, gatewayAccountId4));
+        searchParams.setGatewayAccountIds(List.of(gatewayAccountId1, gatewayAccountId4));
         List<PayoutEntity> payoutList = payoutDao.searchPayouts(searchParams);
         assertThat(payoutList.size(), is(10));
         assertThat(payoutList.get(0).getGatewayAccountId(), is(gatewayAccountId4));

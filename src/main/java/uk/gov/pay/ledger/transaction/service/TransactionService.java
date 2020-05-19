@@ -19,7 +19,7 @@ import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
-import uk.gov.pay.ledger.transaction.search.model.PaginationBuilder;
+import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
 import javax.ws.rs.WebApplicationException;
