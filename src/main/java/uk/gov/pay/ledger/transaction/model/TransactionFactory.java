@@ -95,7 +95,8 @@ public class TransactionFactory {
                     entity.isMoto(),
                     entity.isLive(),
                     entity.getSource(),
-                    safeGetAsString(transactionDetails, "wallet")
+                    safeGetAsString(transactionDetails, "wallet"),
+                    entity.getGatewayPayoutId()
             );
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
@@ -124,6 +125,7 @@ public class TransactionFactory {
                     .withRefundedByUserEmail(safeGetAsString(transactionDetails, "user_email"))
                     .withParentExternalId(entity.getParentExternalId())
                     .withParentTransaction(parentTransaction)
+                    .withGatewayPayoutId(entity.getGatewayPayoutId())
                     .build();
 
         } catch (IOException e) {
