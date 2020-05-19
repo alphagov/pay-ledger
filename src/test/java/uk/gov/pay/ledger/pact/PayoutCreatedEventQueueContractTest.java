@@ -71,6 +71,7 @@ public class PayoutCreatedEventQueueContractTest {
         assertThat(payoutEntity.isPresent(), is(true));
         assertThat(payoutEntity.get().getCreatedDate().toString(), is("2020-05-13T18:45Z"));
         assertThat(payoutEntity.get().getGatewayPayoutId(), is(gatewayPayoutId));
+        assertThat(payoutEntity.get().getGatewayAccountId(), is("123456789"));
         assertThat(payoutEntity.get().getAmount(), is(1000L));
         assertThat(payoutEntity.get().getState(), is(IN_TRANSIT));
 

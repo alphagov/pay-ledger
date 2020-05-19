@@ -43,6 +43,7 @@ public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFix
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
                                 .put("amount", 1000)
+                                .put("gateway_account_id", "123456789")
                                 .put("estimated_arrival_date_in_bank", "2020-05-13T18:45:33.000000Z")
                                 .put("gateway_status", "pending")
                                 .put("destination_type", "bank_account")
