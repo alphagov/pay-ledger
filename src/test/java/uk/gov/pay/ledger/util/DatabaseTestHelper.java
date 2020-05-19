@@ -38,6 +38,10 @@ public class DatabaseTestHelper {
         ).execute());
     }
 
+    public void truncateAllPayoutData() {
+        jdbi.withHandle(handle -> handle.createScript("TRUNCATE TABLE payout CASCADE").execute());
+    }
+
     public int getEventsCountByExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle

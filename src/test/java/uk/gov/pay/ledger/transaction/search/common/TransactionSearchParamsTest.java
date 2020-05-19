@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.search.common;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
+import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
 import java.util.List;
 
