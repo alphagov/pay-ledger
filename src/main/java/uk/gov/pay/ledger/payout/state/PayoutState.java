@@ -54,4 +54,12 @@ public enum PayoutState {
                     return null;
                 });
     }
+
+    public static PayoutState fromState(String payoutState) {
+        return stream(values()).filter(v -> v.getStatus().equals(payoutState)).findFirst()
+                .orElseGet(() -> {
+                    LOGGER.warn("Unknown payout state {}", payoutState);
+                    return null;
+                });
+    }
 }

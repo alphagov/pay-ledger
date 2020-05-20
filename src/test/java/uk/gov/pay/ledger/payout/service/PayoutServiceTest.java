@@ -48,15 +48,15 @@ public class PayoutServiceTest {
 
     @Test
     public void shouldReturnAPaginatedPayoutSearchResponse() {
+        List<String> gatewayAccountIds = List.of(gatewayAccountId);
         searchParams = new PayoutSearchParams();
         searchParams.setPageNumber(1L);
-        searchParams.setGatewayAccountIds(List.of(gatewayAccountId));
 
         List<PayoutEntity> entityList = aPayoutList(gatewayAccountId, 10);
         when(mockPayoutDao.searchPayouts(searchParams)).thenReturn(entityList);
         when(mockPayoutDao.getTotalForSearch(searchParams)).thenReturn(10L);
 
-        PayoutSearchResponse response = payoutService.searchPayouts(searchParams, mockUriInfo);
+        PayoutSearchResponse response = payoutService.searchPayouts(gatewayAccountIds, searchParams, mockUriInfo);
         assertThat(response.getTotal(), is(10L));
         assertThat(response.getCount(), is(10L));
         assertThat(response.getPage(), is(1L));
@@ -78,23 +78,23 @@ public class PayoutServiceTest {
         when(mockPayoutDao.getTotalForSearch(searchParams)).thenReturn(10L);
 
         thrown.expect(WebApplicationException.class);
-        thrown.expectMessage("the requested page not found");
+        thrown.expectMessage("The requested page was not found");
 
         PayoutSearchResponse response = payoutService.searchPayouts(searchParams, mockUriInfo);
     }
 
     @Test
     public void shouldReturnAPaginatedPayoutSearchResponse_withNextLink() {
+        List<String> gatewayAccountIds = List.of(gatewayAccountId);
         searchParams = new PayoutSearchParams();
         searchParams.setPageNumber(1L);
-        searchParams.setGatewayAccountIds(List.of(gatewayAccountId));
         searchParams.setDisplaySize(5L);
 
         List<PayoutEntity> entityList = aPayoutList(gatewayAccountId, 10);
         when(mockPayoutDao.searchPayouts(searchParams)).thenReturn(entityList);
         when(mockPayoutDao.getTotalForSearch(searchParams)).thenReturn(10L);
 
-        PayoutSearchResponse response = payoutService.searchPayouts(searchParams, mockUriInfo);
+        PayoutSearchResponse response = payoutService.searchPayouts(gatewayAccountIds, searchParams, mockUriInfo);
 
         assertThat(response.getTotal(), is(10L));
         assertThat(response.getCount(), is(10L));
@@ -111,16 +111,16 @@ public class PayoutServiceTest {
     @Test
     public void shouldReturnAPaginatedPayoutSearchResponse_withMultipleGatewayAccounts() {
         String gatewayAccountId2 = "12346";
+        List<String> gatewayAccountIds = List.of(gatewayAccountId, gatewayAccountId2);
         searchParams = new PayoutSearchParams();
         searchParams.setPageNumber(1L);
-        searchParams.setGatewayAccountIds(List.of(gatewayAccountId, gatewayAccountId2));
         searchParams.setDisplaySize(14L);
 
         List<PayoutEntity> entityList = aPayoutList(gatewayAccountId, 10);
         entityList.addAll(aPayoutList(gatewayAccountId2, 5));
         when(mockPayoutDao.searchPayouts(searchParams)).thenReturn(entityList);
         when(mockPayoutDao.getTotalForSearch(searchParams)).thenReturn(15L);
-        PayoutSearchResponse response = payoutService.searchPayouts(searchParams, mockUriInfo);
+        PayoutSearchResponse response = payoutService.searchPayouts(gatewayAccountIds, searchParams, mockUriInfo);
 
         assertThat(response.getPayoutViewList().size(), is(15));
 

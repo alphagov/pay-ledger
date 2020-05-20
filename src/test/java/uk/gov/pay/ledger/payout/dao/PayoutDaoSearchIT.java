@@ -8,7 +8,6 @@ import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.payout.search.PayoutSearchParams;
 import uk.gov.pay.ledger.payout.state.PayoutState;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
-import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.util.List;
@@ -90,7 +89,7 @@ public class PayoutDaoSearchIT {
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        searchParams.setPayoutStates(new CommaDelimitedSetParameter(PayoutState.IN_TRANSIT.name()));
+        searchParams.setState(PayoutState.IN_TRANSIT.getStatus());
 
         List<PayoutEntity> payoutList = payoutDao.searchPayouts(searchParams);
         assertThat(payoutList.size(), is(1));
@@ -111,7 +110,7 @@ public class PayoutDaoSearchIT {
         searchParams.setGatewayAccountIds(List.of(gatewayAccountId));
         searchParams.setDisplaySize(10L);
 
-        searchParams.setPayoutStates(new CommaDelimitedSetParameter(PayoutState.IN_TRANSIT.name()));
+        searchParams.setState(PayoutState.PAID_OUT.getStatus());
 
         List<PayoutEntity> payoutList = payoutDao.searchPayouts(searchParams);
         assertThat(payoutList.size(), is(10));
@@ -135,7 +134,7 @@ public class PayoutDaoSearchIT {
         searchParams.setDisplaySize(10L);
         searchParams.setPageNumber(2l);
 
-        searchParams.setPayoutStates(new CommaDelimitedSetParameter(PayoutState.IN_TRANSIT.name()));
+        searchParams.setState(PayoutState.PAID_OUT.getStatus());
 
         List<PayoutEntity> payoutList = payoutDao.searchPayouts(searchParams);
         assertThat(payoutList.size(), is(5));

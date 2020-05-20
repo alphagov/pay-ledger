@@ -20,6 +20,7 @@ import uk.gov.pay.ledger.filters.LoggingMDCResponseFilter;
 import uk.gov.pay.ledger.healthcheck.DependentResourceWaitCommand;
 import uk.gov.pay.ledger.healthcheck.HealthCheckResource;
 import uk.gov.pay.ledger.healthcheck.SQSHealthCheck;
+import uk.gov.pay.ledger.payout.resource.PayoutResource;
 import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
 import uk.gov.pay.ledger.report.resource.PerformanceReportResource;
 import uk.gov.pay.ledger.report.resource.ReportResource;
@@ -82,6 +83,8 @@ public class LedgerApp extends Application<LedgerConfig> {
         if(config.getQueueMessageReceiverConfig().isBackgroundProcessingEnabled()) {
             environment.lifecycle().manage(injector.getInstance(QueueMessageReceiver.class));
         }
+
+        environment.jersey().register(injector.getInstance(PayoutResource.class));
     }
 
 }
