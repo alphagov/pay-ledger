@@ -47,6 +47,7 @@ public class TransactionEntity {
     private TransactionEntity parentTransactionEntity;
     private String gatewayTransactionId;
     private Source source;
+    private String gatewayPayoutId;
 
     public TransactionEntity() {
     }
@@ -80,6 +81,7 @@ public class TransactionEntity {
         this.moto = builder.moto;
         this.gatewayTransactionId = builder.gatewayTransactionId;
         this.source = builder.source;
+        this.gatewayPayoutId = builder.gatewayPayoutId;
     }
 
     public Long getId() {
@@ -222,6 +224,10 @@ public class TransactionEntity {
         return source;
     }
 
+    public String getGatewayPayoutId() {
+        return gatewayPayoutId;
+    }
+
     public static class Builder {
         private Long fee;
         private Long id;
@@ -251,6 +257,7 @@ public class TransactionEntity {
         private Source source;
         private String gatewayTransactionId;
         private boolean moto;
+        private String gatewayPayoutId;
 
         public Builder() {
         }
@@ -396,6 +403,11 @@ public class TransactionEntity {
 
         public Builder withMoto(boolean moto) {
             this.moto = moto;
+            return this;
+        }
+
+        public Builder withGatewayPayoutId(String gatewayPayoutId) {
+            this.gatewayPayoutId = gatewayPayoutId;
             return this;
         }
     }

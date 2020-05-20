@@ -43,6 +43,7 @@ public class TransactionWithParentMapper implements RowMapper<TransactionEntity>
                 .withTransactionType(rs.getString("parent_type"))
                 .withLive(rs.getBoolean("live"))
                 .withMoto(rs.getBoolean("parent_moto"))
+                .withGatewayPayoutId(rs.getString("parent_gateway_payout_id"))
                 .build();
 
         return new TransactionEntity.Builder()
@@ -71,6 +72,7 @@ public class TransactionWithParentMapper implements RowMapper<TransactionEntity>
                 .withTransactionType(rs.getString("type"))
                 .withLive(rs.getBoolean("live"))
                 .withMoto(rs.getBoolean("moto"))
+                .withGatewayPayoutId("gateway_payout_id")
                 .withParentTransactionEntity(parentTransactionEntity)
                 .build();
     }

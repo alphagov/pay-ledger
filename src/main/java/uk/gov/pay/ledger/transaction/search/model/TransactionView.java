@@ -58,6 +58,7 @@ public class TransactionView {
     private Boolean live;
     private Source source;
     private String walletType;
+    private String gatewayPayoutId;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -91,6 +92,7 @@ public class TransactionView {
         this.live = builder.live;
         this.source = builder.source;
         this.walletType = builder.walletType;
+        this.gatewayPayoutId = builder.gatewayPayoutId;
     }
 
     public TransactionView() {
@@ -129,6 +131,7 @@ public class TransactionView {
                     .withLive(payment.isLive())
                     .withSource(payment.getSource())
                     .withWalletType(payment.getWalletType())
+                    .withGatewayPayoutId(payment.getGatewayPayoutId())
                     .build();
         }
 
@@ -147,6 +150,7 @@ public class TransactionView {
                 .withRefundedByUserEmail(refund.getRefundedByUserEmail())
                 .withTransactionType(refund.getTransactionType())
                 .withParentTransaction(refund.getParentTransaction().map(parentTransaction -> from(parentTransaction, statusVersion)).orElse(null))
+                .withGatewayPayoutId(refund.getGatewayPayoutId())
                 .build();
     }
 
@@ -289,8 +293,11 @@ public class TransactionView {
         return walletType;
     }
 
+    public String getGatewayPayoutId() {
+        return gatewayPayoutId;
+    }
+
     public static class Builder {
-        public String walletType;
         private TransactionView parentTransaction;
         private Long id;
         private String gatewayAccountId;
@@ -322,6 +329,8 @@ public class TransactionView {
         private Boolean moto;
         private Boolean live;
         private Source source;
+        private String walletType;
+        private String gatewayPayoutId;
 
         public Builder() {
         }
@@ -482,6 +491,11 @@ public class TransactionView {
 
         public Builder withWalletType(String walletType) {
             this.walletType = walletType;
+            return this;
+        }
+
+        public Builder withGatewayPayoutId(String gatewayPayoutId) {
+            this.gatewayPayoutId = gatewayPayoutId;
             return this;
         }
     }
