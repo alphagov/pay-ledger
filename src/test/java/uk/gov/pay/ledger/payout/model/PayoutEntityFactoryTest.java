@@ -74,7 +74,7 @@ public class PayoutEntityFactoryTest {
     @Test
     public void shouldDigestStateFromEvents() {
         Event payoutCreatedEvent = aQueuePaymentEventFixture().withEventType("PAYOUT_CREATED").toEntity();
-        Event payoutPaidOutEvent = aQueuePaymentEventFixture().withEventType("PAYOUT_PAID_OUT").toEntity();
+        Event payoutPaidOutEvent = aQueuePaymentEventFixture().withEventType("PAYOUT_PAID").toEntity();
         EventDigest eventDigest = EventDigest.fromEventList(List.of(payoutPaidOutEvent, payoutCreatedEvent));
         PayoutEntity payoutEntity = payoutEntityFactory.create(eventDigest);
 

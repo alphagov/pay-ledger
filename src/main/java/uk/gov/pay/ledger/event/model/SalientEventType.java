@@ -47,10 +47,8 @@ public enum SalientEventType {
     REFUND_STATUS_CORRECTED_TO_ERROR_BY_ADMIN,
 
     PAYOUT_CREATED,
-    PAYOUT_PAID_OUT,
-    PAYOUT_BANK_DECLINED,
-    PAYOUT_INSUFFICIENT_FUNDS,
-    PAYOUT_FAILED_UNKNOWN;
+    PAYOUT_PAID,
+    PAYOUT_FAILED;
 
     public static Optional<SalientEventType> from(String eventName) {
         return Arrays.stream(SalientEventType.values())
