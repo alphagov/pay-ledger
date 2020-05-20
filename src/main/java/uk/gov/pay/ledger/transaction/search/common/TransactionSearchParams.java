@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
+import uk.gov.pay.ledger.common.search.SearchParams;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class TransactionSearchParams {
+public class TransactionSearchParams extends SearchParams {
 
     private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "account_id";
     private static final String CARDHOLDER_NAME_FIELD = "cardholder_name";
@@ -314,10 +315,12 @@ public class TransactionSearchParams {
         return accountIds;
     }
 
+    @Override
     public Long getPageNumber() {
         return pageNumber;
     }
 
+    @Override
     public Long getDisplaySize() {
         if (this.displaySize > this.maxDisplaySize) {
             return this.maxDisplaySize;
@@ -346,6 +349,7 @@ public class TransactionSearchParams {
         return withParentTransaction;
     }
 
+    @Override
     public String buildQueryParamString(Long forPage) {
         List<String> queries = new ArrayList<>();
 
@@ -435,10 +439,6 @@ public class TransactionSearchParams {
 
     private String likeClause(String rawUserInputText) {
         return "%" + rawUserInputText + "%";
-    }
-
-    private boolean isSet(CommaDelimitedSetParameter commaDelimitedSetParameter) {
-        return commaDelimitedSetParameter != null && commaDelimitedSetParameter.isNotEmpty();
     }
 
     public void setExactReferenceMatch(boolean exactReferenceMatch) {

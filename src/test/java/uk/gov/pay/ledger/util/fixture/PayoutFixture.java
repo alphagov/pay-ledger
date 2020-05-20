@@ -7,10 +7,13 @@ import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.now;
 import static uk.gov.pay.ledger.payout.entity.PayoutEntity.PayoutEntityBuilder.aPayoutEntity;
+import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 
 public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
 
@@ -60,6 +63,18 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                 .withPayoutDetails(payoutDetails)
                 .withGatewayAccountId(gatewayAccountId)
                 .build();
+    }
+
+    public static List<PayoutEntity> aPayoutList(String gatewayAccountId, int noOfPayouts) {
+        List<PayoutEntity> payoutEntityList = new ArrayList<>();
+
+        for (int i = 0; i < noOfPayouts; i++) {
+            payoutEntityList.add(aPayoutFixture()
+                    .withGatewayAccountId(gatewayAccountId)
+                    .build()
+                    .toEntity());
+        }
+        return payoutEntityList;
     }
 
     public static final class PayoutFixtureBuilder {

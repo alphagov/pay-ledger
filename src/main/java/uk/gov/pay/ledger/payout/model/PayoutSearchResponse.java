@@ -1,12 +1,11 @@
-package uk.gov.pay.ledger.transaction.model;
+package uk.gov.pay.ledger.payout.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
-import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
 import java.util.List;
 
-public class TransactionSearchResponse {
+public class PayoutSearchResponse {
 
     @JsonProperty("total")
     private Long total;
@@ -15,19 +14,19 @@ public class TransactionSearchResponse {
     @JsonProperty("page")
     private long page;
     @JsonProperty("results")
-    List<TransactionView> transactionViewList;
+    List<PayoutView> payoutViewList;
     @JsonProperty("_links")
     private PaginationBuilder paginationBuilder;
 
-    public TransactionSearchResponse(Long total, Long count, Long page,
-                                     List<TransactionView> transactionViewList) {
+    public PayoutSearchResponse(Long total, long count, long page,
+                                List<PayoutView> payoutViewList) {
         this.total = total;
         this.count = count;
         this.page = page;
-        this.transactionViewList = transactionViewList;
+        this.payoutViewList = payoutViewList;
     }
 
-    public TransactionSearchResponse withPaginationBuilder(PaginationBuilder paginationBuilder) {
+    public PayoutSearchResponse withPaginationBuilder(PaginationBuilder paginationBuilder) {
         this.paginationBuilder = paginationBuilder;
         return this;
     }
@@ -36,16 +35,16 @@ public class TransactionSearchResponse {
         return total;
     }
 
-    public Long getCount() {
+    public long getCount() {
         return count;
     }
 
-    public Long getPage() {
+    public long getPage() {
         return page;
     }
 
-    public List<TransactionView> getTransactionViewList() {
-        return transactionViewList;
+    public List<PayoutView> getPayoutViewList() {
+        return payoutViewList;
     }
 
     public PaginationBuilder getPaginationBuilder() {

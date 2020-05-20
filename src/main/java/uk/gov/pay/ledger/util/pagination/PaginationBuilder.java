@@ -1,9 +1,9 @@
-package uk.gov.pay.ledger.transaction.search.model;
+package uk.gov.pay.ledger.util.pagination;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
+import uk.gov.pay.ledger.common.search.SearchParams;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
@@ -18,7 +18,7 @@ public class PaginationBuilder {
     private static final String LAST_LINK = "last_page";
     private static final String PREV_LINK = "prev_page";
     private static final String NEXT_LINK = "next_page";
-    private TransactionSearchParams searchParams;
+    private SearchParams searchParams;
     private UriInfo uriInfo;
 
     @JsonIgnore
@@ -36,7 +36,7 @@ public class PaginationBuilder {
     @JsonProperty(NEXT_LINK)
     private PaginationLink nextLink;
 
-    public PaginationBuilder(TransactionSearchParams searchParams, UriInfo uriInfo) {
+    public PaginationBuilder(SearchParams searchParams, UriInfo uriInfo) {
         this.searchParams = searchParams;
         this.uriInfo = uriInfo;
         selfPageNum = searchParams.getPageNumber();

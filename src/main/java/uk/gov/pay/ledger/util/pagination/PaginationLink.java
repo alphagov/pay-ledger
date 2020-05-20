@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.transaction.search.model;
+package uk.gov.pay.ledger.util.pagination;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
