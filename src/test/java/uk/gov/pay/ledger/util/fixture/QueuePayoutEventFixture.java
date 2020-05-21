@@ -37,6 +37,11 @@ public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFix
         return this;
     }
 
+    public QueuePayoutEventFixture withEventType(String eventType) {
+        this.eventType = eventType;
+        return this;
+    }
+
     public QueuePayoutEventFixture withDefaultEventDataForEventType(String eventType) {
         switch (eventType) {
             case "PAYOUT_CREATED":
@@ -48,6 +53,28 @@ public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFix
                                 .put("gateway_status", "pending")
                                 .put("destination_type", "bank_account")
                                 .put("statement_descriptor", "SERVICE NAME")
+                                .build());
+                break;
+            case "PAYOUT_PAID":
+                eventData = new GsonBuilder().create()
+                        .toJson(ImmutableMap.builder()
+                                .put("paid_out_date", "2020-05-13T18:50:00.000000Z")
+                                .put("gateway_status", "paid")
+                                .build());
+                break;
+            case "PAYOUT_UPDATED":
+                eventData = new GsonBuilder().create()
+                        .toJson(ImmutableMap.builder()
+                                .put("gateway_status", "pending")
+                                .build());
+                break;
+            case "PAYOUT_FAILED":
+                eventData = new GsonBuilder().create()
+                        .toJson(ImmutableMap.builder()
+                                .put("gateway_status", "failed")
+                                .put("failure_code", "account_closed")
+                                .put("failure_message", "The bank account has been closed")
+                                .put("failure_balance_transaction", "ba_aaaaaaaaaa")
                                 .build());
                 break;
             default:
