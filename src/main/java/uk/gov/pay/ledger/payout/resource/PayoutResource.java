@@ -26,7 +26,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Produces(APPLICATION_JSON)
 public class PayoutResource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PayoutResource.class);
+    private static final String ACCOUNT_MANAGER_FIELD_NAME = "gateway_account_id";
     private PayoutService payoutService;
 
     @Inject
@@ -58,6 +58,6 @@ public class PayoutResource {
         return accountIdSupplierManager
                 .withSupplier(accountId -> payoutService.searchPayouts(gatewayAccountIds, transactionSearchParams, uriInfo))
                 .withPrivilegedSupplier(() -> payoutService.searchPayouts(transactionSearchParams, uriInfo))
-                .validateAndGet();
+                .validateAndGet(ACCOUNT_MANAGER_FIELD_NAME);
     }
 }
