@@ -77,13 +77,27 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
         return payoutEntityList;
     }
 
+    public static List<PayoutEntity> aPersistedPayoutList(String gatewayAccountId, int noOfPayouts, Jdbi jdbi) {
+        List<PayoutEntity> payoutEntityList = new ArrayList<>();
+        for (int i = 0; i < noOfPayouts; i++) {
+            PayoutEntity entity = aPayoutFixture()
+                    .withGatewayAccountId(gatewayAccountId)
+                    .build()
+                    .insert(jdbi)
+                    .toEntity();
+            payoutEntityList.add(entity);
+        }
+
+        return payoutEntityList;
+    }
+
     public static final class PayoutFixtureBuilder {
         private Long id = RandomUtils.nextLong(1, 99999);
         private String gatewayPayoutId = RandomStringUtils.randomAlphanumeric(10);
         private Long amount = 1000L;
-        private ZonedDateTime createdDate = now(UTC);
-        private ZonedDateTime paidOutDate;
-        private PayoutState state = PayoutState.IN_TRANSIT;
+        private ZonedDateTime createdDate = now(UTC).minusDays(1L);
+        private ZonedDateTime paidOutDate = now(UTC);
+        private PayoutState state = PayoutState.PAID_OUT;
         private Integer eventCount = 1;
         private String payoutDetails = "{}";
         private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);

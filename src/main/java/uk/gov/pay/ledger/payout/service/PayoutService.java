@@ -32,7 +32,11 @@ public class PayoutService {
         payoutDao.upsert(payoutEntity);
     }
 
-    public PayoutSearchResponse searchPayouts(PayoutSearchParams searchParams, UriInfo uriInfo) {
+    public PayoutSearchResponse searchPayouts(List<String> gatewayAccountIds, PayoutSearchParams searchParams, UriInfo uriInfo) {
+        if (!gatewayAccountIds.isEmpty()) {
+            searchParams.setGatewayAccountIds(gatewayAccountIds);
+        }
+
         List<PayoutView> payoutViewList = payoutDao.searchPayouts(searchParams)
                 .stream()
                 .map(PayoutView::from)
@@ -44,7 +48,7 @@ public class PayoutService {
         if (total > 0 && searchParams.getDisplaySize() > 0) {
             long lastPage = (total + size - 1) / size;
             if (searchParams.getPageNumber() > lastPage || searchParams.getPageNumber() < 1) {
-                throw new WebApplicationException("the requested page not found",
+                throw new WebApplicationException("The requested page was not found",
                         Response.Status.NOT_FOUND);
             }
         }
@@ -57,5 +61,9 @@ public class PayoutService {
         return new PayoutSearchResponse(total, payoutViewList.size(),
                 searchParams.getPageNumber(), payoutViewList)
                 .withPaginationBuilder(paginationBuilder);
+    }
+
+    public PayoutSearchResponse searchPayouts(PayoutSearchParams searchParams, UriInfo uriInfo) {
+        return searchPayouts(List.of(), searchParams, uriInfo);
     }
 }

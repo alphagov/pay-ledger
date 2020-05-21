@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.pay.ledger.payout.state.PayoutState.from;
 
 public class PayoutSearchParams extends SearchParams {
@@ -26,8 +27,8 @@ public class PayoutSearchParams extends SearchParams {
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
     private List<String> gatewayAccountIds;
-    @QueryParam("payout_states")
-    private CommaDelimitedSetParameter payoutStates;
+    @QueryParam("state")
+    private String state;
     @DefaultValue("true")
     private Long pageNumber = 1L;
     private Long displaySize = DEFAULT_DISPLAY_SIZE;
@@ -37,8 +38,8 @@ public class PayoutSearchParams extends SearchParams {
         this.gatewayAccountIds = List.copyOf(gatewayAccountIds);
     }
 
-    public void setPayoutStates(CommaDelimitedSetParameter payoutStates) {
-        this.payoutStates = payoutStates;
+    public void setState(String state) {
+        this.state = state;
     }
 
     @QueryParam("page")
@@ -46,8 +47,9 @@ public class PayoutSearchParams extends SearchParams {
         this.pageNumber = Objects.requireNonNullElse(pageNumber, DEFAULT_PAGE_NUMBER);
     }
 
+    @QueryParam("display_size")
     public PayoutSearchParams setDisplaySize(Long displaySize) {
-        this.displaySize = displaySize;
+        this.displaySize = Objects.requireNonNullElse(displaySize, DEFAULT_DISPLAY_SIZE);
         return this;
     }
 
@@ -58,8 +60,8 @@ public class PayoutSearchParams extends SearchParams {
             filters.add(" p.gateway_account_id IN (<" + GATEWAY_ACCOUNT_ID_FIELD + ">)");
         }
 
-        if (isSet(payoutStates)) {
-            filters.add(" (p.state IN (<" + STATE_FIELD + ">))");
+        if (isNotBlank(state)) {
+            filters.add(" p.state = :" + STATE_FIELD);
         }
         return List.copyOf(filters);
     }
@@ -72,8 +74,9 @@ public class PayoutSearchParams extends SearchParams {
                 queryMap.put(GATEWAY_ACCOUNT_ID_FIELD, gatewayAccountIds);
             }
 
-            if (isSet(payoutStates)) {
-                queryMap.put(STATE_FIELD, getPayoutStatesForStatuses(payoutStates));
+            if (isNotBlank(state)) {
+                queryMap.put(STATE_FIELD,
+                        PayoutState.fromState(state).name());
             }
         }
         return queryMap;
@@ -83,8 +86,8 @@ public class PayoutSearchParams extends SearchParams {
         return gatewayAccountIds;
     }
 
-    public CommaDelimitedSetParameter getPayoutStates() {
-        return payoutStates;
+    public String getState() {
+        return state;
     }
 
     @Override
@@ -119,20 +122,13 @@ public class PayoutSearchParams extends SearchParams {
             queries.add(GATEWAY_ACCOUNT_ID_FIELD + "=" + String.join(",", gatewayAccountIds));
         }
 
-        if (isSet(payoutStates)) {
-            queries.add(STATE_FIELD + "=" + payoutStates.getRawString());
+        if (isNotBlank(state)) {
+            queries.add(STATE_FIELD + "=" + state);
         }
 
         queries.add("page=" + forPage);
         queries.add("display_size=" + getDisplaySize());
 
         return String.join("&", queries);
-    }
-
-    private List<String> getPayoutStatesForStatuses(CommaDelimitedSetParameter payoutStates) {
-        return payoutStates.getParameters().stream()
-                .map(status -> from(status))
-                .map(PayoutState::name)
-                .collect(Collectors.toList());
     }
 }
