@@ -69,6 +69,6 @@ public class AccountIdSupplierManagerTest {
         new AccountIdListSupplierManager(overrideAccountRestriction, gatewayAccountId)
                 .withPrivilegedSupplier(privilegedSupplier)
                 .withSupplier(supplier)
-                .validateAndGet();
+                .validateAndGet("account_id");
     }
 }

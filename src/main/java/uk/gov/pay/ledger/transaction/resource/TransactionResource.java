@@ -49,6 +49,7 @@ import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParam
 public class TransactionResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
+    private static final String ACCOUNT_MANAGER_FIELD_NAME = "account_id";
     private final TransactionService transactionService;
     private final CsvService csvService;
     private final LedgerConfig configuration;
@@ -152,7 +153,7 @@ public class TransactionResource {
         return accountIdSupplierManager
                 .withSupplier(accountId -> transactionService.searchTransactions(gatewayAccountIds, transactionSearchParams, uriInfo))
                 .withPrivilegedSupplier(() -> transactionService.searchTransactions(transactionSearchParams, uriInfo))
-                .validateAndGet();
+                .validateAndGet(ACCOUNT_MANAGER_FIELD_NAME);
     }
 
     @Path("{transactionExternalId}/event")

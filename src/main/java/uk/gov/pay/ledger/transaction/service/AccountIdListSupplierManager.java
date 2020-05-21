@@ -11,8 +11,6 @@ import static java.lang.String.format;
 
 public class AccountIdListSupplierManager<T> {
 
-    private static final String ACCOUNT_ID = "account_id";
-
     private final boolean overrideAccountRestriction;
     private final List<String> gatewayAccountIds;
 
@@ -38,9 +36,9 @@ public class AccountIdListSupplierManager<T> {
         return this;
     }
 
-    public T validateAndGet() {
+    public T validateAndGet(String fieldName) {
         if (!overrideAccountRestriction && gatewayAccountIds.isEmpty()) {
-            throw new ValidationException(format("Field [%s] cannot be empty", ACCOUNT_ID));
+            throw new ValidationException(format("Field [%s] cannot be empty", fieldName));
         }
 
         if (gatewayAccountIds.isEmpty()) {
