@@ -55,11 +55,6 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
         return this;
     }
 
-    public QueueRefundEventFixture withEventData(String eventData) {
-        this.eventData = eventData;
-        return this;
-    }
-
     public QueueRefundEventFixture withRefundedBy(String refundedBy) {
         this.refundedBy = refundedBy;
         return this;

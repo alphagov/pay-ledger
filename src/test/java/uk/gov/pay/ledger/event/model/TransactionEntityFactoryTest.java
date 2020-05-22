@@ -52,13 +52,7 @@ public class TransactionEntityFactoryTest {
                 .withEventData("{\"net_amount\": 55, \"total_amount\": 105, \"fee\": 33}")
                 .withResourceType(ResourceType.PAYMENT)
                 .toEntity();
-        Event paymentIncludedInPayoutEvent = aQueuePaymentEventFixture()
-                .withEventType("PAYMENT_INCLUDED_IN_PAYOUT")
-                .withEventData("{\"gateway_payout_id\": \"payout-id\"}")
-                .withResourceType(ResourceType.PAYMENT)
-                .toEntity();
-        EventDigest eventDigest = EventDigest.fromEventList(List.of(paymentCreatedEvent, paymentDetailsEvent,
-                captureConfirmedEvent, paymentIncludedInPayoutEvent));
+        EventDigest eventDigest = EventDigest.fromEventList(List.of(paymentCreatedEvent, paymentDetailsEvent, captureConfirmedEvent));
 
         TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
 
@@ -81,7 +75,6 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getTransactionType(), is("PAYMENT"));
         assertThat(transactionEntity.getSource(), is(notNullValue()));
         assertThat(transactionEntity.isLive(), is(true));
-        assertThat(transactionEntity.getGatewayPayoutId(), is("payout-id"));
 
         JsonObject transactionDetails = JsonParser.parseString(transactionEntity.getTransactionDetails()).getAsJsonObject();
         assertThat(transactionDetails.get("language").getAsString(), is("en"));

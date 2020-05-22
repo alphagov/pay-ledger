@@ -43,8 +43,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withTransactionType(rs.getString("type"))
                 .withLive(rs.getBoolean("live"))
                 .withMoto(rs.getBoolean("moto"))
-                .withGatewayTransactionId(rs.getString("gateway_transaction_id"))
-                .withGatewayPayoutId(rs.getString("gateway_payout_id"));
+                .withGatewayTransactionId(rs.getString("gateway_transaction_id"));
         Source.from(rs.getString("source")).ifPresent(builder::withSource);
         return builder.build();
     }

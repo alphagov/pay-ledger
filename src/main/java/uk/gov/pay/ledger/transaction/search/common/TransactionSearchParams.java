@@ -34,7 +34,6 @@ public class TransactionSearchParams extends SearchParams {
     private static final String STATE_FIELD = "state";
     private static final String TRANSACTION_TYPE_FIELD = "transaction_type";
     private static final String GATEWAY_TRANSACTION_ID_FIELD = "gateway_transaction_id";
-    private static final String GATEWAY_PAYOUT_ID = "gateway_payout_id";
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
 
@@ -74,8 +73,6 @@ public class TransactionSearchParams extends SearchParams {
     private String toDate;
     @QueryParam(TRANSACTION_TYPE_FIELD)
     private TransactionType transactionType;
-    @QueryParam("gateway_payout_id")
-    private String gatewayPayoutId;
     @DefaultValue("true")
     private Long pageNumber = 1L;
 
@@ -143,10 +140,6 @@ public class TransactionSearchParams extends SearchParams {
 
     public void setWithParentTransaction(boolean withParentTransaction) {
         this.withParentTransaction = withParentTransaction;
-    }
-
-    public void setGatewayPayoutId(String gatewayPayoutId) {
-        this.gatewayPayoutId = gatewayPayoutId;
     }
 
     @QueryParam("page")
@@ -251,9 +244,7 @@ public class TransactionSearchParams extends SearchParams {
         if (isNotBlank(firstDigitsCardNumber)) {
             filters.add(" t.first_digits_card_number = :" + FIRST_DIGITS_CARD_NUMBER_FIELD);
         }
-        if (isNotBlank(gatewayPayoutId)) {
-            filters.add(" t.gateway_payout_id = :" + GATEWAY_PAYOUT_ID);
-        }
+
     }
 
     public Map<String, Object> getQueryMap() {
@@ -309,9 +300,6 @@ public class TransactionSearchParams extends SearchParams {
             }
             if (gatewayTransactionId != null) {
                 queryMap.put(GATEWAY_TRANSACTION_ID_FIELD, gatewayTransactionId);
-            }
-            if (isNotBlank(gatewayPayoutId)) {
-                queryMap.put(GATEWAY_PAYOUT_ID, gatewayPayoutId);
             }
         }
         return queryMap;
@@ -404,9 +392,6 @@ public class TransactionSearchParams extends SearchParams {
         }
         if (transactionType != null) {
             queries.add(TRANSACTION_TYPE_FIELD + "=" + transactionType);
-        }
-        if (isNotBlank(gatewayPayoutId)) {
-            queries.add(GATEWAY_PAYOUT_ID + "=" + gatewayPayoutId);
         }
         queries.add("page=" + forPage);
         queries.add("display_size=" + getDisplaySize());
