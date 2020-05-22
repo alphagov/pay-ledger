@@ -39,14 +39,12 @@ public class TransactionResourceIT {
 
     @Test
     public void shouldGetTransaction() {
-        var gatewayPayoutId = "payout-id";
 
         transactionFixture = aTransactionFixture()
                 .withDefaultCardDetails()
                 .withDefaultTransactionDetails()
                 .withLive(Boolean.TRUE)
-                .withSource(String.valueOf(Source.CARD_API))
-                .withGatewayPayoutId(gatewayPayoutId);
+                .withSource(String.valueOf(Source.CARD_API));
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -62,8 +60,7 @@ public class TransactionResourceIT {
                 .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
                 .body("live", is(Boolean.TRUE))
                 .body("wallet_type", is("APPLE_PAY"))
-                .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId));
+                .body("source", is(String.valueOf(Source.CARD_API)));
     }
 
     @Test
@@ -136,7 +133,6 @@ public class TransactionResourceIT {
         var now = ZonedDateTime.parse("2019-07-31T14:52:07.073Z");
         var refundedBy = "some_user_id";
         var refundedByUserEmail = "test@example.com";
-        var gatewayPayoutId = "payout-id";
 
         transactionFixture = aTransactionFixture()
                 .withTransactionType("REFUND")
@@ -144,8 +140,7 @@ public class TransactionResourceIT {
                 .withCreatedDate(now)
                 .withRefundedById(refundedBy)
                 .withRefundedByUserEmail(refundedByUserEmail)
-                .withDefaultTransactionDetails()
-                .withGatewayPayoutId(gatewayPayoutId);
+                .withDefaultTransactionDetails();
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -160,8 +155,7 @@ public class TransactionResourceIT {
                 .body("reference", is(transactionFixture.getReference()))
                 .body("created_date", is(now.toString()))
                 .body("refunded_by", is(refundedBy))
-                .body("refunded_by_user_email", is(refundedByUserEmail))
-                .body("gateway_payout_id", is(gatewayPayoutId));
+                .body("refunded_by_user_email", is(refundedByUserEmail));
     }
 
     @Test

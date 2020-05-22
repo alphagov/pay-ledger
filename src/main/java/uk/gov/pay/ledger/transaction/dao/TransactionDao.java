@@ -43,8 +43,7 @@ public class TransactionDao {
             " parent.refund_amount_available as parent_refund_amount_available, " +
             " parent.fee as parent_fee," +
             " parent.type as parent_type, " +
-            " parent.moto as parent_moto, " +
-            " parent.gateway_payout_id as parent_gateway_payout_id " +
+            " parent.moto as parent_moto " +
             " FROM transaction t LEFT OUTER JOIN transaction parent " +
             " ON t.parent_external_id = parent.external_id ";
 
@@ -116,8 +115,7 @@ public class TransactionDao {
                     "live, " +
                     "moto, " +
                     "gateway_transaction_id, " +
-                    "source, " +
-                    "gateway_payout_id" +
+                    "source" +
                     ") " +
                     "VALUES (" +
                     ":externalId," +
@@ -145,8 +143,7 @@ public class TransactionDao {
                     ":live, " +
                     ":moto, " +
                     ":gatewayTransactionId, " +
-                    ":source::source, " +
-                    ":gatewayPayoutId" +
+                    ":source::source" +
                     ") " +
                     "ON CONFLICT (external_id) " +
                     "DO UPDATE SET " +
@@ -175,8 +172,7 @@ public class TransactionDao {
                     "live = EXCLUDED.live, " +
                     "moto = EXCLUDED.moto, " +
                     "gateway_transaction_id = EXCLUDED.gateway_transaction_id, " +
-                    "source = EXCLUDED.source, " +
-                    "gateway_payout_id = EXCLUDED.gateway_payout_id " +
+                    "source = EXCLUDED.source " +
                     "WHERE EXCLUDED.event_count >= transaction.event_count;";
 
     private static final String GET_SOURCE_TYPE_ENUM_VALUES =

@@ -42,7 +42,6 @@ public class TransactionDaoIT {
                 .withTransactionType("PAYMENT")
                 .withLive(true)
                 .withGatewayTransactionId("gateway_transaction_id")
-                .withGatewayPayoutId("payout-id")
                 .withDefaultTransactionDetails();
         TransactionEntity transactionEntity = fixture.toEntity();
 
@@ -118,7 +117,6 @@ public class TransactionDaoIT {
         assertThat(transaction.getRefundAmountRefunded(), is(fixture.getRefundAmountRefunded()));
         assertThat(transaction.getRefundStatus(), is(fixture.getRefundStatus()));
         assertThat(transaction.getGatewayTransactionId(), is(fixture.getGatewayTransactionId()));
-        assertThat(transaction.getGatewayPayoutId(), is(fixture.getGatewayPayoutId()));
     }
 
     @Test
@@ -146,7 +144,6 @@ public class TransactionDaoIT {
         TransactionEntity parentTransactionEntity = aTransactionFixture()
                 .withTransactionType(TransactionType.PAYMENT.name())
                 .withDefaultTransactionDetails()
-                .withGatewayPayoutId("payment-payout-id")
                 .insert(rule.getJdbi())
                 .toEntity();
 
@@ -154,7 +151,6 @@ public class TransactionDaoIT {
                 .withTransactionType(TransactionType.REFUND.name())
                 .withParentExternalId(parentTransactionEntity.getExternalId())
                 .withDefaultTransactionDetails()
-                .withGatewayPayoutId("refund-payout-id")
                 .insert(rule.getJdbi())
                 .toEntity();
 
@@ -174,7 +170,6 @@ public class TransactionDaoIT {
         assertThat(transaction.getCreatedDate(), is(transactionEntity.getCreatedDate()));
         assertThat(transaction.getEventCount(), is(transactionEntity.getEventCount()));
         assertThat(transaction.getTransactionType(), is(transactionEntity.getTransactionType()));
-        assertThat(transaction.getGatewayPayoutId(), is(transactionEntity.getGatewayPayoutId()));
     }
 
     @Test

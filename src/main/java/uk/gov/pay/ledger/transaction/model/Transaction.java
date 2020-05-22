@@ -12,17 +12,15 @@ public abstract class Transaction {
     protected String gatewayAccountId;
     protected Long amount;
     protected String externalId;
-    private String gatewayPayoutId;
 
     public Transaction() {
     }
 
-    public Transaction(Long id, String gatewayAccountId, Long amount, String externalId, String gatewayPayoutId) {
+    public Transaction(Long id, String gatewayAccountId, Long amount, String externalId) {
         this.id = id;
         this.gatewayAccountId = gatewayAccountId;
         this.amount = amount;
         this.externalId = externalId;
-        this.gatewayPayoutId = gatewayPayoutId;
     }
 
     public Long getId() {
@@ -41,9 +39,5 @@ public abstract class Transaction {
 
     public String getExternalId() {
         return externalId;
-    }
-
-    public String getGatewayPayoutId() {
-        return gatewayPayoutId;
     }
 }
