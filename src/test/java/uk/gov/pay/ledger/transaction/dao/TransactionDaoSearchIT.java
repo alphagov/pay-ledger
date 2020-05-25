@@ -515,6 +515,41 @@ public class TransactionDaoSearchIT {
     }
 
     @Test
+    public void shouldFilterByGatewayPayoutIdWhenSpecified() {
+        String gatewayAccountId = "account-id-" + nextLong();
+        String gatewayPayoutId = "payout-id-" + nextLong();
+
+        TransactionFixture transaction = aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withCreatedDate(now().minusDays(1))
+                .withTransactionType("PAYMENT")
+                .insert(rule.getJdbi());
+        TransactionFixture refund = aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withTransactionType("REFUND")
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId + "different-id")
+                .withTransactionType("PAYMENT")
+                .insert(rule.getJdbi());
+
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setGatewayPayoutId(gatewayPayoutId);
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(2));
+        assertThat(transactionList.get(0).getExternalId(), is(refund.getExternalId()));
+        assertThat(transactionList.get(0).getGatewayPayoutId(), is(refund.getGatewayPayoutId()));
+        assertThat(transactionList.get(1).getExternalId(), is(transaction.getExternalId()));
+        assertThat(transactionList.get(1).getGatewayPayoutId(), is(transaction.getGatewayPayoutId()));
+    }
+
+    @Test
     public void shouldNotFilterByGatewayAccountIdWhenNotSpecified() {
         String gatewayAccountId = "account-id-" + nextLong();
 
@@ -882,7 +917,7 @@ public class TransactionDaoSearchIT {
                 .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
                 .insert(rule.getJdbi());
 
-        searchParams.setAccountIds(List.of("1","2"));
+        searchParams.setAccountIds(List.of("1", "2"));
 
         var searchParamsList = List.of("ex-1", "ex-2", "ex-3", "ex-4");
         var doNotIncludeList = List.of("ex-5");
@@ -893,6 +928,7 @@ public class TransactionDaoSearchIT {
         assertThat(transactionList.stream().filter(x -> searchParamsList.contains(x.getExternalId())).count(), is(4L));
         assertThat(transactionList.stream().filter(x -> doNotIncludeList.contains(x.getExternalId())).count(), is(0L));
     }
+
     @Test
     public void searchTransactionsByCursor_shouldSplitCursorPages() {
         transactionFixture = aTransactionFixture()
@@ -941,7 +977,7 @@ public class TransactionDaoSearchIT {
 
         assertThat(firstPage.size(), is(2));
         assertThat(firstLastEntity.getId(), is(200L));
-        assertThat(secondPage.size(), is (2));
+        assertThat(secondPage.size(), is(2));
         assertThat(thirdPage.size(), is(1));
         assertThat(thirdLastEntity.getId(), is(3L));
         assertThat(fourthPage.size(), is(0));

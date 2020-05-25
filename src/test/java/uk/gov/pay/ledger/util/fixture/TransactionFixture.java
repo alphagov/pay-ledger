@@ -71,6 +71,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String refundedByUserEmail;
     private TransactionEntity parentTransactionEntity;
     private String source;
+    private String gatewayPayoutId;
 
     private TransactionFixture() {
     }
@@ -300,6 +301,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withGatewayPayoutId(String gatewayPayoutId) {
+        this.gatewayPayoutId = gatewayPayoutId;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -332,9 +338,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        live,\n" +
                                 "        moto,\n" +
                                 "        gateway_transaction_id,\n" +
-                                "        source\n" +
+                                "        source,\n" +
+                                "        gateway_payout_id\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?, ?, ?::source)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?, ?, ?::source, ?)\n",
                         id,
                         externalId,
                         parentExternalId,
@@ -361,7 +368,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         live,
                         moto,
                         gatewayTransactionId,
-                        source
+                        source,
+                        gatewayPayoutId
                 )
         );
         return this;
@@ -437,7 +445,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withLive(live)
                 .withMoto(moto)
                 .withGatewayTransactionId(gatewayTransactionId)
-                .withParentTransactionEntity(parentTransactionEntity);
+                .withParentTransactionEntity(parentTransactionEntity)
+                .withGatewayPayoutId(gatewayPayoutId);
         Source.from(source).ifPresent(builder::withSource);
         return builder.build();
     }
@@ -496,6 +505,30 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public String getParentExternalId() {
         return parentExternalId;
+    }
+
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public Long getRefundAmountAvailable() {
+        return refundAmountAvailable;
+    }
+
+    public Long getRefundAmountRefunded() {
+        return refundAmountRefunded;
+    }
+
+    public String getRefundStatus() {
+        return refundStatus;
+    }
+
+    public String getGatewayTransactionId() {
+        return gatewayTransactionId;
+    }
+
+    public String getGatewayPayoutId() {
+        return gatewayPayoutId;
     }
 
     public TransactionFixture withDefaultCardDetails(boolean includeCardDetails) {
@@ -559,25 +592,5 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     public TransactionFixture withRefundedByUserEmail(String refundedByUserEmail) {
         this.refundedByUserEmail = refundedByUserEmail;
         return this;
-    }
-
-    public String getTransactionType() {
-        return transactionType;
-    }
-
-    public Long getRefundAmountAvailable() {
-        return refundAmountAvailable;
-    }
-
-    public Long getRefundAmountRefunded() {
-        return refundAmountRefunded;
-    }
-
-    public String getRefundStatus() {
-        return refundStatus;
-    }
-
-    public String getGatewayTransactionId() {
-        return gatewayTransactionId;
     }
 }

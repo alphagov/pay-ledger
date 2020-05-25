@@ -68,6 +68,14 @@ public class TransactionSearchParamsTest {
     }
 
     @Test
+    public void shouldApplyGatewayAccountIdCorrectlyToFilterAndQueries() {
+        transactionSearchParams.setGatewayPayoutId("test-gateway-payout-id");
+        assertThat(transactionSearchParams.getFilterTemplates().get(0), is(" t.gateway_payout_id = :gateway_payout_id"));
+        assertThat(transactionSearchParams.getQueryMap().get("gateway_payout_id"), is("test-gateway-payout-id"));
+        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("gateway_payout_id=test-gateway-payout-id"));
+    }
+
+    @Test
     public void getFilterTemplateWithParentTxnSearch_shouldReturnFilterWithReferenceSearch() {
         transactionSearchParams.setReference("test-reference");
         assertThat(transactionSearchParams.getFilterTemplatesWithParentTransactionSearch().get(0),

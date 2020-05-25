@@ -392,6 +392,7 @@ public class TransactionServiceTest {
         searchParams.setPaymentStates(new CommaDelimitedSetParameter("created,submitted"));
         searchParams.setRefundStates(new CommaDelimitedSetParameter("created,refunded"));
         searchParams.setCardBrands(new CommaDelimitedSetParameter("visa,mastercard"));
+        searchParams.setGatewayPayoutId("test-gateway-payout-id");
     }
 
     private void assertCorrectPaginationQueryParams(TransactionSearchResponse transactionSearchResponse) {
@@ -408,5 +409,6 @@ public class TransactionServiceTest {
         assertThat(selfLink, containsString("card_brand=visa%2Cmastercard"));
         assertThat(selfLink, containsString("from_date=2019-05-01T10%3A15%3A30Z"));
         assertThat(selfLink, containsString("to_date=2019-06-01T10%3A15%3A30Z"));
+        assertThat(selfLink, containsString("gateway_payout_id=test-gateway-payout-id"));
     }
 }
