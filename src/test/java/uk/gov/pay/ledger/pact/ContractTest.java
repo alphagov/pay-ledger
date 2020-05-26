@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import uk.gov.pay.ledger.event.model.SalientEventType;
+import uk.gov.pay.ledger.payout.state.PayoutState;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
@@ -19,10 +20,12 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
+import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
+import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public abstract class ContractTest {
@@ -344,6 +347,30 @@ public abstract class ContractTest {
                 150L, "reference2", "description",
                 "2019-09-21T15:14:16.067Z", TransactionState.SUCCESS);
 
+    }
+
+    @State("two payouts exist for selfservice search")
+    public void createTwoPayouts() {
+        String gatewayAccountId = "654321";
+        aPayoutFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId("payout-id-1")
+                .withAmount(1250L)
+                .withCreatedDate(ZonedDateTime.parse("2020-05-21T12:22:16.067Z"))
+                .withPaidOutDate(ZonedDateTime.parse("2020-05-22T14:22:16.067Z"))
+                .withState(PayoutState.PAID_OUT)
+                .build()
+                .insert(app.getJdbi());
+
+        aPayoutFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId("payout-id-2")
+                .withAmount(2345L)
+                .withCreatedDate(ZonedDateTime.parse("2020-05-22T12:22:16.067Z"))
+                .withPaidOutDate(ZonedDateTime.parse("2020-05-23T14:22:16.067Z"))
+                .withState(PayoutState.PAID_OUT)
+                .build()
+                .insert(app.getJdbi());
     }
 
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
