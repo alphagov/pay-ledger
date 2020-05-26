@@ -56,8 +56,8 @@ public class Payment extends Transaction {
                    CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
                    Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
                    Long netAmount, Long totalAmount, RefundSummary refundSummary, SettlementSummary settlementSummary,
-                   Boolean moto, Boolean live, Source source, String walletType) {
-        super(id, gatewayAccountId, amount, externalId);
+                   Boolean moto, Boolean live, Source source, String walletType, String gatewayPayoutId) {
+        super(id, gatewayAccountId, amount, externalId, gatewayPayoutId);
         this.corporateCardSurcharge = corporateCardSurcharge;
         this.fee = fee;
         this.netAmount = netAmount;
@@ -94,12 +94,12 @@ public class Payment extends Transaction {
                    CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
                    Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
                    Long netAmount, RefundSummary refundSummary, Long totalAmount, SettlementSummary settlementSummary,
-                   Boolean moto, Boolean live, Source source, String walletType) {
+                   Boolean moto, Boolean live, Source source, String walletType, String gatewayPayoutId) {
 
         this(null, gatewayAccountId, amount, reference, description, state, language, externalId, returnUrl, email,
                 paymentProvider, createdDate, cardDetails, delayedCapture, externalMetaData, eventCount,
                 gatewayTransactionId, corporateCardSurcharge, fee, netAmount, totalAmount, refundSummary,
-                settlementSummary, moto, live, source, walletType);
+                settlementSummary, moto, live, source, walletType, gatewayPayoutId);
     }
 
     @Override
