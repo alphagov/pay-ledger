@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 public class EventDigest {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final ZonedDateTime mostRecentEventTimestamp;
@@ -58,16 +60,26 @@ public class EventDigest {
                 .min(ZonedDateTime::compareTo)
                 .orElseThrow();
 
+        String parentResourceExternalId = deriveParentResourceExternalId(events);
+
         return new EventDigest(
                 latestEvent.getEventDate(),
                 latestSalientEventType,
                 latestEvent.getResourceType(),
                 latestEvent.getResourceExternalId(),
-                latestEvent.getParentResourceExternalId(),
+                parentResourceExternalId,
                 events.size(),
                 eventPayload,
                 earliestDate
         );
+    }
+
+    private static String deriveParentResourceExternalId(List<Event> events) {
+        return events.stream()
+                .filter(event -> isNotEmpty(event.getParentResourceExternalId()))
+                .map(Event::getParentResourceExternalId)
+                .findFirst()
+                .orElse(null);
     }
 
     private static Map<String, Object> buildEventPayload(List<Event> events) {
