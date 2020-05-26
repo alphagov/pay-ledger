@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.dao.mapper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -12,38 +13,43 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class TransactionWithParentMapper implements RowMapper<TransactionEntity> {
 
     @Override
     public TransactionEntity map(ResultSet rs, StatementContext ctx) throws SQLException {
+        TransactionEntity parentTransactionEntity = null;
 
-        TransactionEntity parentTransactionEntity = new TransactionEntity.Builder()
-                .withId(getLongWithNullCheck(rs, "parent_id"))
-                .withGatewayAccountId(rs.getString("parent_gateway_account_id"))
-                .withExternalId(rs.getString("parent_external_id"))
-                .withParentExternalId(rs.getString("parent_parent_external_id"))
-                .withAmount(getLongWithNullCheck(rs, "parent_amount"))
-                .withReference(rs.getString("parent_reference"))
-                .withDescription(rs.getString("parent_description"))
-                .withState(getState(rs, "parent_state"))
-                .withEmail(rs.getString("parent_email"))
-                .withCardholderName(rs.getString("parent_cardholder_name"))
-                .withCreatedDate(getZonedDateTime(rs, "parent_created_date").orElse(null))
-                .withTransactionDetails(rs.getString("parent_transaction_details"))
-                .withEventCount(rs.getInt("parent_event_count"))
-                .withCardBrand(rs.getString("parent_card_brand"))
-                .withLastDigitsCardNumber(rs.getString("parent_last_digits_card_number"))
-                .withFirstDigitsCardNumber(rs.getString("parent_first_digits_card_number"))
-                .withNetAmount(getLongWithNullCheck(rs, "parent_net_amount"))
-                .withTotalAmount(getLongWithNullCheck(rs, "parent_total_amount"))
-                .withRefundStatus(rs.getString("parent_refund_status"))
-                .withRefundAmountRefunded(getLongWithNullCheck(rs, "parent_refund_amount_refunded"))
-                .withRefundAmountAvailable(getLongWithNullCheck(rs, "parent_refund_amount_available"))
-                .withFee(getLongWithNullCheck(rs, "parent_fee"))
-                .withTransactionType(rs.getString("parent_type"))
-                .withLive(rs.getBoolean("live"))
-                .withMoto(rs.getBoolean("parent_moto"))
-                .build();
+        if (isNotBlank(rs.getString("parent_external_id"))) {
+            parentTransactionEntity = new TransactionEntity.Builder()
+                    .withId(getLongWithNullCheck(rs, "parent_id"))
+                    .withGatewayAccountId(rs.getString("parent_gateway_account_id"))
+                    .withExternalId(rs.getString("parent_external_id"))
+                    .withParentExternalId(rs.getString("parent_parent_external_id"))
+                    .withAmount(getLongWithNullCheck(rs, "parent_amount"))
+                    .withReference(rs.getString("parent_reference"))
+                    .withDescription(rs.getString("parent_description"))
+                    .withState(getState(rs, "parent_state"))
+                    .withEmail(rs.getString("parent_email"))
+                    .withCardholderName(rs.getString("parent_cardholder_name"))
+                    .withCreatedDate(getZonedDateTime(rs, "parent_created_date").orElse(null))
+                    .withTransactionDetails(rs.getString("parent_transaction_details"))
+                    .withEventCount(rs.getInt("parent_event_count"))
+                    .withCardBrand(rs.getString("parent_card_brand"))
+                    .withLastDigitsCardNumber(rs.getString("parent_last_digits_card_number"))
+                    .withFirstDigitsCardNumber(rs.getString("parent_first_digits_card_number"))
+                    .withNetAmount(getLongWithNullCheck(rs, "parent_net_amount"))
+                    .withTotalAmount(getLongWithNullCheck(rs, "parent_total_amount"))
+                    .withRefundStatus(rs.getString("parent_refund_status"))
+                    .withRefundAmountRefunded(getLongWithNullCheck(rs, "parent_refund_amount_refunded"))
+                    .withRefundAmountAvailable(getLongWithNullCheck(rs, "parent_refund_amount_available"))
+                    .withFee(getLongWithNullCheck(rs, "parent_fee"))
+                    .withTransactionType(rs.getString("parent_type"))
+                    .withLive(rs.getBoolean("live"))
+                    .withMoto(rs.getBoolean("parent_moto"))
+                    .build();
+        }
 
         return new TransactionEntity.Builder()
                 .withId(rs.getLong("id"))
