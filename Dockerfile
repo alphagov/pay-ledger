@@ -1,5 +1,5 @@
-# adoptopenjdk / openjdk11 : jdk-11.0.5_10-alpine
-FROM adoptopenjdk/openjdk11@sha256:8cdca24628b649ebf5bdddc836416f869f94204931a48719090ca13492adbb18
+# Digest of image e.g. openjdk11:jre-11.0.7_10-alpine for linux/amd64 from tags list on https://hub.docker.com/r/adoptopenjdk/openjdk11
+FROM adoptopenjdk/openjdk11@sha256:63a55a2b49a12a15409c8228e7a23be3347b565d45dc7d05a03f965b495e0a90
 
 RUN ["apk", "--no-cache", "upgrade"]
 
