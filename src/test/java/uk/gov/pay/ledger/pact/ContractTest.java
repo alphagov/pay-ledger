@@ -45,6 +45,7 @@ public abstract class ContractTest {
     public void setUp() {
         DatabaseTestHelper helper = aDatabaseTestHelper(app.getJdbi());
         helper.truncateAllData();
+        helper.truncateAllPayoutData();
     }
 
     @State("a payment transaction exists")
