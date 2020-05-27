@@ -12,13 +12,13 @@ import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
-import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.service.AccountIdListSupplierManager;
 import uk.gov.pay.ledger.transaction.service.AccountIdSupplierManager;
 import uk.gov.pay.ledger.transaction.service.CsvService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
+import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -43,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParamsValidator.validateSearchParams;
+import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParamsValidator.validateSearchParamsForCsv;
 
 @Path("/v1/transaction")
 @Produces(APPLICATION_JSON)
@@ -101,21 +102,24 @@ public class TransactionResource {
     @Produces("text/csv")
     @Timed
     public Response streamCsv(@Valid @BeanParam TransactionSearchParams searchParams,
-                              @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
                               @QueryParam("account_id") CommaDelimitedSetParameter gatewayAccountIds,
                               @QueryParam("fee_headers") boolean includeFeeHeaders,
                               @QueryParam("moto_header") boolean includeMotoHeader,
                               @Context UriInfo uriInfo) {
         StreamingOutput stream = outputStream -> {
             TransactionSearchParams csvSearchParams = Optional.ofNullable(searchParams).orElse(new TransactionSearchParams());
+
+            validateSearchParamsForCsv(csvSearchParams, gatewayAccountIds);
+
             csvSearchParams.overrideMaxDisplaySize((long) configuration.getReportingConfig().getStreamingCsvPageSize());
             csvSearchParams.setAccountIds(gatewayAccountIds.getParameters());
+
             List<TransactionEntity> page;
             ZonedDateTime startingAfterCreatedDate = null;
             Long startingAfterId = null;
             int count = 0;
 
-            Map<String, Object> headers = csvService.csvHeaderFrom(searchParams, includeFeeHeaders, includeMotoHeader);
+            Map<String, Object> headers = csvService.csvHeaderFrom(csvSearchParams, includeFeeHeaders, includeMotoHeader);
             ObjectWriter writer = csvService.writerFrom(headers);
             Stopwatch stopwatch = Stopwatch.createStarted();
             outputStream.write(csvService.csvStringFrom(headers, writer).getBytes());
