@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.transaction.resource;
 
 import io.dropwizard.testing.junit.ResourceTestRule;
+import org.hamcrest.Matchers;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -157,8 +158,23 @@ public class TransactionResourceTest {
         });
         List errors = (List) responseMessage.get("errors");
 
-        System.out.println(errors);
         assertThat(response.getStatus(), is(400));
         assertThat(errors.get(0), is("query param payment_provider must not be empty"));
+    }
+
+    @Test
+    public void searchTransactionForCsvShouldReturn400IfGatewayAccountIdIsNotAvailable() {
+        Response response = resources
+                .target("/v1/transaction")
+                .request()
+                .accept("text/csv")
+                .get();
+
+        HashMap<String, Object> responseMessage = response.readEntity(HashMap.class);
+
+        assertThat(response.getStatus(), is(400));
+        assertThat(responseMessage.get("error_identifier"), is("GENERIC"));
+        assertThat((List<String>) responseMessage.get("message"),
+                Matchers.containsInAnyOrder("gateway_account_id is mandatory to search transactions for CSV"));
     }
 }

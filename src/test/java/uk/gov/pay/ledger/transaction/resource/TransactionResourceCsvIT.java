@@ -20,8 +20,11 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.ZonedDateTime.now;
 import static org.apache.commons.csv.CSVFormat.DEFAULT;
 import static org.apache.commons.csv.CSVFormat.RFC4180;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
@@ -230,9 +233,9 @@ public class TransactionResourceCsvIT {
 
         InputStream csvResponseStream = given().port(port)
                 .accept("text/csv")
-                .queryParam("account_id", gatewayAccountId + "," +gatewayAccountId2)
+                .queryParam("account_id", gatewayAccountId + "," + gatewayAccountId2)
                 .queryParam("fee_headers", true)
-                .queryParam("page",1)
+                .queryParam("page", 1)
                 .queryParam("display_size", 5)
                 .get("/v1/transaction/")
                 .then()
@@ -314,6 +317,49 @@ public class TransactionResourceCsvIT {
         assertThat(header.get(22), is("Card Type"));
         assertThat(header.get(23), is("MOTO"));
         assertThat(header.get(24), is("a-metadata-key (metadata)"));
+    }
+
+    @Test
+    public void shouldGetAllTransactionsForAGivenGatewayPayoutId() throws IOException {
+        String targetGatewayAccountId = randomNumeric(5);
+        String gatewayPayoutId = randomAlphanumeric(30);
+
+        TransactionFixture transactionFixture = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(targetGatewayAccountId)
+                .withCreatedDate(now())
+                .withGatewayPayoutId(gatewayPayoutId)
+                .insert(rule.getJdbi());
+        TransactionFixture transactionFixtureWithoutGatewayPayoutId = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(targetGatewayAccountId)
+                .insert(rule.getJdbi());
+        TransactionFixture refundFixture = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withCreatedDate(now().plusDays(1))
+                .withParentExternalId(transactionFixtureWithoutGatewayPayoutId.getExternalId())
+                .withGatewayAccountId(targetGatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId)
+                .insert(rule.getJdbi());
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction?" +
+                        "account_id=" + targetGatewayAccountId +
+                        "&gateway_payout_id=" + gatewayPayoutId
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
+        assertThat(csvRecords.size(), is(2));
+
+        CSVRecord refundRecord = csvRecords.get(0);
+        assertThat(refundRecord.get("GOV.UK Payment ID"), is(transactionFixtureWithoutGatewayPayoutId.getExternalId()));
+        CSVRecord paymentRecord = csvRecords.get(1);
+        assertThat(paymentRecord.get("GOV.UK Payment ID"), is(transactionFixture.getExternalId()));
     }
 
     private void assertPaymentTransactionDetails(CSVRecord csvRecord, TransactionFixture transactionFixture) {
