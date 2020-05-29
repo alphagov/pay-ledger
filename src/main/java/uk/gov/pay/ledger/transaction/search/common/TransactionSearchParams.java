@@ -83,6 +83,7 @@ public class TransactionSearchParams extends SearchParams {
     @QueryParam("display_size")
     private Long displaySize = DEFAULT_MAX_DISPLAY_SIZE;
     private Map<String, Object> queryMap;
+    @QueryParam("gateway_transaction_id")
     private String gatewayTransactionId;
 
     public void setAccountIds(List<String> accountIds) {
