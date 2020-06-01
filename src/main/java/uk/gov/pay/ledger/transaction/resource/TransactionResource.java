@@ -40,13 +40,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParamsValidator.validateSearchParams;
 import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParamsValidator.validateSearchParamsForCsv;
 
 @Path("/v1/transaction")
-@Produces(APPLICATION_JSON)
+@Produces("application/json; qs=1")
 public class TransactionResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
@@ -99,7 +98,7 @@ public class TransactionResource {
 
     @Path("/")
     @GET
-    @Produces("text/csv")
+    @Produces("text/csv; qs=.5")
     @Timed
     public Response streamCsv(@Valid @BeanParam TransactionSearchParams searchParams,
                               @QueryParam("account_id") CommaDelimitedSetParameter gatewayAccountIds,
