@@ -138,7 +138,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-sqs</artifactId>
-            <version>1.11.792</version>
+            <version>1.11.793</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
