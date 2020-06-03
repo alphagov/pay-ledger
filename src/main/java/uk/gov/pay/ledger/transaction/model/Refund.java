@@ -14,7 +14,7 @@ public class Refund extends Transaction {
     private final String refundedBy;
     private final String refundedByUserEmail;
     private final String parentExternalId;
-    private final Optional<Transaction> parentTransaction;
+    private final Transaction parentTransaction;
 
     public Refund(Builder builder) {
         super(builder.id, builder.gatewayAccountId, builder.amount, builder.externalId, builder.gatewayPayoutId);
@@ -58,7 +58,7 @@ public class Refund extends Transaction {
     }
 
     public Optional<Transaction> getParentTransaction() {
-        return parentTransaction;
+        return Optional.ofNullable(parentTransaction);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class Refund extends Transaction {
         private Long amount;
         private String externalId;
         private String parentExternalId;
-        private Optional<Transaction> parentTransaction;
+        private Transaction parentTransaction;
         private String gatewayPayoutId;
 
         public Builder() {
@@ -153,7 +153,7 @@ public class Refund extends Transaction {
             return this;
         }
 
-        public Builder withParentTransaction(Optional<Transaction> transaction) {
+        public Builder withParentTransaction(Transaction transaction) {
             this.parentTransaction = transaction;
             return this;
         }

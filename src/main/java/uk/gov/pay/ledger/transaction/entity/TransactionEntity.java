@@ -8,6 +8,7 @@ import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -212,8 +213,8 @@ public class TransactionEntity {
         return moto;
     }
 
-    public TransactionEntity getParentTransactionEntity() {
-        return parentTransactionEntity;
+    public Optional<TransactionEntity> getParentTransactionEntity() {
+        return Optional.ofNullable(parentTransactionEntity);
     }
 
     public String getGatewayTransactionId() {

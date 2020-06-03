@@ -45,18 +45,15 @@ public class TransactionService {
     private final EventDao eventDao;
     private TransactionEntityFactory transactionEntityFactory;
     private TransactionFactory transactionFactory;
-    private CsvTransactionFactory csvTransactionFactory;
     private ObjectMapper objectMapper;
 
     @Inject
     public TransactionService(TransactionDao transactionDao, EventDao eventDao, TransactionEntityFactory transactionEntityFactory,
-                              TransactionFactory transactionFactory, CsvTransactionFactory csvTransactionFactory,
-                              ObjectMapper objectMapper) {
+                              TransactionFactory transactionFactory, ObjectMapper objectMapper) {
         this.transactionDao = transactionDao;
         this.eventDao = eventDao;
         this.transactionEntityFactory = transactionEntityFactory;
         this.transactionFactory = transactionFactory;
-        this.csvTransactionFactory = csvTransactionFactory;
         this.objectMapper = objectMapper;
     }
 

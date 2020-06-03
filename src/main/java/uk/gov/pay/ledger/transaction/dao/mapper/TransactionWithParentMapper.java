@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.transaction.dao.mapper;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;

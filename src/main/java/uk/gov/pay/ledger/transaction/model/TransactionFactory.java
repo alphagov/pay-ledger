@@ -109,8 +109,9 @@ public class TransactionFactory {
         try {
             JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
 
-            Optional<Transaction> parentTransaction = Optional.ofNullable(entity.getParentTransactionEntity())
-                    .map(this::createTransactionEntity);
+            Transaction parentTransaction = entity.getParentTransactionEntity()
+                    .map(this::createTransactionEntity)
+                    .orElse(null);
 
             return new Refund.Builder()
                     .withGatewayAccountId(entity.getGatewayAccountId())

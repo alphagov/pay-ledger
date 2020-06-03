@@ -91,9 +91,10 @@ public class CsvTransactionFactory {
                 result.put(FIELD_STATE, PaymentState.getDisplayName(transactionEntity.getState()));
             }
             if (TransactionType.REFUND.toString().equals(transactionEntity.getTransactionType())) {
-                if (transactionEntity.getParentTransactionEntity() != null) {
+                Optional<TransactionEntity> parentTransactionEntity = transactionEntity.getParentTransactionEntity();
+                if (parentTransactionEntity.isPresent()) {
                     result.putAll(
-                            getPaymentTransactionAttributes(transactionEntity.getParentTransactionEntity())
+                            getPaymentTransactionAttributes(parentTransactionEntity.get())
                     );
                 }
 

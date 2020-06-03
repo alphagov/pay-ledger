@@ -69,9 +69,8 @@ public class TransactionServiceTest {
         ObjectMapper objectMapper = Jackson.newObjectMapper();
         TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(objectMapper);
         TransactionFactory transactionFactory = new TransactionFactory(objectMapper);
-        CsvTransactionFactory csvTransactionFactory = new CsvTransactionFactory(objectMapper);
         transactionService = new TransactionService(mockTransactionDao, mockEventDao, transactionEntityFactory,
-                transactionFactory, csvTransactionFactory, objectMapper);
+                transactionFactory, objectMapper);
         searchParams = new TransactionSearchParams();
         searchParams.setAccountIds(List.of(gatewayAccountId));
 

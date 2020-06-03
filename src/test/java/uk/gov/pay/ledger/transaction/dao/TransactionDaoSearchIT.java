@@ -585,7 +585,7 @@ public class TransactionDaoSearchIT {
         assertThat(transactionList.size(), is(2));
 
         assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
-        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity().get(), transactionFixture);
         assertTransactionEquals(transactionList.get(1), transactionFixture);
 
         Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
@@ -608,7 +608,7 @@ public class TransactionDaoSearchIT {
         assertThat(transactionList.size(), is(2));
 
         assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
-        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity().get(), transactionFixture);
         assertTransactionEquals(transactionList.get(1), transactionFixture);
 
         Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
@@ -629,7 +629,7 @@ public class TransactionDaoSearchIT {
         assertThat(transactionList.size(), is(2));
 
         assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
-        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity().get(), transactionFixture);
         assertTransactionEquals(transactionList.get(1), transactionFixture);
 
         Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
@@ -655,7 +655,7 @@ public class TransactionDaoSearchIT {
         assertThat(transactionList.size(), is(2));
 
         assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
-        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity().get(), transactionFixture);
         assertTransactionEquals(transactionList.get(1), transactionFixture);
 
         Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
@@ -676,7 +676,7 @@ public class TransactionDaoSearchIT {
         assertThat(transactionList.size(), is(2));
 
         assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
-        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity().get(), transactionFixture);
         assertTransactionEquals(transactionList.get(1), transactionFixture);
 
         Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
@@ -697,7 +697,7 @@ public class TransactionDaoSearchIT {
         assertThat(transactionList.size(), is(2));
 
         assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
-        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity().get(), transactionFixture);
         assertTransactionEquals(transactionList.get(1), transactionFixture);
 
         Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
@@ -718,7 +718,7 @@ public class TransactionDaoSearchIT {
         List<TransactionEntity> transactionList = transactionDao.searchTransactionsAndParent(searchParams);
         assertThat(transactionList.size(), is(2));
         assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
-        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity().get(), transactionFixture);
         assertTransactionEquals(transactionList.get(1), transactionFixture);
 
         Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
@@ -739,7 +739,7 @@ public class TransactionDaoSearchIT {
         assertThat(transactionList.size(), is(1));
 
         assertTransactionEquals(transactionList.get(0), transactionFixtureChild);
-        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity(), transactionFixture);
+        assertTransactionEquals(transactionList.get(0).getParentTransactionEntity().get(), transactionFixture);
 
         Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
         assertThat(total, is(1L));

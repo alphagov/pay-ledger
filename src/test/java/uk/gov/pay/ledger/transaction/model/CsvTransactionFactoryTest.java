@@ -10,7 +10,6 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import java.time.ZonedDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,7 +85,7 @@ public class CsvTransactionFactoryTest {
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(refundTransactionEntity);
 
-        assertPaymentDetails(csvDataMap, refundTransactionEntity.getParentTransactionEntity());
+        assertPaymentDetails(csvDataMap, refundTransactionEntity.getParentTransactionEntity().get());
         assertThat(csvDataMap.get("Amount"), is("-0.99"));
         assertThat(csvDataMap.get("State"), is("Refund error"));
         assertThat(csvDataMap.get("Finished"), is(true));
