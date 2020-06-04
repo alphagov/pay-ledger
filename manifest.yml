@@ -25,7 +25,7 @@ applications:
       DB_SSL_OPTION: ''
 
       # Provided by the sqs service - see src/main/resources/env-map.yml
-      AWS_SQS_ENDPOINT: ''
+      AWS_SQS_REGION: ''
       AWS_SQS_PAYMENT_EVENT_QUEUE_URL: ''
 
       # Provided by ledger-secret-service see src/main/resource/env-map.yml
