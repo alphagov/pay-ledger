@@ -4,7 +4,6 @@ env_vars:
   DB_PASSWORD:                      '.[][] | select(.name == "ledger-db") | .credentials.password                     '
   DB_USER:                          '.[][] | select(.name == "ledger-db") | .credentials.username                     '
   DB_SSL_OPTION:                    '.[][] | select(.name == "ledger-db") | .credentials.ssl_option      // "ssl=true"'
-  AWS_SQS_ENDPOINT:                 '.[][] | select(.name == "sqs")       | .credentials.endpoint                     '
   AWS_SQS_PAYMENT_EVENT_QUEUE_URL:  '.[][] | select(.name == "sqs")       | .credentials.event_queue_url              '
   AWS_ACCESS_KEY:                   '.[][] | select(.name == "ledger-secret-service") | .credentials.aws_access_key   '
   AWS_SECRET_KEY:                   '.[][] | select(.name == "ledger-secret-service") | .credentials.aws_secret_key   '
