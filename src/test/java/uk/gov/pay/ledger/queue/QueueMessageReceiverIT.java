@@ -1,12 +1,10 @@
 package uk.gov.pay.ledger.queue;
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import uk.gov.pay.ledger.event.model.ResourceType;
+import org.junit.ClassRule;
+import org.junit.Test;
 import uk.gov.pay.ledger.event.model.SalientEventType;
-import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
+import uk.gov.pay.ledger.event.model.ResourceType;
+import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture;
 
 import java.time.ZonedDateTime;
@@ -20,10 +18,8 @@ import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaym
 
 public class QueueMessageReceiverIT {
 
-    @RegisterExtension
-    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension(
-            config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true")
-    );
+    @ClassRule
+    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule(config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true"));
 
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
 

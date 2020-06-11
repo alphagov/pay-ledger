@@ -30,4 +30,8 @@ public class EventService {
             return new CreateEventResponse(e);
         }
     }
+
+    public EventDigest getEventDigestForResource(Event event) {
+        return getEventDigestForResource(event.getResourceExternalId());
+    }
 }

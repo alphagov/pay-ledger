@@ -160,6 +160,10 @@ public class TransactionService {
 
     public void upsertTransactionFor(EventDigest eventDigest) {
         TransactionEntity transaction = transactionEntityFactory.create(eventDigest);
+        upsertTransaction(transaction);
+    }
+
+    public void upsertTransaction(TransactionEntity transaction) {
         transactionDao.upsert(transaction);
     }
 
