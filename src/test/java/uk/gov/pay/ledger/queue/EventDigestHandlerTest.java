@@ -68,7 +68,7 @@ public class EventDigestHandlerTest {
         Event event = anEventFixture().withResourceType(PAYMENT).toEntity();
         eventDigestHandler.processEvent(event);
 
-        verify(eventService).getEventDigestForResource(event.getResourceExternalId());
+        verify(eventService).getEventDigestForResource(event);
         verify(transactionService).upsertTransactionFor(eventDigest);
         verify(transactionMetadataService).upsertMetadataFor(event);
     }
@@ -78,7 +78,7 @@ public class EventDigestHandlerTest {
         Event event = anEventFixture().withResourceType(REFUND).toEntity();
         eventDigestHandler.processEvent(event);
 
-        verify(eventService).getEventDigestForResource(event.getResourceExternalId());
+        verify(eventService).getEventDigestForResource(event);
         verify(transactionService).upsertTransactionFor(eventDigest);
         verify(transactionMetadataService).upsertMetadataFor(event);
     }
@@ -88,7 +88,7 @@ public class EventDigestHandlerTest {
         Event event = anEventFixture().withResourceType(PAYOUT).toEntity();
         eventDigestHandler.processEvent(event);
 
-        verify(eventService).getEventDigestForResource(event.getResourceExternalId());
+        verify(eventService).getEventDigestForResource(event);
         verify(payoutService).upsertPayoutFor(eventDigest);
     }
 

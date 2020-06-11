@@ -36,12 +36,10 @@ public class EventDigestHandler {
     }
 
     public void processEvent(Event event) {
-        EventDigest eventDigest = eventService.getEventDigestForResource(event.getResourceExternalId());
-
         if (isATransactionEvent(event.getResourceType())) {
-            processDigestForTransactionEvent(event, eventDigest);
+            processDigestForTransactionEvent(event);
         } else if (isAPayoutEvent(event.getResourceType())) {
-            processDigestForPayout(eventDigest);
+            processDigestForPayout(event);
         } else {
             LOGGER.warn("Event digest processing for resource type [{}] is not supported. Event type [{}] and resource external id [{}]",
                     event.getResourceType(),
@@ -58,12 +56,13 @@ public class EventDigestHandler {
         return PAYMENT.equals(resourceType) || REFUND.equals(resourceType);
     }
 
-    private void processDigestForTransactionEvent(Event event, EventDigest eventDigest) {
+    private void processDigestForTransactionEvent(Event event) {
+        EventDigest eventDigest = eventService.getEventDigestForResource(event);
         transactionService.upsertTransactionFor(eventDigest);
         transactionMetadataService.upsertMetadataFor(event);
     }
 
-    private void processDigestForPayout(EventDigest eventDigest) {
-        payoutService.upsertPayoutFor(eventDigest);
+    private void processDigestForPayout(Event event) {
+        payoutService.upsertPayoutFor(eventService.getEventDigestForResource(event));
     }
 }

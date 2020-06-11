@@ -38,6 +38,8 @@ public class EventServiceTest {
 
     private ZonedDateTime latestEventTime;
     private final String resourceExternalId = "resource_external_id";
+    private Event event1;
+    private Event event2;
 
     @BeforeEach
     public void setUp() {
@@ -45,13 +47,13 @@ public class EventServiceTest {
 
         latestEventTime = ZonedDateTime.now().minusHours(1L);
         String eventDetails1 = "{ \"amount\": 1000}";
-        Event event1 = EventFixture.anEventFixture()
+        event1 = EventFixture.anEventFixture()
                 .withEventData(eventDetails1)
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(latestEventTime)
                 .toEntity();
         String eventDetails2 = "{ \"amount\": 2000, \"description\": \"a payment\"}";
-        Event event2 = EventFixture.anEventFixture()
+        event2 = EventFixture.anEventFixture()
                 .withEventData(eventDetails2)
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(ZonedDateTime.now().minusHours(2L))
@@ -61,7 +63,7 @@ public class EventServiceTest {
 
     @Test
     public void getEventDigestForResource_shouldUseFirstEventInListToPopulateEventDigestMetadata() {
-        EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
+        EventDigest eventDigest = eventService.getEventDigestForResource(event1);
 
         assertThat(eventDigest.getMostRecentEventTimestamp(), is(latestEventTime));
         assertThat(eventDigest.getMostRecentSalientEventType().get(), is(SalientEventType.PAYMENT_CREATED));
@@ -69,7 +71,7 @@ public class EventServiceTest {
 
     @Test
     public void laterEventsShouldOverrideEarlierEventsInEventDetailsDigest() {
-        EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
+        EventDigest eventDigest = eventService.getEventDigestForResource(event1);
 
         assertThat(eventDigest.getEventPayload().get("description"), is("a payment"));
         assertThat(eventDigest.getEventPayload().get("amount"), is(1000));
@@ -92,7 +94,7 @@ public class EventServiceTest {
                 .toEntity();
         when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(List.of(event2, event1));
 
-        EventDigest eventDigest = eventService.getEventDigestForResource(resourceExternalId);
+        EventDigest eventDigest = eventService.getEventDigestForResource(event1);
 
         assertThat(eventDigest.getMostRecentSalientEventType().get(), is(SalientEventType.PAYMENT_CREATED));
     }
