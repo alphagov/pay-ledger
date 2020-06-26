@@ -1,21 +1,25 @@
 package uk.gov.pay.ledger.queue;
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
+import uk.gov.pay.ledger.transaction.dao.TransactionDao;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
+import java.util.Optional;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 public class QueueMessageReceiverIT {
@@ -24,6 +28,8 @@ public class QueueMessageReceiverIT {
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension(
             config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true")
     );
+
+    TransactionDao transactionDao = new TransactionDao(rule.getJdbi());
 
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
 
@@ -102,6 +108,21 @@ public class QueueMessageReceiverIT {
         final String resourceExternalId = "rexid";
         final String parentResourceExternalId = "parentRexId";
         final String gatewayAccountId = "test_accountId";
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(parentResourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("PAYMENT_CREATED")
+                .withDefaultEventDataForEventType("PAYMENT_CREATED")
+                .insert(rule.getSqsClient());
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(parentResourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("PAYMENT_DETAILS_ENTERED")
+                .withDefaultEventDataForEventType("PAYMENT_DETAILS_ENTERED")
+                .insert(rule.getSqsClient());
+
         aQueuePaymentEventFixture()
                 .withResourceExternalId(parentResourceExternalId)
                 .withEventDate(CREATED_AT)
@@ -129,6 +150,22 @@ public class QueueMessageReceiverIT {
                 .statusCode(200)
                 .body("transaction_id", is(resourceExternalId))
                 .body("state.status", is("submitted"));
+
+        Optional<TransactionEntity> mayBeRefund = transactionDao.findTransactionByExternalId(resourceExternalId);
+        TransactionEntity refund = mayBeRefund.get();
+        assertThat(refund.getCardholderName(), is("J citizen"));
+        assertThat(refund.getEmail(), is("j.doe@example.org"));
+        assertThat(refund.getCardBrand(), is("visa"));
+        assertThat(refund.getDescription(), is("a description"));
+        assertThat(refund.getLastDigitsCardNumber(), is("4242"));
+        assertThat(refund.getFirstDigitsCardNumber(), is("424242"));
+        assertThat(refund.getReference(), is("aref"));
+        Map<String, String> transactionDetails = new Gson().fromJson(refund.getTransactionDetails(), Map.class);
+        assertThat(transactionDetails.get("reference"), is("aref"));
+        assertThat(transactionDetails.get("card_brand_label"), is("Visa"));
+        assertThat(transactionDetails.get("expiry_date"), is("11/21"));
+        assertThat(transactionDetails.get("card_type"), is("DEBIT"));
+        assertThat(transactionDetails.get("wallet_type"), is("Google Pay"));
     }
 
     @Test

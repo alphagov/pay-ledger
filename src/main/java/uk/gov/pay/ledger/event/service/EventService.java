@@ -17,7 +17,7 @@ public class EventService {
         this.eventDao = eventDao;
     }
 
-    private EventDigest getEventDigestForResource(String resourceExternalId) {
+    public EventDigest getEventDigestForResource(String resourceExternalId) {
         List<Event> events = eventDao.getEventsByResourceExternalId(resourceExternalId);
         return EventDigest.fromEventList(events);
     }

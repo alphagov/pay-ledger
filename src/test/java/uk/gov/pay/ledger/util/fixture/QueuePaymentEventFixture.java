@@ -135,9 +135,11 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("address_country", "GB")
                                 .put("card_type", "DEBIT")
                                 .put("card_brand", "visa")
+                                .put("card_brand_label", "Visa")
                                 .put("gateway_transaction_id", gatewayAccountId)
                                 .put("corporate_surcharge", 5)
                                 .put("total_amount", 1005)
+                                .put("wallet_type", "Google Pay")
                                 .build());
                 break;
             case "CAPTURE_CONFIRMED":
