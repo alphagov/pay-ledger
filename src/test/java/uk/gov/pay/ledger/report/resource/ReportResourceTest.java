@@ -1,14 +1,15 @@
 package uk.gov.pay.ledger.report.resource;
 
-import io.dropwizard.testing.junit.ResourceTestRule;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import io.dropwizard.testing.junit5.ResourceExtension;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.exception.JerseyViolationExceptionMapper;
-import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
+import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.report.service.ReportService;
 
@@ -21,12 +22,12 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public class ReportResourceTest {
 
     private static final ReportService mockReportService = mock(ReportService.class);
 
-    @ClassRule
-    public static ResourceTestRule resources = ResourceTestRule.builder()
+    public static ResourceExtension resources = ResourceExtension.builder()
             .addResource(new ReportResource(mockReportService))
             .addProvider(BadRequestExceptionMapper.class)
             .addProvider(JerseyViolationExceptionMapper.class)

@@ -2,11 +2,11 @@ package uk.gov.pay.ledger.queue;
 
 import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EventQueueTest {
 
     @Mock
@@ -34,7 +34,7 @@ public class EventQueueTest {
 
     private EventQueue eventQueue;
 
-    @Before
+    @BeforeEach
     public void setUp() throws QueueException {
         String validJsonMessage = "{" +
                 "\"id\": \"my-id\"," +

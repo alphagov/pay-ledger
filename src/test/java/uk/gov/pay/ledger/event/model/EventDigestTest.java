@@ -1,6 +1,6 @@
 package uk.gov.pay.ledger.event.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;
 import java.util.List;

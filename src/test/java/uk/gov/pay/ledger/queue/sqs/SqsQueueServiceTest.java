@@ -5,11 +5,11 @@ import com.amazonaws.services.sqs.model.AmazonSQSException;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
 import uk.gov.pay.ledger.queue.QueueException;
@@ -19,12 +19,13 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SqsQueueServiceTest {
 
     @Mock
@@ -35,7 +36,7 @@ public class SqsQueueServiceTest {
 
     private SqsQueueService sqsQueueService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         SqsConfig sqsConfig = mock(SqsConfig.class);
         when(sqsConfig.getMessageMaximumBatchSize()).thenReturn(10);
@@ -78,9 +79,9 @@ public class SqsQueueServiceTest {
         assertTrue(queueMessages.isEmpty());
     }
 
-    @Test(expected = QueueException.class)
-    public void receiveMessagesShouldThrowQueueExceptionIfMessagesCannotBeReceived() throws QueueException {
+    @Test
+    public void receiveMessagesShouldThrowQueueExceptionIfMessagesCannotBeReceived() {
         when(sqsClient.receiveMessage(any(ReceiveMessageRequest.class))).thenThrow(AmazonSQSException.class);
-        sqsQueueService.receiveMessages("some-queue-url", "some-attribute-name");
+        assertThrows(QueueException.class, () -> sqsQueueService.receiveMessages("some-queue-url", "some-attribute-name"));
     }
 }

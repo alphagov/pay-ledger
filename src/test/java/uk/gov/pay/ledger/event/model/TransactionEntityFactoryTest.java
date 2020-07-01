@@ -3,10 +3,8 @@ package uk.gov.pay.ledger.event.model;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
@@ -22,14 +20,11 @@ import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaym
 
 public class TransactionEntityFactoryTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private TransactionEntityFactory transactionEntityFactory;
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         transactionEntityFactory = new TransactionEntityFactory(new ObjectMapper());
     }

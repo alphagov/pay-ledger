@@ -1,18 +1,17 @@
 package uk.gov.pay.ledger.queue;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.BeforeClass;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
@@ -27,7 +26,6 @@ import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,7 +36,7 @@ import static uk.gov.pay.ledger.event.model.ResourceType.PAYOUT;
 import static uk.gov.pay.ledger.event.model.ResourceType.REFUND;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EventDigestHandlerTest {
 
     @Mock
@@ -58,7 +56,7 @@ public class EventDigestHandlerTest {
     private EventDigestHandler eventDigestHandler;
     private EventDigest eventDigest;
 
-    @Before
+    @BeforeClass
     public void setUp() {
         eventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));
         when(eventService.getEventDigestForResource(any()))

@@ -1,12 +1,10 @@
 package uk.gov.pay.ledger.payout.service;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.payout.dao.PayoutDao;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.payout.model.PayoutEntityFactory;
@@ -21,14 +19,14 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.aPayoutList;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PayoutServiceTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
     @Mock
     private PayoutDao mockPayoutDao;
     @Mock
@@ -39,11 +37,11 @@ public class PayoutServiceTest {
     private String gatewayAccountId = "12345";
     private PayoutSearchParams searchParams;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         payoutService = new PayoutService(mockPayoutDao, payoutEntityFactory);
-        when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://example.com"));
-        when(mockUriInfo.getPath()).thenReturn("/v1/payout");
+        lenient().when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://example.com"));
+        lenient().when(mockUriInfo.getPath()).thenReturn("/v1/payout");
     }
 
     @Test
@@ -77,10 +75,9 @@ public class PayoutServiceTest {
         when(mockPayoutDao.searchPayouts(searchParams)).thenReturn(List.of());
         when(mockPayoutDao.getTotalForSearch(searchParams)).thenReturn(10L);
 
-        thrown.expect(WebApplicationException.class);
-        thrown.expectMessage("The requested page was not found");
-
-        PayoutSearchResponse response = payoutService.searchPayouts(searchParams, mockUriInfo);
+        WebApplicationException webApplicationException = assertThrows(WebApplicationException.class,
+                () -> payoutService.searchPayouts(searchParams, mockUriInfo));
+        assertThat(webApplicationException.getMessage(), is("The requested page was not found"));
     }
 
     @Test

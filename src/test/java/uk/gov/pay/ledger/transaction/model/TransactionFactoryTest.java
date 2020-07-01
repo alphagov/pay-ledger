@@ -2,8 +2,8 @@ package uk.gov.pay.ledger.transaction.model;
 
 import com.google.gson.JsonObject;
 import io.dropwizard.jackson.Jackson;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -12,10 +12,10 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.emptyString;
 
 public class TransactionFactoryTest {
 
@@ -47,7 +47,7 @@ public class TransactionFactoryTest {
     private String cardExpiryDate = "10/27";
     private String walletType = "APPLE_PAY";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         JsonObject metadata = new JsonObject();
         metadata.addProperty("ledger_code", 123);

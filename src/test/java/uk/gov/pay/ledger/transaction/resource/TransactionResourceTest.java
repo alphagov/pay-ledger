@@ -1,11 +1,11 @@
 package uk.gov.pay.ledger.transaction.resource;
 
-import io.dropwizard.testing.junit.ResourceTestRule;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import io.dropwizard.testing.junit5.ResourceExtension;
 import org.hamcrest.Matchers;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
@@ -31,14 +31,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(DropwizardExtensionsSupport.class)
+@ExtendWith(MockitoExtension.class)
 public class TransactionResourceTest {
     private static final TransactionService mockTransactionService = mock(TransactionService.class);
     private static final CsvService mockCsvService = mock(CsvService.class);
     private static final LedgerConfig mockConfig = mock(LedgerConfig.class);
 
-    @ClassRule
-    public static final ResourceTestRule resources = ResourceTestRule.builder()
+
+    public static final ResourceExtension resources = ResourceExtension.builder()
             .addResource(new TransactionResource(mockTransactionService, mockCsvService, mockConfig))
             .addProvider(BadRequestExceptionMapper.class)
             .build();

@@ -1,11 +1,9 @@
 package uk.gov.pay.ledger.transaction.service;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
@@ -14,15 +12,15 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AccountIdSupplierManagerTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private Function<List<String>, Optional<TransactionView>> supplier;
@@ -32,10 +30,10 @@ public class AccountIdSupplierManagerTest {
 
     @Test
     public void givenAccountIdNotProvidedWhenRequiredThrowsAnError() {
-        thrown.expect(ValidationException.class);
-        thrown.expectMessage("Field [account_id] cannot be empty");
+        ValidationException validationException = assertThrows(ValidationException.class,
+                () -> setUpAndGet(null, null));
 
-        setUpAndGet(null, null);
+        assertThat(validationException.getMessage(), is("Field [account_id] cannot be empty"));
 
         verify(supplier, never()).apply(any());
         verify(privilegedSupplier, never()).get();

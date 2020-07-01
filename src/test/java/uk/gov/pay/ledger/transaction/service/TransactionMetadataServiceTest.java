@@ -1,9 +1,9 @@
 package uk.gov.pay.ledger.transaction.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TransactionMetadataServiceTest {
 
     @Mock

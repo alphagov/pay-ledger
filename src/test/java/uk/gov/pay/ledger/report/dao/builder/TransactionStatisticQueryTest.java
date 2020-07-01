@@ -1,8 +1,8 @@
 package uk.gov.pay.ledger.report.dao.builder;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Before;
-import org.junit.Test;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -13,7 +13,7 @@ public class TransactionStatisticQueryTest {
 
     private TransactionStatisticQuery transactionStatisticQuery = new TransactionStatisticQuery();
 
-    @Before
+    @BeforeEach
     public void setup() {
         transactionStatisticQuery.getQueryMap().clear();
         transactionStatisticQuery.getFilterTemplates().clear();

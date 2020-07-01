@@ -2,13 +2,11 @@ package uk.gov.pay.ledger.transaction.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.jackson.Jackson;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
@@ -21,13 +19,13 @@ import uk.gov.pay.ledger.transaction.model.TransactionEvent;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
-import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
-import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
+import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriBuilder;
@@ -42,17 +40,17 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TransactionServiceTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
     @Mock
     private TransactionDao mockTransactionDao;
     @Mock
@@ -64,7 +62,7 @@ public class TransactionServiceTest {
     private TransactionSearchParams searchParams;
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ObjectMapper objectMapper = Jackson.newObjectMapper();
         TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(objectMapper);
@@ -75,8 +73,8 @@ public class TransactionServiceTest {
         searchParams = new TransactionSearchParams();
         searchParams.setAccountIds(List.of(gatewayAccountId));
 
-        when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://app.com"));
-        when(mockUriInfo.getPath()).thenReturn("/v1/transaction");
+        lenient().when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://app.com"));
+        lenient().when(mockUriInfo.getPath()).thenReturn("/v1/transaction");
     }
 
     @Test
@@ -166,12 +164,12 @@ public class TransactionServiceTest {
         List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 10);
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
         when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(10L);
-        thrown.expect(WebApplicationException.class);
-        thrown.expectMessage("the requested page not found");
 
         searchParams.setPageNumber(2L);
 
-        transactionService.searchTransactions(searchParams, mockUriInfo);
+        WebApplicationException webApplicationException = assertThrows(WebApplicationException.class,
+                () -> transactionService.searchTransactions(searchParams, mockUriInfo));
+        assertThat(webApplicationException.getMessage(), is("the requested page not found"));
 
         verify(mockTransactionDao).searchTransactions(searchParams);
         verify(mockTransactionDao).getTotalForSearch(searchParams);
@@ -268,10 +266,10 @@ public class TransactionServiceTest {
         when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
                 .thenReturn(new ArrayList<>());
 
-        thrown.expect(WebApplicationException.class);
-        thrown.expectMessage("Transaction with id [external-id] not found");
+        WebApplicationException webApplicationException = assertThrows(WebApplicationException.class,
+                () -> transactionService.findTransactionEvents("external-id", gatewayAccountId, false, 1));
 
-        transactionService.findTransactionEvents("external-id", gatewayAccountId, false, 1);
+        assertThat(webApplicationException.getMessage(), is("Transaction with id [external-id] not found"));
     }
 
     @Test
