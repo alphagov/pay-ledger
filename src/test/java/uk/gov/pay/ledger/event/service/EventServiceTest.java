@@ -2,11 +2,11 @@ package uk.gov.pay.ledger.event.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.jackson.Jackson;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
@@ -18,13 +18,14 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EventServiceTest {
     @Mock
     EventDao mockEventDao;
@@ -38,7 +39,7 @@ public class EventServiceTest {
     private ZonedDateTime latestEventTime;
     private final String resourceExternalId = "resource_external_id";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         eventService = new EventService(mockEventDao);
 
@@ -55,7 +56,7 @@ public class EventServiceTest {
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(ZonedDateTime.now().minusHours(2L))
                 .toEntity();
-        when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(List.of(event1, event2));
+        lenient().when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(List.of(event1, event2));
     }
 
     @Test

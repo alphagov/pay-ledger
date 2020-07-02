@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
@@ -22,15 +20,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 public class PayoutEntityFactoryTest {
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private PayoutEntityFactory payoutEntityFactory;
 
     private GsonBuilder gsonBuilder = new GsonBuilder();
     private ObjectMapper objectMapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         objectMapper = new ObjectMapper();
         payoutEntityFactory = new PayoutEntityFactory(objectMapper);

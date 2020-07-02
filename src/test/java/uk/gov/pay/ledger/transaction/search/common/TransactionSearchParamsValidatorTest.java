@@ -1,25 +1,22 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import uk.gov.pay.ledger.exception.UnparsableDateException;
 import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
-@RunWith(JUnitParamsRunner.class)
-public class TransactionSearchParamsValidatorTest {
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+public class TransactionSearchParamsValidatorTest {
 
     TransactionSearchParams searchParams;
 
-    @Before
+    @BeforeEach
     public void setup() {
         searchParams = new TransactionSearchParams();
     }
@@ -27,17 +24,17 @@ public class TransactionSearchParamsValidatorTest {
     @Test
     public void shouldThrowException_whenInvalidFromDate() {
         searchParams.setFromDate("wrong-date");
-        thrown.expect(UnparsableDateException.class);
-        thrown.expectMessage("Input from_date (wrong-date) is wrong format");
-        TransactionSearchParamsValidator.validateSearchParams(searchParams, null);
+        UnparsableDateException unparsableDateException = assertThrows(UnparsableDateException.class,
+                () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, null));
+        assertThat(unparsableDateException.getMessage(), is("Input from_date (wrong-date) is wrong format"));
     }
 
     @Test
     public void shouldThrowException_whenInvalidToDate() {
         searchParams.setToDate("wrong-date");
-        thrown.expect(UnparsableDateException.class);
-        thrown.expectMessage("Input to_date (wrong-date) is wrong format");
-        TransactionSearchParamsValidator.validateSearchParams(searchParams, null);
+        UnparsableDateException unparsableDateException = assertThrows(UnparsableDateException.class,
+                () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, null));
+        assertThat(unparsableDateException.getMessage(), is("Input to_date (wrong-date) is wrong format"));
     }
 
     @Test
@@ -56,9 +53,9 @@ public class TransactionSearchParamsValidatorTest {
     @Test
     public void shouldNotThrowException_whenGatewayAccountIdsAvailableAndWithParentTransactionIsTrue() {
         searchParams.setWithParentTransaction(true);
-        thrown.expect(ValidationException.class);
-        thrown.expectMessage("gateway_account_id is mandatory to search with parent transaction");
-        TransactionSearchParamsValidator.validateSearchParams(searchParams, new CommaDelimitedSetParameter(""));
+        ValidationException validationException = assertThrows(ValidationException.class,
+                () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, new CommaDelimitedSetParameter("")));
+        assertThat(validationException.getMessage(), is("gateway_account_id is mandatory to search with parent transaction"));
     }
 
     @Test
@@ -75,25 +72,28 @@ public class TransactionSearchParamsValidatorTest {
                 searchParams, new CommaDelimitedSetParameter("1,2"));
     }
 
-    @Test(expected = ValidationException.class)
+    @Test
     public void validateSearchParamsForCsvShouldThrowExceptionIfGatewayAccountIsNotAvailable() {
-        TransactionSearchParamsValidator.validateSearchParamsForCsv(
-                searchParams, new CommaDelimitedSetParameter(""));
-
-        TransactionSearchParamsValidator.validateSearchParamsForCsv(
-                searchParams, null);
+        assertThrows(ValidationException.class, () -> TransactionSearchParamsValidator.validateSearchParamsForCsv(
+                searchParams, null));
     }
 
-    @Parameters({
+    @Test
+    public void validateSearchParamsForCsvShouldThrowExceptionIfGatewayAccountIdsIsEmptyString() {
+        assertThrows(ValidationException.class, () -> TransactionSearchParamsValidator.validateSearchParamsForCsv(
+                searchParams, new CommaDelimitedSetParameter("")));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
             "wrong-date, 2019-05-01T10:15:30Z",
             "2019-05-01T10:15:30Z, wrong-date"
     })
-    @Test(expected = UnparsableDateException.class)
     public void validateSearchParamsForCsvShouldThrowExceptionForInvalidDates(String fromDate, String toDate) {
         searchParams.setFromDate(fromDate);
         searchParams.setToDate(toDate);
 
-        TransactionSearchParamsValidator.validateSearchParamsForCsv(
-                searchParams, new CommaDelimitedSetParameter("1"));
+        assertThrows(UnparsableDateException.class, () -> TransactionSearchParamsValidator.validateSearchParamsForCsv(
+                searchParams, new CommaDelimitedSetParameter("1")));
     }
 }

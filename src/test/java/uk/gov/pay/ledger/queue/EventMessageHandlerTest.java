@@ -1,17 +1,14 @@
 package uk.gov.pay.ledger.queue;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
-import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
-import uk.gov.pay.ledger.transaction.service.TransactionService;
 
 import java.util.List;
 
@@ -20,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EventMessageHandlerTest {
 
     @Mock
@@ -43,7 +40,7 @@ public class EventMessageHandlerTest {
     @InjectMocks
     private EventMessageHandler eventMessageHandler;
 
-    @Before
+    @BeforeEach
     public void setUp() throws QueueException {
         when(eventQueue.retrieveEvents()).thenReturn(List.of(eventMessage));
         when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);

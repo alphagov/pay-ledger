@@ -1,17 +1,17 @@
 package uk.gov.pay.ledger.report.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.report.dao.ReportDao;
 import uk.gov.pay.ledger.report.dao.builder.TransactionStatisticQuery;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
-import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
+import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 
@@ -31,7 +31,7 @@ import static uk.gov.pay.ledger.transaction.state.TransactionState.CREATED;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.ERROR;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.SUCCESS;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ReportServiceTest {
 
     @Mock

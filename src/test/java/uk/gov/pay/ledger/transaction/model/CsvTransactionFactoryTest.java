@@ -3,14 +3,13 @@ package uk.gov.pay.ledger.transaction.model;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import java.time.ZonedDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +24,7 @@ public class CsvTransactionFactoryTest {
     private CsvTransactionFactory csvTransactionFactory;
     private TransactionFixture transactionFixture;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ObjectMapper objectMapper = new ObjectMapper();
         csvTransactionFactory = new CsvTransactionFactory(objectMapper);

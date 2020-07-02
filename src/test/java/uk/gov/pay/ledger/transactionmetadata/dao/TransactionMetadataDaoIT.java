@@ -2,7 +2,6 @@ package uk.gov.pay.ledger.transactionmetadata.dao;
 
 import com.google.common.collect.ImmutableMap;
 import org.hamcrest.MatcherAssert;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -127,7 +126,7 @@ public class TransactionMetadataDaoIT {
 
         MatcherAssert.assertThat(transactionEntityList.size(), is(2));
 
-        Assert.assertThat(transactionEntityList, hasItem("test-key-1"));
-        Assert.assertThat(transactionEntityList, hasItem("test-key-2"));
+        assertThat(transactionEntityList, hasItem("test-key-1"));
+        assertThat(transactionEntityList, hasItem("test-key-2"));
     }
 }

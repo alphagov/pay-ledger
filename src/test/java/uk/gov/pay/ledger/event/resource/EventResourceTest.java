@@ -1,25 +1,25 @@
 package uk.gov.pay.ledger.event.resource;
 
-import io.dropwizard.testing.junit.ResourceTestRule;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import io.dropwizard.testing.junit5.ResourceExtension;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.resource.EventResource;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 
 import javax.ws.rs.core.Response;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@ExtendWith(DropwizardExtensionsSupport.class)
 public class EventResourceTest {
     private static final EventDao dao = mock(EventDao.class);
     private static final Long eventId = 1L;
@@ -28,12 +28,11 @@ public class EventResourceTest {
             .withId(eventId)
             .toEntity();
 
-    @ClassRule
-    public static final ResourceTestRule resources = ResourceTestRule.builder()
+    public static final ResourceExtension resources = ResourceExtension.builder()
             .addResource(new EventResource(dao))
             .build();
 
-    @Before
+    @BeforeEach
     public void setup() {
         when(dao.getById(eventId)).thenReturn(Optional.of(event));
     }

@@ -1,11 +1,11 @@
 package uk.gov.pay.ledger.util.pagination;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.payout.search.PayoutSearchParams;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
@@ -18,7 +18,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PaginationBuilderTest {
 
     @Mock
@@ -28,7 +28,7 @@ public class PaginationBuilderTest {
     PayoutSearchParams payoutSearchParams;
     private final String gatewayAccountExternalId = "a-gateway-account-external-id";
 
-    @Before
+    @BeforeEach
     public void setUp() throws URISyntaxException {
         URI uri = new URI("http://example.org");
         Mockito.when(mockedUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri(uri), UriBuilder.fromUri(uri));

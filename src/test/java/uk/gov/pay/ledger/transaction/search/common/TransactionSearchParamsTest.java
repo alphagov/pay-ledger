@@ -1,7 +1,7 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
@@ -16,7 +16,7 @@ public class TransactionSearchParamsTest {
 
     private TransactionSearchParams transactionSearchParams;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         transactionSearchParams = new TransactionSearchParams();
     }
