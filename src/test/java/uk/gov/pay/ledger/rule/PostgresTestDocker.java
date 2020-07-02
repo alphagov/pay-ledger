@@ -1,5 +1,7 @@
 package uk.gov.pay.ledger.rule;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 
 import java.sql.Connection;
@@ -8,14 +10,19 @@ import java.sql.SQLException;
 import static java.sql.DriverManager.getConnection;
 
 public class PostgresTestDocker {
+
+    private static final Logger logger = LoggerFactory.getLogger(PostgresTestDocker.class);
+
     private static final String DB_NAME = "ledger_test";
     private static final String DB_USERNAME = "test";
     private static final String DB_PASSWORD = "test";
     private static GenericContainer container;
 
-    static void getOrCreate() {
+    public static void getOrCreate() {
         try {
             if (container == null) {
+                logger.info("Creating Postgres Container");
+
                 container = new GenericContainer("postgres:11.1");
                 container.addExposedPort(5432);
 
@@ -58,11 +65,11 @@ public class PostgresTestDocker {
         return getConnectionUrl() + DB_NAME;
     }
 
-    static String getDbPassword() {
+    public static String getDbPassword() {
         return DB_PASSWORD;
     }
 
-    static String getDbUsername() {
+    public static String getDbUsername() {
         return DB_USERNAME;
     }
 }
