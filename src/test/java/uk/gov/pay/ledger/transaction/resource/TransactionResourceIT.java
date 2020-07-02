@@ -1,13 +1,15 @@
 package uk.gov.pay.ledger.transaction.resource;
 
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
@@ -25,14 +27,14 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 
 public class TransactionResourceIT {
 
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+    @RegisterExtension
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private Integer port = rule.getAppRule().getLocalPort();
 
     private TransactionFixture transactionFixture;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         aDatabaseTestHelper(rule.getJdbi()).truncateAllData();
     }

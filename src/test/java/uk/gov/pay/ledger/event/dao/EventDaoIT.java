@@ -2,12 +2,12 @@ package uk.gov.pay.ledger.event.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventTicker;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.ZonedDateTimeTimestampMatcher.isDate;
@@ -28,8 +28,8 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 
 public class EventDaoIT {
 
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+    @RegisterExtension
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -38,7 +38,7 @@ public class EventDaoIT {
     private ResourceTypeDao resourceTypeDao;
     private DatabaseTestHelper dbHelper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         eventDao = rule.getJdbi().onDemand(EventDao.class);
         resourceTypeDao = rule.getJdbi().onDemand(ResourceTypeDao.class);

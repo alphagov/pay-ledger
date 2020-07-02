@@ -1,9 +1,9 @@
 package uk.gov.pay.ledger.report.resource;
 
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -18,13 +18,13 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 
 public class ReportResourceIT {
 
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+    @RegisterExtension
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private Integer port = rule.getAppRule().getLocalPort();
     private final String gatewayAccountId = "abc123";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         aDatabaseTestHelper(rule.getJdbi()).truncateAllData();
     }

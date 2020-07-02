@@ -1,10 +1,12 @@
 package uk.gov.pay.ledger.transaction.dao;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.ClassRule;
-import org.junit.Test;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.commons.model.Source;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -15,19 +17,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class TransactionDaoIT {
 
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+    @RegisterExtension
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private TransactionDao transactionDao = new TransactionDao(rule.getJdbi());
 

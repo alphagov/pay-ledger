@@ -1,11 +1,13 @@
 package uk.gov.pay.ledger.transaction.dao;
 
 
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
@@ -28,8 +30,8 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 
 public class TransactionDaoSearchIT {
 
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+    @RegisterExtension
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private TransactionFixture transactionFixture;
     private TransactionDao transactionDao;
@@ -37,7 +39,7 @@ public class TransactionDaoSearchIT {
 
     private DatabaseTestHelper databaseTestHelper = aDatabaseTestHelper(rule.getJdbi());
 
-    @Before
+    @BeforeEach
     public void setUp() {
         databaseTestHelper.truncateAllData();
         transactionDao = new TransactionDao(rule.getJdbi());

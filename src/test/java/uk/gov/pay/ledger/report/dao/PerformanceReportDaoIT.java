@@ -1,11 +1,13 @@
 package uk.gov.pay.ledger.report.dao;
 
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
 import uk.gov.pay.ledger.report.params.PerformanceReportParams.PerformanceReportParamsBuilder;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
@@ -14,6 +16,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static io.dropwizard.testing.ConfigOverride.config;
 import static java.math.BigDecimal.ZERO;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,14 +26,16 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 
 public class PerformanceReportDaoIT {
 
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+    @RegisterExtension
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension(
+            config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true")
+    );
 
     private DatabaseTestHelper databaseTestHelper = aDatabaseTestHelper(rule.getJdbi());
 
     private PerformanceReportDao transactionDao;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         databaseTestHelper.truncateAllData();
         transactionDao = new PerformanceReportDao(rule.getJdbi());

@@ -2,15 +2,14 @@ package uk.gov.pay.ledger.queue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import junitparams.converters.Nullable;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.pay.ledger.event.model.SalientEventType;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 
 import java.time.ZonedDateTime;
 
@@ -21,21 +20,22 @@ import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.pay.commons.model.Source.CARD_API;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
-@RunWith(JUnitParamsRunner.class)
+@ExtendWith(DropwizardExtensionsSupport.class)
 public class QueueMessageReceiverForTransactionIT {
 
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule(config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true"));
+    @RegisterExtension
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension(
+            config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true"));
 
     private final String gatewayAccountId = "test_gateway_account_id";
 
-    @Test
-    @Parameters({
+    @ParameterizedTest
+    @ValueSource(strings = {
             "true",
             "false",
             "null"
     })
-    public void paymentCreatedMessageIsPersistedCorrectly(@Nullable Boolean moto) throws InterruptedException {
+    public void paymentCreatedMessageIsPersistedCorrectly(Boolean moto) throws InterruptedException {
         String resourceExternalId = RandomStringUtils.random(10, true, true);
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)

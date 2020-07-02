@@ -1,11 +1,13 @@
 package uk.gov.pay.ledger.report.resource;
 
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.commons.model.ErrorIdentifier;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
@@ -23,14 +25,13 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 
 public class PerformanceReportResourceIT {
 
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private Integer port = rule.getAppRule().getLocalPort();
 
     private DatabaseTestHelper databaseTestHelper = aDatabaseTestHelper(rule.getJdbi());
 
-    @After
+    @AfterEach
     public void tearDown() {
         databaseTestHelper.truncateAllData();
     }

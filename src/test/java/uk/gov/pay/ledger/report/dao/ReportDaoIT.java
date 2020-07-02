@@ -1,14 +1,16 @@
 package uk.gov.pay.ledger.report.dao;
 
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.report.dao.builder.TransactionStatisticQuery;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
 import uk.gov.pay.ledger.report.entity.TimeseriesReportSlice;
 import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
@@ -24,14 +26,15 @@ import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class ReportDaoIT {
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+
+    @RegisterExtension
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private ReportDao reportDao;
 
     private DatabaseTestHelper databaseTestHelper = aDatabaseTestHelper(rule.getJdbi());
 
-    @Before
+    @BeforeEach
     public void setUp() {
         databaseTestHelper.truncateAllData();
         reportDao = new ReportDao(rule.getJdbi());
