@@ -1,11 +1,13 @@
 package uk.gov.pay.ledger.payout.dao;
 
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.payout.state.PayoutState;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 
 import java.time.ZonedDateTime;
 
@@ -19,13 +21,14 @@ import static uk.gov.pay.ledger.payout.entity.PayoutEntity.PayoutEntityBuilder.a
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 
 public class PayoutDaoIT {
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+
+    @RegisterExtension
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private PayoutDao payoutDao = new PayoutDao(rule.getJdbi());
     private String gatewayPayoutId;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         gatewayPayoutId = RandomStringUtils.random(6);
     }

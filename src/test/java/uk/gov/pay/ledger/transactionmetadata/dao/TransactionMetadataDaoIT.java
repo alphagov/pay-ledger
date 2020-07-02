@@ -1,12 +1,14 @@
 package uk.gov.pay.ledger.transactionmetadata.dao;
 
 import com.google.common.collect.ImmutableMap;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hamcrest.MatcherAssert;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -26,8 +28,8 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 
 public class TransactionMetadataDaoIT {
 
-    @ClassRule
-    public static AppWithPostgresAndSqsRule rule = new AppWithPostgresAndSqsRule();
+    @RegisterExtension
+    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
     private static String key = "key-1";
     private TransactionMetadataDao transactionMetadataDao;
     private DatabaseTestHelper dbHelper;
@@ -35,7 +37,7 @@ public class TransactionMetadataDaoIT {
     private TransactionFixture transactionFixture;
     private TransactionSearchParams searchParams;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         transactionMetadataDao = new TransactionMetadataDao(rule.getJdbi());
         metadataKeyDao = rule.getJdbi().onDemand(MetadataKeyDao.class);

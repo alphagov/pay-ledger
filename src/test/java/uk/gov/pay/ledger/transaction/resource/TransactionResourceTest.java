@@ -38,7 +38,6 @@ public class TransactionResourceTest {
     private static final CsvService mockCsvService = mock(CsvService.class);
     private static final LedgerConfig mockConfig = mock(LedgerConfig.class);
 
-
     public static final ResourceExtension resources = ResourceExtension.builder()
             .addResource(new TransactionResource(mockTransactionService, mockCsvService, mockConfig))
             .addProvider(BadRequestExceptionMapper.class)
@@ -143,7 +142,6 @@ public class TransactionResourceTest {
                 .request()
                 .get();
 
-        System.out.println(response.readEntity(String.class));
         assertThat(response.getStatus(), is(404));
     }
 

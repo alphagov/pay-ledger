@@ -1,20 +1,24 @@
 package uk.gov.pay.ledger.healthcheck;
 
-import org.junit.Rule;
-import org.junit.Test;
-import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
-import uk.gov.pay.ledger.rule.SqsTestDocker;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.rule.PostgresTestDocker;
+import uk.gov.pay.ledger.rule.SqsTestDocker;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public class HealthCheckResourceIT {
 
-    @Rule
-    public AppWithPostgresAndSqsRule app = new AppWithPostgresAndSqsRule();
+    @RegisterExtension
+    public AppWithPostgresAndSqsExtension app = new AppWithPostgresAndSqsExtension();
 
     @Test
     public void healthcheckIdentifiesHealthySQSQueue() {
