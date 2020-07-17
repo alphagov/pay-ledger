@@ -69,35 +69,35 @@ public class TransactionFactory {
                     safeGetAsDate(transactionDetails, "captured_date")
             );
 
-            return new Payment(
-                    entity.getGatewayAccountId(),
-                    entity.getAmount(),
-                    entity.getReference(),
-                    entity.getDescription(),
-                    entity.getState(),
-                    safeGetAsString(transactionDetails, "language"),
-                    entity.getExternalId(),
-                    safeGetAsString(transactionDetails, "return_url"),
-                    entity.getEmail(),
-                    safeGetAsString(transactionDetails, "payment_provider"),
-                    entity.getCreatedDate(),
-                    cardDetails,
-                    safeGetAsBoolean(transactionDetails, "delayed_capture", false),
-                    metadata,
-                    entity.getEventCount(),
-                    safeGetAsString(transactionDetails, "gateway_transaction_id"),
-                    safeGetAsLong(transactionDetails, "corporate_surcharge"),
-                    entity.getFee(),
-                    entity.getNetAmount(),
-                    refundSummary,
-                    entity.getTotalAmount(),
-                    settlementSummary,
-                    entity.isMoto(),
-                    entity.isLive(),
-                    entity.getSource(),
-                    safeGetAsString(transactionDetails, "wallet"),
-                    entity.getGatewayPayoutId()
-            );
+            return new Payment.Builder()
+                    .withGatewayAccountId(entity.getGatewayAccountId())
+                    .withAmount(entity.getAmount())
+                    .withReference(entity.getReference())
+                    .withDescription(entity.getDescription())
+                    .withState(entity.getState())
+                    .withLanguage(safeGetAsString(transactionDetails, "language"))
+                    .withExternalId(entity.getExternalId())
+                    .withReturnUrl(safeGetAsString(transactionDetails, "return_url"))
+                    .withEmail(entity.getEmail())
+                    .withPaymentProvider(safeGetAsString(transactionDetails, "payment_provider"))
+                    .withCreatedDate(entity.getCreatedDate())
+                    .withCardDetails(cardDetails)
+                    .withDelayedCapture(safeGetAsBoolean(transactionDetails, "delayed_capture", false))
+                    .withExternalMetadata(metadata)
+                    .withEventCount(entity.getEventCount())
+                    .withGatewayTransactionId(safeGetAsString(transactionDetails, "gateway_transaction_id"))
+                    .withCorporateCardSurcharge(safeGetAsLong(transactionDetails, "corporate_surcharge"))
+                    .withFee(entity.getFee())
+                    .withNetAmount(entity.getNetAmount())
+                    .withRefundSummary(refundSummary)
+                    .withTotalAmount(entity.getTotalAmount())
+                    .withSettlementSummary(settlementSummary)
+                    .withMoto(entity.isMoto())
+                    .withLive(entity.isLive())
+                    .withSource(entity.getSource())
+                    .withWalletType(safeGetAsString(transactionDetails, "wallet"))
+                    .withGatewayPayoutId(entity.getGatewayPayoutId())
+                    .build();
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
         }
