@@ -5,7 +5,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +32,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYOUT;
@@ -87,7 +85,6 @@ public class EventDigestHandlerTest {
 
         verify(eventService).getEventDigestForResource(event);
         verify(transactionService).upsertTransaction(any());
-        verify(transactionMetadataService).upsertMetadataFor(event);
     }
 
     @Test
