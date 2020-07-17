@@ -43,7 +43,7 @@ public class RefundSucceededEventQueueContractTest {
     private QueueRefundEventFixture refundFixture = aQueueRefundEventFixture()
             .withResourceType(ResourceType.REFUND)
             .withEventType("REFUND_SUCCEEDED")
-            .withReference("a_reference")
+            .withGatewayTransactionId("a_gateway_transaction_id")
             .withDefaultEventDataForEventType("REFUND_SUCCEEDED");
 
     @Before
@@ -85,7 +85,7 @@ public class RefundSucceededEventQueueContractTest {
         assertThat(transaction.get().getExternalId(), is(refundFixture.getResourceExternalId()));
         assertThat(transaction.get().getParentExternalId(), is(refundFixture.getParentResourceExternalId()));
         assertThat(transaction.get().getCreatedDate(),is(refundFixture.getEventDate()));
-        assertThat(transaction.get().getReference(), is(refundFixture.getReference()));
+        assertThat(transaction.get().getGatewayTransactionId(), is(refundFixture.getGatewayTransactionId()));
     }
 
     public void setMessage(byte[] messageContents) {

@@ -21,7 +21,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
     private String eventData = "{\"event_data\": \"event data\"}";
     private String refundedBy = "a_user_id";
     private String userEmail = "test@example.com";
-    private String reference = null;
+    private String gatewayTransactionId = null;
 
     private QueueRefundEventFixture() {
     }
@@ -65,11 +65,6 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
         return this;
     }
 
-    public QueueRefundEventFixture withReference(String reference) {
-        this.reference = reference;
-        return this;
-    }
-
     public QueueRefundEventFixture withDefaultEventDataForEventType(String eventType) {
         switch (eventType) {
             case "REFUND_CREATED_BY_SERVICE":
@@ -94,7 +89,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
             case "REFUND_SUCCEEDED":
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
-                                .put("reference", reference)
+                                .put("gateway_transaction_id", gatewayTransactionId)
                                 .build());
                 break;
             default:
@@ -141,10 +136,6 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
         return userEmail;
     }
 
-    public String getReference() {
-        return reference;
-    }
-
     @Override
     public QueueRefundEventFixture insert(AmazonSQS sqsClient) {
         this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, resourceExternalId,
@@ -174,4 +165,12 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
         return amount;
     }
 
+    public String getGatewayTransactionId() {
+        return gatewayTransactionId;
+    }
+
+    public QueueRefundEventFixture withGatewayTransactionId(String gatewayTransactionId) {
+        this.gatewayTransactionId = gatewayTransactionId;
+        return this;
+    }
 }
