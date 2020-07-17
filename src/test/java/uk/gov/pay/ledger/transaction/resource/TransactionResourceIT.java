@@ -1,11 +1,9 @@
 package uk.gov.pay.ledger.transaction.resource;
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.event.model.Event;
@@ -146,6 +144,7 @@ public class TransactionResourceIT {
                 .withCreatedDate(now)
                 .withRefundedById(refundedBy)
                 .withRefundedByUserEmail(refundedByUserEmail)
+                .withGatewayTransactionId("gateway-transaction-id")
                 .withDefaultTransactionDetails()
                 .withGatewayPayoutId(gatewayPayoutId);
         transactionFixture.insert(rule.getJdbi());
@@ -159,7 +158,7 @@ public class TransactionResourceIT {
                 .body("transaction_id", is(transactionFixture.getExternalId()))
                 .body("state.status", is(transactionFixture.getState().getStatus()))
                 .body("amount", is(transactionFixture.getAmount().intValue()))
-                .body("reference", is(transactionFixture.getReference()))
+                .body("gateway_transaction_id", is(transactionFixture.getGatewayTransactionId()))
                 .body("created_date", is(now.toString()))
                 .body("refunded_by", is(refundedBy))
                 .body("refunded_by_user_email", is(refundedByUserEmail))
@@ -223,6 +222,7 @@ public class TransactionResourceIT {
                 .withState(TransactionState.SUCCESS)
                 .withAmount(1000L)
                 .withRefundedById("refund-by-user-id")
+                .withGatewayTransactionId("gateway-transaction-id")
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi())
                 .toEntity();
@@ -238,7 +238,7 @@ public class TransactionResourceIT {
                 .body("transactions[0].amount", is(1000))
                 .body("transactions[0].state.status", is(refundTransactionEntity.getState().getStatus()))
                 .body("transactions[0].state.finished", is(true))
-                .body("transactions[0].reference", is(refundTransactionEntity.getReference()))
+                .body("transactions[0].gateway_transaction_id", is(refundTransactionEntity.getGatewayTransactionId()))
                 .body("transactions[0].created_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(refundTransactionEntity.getCreatedDate())))
                 .body("transactions[0].refunded_by", is("refund-by-user-id"))
                 .body("transactions[0].transaction_type", is(refundTransactionEntity.getTransactionType()))

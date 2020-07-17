@@ -178,7 +178,7 @@ public class TransactionFactoryTest {
                 .withExternalId(externalId)
                 .withParentExternalId("parent-ext-id")
                 .withAmount(amount)
-                .withReference(reference)
+                .withGatewayTransactionId("gti_12334")
                 .withState(state)
                 .withCreatedDate(createdDate)
                 .withEventCount(eventCount)
@@ -193,7 +193,7 @@ public class TransactionFactoryTest {
         assertThat(refundEntity.getParentExternalId(), is("parent-ext-id"));
         assertThat(refundEntity.getRefundedBy(), is("some_user_id"));
         assertThat(refundEntity.getRefundedByUserEmail(), is("test@example.com"));
-        assertThat(refundEntity.getReference(), is(reference));
+        assertThat(refundEntity.getGatewayTransactionId(), is("gti_12334"));
         assertThat(refundEntity.getState(), is(state));
         assertThat(refundEntity.getCreatedDate(), is(createdDate));
         assertThat(refundEntity.getEventCount(), is(eventCount));
