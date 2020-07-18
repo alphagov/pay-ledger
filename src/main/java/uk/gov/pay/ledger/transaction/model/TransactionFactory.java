@@ -112,6 +112,19 @@ public class TransactionFactory {
             Optional<Transaction> parentTransaction = Optional.ofNullable(entity.getParentTransactionEntity())
                     .map(this::createTransactionEntity);
 
+            CardType cardType = CardType.fromString(safeGetAsString(transactionDetails, "card_type"));
+            CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), null,
+                    safeGetAsString(transactionDetails, "card_brand_label"), entity.getLastDigitsCardNumber(),
+                    entity.getFirstDigitsCardNumber(), safeGetAsString(transactionDetails, "expiry_date"), cardType);
+
+            Payment paymentDetails = new Payment.Builder()
+                    .withReference(entity.getReference())
+                    .withDescription(entity.getDescription())
+                    .withEmail(entity.getEmail())
+                    .withCardDetails(cardDetails)
+                    .withWalletType(safeGetAsString(transactionDetails, "wallet"))
+                    .build();
+
             return new Refund.Builder()
                     .withGatewayAccountId(entity.getGatewayAccountId())
                     .withAmount(entity.getAmount())
@@ -125,6 +138,7 @@ public class TransactionFactory {
                     .withParentExternalId(entity.getParentExternalId())
                     .withParentTransaction(parentTransaction)
                     .withGatewayPayoutId(entity.getGatewayPayoutId())
+                    .withSharedPaymentDetails(paymentDetails)
                     .build();
 
         } catch (IOException e) {

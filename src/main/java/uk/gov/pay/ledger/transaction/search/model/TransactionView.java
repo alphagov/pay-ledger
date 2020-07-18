@@ -59,6 +59,7 @@ public class TransactionView {
     private Source source;
     private String walletType;
     private String gatewayPayoutId;
+    private Payment sharedPaymentDetails;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -93,6 +94,7 @@ public class TransactionView {
         this.source = builder.source;
         this.walletType = builder.walletType;
         this.gatewayPayoutId = builder.gatewayPayoutId;
+        this.sharedPaymentDetails = builder.sharedPaymentDetails;
     }
 
     public TransactionView() {
@@ -150,6 +152,7 @@ public class TransactionView {
                 .withTransactionType(refund.getTransactionType())
                 .withParentTransaction(refund.getParentTransaction().map(parentTransaction -> from(parentTransaction, statusVersion)).orElse(null))
                 .withGatewayPayoutId(refund.getGatewayPayoutId())
+                .withSharedPaymentDetails(refund.getSharedPaymentDetails())
                 .build();
     }
 
@@ -296,6 +299,10 @@ public class TransactionView {
         return gatewayPayoutId;
     }
 
+    public Payment getSharedPaymentDetails() {
+        return sharedPaymentDetails;
+    }
+
     public static class Builder {
         private TransactionView parentTransaction;
         private Long id;
@@ -330,6 +337,7 @@ public class TransactionView {
         private Source source;
         private String walletType;
         private String gatewayPayoutId;
+        private Payment sharedPaymentDetails;
 
         public Builder() {
         }
@@ -495,6 +503,11 @@ public class TransactionView {
 
         public Builder withGatewayPayoutId(String gatewayPayoutId) {
             this.gatewayPayoutId = gatewayPayoutId;
+            return this;
+        }
+
+        public Builder withSharedPaymentDetails(Payment sharedPaymentDetails) {
+            this.sharedPaymentDetails = sharedPaymentDetails;
             return this;
         }
     }

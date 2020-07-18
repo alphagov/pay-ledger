@@ -201,6 +201,59 @@ public class TransactionFactoryTest {
         assertCorrectPaymentTransactionWithFullData((Payment) refundEntity.getParentTransaction().get());
     }
 
+    @Test
+    public void createsRefundWithSharedPaymentDetailsFromTransactionEntity() {
+        TransactionEntity refund = new TransactionEntity.Builder()
+                .withTransactionType("REFUND")
+                .withId(id)
+                .withGatewayAccountId(gatewayAccountId)
+                .withExternalId(externalId)
+                .withParentExternalId("parent-ext-id")
+                .withAmount(amount)
+                .withGatewayTransactionId("gti_12334")
+                .withState(state)
+                .withCreatedDate(createdDate)
+                .withEventCount(eventCount)
+                .withParentTransactionEntity(fullDataObject)
+                .withTransactionDetails("{\"refunded_by\": \"some_user_id\", \"user_email\": \"test@example.com\", \"expiry_date\": \"10/27\", \"card_type\": \"credit\", \"wallet\": \"APPLE_PAY\", \"card_brand_label\": \"Visa\"}")
+
+                .withCardholderName("a-cardholder-name")
+                .withFirstDigitsCardNumber("1234")
+                .withLastDigitsCardNumber("5678")
+                .withEmail("a-email")
+                .withDescription("a-description")
+                .withReference("a-reference")
+                .build();
+        Refund refundEntity = (Refund) transactionFactory.createTransactionEntity(refund);
+
+        assertThat(refundEntity.getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(refundEntity.getAmount(), is(amount));
+        assertThat(refundEntity.getExternalId(), is(externalId));
+        assertThat(refundEntity.getParentExternalId(), is("parent-ext-id"));
+        assertThat(refundEntity.getRefundedBy(), is("some_user_id"));
+        assertThat(refundEntity.getRefundedByUserEmail(), is("test@example.com"));
+        assertThat(refundEntity.getGatewayTransactionId(), is("gti_12334"));
+        assertThat(refundEntity.getState(), is(state));
+        assertThat(refundEntity.getCreatedDate(), is(createdDate));
+        assertThat(refundEntity.getEventCount(), is(eventCount));
+
+        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getCardHolderName(), is("a-cardholder-name"));
+        assertThat(refundEntity.getSharedPaymentDetails().getEmail(), is("a-email"));
+        assertThat(refundEntity.getSharedPaymentDetails().getDescription(), is("a-description"));
+
+        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getCardBrand(), is("Visa"));
+
+        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getLastDigitsCardNumber(), is("5678"));
+        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getFirstDigitsCardNumber(), is("1234"));
+
+        assertThat(refundEntity.getSharedPaymentDetails().getReference(), is("a-reference"));
+        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getExpiryDate(), is("10/27"));
+        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getCardType(), is(CardType.CREDIT));
+        assertThat(refundEntity.getSharedPaymentDetails().getWalletType(), is("APPLE_PAY"));
+
+        assertCorrectPaymentTransactionWithFullData((Payment) refundEntity.getParentTransaction().get());
+    }
+
     private void assertCorrectPaymentTransactionWithFullData(Payment payment) {
         assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
         assertThat(payment.getAmount(), is(amount));

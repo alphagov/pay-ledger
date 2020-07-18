@@ -13,6 +13,7 @@ public class Refund extends Transaction {
     private final String refundedByUserEmail;
     private final String parentExternalId;
     private final String gatewayTransactionId;
+    private final Payment sharedPaymentDetails;
     private final Optional<Transaction> parentTransaction;
 
     public Refund(Builder builder) {
@@ -25,6 +26,7 @@ public class Refund extends Transaction {
         this.parentExternalId = builder.parentExternalId;
         this.parentTransaction = builder.parentTransaction;
         this.gatewayTransactionId = builder.gatewayTransactionId;
+        this.sharedPaymentDetails = builder.sharedPaymentDetails;
     }
 
     public TransactionState getState() {
@@ -64,6 +66,10 @@ public class Refund extends Transaction {
         return refundedByUserEmail;
     }
 
+    public Payment getSharedPaymentDetails() {
+        return sharedPaymentDetails;
+    }
+
     public static class Builder {
         private TransactionState state;
         private ZonedDateTime createdDate;
@@ -75,6 +81,7 @@ public class Refund extends Transaction {
         private Long amount;
         private String externalId;
         private String parentExternalId;
+        private Payment sharedPaymentDetails;
         private Optional<Transaction> parentTransaction;
         private String gatewayPayoutId;
         private String gatewayTransactionId;
@@ -148,6 +155,11 @@ public class Refund extends Transaction {
 
         public Builder withGatewayTransactionId(String gatewayTransactionId) {
             this.gatewayTransactionId = gatewayTransactionId;
+            return this;
+        }
+
+        public Builder withSharedPaymentDetails(Payment paymentDetails) {
+            this.sharedPaymentDetails = paymentDetails;
             return this;
         }
     }
