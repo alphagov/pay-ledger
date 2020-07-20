@@ -163,6 +163,10 @@ public class TransactionService {
         transactionDao.upsert(transaction);
     }
 
+    public void upsertTransaction(TransactionEntity transaction) {
+        transactionDao.upsert(transaction);
+    }
+
     public TransactionEventResponse findTransactionEvents(String externalId, String gatewayAccountId,
                                                           boolean includeAllEvents, int statusVersion) {
         Map<String, TransactionEntity> transactionEntityMap = getTransactionsAsMap(externalId, gatewayAccountId);
@@ -180,8 +184,7 @@ public class TransactionService {
         }
     }
 
-    public Optional<TransactionView> findByGatewayTransactionId(String gatewayTransactionId, String paymentProvider
-                                                                ) {
+    public Optional<TransactionView> findByGatewayTransactionId(String gatewayTransactionId, String paymentProvider) {
         TransactionSearchParams searchParams = new TransactionSearchParams();
         searchParams.setGatewayTransactionId(gatewayTransactionId);
         searchParams.setTransactionType(PAYMENT);
