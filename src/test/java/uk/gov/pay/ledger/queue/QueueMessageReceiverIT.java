@@ -4,8 +4,8 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.SalientEventType;
+import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture;
 
@@ -18,6 +18,7 @@ import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public class QueueMessageReceiverIT {
 
     @RegisterExtension

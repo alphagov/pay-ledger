@@ -16,18 +16,22 @@ public class TransactionEntityFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionEntityFactory.class);
 
     @Inject
-    public TransactionEntityFactory(ObjectMapper objectMapper){
+    public TransactionEntityFactory(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
     public TransactionEntity create(EventDigest eventDigest) {
+        return create(eventDigest, eventDigest.getEventPayload());
+    }
+
+    public TransactionEntity create(EventDigest eventDigest, Map<String, Object> eventPayload) {
         TransactionState digestTransactionState = eventDigest
                 .getMostRecentSalientEventType()
                 .map(TransactionState::fromEventType)
                 .orElse(TransactionState.UNDEFINED);
 
-        String transactionDetail = convertToTransactionDetails(eventDigest.getEventPayload());
-        TransactionEntity entity = objectMapper.convertValue(eventDigest.getEventPayload(), TransactionEntity.class);
+        String transactionDetail = convertToTransactionDetails(eventPayload);
+        TransactionEntity entity = objectMapper.convertValue(eventPayload, TransactionEntity.class);
         entity.setTransactionDetails(transactionDetail);
         entity.setEventCount(eventDigest.getEventCount());
         entity.setState(digestTransactionState);
@@ -47,4 +51,5 @@ public class TransactionEntityFactory {
         }
         return "{}";
     }
+
 }

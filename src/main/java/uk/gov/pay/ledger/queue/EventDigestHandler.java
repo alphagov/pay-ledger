@@ -4,66 +4,54 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.model.EventDigest;
-import uk.gov.pay.ledger.event.model.ResourceType;
+import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.payout.service.PayoutService;
+import uk.gov.pay.ledger.queue.eventprocessor.EventProcessor;
+import uk.gov.pay.ledger.queue.eventprocessor.PaymentEventProcessor;
+import uk.gov.pay.ledger.queue.eventprocessor.PayoutEventProcessor;
+import uk.gov.pay.ledger.queue.eventprocessor.RefundEventProcessor;
 import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
-
-import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT;
-import static uk.gov.pay.ledger.event.model.ResourceType.PAYOUT;
-import static uk.gov.pay.ledger.event.model.ResourceType.REFUND;
 
 public class EventDigestHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventDigestHandler.class);
 
-    private final EventService eventService;
-    private final TransactionService transactionService;
-    private final TransactionMetadataService transactionMetadataService;
-    private final PayoutService payoutService;
+    PaymentEventProcessor paymentEventProcessor;
+    PayoutEventProcessor payoutEventProcessor;
+    RefundEventProcessor refundEventProcessor;
 
     @Inject
     public EventDigestHandler(EventService eventService,
                               TransactionService transactionService,
                               TransactionMetadataService transactionMetadataService,
-                              PayoutService payoutService) {
-        this.eventService = eventService;
-        this.transactionService = transactionService;
-        this.transactionMetadataService = transactionMetadataService;
-        this.payoutService = payoutService;
+                              PayoutService payoutService,
+                              TransactionEntityFactory transactionEntityFactory) {
+        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService);
+        payoutEventProcessor = new PayoutEventProcessor(eventService, payoutService);
+        refundEventProcessor = new RefundEventProcessor(eventService, transactionService, transactionEntityFactory);
     }
 
-    public void processEvent(Event event) {
-        EventDigest eventDigest = eventService.getEventDigestForResource(event.getResourceExternalId());
-
-        if (isATransactionEvent(event.getResourceType())) {
-            processDigestForTransactionEvent(event, eventDigest);
-        } else if (isAPayoutEvent(event.getResourceType())) {
-            processDigestForPayout(eventDigest);
-        } else {
-            LOGGER.warn("Event digest processing for resource type [{}] is not supported. Event type [{}] and resource external id [{}]",
-                    event.getResourceType(),
-                    event.getEventType(),
-                    event.getResourceExternalId());
+    public EventProcessor processorFor(Event event) {
+        switch (event.getResourceType()) {
+            case PAYMENT:
+                return paymentEventProcessor;
+            case REFUND:
+                return refundEventProcessor;
+            case PAYOUT:
+                return payoutEventProcessor;
+            default:
+                String message = String.format("Event digest processing for resource type [%s] is not supported. Event type [%s] and resource external id [%s]",
+                        event.getResourceType(),
+                        event.getEventType(),
+                        event.getResourceExternalId());
+                LOGGER.error(message);
+                throw new RuntimeException(message);
         }
     }
 
-    private boolean isAPayoutEvent(ResourceType resourceType) {
-        return PAYOUT.equals(resourceType);
-    }
-
-    private boolean isATransactionEvent(ResourceType resourceType) {
-        return PAYMENT.equals(resourceType) || REFUND.equals(resourceType);
-    }
-
-    private void processDigestForTransactionEvent(Event event, EventDigest eventDigest) {
-        transactionService.upsertTransactionFor(eventDigest);
-        transactionMetadataService.upsertMetadataFor(event);
-    }
-
-    private void processDigestForPayout(EventDigest eventDigest) {
-        payoutService.upsertPayoutFor(eventDigest);
+    public void processEvent(Event event) {
+        processorFor(event).process(event);
     }
 }
