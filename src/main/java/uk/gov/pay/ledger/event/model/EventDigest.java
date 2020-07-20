@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.event.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.pay.ledger.exception.EmptyEventsException;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -47,7 +48,7 @@ public class EventDigest {
 
         var latestEvent = events.stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No events found"));
+                .orElseThrow(() -> new EmptyEventsException("No events found"));
 
         var latestSalientEventType = events.stream()
                 .map(e -> SalientEventType.from(e.getEventType()))

@@ -32,6 +32,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYOUT;
@@ -84,7 +85,7 @@ public class EventDigestHandlerTest {
         eventDigestHandler.processEvent(event);
 
         verify(eventService).getEventDigestForResource(event);
-        verify(transactionService).upsertTransactionFor(any());
+        verify(transactionService).upsertTransactionFor(any(EventDigest.class));
     }
 
     @Test
@@ -115,5 +116,19 @@ public class EventDigestHandlerTest {
                 is(format("Event digest processing for resource type [%s] is not supported. " +
                                 "Event type [%s] and resource external id [%s]",
                         event.getResourceType(), event.getEventType(), event.getResourceExternalId())));
+    }
+
+    @Test
+    public void shouldAddPaymentDetailsForRefundIfParentExternalIdIsSet() {
+        String parentExternalId = "parent-external-id";
+        when(eventService.getEventDigestForResource(any(Event.class)))
+                .thenReturn(EventDigest.fromEventList(List.of(anEventFixture().withParentResourceExternalId(parentExternalId).toEntity())));
+        Event event = anEventFixture().withResourceType(REFUND)
+                .withParentResourceExternalId(parentExternalId)
+                .toEntity();
+        eventDigestHandler.processEvent(event);
+
+        verify(eventService).getEventDigestForResource(event);
+        verify(eventService).getEventDigestForResource(parentExternalId);
     }
 }
