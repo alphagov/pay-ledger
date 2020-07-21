@@ -49,57 +49,32 @@ public class Payment extends Transaction {
 
     }
 
-    public Payment(Long id, String gatewayAccountId, Long amount,
-                   String reference, String description, TransactionState state,
-                   String language, String externalId, String returnUrl,
-                   String email, String paymentProvider, ZonedDateTime createdDate,
-                   CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
-                   Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
-                   Long netAmount, Long totalAmount, RefundSummary refundSummary, SettlementSummary settlementSummary,
-                   Boolean moto, Boolean live, Source source, String walletType, String gatewayPayoutId) {
-        super(id, gatewayAccountId, amount, externalId, gatewayPayoutId);
-        this.corporateCardSurcharge = corporateCardSurcharge;
-        this.fee = fee;
-        this.netAmount = netAmount;
-        this.totalAmount = totalAmount;
-        this.refundSummary = refundSummary;
-        this.settlementSummary = settlementSummary;
-        this.id = id;
-        this.gatewayAccountId = gatewayAccountId;
-        this.amount = amount;
-        this.reference = reference;
-        this.description = description;
-        this.state = state;
-        this.language = language;
-        this.externalId = externalId;
-        this.returnUrl = returnUrl;
-        this.email = email;
-        this.paymentProvider = paymentProvider;
-        this.createdDate = createdDate;
-        this.cardDetails = cardDetails;
-        this.delayedCapture = delayedCapture;
-        this.externalMetaData = externalMetaData;
-        this.eventCount = eventCount;
-        this.gatewayTransactionId = gatewayTransactionId;
-        this.moto = moto;
-        this.live = live;
-        this.source = source;
-        this.walletType = walletType;
-    }
-
-    public Payment(String gatewayAccountId, Long amount,
-                   String reference, String description, TransactionState state,
-                   String language, String externalId, String returnUrl,
-                   String email, String paymentProvider, ZonedDateTime createdDate,
-                   CardDetails cardDetails, Boolean delayedCapture, Map<String, Object> externalMetaData,
-                   Integer eventCount, String gatewayTransactionId, Long corporateCardSurcharge, Long fee,
-                   Long netAmount, RefundSummary refundSummary, Long totalAmount, SettlementSummary settlementSummary,
-                   Boolean moto, Boolean live, Source source, String walletType, String gatewayPayoutId) {
-
-        this(null, gatewayAccountId, amount, reference, description, state, language, externalId, returnUrl, email,
-                paymentProvider, createdDate, cardDetails, delayedCapture, externalMetaData, eventCount,
-                gatewayTransactionId, corporateCardSurcharge, fee, netAmount, totalAmount, refundSummary,
-                settlementSummary, moto, live, source, walletType, gatewayPayoutId);
+    public Payment(Builder builder) {
+        super(builder.id, builder.gatewayAccountId, builder.amount, builder.externalId, builder.gatewayPayoutId);
+        this.corporateCardSurcharge = builder.corporateCardSurcharge;
+        this.fee = builder.fee;
+        this.netAmount = builder.netAmount;
+        this.totalAmount = builder.totalAmount;
+        this.refundSummary = builder.refundSummary;
+        this.settlementSummary = builder.settlementSummary;
+        this.reference = builder.reference;
+        this.description = builder.description;
+        this.state = builder.state;
+        this.language = builder.language;
+        this.returnUrl = builder.returnUrl;
+        this.email = builder.email;
+        this.paymentProvider = builder.paymentProvider;
+        this.createdDate = builder.createdDate;
+        this.cardDetails = builder.cardDetails;
+        this.delayedCapture = builder.delayedCapture;
+        this.externalMetaData = builder.externalMetaData;
+        this.eventCount = builder.eventCount;
+        this.gatewayTransactionId = builder.gatewayTransactionId;
+        this.moto = builder.moto;
+        this.live = builder.live;
+        this.source = builder.source;
+        this.walletType = builder.walletType;
+        this.eventCount = builder.eventCount;
     }
 
     @Override
@@ -203,5 +178,184 @@ public class Payment extends Transaction {
 
     public String getWalletType() {
         return walletType;
+    }
+
+    public static class Builder {
+        private Long id;
+        private Boolean moto;
+        private String reference;
+        private String description;
+        private TransactionState state;
+        private String language;
+        private String returnUrl;
+        private String email;
+        private String paymentProvider;
+        private ZonedDateTime createdDate;
+        private CardDetails cardDetails;
+        private Boolean delayedCapture;
+        private Map<String, Object> externalMetaData;
+        private Integer eventCount;
+        private String gatewayTransactionId;
+        private Long corporateCardSurcharge;
+        private Long fee;
+        private Long netAmount;
+        private Long totalAmount;
+        private Long amount;
+        private RefundSummary refundSummary;
+        private SettlementSummary settlementSummary;
+        private Boolean live;
+        private Source source;
+        private String walletType;
+        private String gatewayAccountId;
+        private String externalId;
+        private String gatewayPayoutId;
+
+        public Builder() {
+
+        }
+
+        public Payment build() {
+            return new Payment(this);
+        }
+
+        public Builder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withGatewayAccountId(String gatewayAccountId) {
+            this.gatewayAccountId = gatewayAccountId;
+            return this;
+        }
+
+        public Builder withAmount(Long amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public Builder withTotalAmount(Long totalAmount) {
+            this.totalAmount = totalAmount;
+            return this;
+        }
+
+        public Builder withCorporateCardSurcharge(Long corporateCardSurcharge) {
+            this.corporateCardSurcharge = corporateCardSurcharge;
+            return this;
+        }
+
+        public Builder withFee(Long fee) {
+            this.fee = fee;
+            return this;
+        }
+
+        public Builder withNetAmount(Long netAmount) {
+            this.netAmount = netAmount;
+            return this;
+        }
+
+        public Builder withState(TransactionState state) {
+            this.state = state;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder withReference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public Builder withLanguage(String language) {
+            this.language = language;
+            return this;
+        }
+
+        public Builder withExternalId(String externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
+        public Builder withReturnUrl(String returnUrl) {
+            this.returnUrl = returnUrl;
+            return this;
+        }
+
+        public Builder withEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder withPaymentProvider(String paymentProvider) {
+            this.paymentProvider = paymentProvider;
+            return this;
+        }
+
+        public Builder withCreatedDate(ZonedDateTime createdDate) {
+            this.createdDate = createdDate;
+            return this;
+        }
+
+        public Builder withCardDetails(CardDetails cardDetails) {
+            this.cardDetails = cardDetails;
+            return this;
+        }
+
+        public Builder withDelayedCapture(Boolean delayedCapture) {
+            this.delayedCapture = delayedCapture;
+            return this;
+        }
+
+        public Builder withGatewayTransactionId(String gatewayTransactionId) {
+            this.gatewayTransactionId = gatewayTransactionId;
+            return this;
+        }
+
+        public Builder withRefundSummary(RefundSummary refundSummary) {
+            this.refundSummary = refundSummary;
+            return this;
+        }
+
+        public Builder withSettlementSummary(SettlementSummary settlementSummary) {
+            this.settlementSummary = settlementSummary;
+            return this;
+        }
+
+        public Builder withExternalMetadata(Map<String, Object> externalMetaData) {
+            this.externalMetaData = externalMetaData;
+            return this;
+        }
+
+        public Builder withMoto(Boolean moto) {
+            this.moto = moto;
+            return this;
+        }
+
+        public Builder withLive(Boolean live) {
+            this.live = live;
+            return this;
+        }
+
+        public Builder withSource(Source source) {
+            this.source = source;
+            return this;
+        }
+
+        public Builder withWalletType(String walletType) {
+            this.walletType = walletType;
+            return this;
+        }
+
+        public Builder withGatewayPayoutId(String gatewayPayoutId) {
+            this.gatewayPayoutId = gatewayPayoutId;
+            return this;
+        }
+
+        public Builder withEventCount(Integer eventCount) {
+            this.eventCount = eventCount;
+            return this;
+        }
     }
 }
