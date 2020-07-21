@@ -163,10 +163,12 @@ public class QueueMessageReceiverIT {
         assertThat(refund.getLastDigitsCardNumber(), is("4242"));
         assertThat(refund.getFirstDigitsCardNumber(), is("424242"));
         assertThat(refund.getReference(), is("aref"));
-        Map<String, String> transactionDetails = new Gson().fromJson(refund.getTransactionDetails(), Map.class);
-        assertThat(transactionDetails.get("reference"), is("aref"));
-        assertThat(transactionDetails.get("expiry_date"), is("11/21"));
-        assertThat(transactionDetails.get("card_type"), is("DEBIT"));
+        Map<String, Object> transactionDetails = new Gson().fromJson(refund.getTransactionDetails(), Map.class);
+        Map<String,String> paymentDetails = (Map<String, String>) transactionDetails.get("payment_details");
+
+        assertThat(paymentDetails.get("card_brand_label"), is("Visa"));
+        assertThat(paymentDetails.get("expiry_date"), is("11/21"));
+        assertThat(paymentDetails.get("card_type"), is("DEBIT"));
     }
 
     @Test

@@ -18,6 +18,7 @@ import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.payout.service.PayoutService;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
@@ -85,7 +86,7 @@ public class EventDigestHandlerTest {
         eventDigestHandler.processEvent(event);
 
         verify(eventService).getEventDigestForResource(event);
-        verify(transactionService).upsertTransactionFor(any(EventDigest.class));
+        verify(transactionService).upsertTransaction(any(TransactionEntity.class));
     }
 
     @Test

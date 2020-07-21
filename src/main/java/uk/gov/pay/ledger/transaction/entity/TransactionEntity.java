@@ -8,6 +8,7 @@ import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -226,6 +227,16 @@ public class TransactionEntity {
 
     public String getGatewayPayoutId() {
         return gatewayPayoutId;
+    }
+
+    public void setEntityFieldsFromOriginalPayment(TransactionEntity paymentTransaction) {
+        this.cardBrand = paymentTransaction.getCardBrand();
+        this.cardholderName = paymentTransaction.getCardholderName();
+        this.reference = paymentTransaction.getReference();
+        this.firstDigitsCardNumber = paymentTransaction.getFirstDigitsCardNumber();
+        this.lastDigitsCardNumber = paymentTransaction.getLastDigitsCardNumber();
+        this.description = paymentTransaction.getDescription();
+        this.email = paymentTransaction.email;
     }
 
     public static class Builder {

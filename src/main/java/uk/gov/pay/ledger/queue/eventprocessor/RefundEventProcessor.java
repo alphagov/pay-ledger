@@ -8,9 +8,9 @@ import uk.gov.pay.ledger.exception.EmptyEventsException;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -31,6 +31,7 @@ public class RefundEventProcessor extends EventProcessor {
     @Override
     public void process(Event event) {
         EventDigest refundEventDigest = eventService.getEventDigestForResource(event);
+        Optional<EventDigest> mayBePaymentEventDigest = Optional.empty();
 
         /**
          * Apply shared refund payment attributes to the refund digest
@@ -43,24 +44,35 @@ public class RefundEventProcessor extends EventProcessor {
          * for the digest can be removed.
          */
         if (isNotBlank(refundEventDigest.getParentResourceExternalId())) {
-            Map<String, Object> fieldsFromPayment = getFieldsFromOriginalPayment(refundEventDigest.getParentResourceExternalId());
-            refundEventDigest.getEventPayload().putAll(fieldsFromPayment);
+            mayBePaymentEventDigest = getPaymentEventDigest(refundEventDigest.getParentResourceExternalId());
+            mayBePaymentEventDigest.ifPresent(paymentEventDigest -> {
+                Map<String, Object> fieldsFromPayment = getPaymentFieldsToProjectOnToRefund(paymentEventDigest);
+                refundEventDigest.getEventPayload().put("payment_details", fieldsFromPayment);
+            });
         }
 
-        transactionService.upsertTransactionFor(refundEventDigest);
+        TransactionEntity refundTransactionEntity = transactionEntityFactory.create(refundEventDigest);
+
+        mayBePaymentEventDigest.ifPresent(paymentEventDigest -> {
+            TransactionEntity paymentTransactionEntity = transactionEntityFactory.create(paymentEventDigest);
+            refundTransactionEntity.setEntityFieldsFromOriginalPayment(paymentTransactionEntity);
+        });
+
+        transactionService.upsertTransaction(refundTransactionEntity);
     }
 
-    private Map<String, Object> getFieldsFromOriginalPayment(String paymentExternalId) {
+    private Optional<EventDigest> getPaymentEventDigest(String paymentExternalId) {
         EventDigest paymentEventDigest = null;
-        List<String> paymentsFieldsToCopyToRefunds = List.of("cardholder_name", "email", "description",
-                "card_brand", "last_digits_card_number", "first_digits_card_number", "reference",
-                "card_brand_label", "expiry_date", "card_type", "wallet_type");
-
         try {
             paymentEventDigest = eventService.getEventDigestForResource(paymentExternalId);
         } catch (EmptyEventsException ignored) {
             // no valid refund projection is possible without payment events, allow upstream to handle this
         }
+        return Optional.ofNullable(paymentEventDigest);
+    }
+
+    private Map<String, Object> getPaymentFieldsToProjectOnToRefund(EventDigest paymentEventDigest) {
+        List<String> paymentsFieldsToCopyToRefunds = List.of("card_brand_label", "expiry_date", "card_type", "wallet_type");
 
         var paymentPayloadIsEmpty = paymentEventDigest == null || paymentEventDigest.getEventPayload() == null;
 
