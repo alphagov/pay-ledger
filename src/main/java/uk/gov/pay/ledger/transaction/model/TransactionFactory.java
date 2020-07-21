@@ -112,17 +112,19 @@ public class TransactionFactory {
             Optional<Transaction> parentTransaction = Optional.ofNullable(entity.getParentTransactionEntity())
                     .map(this::createTransactionEntity);
 
-            CardType cardType = CardType.fromString(safeGetAsString(transactionDetails, "card_type"));
+            JsonNode refundPaymentDetails = transactionDetails.get("payment_details");
+
+            CardType cardType = CardType.fromString(safeGetAsString(refundPaymentDetails, "card_type"));
             CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), null,
-                    safeGetAsString(transactionDetails, "card_brand_label"), entity.getLastDigitsCardNumber(),
-                    entity.getFirstDigitsCardNumber(), safeGetAsString(transactionDetails, "expiry_date"), cardType);
+                    safeGetAsString(refundPaymentDetails, "card_brand_label"), entity.getLastDigitsCardNumber(),
+                    entity.getFirstDigitsCardNumber(), safeGetAsString(refundPaymentDetails, "expiry_date"), cardType);
 
             Payment paymentDetails = new Payment.Builder()
                     .withReference(entity.getReference())
                     .withDescription(entity.getDescription())
                     .withEmail(entity.getEmail())
                     .withCardDetails(cardDetails)
-                    .withWalletType(safeGetAsString(transactionDetails, "wallet"))
+                    .withWalletType(safeGetAsString(refundPaymentDetails, "wallet"))
                     .build();
 
             return new Refund.Builder()
