@@ -71,7 +71,7 @@ public class TransactionDao {
             "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
 
     private static final String SEARCH_TRANSACTIONS_CURSOR =
-            SEARCH_TRANSACTIONS_WITH_PARENT_BASE +
+            "SELECT * FROM transaction t " +
             ":searchExtraFields " +
             ":cursorFields " +
             "ORDER BY t.created_date DESC, t.id DESC LIMIT :limit";
@@ -295,7 +295,7 @@ public class TransactionDao {
             query.bind("startingAfterId", startingAfterId);
             query.bind("limit", cursorPageSize);
 
-            return query.map(new TransactionWithParentMapper()).list();
+            return query.map(new TransactionMapper()).list();
         });
     }
 

@@ -120,6 +120,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return id;
     }
 
+    public String getCardExpiryDate() {
+        return cardExpiryDate;
+    }
+
     public TransactionFixture withId(Long id) {
         this.id = id;
         return this;
@@ -221,12 +225,18 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return cardBrand;
     }
 
+    public String getCardBrandLabel() {
+        return cardBrandLabel;
+    }
+
     public TransactionFixture withCardBrand(String cardBrand) {
         this.cardBrand = cardBrand;
         return this;
     }
 
-    public boolean isMoto() { return moto;}
+    public boolean isMoto() {
+        return moto;
+    }
 
     public TransactionFixture withMoto(boolean moto) {
         this.moto = moto;
@@ -378,6 +388,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     @NotNull
     private JsonObject getTransactionDetail() {
         JsonObject transactionDetails = new JsonObject();
+        JsonObject refundPaymentDetails = new JsonObject();
+
+        String defaultCardType = String.valueOf(CREDIT);
+        String defaultWalletType = "APPLE_PAY";
 
         transactionDetails.addProperty("language", language);
         transactionDetails.addProperty("return_url", returnUrl);
@@ -387,8 +401,17 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("corporate_surcharge", corporateCardSurcharge);
         transactionDetails.addProperty("refunded_by", refundedById);
         transactionDetails.addProperty("user_email", refundedByUserEmail);
-        transactionDetails.addProperty("card_type", String.valueOf(CREDIT));
-        transactionDetails.addProperty("wallet", "APPLE_PAY");
+        transactionDetails.addProperty("card_type", defaultCardType);
+        transactionDetails.addProperty("wallet", defaultWalletType);
+
+        if ("REFUND".equals(transactionType)) {
+            refundPaymentDetails.addProperty("card_brand_label", cardBrandLabel);
+            refundPaymentDetails.addProperty("expiry_date", cardExpiryDate);
+            refundPaymentDetails.addProperty("card_type", defaultCardType);
+            refundPaymentDetails.addProperty("wallet", defaultWalletType);
+            transactionDetails.add("payment_details", refundPaymentDetails);
+        }
+
         Optional.ofNullable(cardBrandLabel)
                 .ifPresent(cardBrandLabel -> transactionDetails.addProperty("card_brand_label", cardBrandLabel));
         Optional.ofNullable(externalMetadata)
@@ -591,6 +614,15 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withRefundedByUserEmail(String refundedByUserEmail) {
         this.refundedByUserEmail = refundedByUserEmail;
+        return this;
+    }
+
+    public TransactionFixture withDefaultPaymentDetails() {
+        // default values are already assigned for cardBrand, cardholderName, reference, description, email
+
+        this.firstDigitsCardNumber = "123456";
+        this.lastDigitsCardNumber = "1234";
+        this.cardBrandLabel = "Visa";
         return this;
     }
 }
