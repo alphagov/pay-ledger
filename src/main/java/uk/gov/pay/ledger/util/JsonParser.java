@@ -36,6 +36,9 @@ public class JsonParser {
     }
 
     private static Optional<JsonNode> safeGetJsonElement(JsonNode object, String fieldName) {
+        if (object == null) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(object.get(fieldName));
     }
 }

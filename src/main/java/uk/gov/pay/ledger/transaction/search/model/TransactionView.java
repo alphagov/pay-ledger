@@ -59,6 +59,7 @@ public class TransactionView {
     private Source source;
     private String walletType;
     private String gatewayPayoutId;
+    private TransactionView paymentDetails;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -93,6 +94,7 @@ public class TransactionView {
         this.source = builder.source;
         this.walletType = builder.walletType;
         this.gatewayPayoutId = builder.gatewayPayoutId;
+        this.paymentDetails = builder.paymentDetails;
     }
 
     public TransactionView() {
@@ -102,7 +104,7 @@ public class TransactionView {
         if (transaction instanceof Payment) {
             Payment payment = (Payment) transaction;
 
-            return new Builder()
+            Builder paymentBuilder = new Builder()
                     .withId(payment.getId())
                     .withGatewayAccountId(payment.getGatewayAccountId())
                     .withAmount(payment.getAmount())
@@ -110,7 +112,6 @@ public class TransactionView {
                     .withCorporateCardSurcharge(payment.getCorporateCardSurcharge())
                     .withFee(payment.getFee())
                     .withNetAmount(payment.getNetAmount())
-                    .withState(ExternalTransactionState.from(payment.getState(), statusVersion))
                     .withDescription(payment.getDescription())
                     .withReference(payment.getReference())
                     .withLanguage(payment.getLanguage())
@@ -131,18 +132,21 @@ public class TransactionView {
                     .withLive(payment.isLive())
                     .withSource(payment.getSource())
                     .withWalletType(payment.getWalletType())
-                    .withGatewayPayoutId(payment.getGatewayPayoutId())
-                    .build();
+                    .withGatewayPayoutId(payment.getGatewayPayoutId());
+            if (payment.getState() != null) {
+                paymentBuilder = paymentBuilder
+                        .withState(ExternalTransactionState.from(payment.getState(), statusVersion));
+            }
+            return paymentBuilder.build();
         }
 
         Refund refund = (Refund) transaction;
-        return new Builder()
+        Builder refundBuilder = new Builder()
                 .withId(refund.getId())
                 .withGatewayAccountId(refund.getGatewayAccountId())
                 .withAmount(refund.getAmount())
                 .withState(ExternalTransactionState.from(refund.getState(), statusVersion))
-                .withDescription(refund.getDescription())
-                .withReference(refund.getReference())
+                .withGatewayTransactionId(refund.getGatewayTransactionId())
                 .withExternalId(refund.getExternalId())
                 .withParentExternalId(refund.getParentExternalId())
                 .withCreatedDate(refund.getCreatedDate())
@@ -150,8 +154,12 @@ public class TransactionView {
                 .withRefundedByUserEmail(refund.getRefundedByUserEmail())
                 .withTransactionType(refund.getTransactionType())
                 .withParentTransaction(refund.getParentTransaction().map(parentTransaction -> from(parentTransaction, statusVersion)).orElse(null))
-                .withGatewayPayoutId(refund.getGatewayPayoutId())
-                .build();
+                .withGatewayPayoutId(refund.getGatewayPayoutId());
+        if (refund.getPaymentDetails() != null) {
+            refundBuilder = refundBuilder
+                    .withPaymentDetails(from(refund.getPaymentDetails(), statusVersion));
+        }
+        return refundBuilder.build();
     }
 
     public Long getId() {
@@ -297,6 +305,10 @@ public class TransactionView {
         return gatewayPayoutId;
     }
 
+    public TransactionView getPaymentDetails() {
+        return paymentDetails;
+    }
+
     public static class Builder {
         private TransactionView parentTransaction;
         private Long id;
@@ -331,6 +343,7 @@ public class TransactionView {
         private Source source;
         private String walletType;
         private String gatewayPayoutId;
+        private TransactionView paymentDetails;
 
         public Builder() {
         }
@@ -496,6 +509,11 @@ public class TransactionView {
 
         public Builder withGatewayPayoutId(String gatewayPayoutId) {
             this.gatewayPayoutId = gatewayPayoutId;
+            return this;
+        }
+
+        public Builder withPaymentDetails(TransactionView sharedPaymentDetails) {
+            this.paymentDetails = sharedPaymentDetails;
             return this;
         }
     }

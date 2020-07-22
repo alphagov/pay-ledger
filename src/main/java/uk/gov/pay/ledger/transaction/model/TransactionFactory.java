@@ -112,11 +112,25 @@ public class TransactionFactory {
             Optional<Transaction> parentTransaction = Optional.ofNullable(entity.getParentTransactionEntity())
                     .map(this::createTransactionEntity);
 
+            JsonNode refundPaymentDetails = transactionDetails.get("payment_details");
+
+            CardType cardType = CardType.fromString(safeGetAsString(refundPaymentDetails, "card_type"));
+            CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), null,
+                    safeGetAsString(refundPaymentDetails, "card_brand_label"), entity.getLastDigitsCardNumber(),
+                    entity.getFirstDigitsCardNumber(), safeGetAsString(refundPaymentDetails, "expiry_date"), cardType);
+
+            Payment paymentDetails = new Payment.Builder()
+                    .withReference(entity.getReference())
+                    .withDescription(entity.getDescription())
+                    .withEmail(entity.getEmail())
+                    .withCardDetails(cardDetails)
+                    .withWalletType(safeGetAsString(refundPaymentDetails, "wallet"))
+                    .build();
+
             return new Refund.Builder()
                     .withGatewayAccountId(entity.getGatewayAccountId())
                     .withAmount(entity.getAmount())
-                    .withReference(entity.getReference())
-                    .withDescription(entity.getDescription())
+                    .withGatewayTransactionId(entity.getGatewayTransactionId())
                     .withState(entity.getState())
                     .withExternalId(entity.getExternalId())
                     .withCreatedDate(entity.getCreatedDate())
@@ -126,6 +140,7 @@ public class TransactionFactory {
                     .withParentExternalId(entity.getParentExternalId())
                     .withParentTransaction(parentTransaction)
                     .withGatewayPayoutId(entity.getGatewayPayoutId())
+                    .withPaymentDetails(paymentDetails)
                     .build();
 
         } catch (IOException e) {
