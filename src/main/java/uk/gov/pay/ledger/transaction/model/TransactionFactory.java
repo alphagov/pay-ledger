@@ -138,7 +138,6 @@ public class TransactionFactory {
                     .withRefundedBy(safeGetAsString(transactionDetails, "refunded_by"))
                     .withRefundedByUserEmail(safeGetAsString(transactionDetails, "user_email"))
                     .withParentExternalId(entity.getParentExternalId())
-                    .withParentTransaction(parentTransaction)
                     .withGatewayPayoutId(entity.getGatewayPayoutId())
                     .withPaymentDetails(paymentDetails)
                     .build();

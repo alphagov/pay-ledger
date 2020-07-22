@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.transaction.dao.mapper.TransactionMapper;
-import uk.gov.pay.ledger.transaction.dao.mapper.TransactionWithParentMapper;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
@@ -17,37 +16,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class TransactionDao {
-
-    private static final String SEARCH_TRANSACTIONS_WITH_PARENT_BASE = "SELECT " +
-            " t.*," +
-            " parent.id as parent_id, " +
-            " parent.gateway_account_id as parent_gateway_account_id, " +
-            " parent.external_id as parent_external_id, " +
-            " parent.parent_external_id as parent_parent_external_id," +
-            " parent.amount as parent_amount, " +
-            " parent.reference as parent_reference," +
-            " parent.description as parent_description, " +
-            " parent.state as parent_state," +
-            " parent.email as parent_email," +
-            " parent.cardholder_name as parent_cardholder_name," +
-            " parent.created_date as parent_created_date, " +
-            " parent.transaction_details as parent_transaction_details," +
-            " parent.event_count as parent_event_count," +
-            " parent.card_brand as parent_card_brand," +
-            " parent.last_digits_card_number as parent_last_digits_card_number," +
-            " parent.first_digits_card_number as parent_first_digits_card_number, " +
-            " parent.net_amount as parent_net_amount, " +
-            " parent.total_amount as parent_total_amount," +
-            " parent.refund_status as parent_refund_status," +
-            " parent.refund_amount_refunded as parent_refund_amount_refunded," +
-            " parent.refund_amount_available as parent_refund_amount_available, " +
-            " parent.fee as parent_fee," +
-            " parent.type as parent_type, " +
-            " parent.moto as parent_moto, " +
-            " parent.gateway_payout_id as parent_gateway_payout_id " +
-            " FROM transaction t LEFT OUTER JOIN transaction parent " +
-            " ON t.parent_external_id = parent.external_id ";
-
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID = "SELECT * FROM transaction " +
             "WHERE external_id = :externalId " +
             "AND (:gatewayAccountId is NULL OR gateway_account_id = :gatewayAccountId)";
@@ -78,17 +46,6 @@ public class TransactionDao {
 
     private static final String COUNT_TRANSACTIONS = "SELECT count(1) " +
             "FROM transaction t " +
-            ":searchExtraFields ";
-
-    private static final String SEARCH_TRANSACTIONS_WITH_PARENT_TRANSACTION =
-            SEARCH_TRANSACTIONS_WITH_PARENT_BASE +
-            ":searchExtraFields " +
-            "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
-
-    private static final String COUNT_TRANSACTIONS_WITH_PARENT_TRANSACTION = "select " +
-            " count(1) " +
-            " from transaction t left outer join transaction parent " +
-            " on t.parent_external_id = parent.external_id " +
             ":searchExtraFields ";
 
     private static final String UPSERT_STRING =
@@ -262,19 +219,6 @@ public class TransactionDao {
         });
     }
 
-    public List<TransactionEntity> searchTransactionsAndParent(TransactionSearchParams searchParams) {
-        return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplatesWithParentTransactionSearch(), SEARCH_TRANSACTIONS_WITH_PARENT_TRANSACTION));
-            searchParams.getQueryMap().forEach(bindSearchParameter(query));
-            query.bind("offset", searchParams.getOffset());
-            query.bind("limit", searchParams.getDisplaySize());
-
-            return query
-                    .map(new TransactionWithParentMapper())
-                    .list();
-        });
-    }
-
     public List<TransactionEntity> cursorTransactionSearch(TransactionSearchParams searchParams, ZonedDateTime startingAfterCreatedDate, Long startingAfterId) {
         Long cursorPageSize = searchParams.getDisplaySize();
         String cursorTemplate = "";
@@ -296,16 +240,6 @@ public class TransactionDao {
             query.bind("limit", cursorPageSize);
 
             return query.map(new TransactionMapper()).list();
-        });
-    }
-
-    public Long getTotalForSearchTransactionAndParent(TransactionSearchParams searchParams) {
-        return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplatesWithParentTransactionSearch(), COUNT_TRANSACTIONS_WITH_PARENT_TRANSACTION));
-            searchParams.getQueryMap().forEach(bindSearchParameter(query));
-            return query
-                    .mapTo(Long.class)
-                    .one();
         });
     }
 

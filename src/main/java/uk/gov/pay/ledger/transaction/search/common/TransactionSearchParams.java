@@ -46,9 +46,6 @@ public class TransactionSearchParams extends SearchParams {
     @DefaultValue("false")
     @QueryParam("exact_reference_match")
     private boolean exactReferenceMatch;
-    @DefaultValue("false")
-    @QueryParam("with_parent_transaction")
-    private boolean withParentTransaction;
     private List<String> accountIds;
     @QueryParam("email")
     private String email;
@@ -140,10 +137,6 @@ public class TransactionSearchParams extends SearchParams {
 
     public void setStatusVersion(int statusVersion) {
         this.statusVersion = statusVersion;
-    }
-
-    public void setWithParentTransaction(boolean withParentTransaction) {
-        this.withParentTransaction = withParentTransaction;
     }
 
     public void setGatewayPayoutId(String gatewayPayoutId) {
@@ -356,10 +349,6 @@ public class TransactionSearchParams extends SearchParams {
 
     public int getStatusVersion() {
         return statusVersion;
-    }
-
-    public boolean getWithParentTransaction() {
-        return withParentTransaction;
     }
 
     @Override

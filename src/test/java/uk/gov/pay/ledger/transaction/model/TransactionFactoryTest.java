@@ -197,8 +197,6 @@ public class TransactionFactoryTest {
         assertThat(refundEntity.getState(), is(state));
         assertThat(refundEntity.getCreatedDate(), is(createdDate));
         assertThat(refundEntity.getEventCount(), is(eventCount));
-
-        assertCorrectPaymentTransactionWithFullData((Payment) refundEntity.getParentTransaction().get());
     }
 
     @Test
@@ -249,8 +247,6 @@ public class TransactionFactoryTest {
         assertThat(refundEntity.getPaymentDetails().getCardDetails().getExpiryDate(), is("10/27"));
         assertThat(refundEntity.getPaymentDetails().getCardDetails().getCardType(), is(CardType.CREDIT));
         assertThat(refundEntity.getPaymentDetails().getWalletType(), is("APPLE_PAY"));
-
-        assertCorrectPaymentTransactionWithFullData((Payment) refundEntity.getParentTransaction().get());
     }
 
     private void assertCorrectPaymentTransactionWithFullData(Payment payment) {

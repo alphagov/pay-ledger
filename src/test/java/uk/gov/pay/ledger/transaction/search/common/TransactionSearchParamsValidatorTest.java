@@ -45,26 +45,6 @@ public class TransactionSearchParamsValidatorTest {
     }
 
     @Test
-    public void shouldNotThrowException_whenGatewayAccountIdAvailableAndWithParentTransactionIsTrue() {
-        searchParams.setWithParentTransaction(true);
-        TransactionSearchParamsValidator.validateSearchParams(searchParams, new CommaDelimitedSetParameter("account-id"));
-    }
-
-    @Test
-    public void shouldNotThrowException_whenGatewayAccountIdsAvailableAndWithParentTransactionIsTrue() {
-        searchParams.setWithParentTransaction(true);
-        ValidationException validationException = assertThrows(ValidationException.class,
-                () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, new CommaDelimitedSetParameter("")));
-        assertThat(validationException.getMessage(), is("gateway_account_id is mandatory to search with parent transaction"));
-    }
-
-    @Test
-    public void shouldNotThrowException_whenGatewayAccountIdIsNotAvailableAndWithParentTransactionIsTrue() {
-        searchParams.setWithParentTransaction(true);
-        TransactionSearchParamsValidator.validateSearchParams(searchParams, new CommaDelimitedSetParameter("1,2"));
-    }
-
-    @Test
     public void validateSearchParamsForCsvShouldNotThrowExceptionForValidParams() {
         searchParams.setFromDate("2019-05-01T10:15:30Z");
         searchParams.setToDate("2019-05-01T10:15:30Z");

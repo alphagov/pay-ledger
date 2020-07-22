@@ -153,7 +153,6 @@ public class TransactionView {
                 .withRefundedBy(refund.getRefundedBy())
                 .withRefundedByUserEmail(refund.getRefundedByUserEmail())
                 .withTransactionType(refund.getTransactionType())
-                .withParentTransaction(refund.getParentTransaction().map(parentTransaction -> from(parentTransaction, statusVersion)).orElse(null))
                 .withGatewayPayoutId(refund.getGatewayPayoutId());
         if (refund.getPaymentDetails() != null) {
             refundBuilder = refundBuilder
