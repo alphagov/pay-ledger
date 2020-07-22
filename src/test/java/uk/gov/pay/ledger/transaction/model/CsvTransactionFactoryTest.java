@@ -35,17 +35,10 @@ public class CsvTransactionFactoryTest {
                 .withAmount(100L)
                 .withCreatedDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
                 .withTotalAmount(123L)
-                .withTransactionDetails(
-                        new GsonBuilder().create()
-                                .toJson(ImmutableMap.builder()
-                                        .put("expiry_date", "10/24")
-                                        .put("user_email", "refundedbyuser@example.org")
-                                        .put("corporate_surcharge", 23)
-                                        .put("wallet", "APPLE_PAY")
-                                        .put("card_type", "DEBIT")
-                                        .put("card_brand_label", "Visa")
-                                        .build())
-                );
+                .withCorporateCardSurcharge(23)
+                .withCardBrandLabel("Visa")
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails();
     }
 
     @Test
@@ -71,21 +64,21 @@ public class CsvTransactionFactoryTest {
     @Test
     public void toMapShouldReturnMapWithCorrectCsvDataForRefundTransaction() {
 
-        TransactionEntity transactionEntity = transactionFixture
-                .withMoto(true)
-                .toEntity();
-        TransactionEntity refundTransactionEntity = transactionFixture.withTransactionType("REFUND")
+        TransactionEntity refundTransactionEntity = aTransactionFixture()
+                .withCreatedDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
+                .withTransactionType("REFUND")
                 .withAmount(99L)
                 .withTotalAmount(99L)
                 .withState(TransactionState.ERROR)
-                .withParentTransactionEntity(transactionEntity)
-                .withTransactionDetails(new GsonBuilder().create()
-                        .toJson(ImmutableMap.builder().put("user_email", "refundedbyuser@example.org").build()))
+                .withRefundedByUserEmail("refundedbyuser@example.org")
+                .withParentExternalId(transactionFixture.getExternalId())
+                .withRefundForPayment(transactionFixture)
+                .withDefaultTransactionDetails()
                 .toEntity();
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(refundTransactionEntity);
 
-        assertPaymentDetails(csvDataMap, refundTransactionEntity.getParentTransactionEntity());
+        assertPaymentDetails(csvDataMap, transactionFixture.toEntity());
         assertThat(csvDataMap.get("Amount"), is("-0.99"));
         assertThat(csvDataMap.get("State"), is("Refund error"));
         assertThat(csvDataMap.get("Finished"), is(true));
@@ -96,7 +89,6 @@ public class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.00"));
         assertThat(csvDataMap.get("Total Amount"), is("-0.99"));
         assertThat(csvDataMap.get("Net"), is("-0.99"));
-        assertThat(csvDataMap.get("MOTO"), is(true));
     }
 
     @Test
@@ -206,11 +198,10 @@ public class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Email"), is(transactionEntity.getEmail()));
         assertThat(csvDataMap.get("Card Brand"), is("Visa"));
         assertThat(csvDataMap.get("Cardholder Name"), is(transactionEntity.getCardholderName()));
-        assertThat(csvDataMap.get("Card Expiry Date"), is("10/24"));
+        assertThat(csvDataMap.get("Card Expiry Date"), is("10/21"));
         assertThat(csvDataMap.get("Card Number"), is(transactionEntity.getLastDigitsCardNumber()));
-        assertThat(csvDataMap.get("Provider ID"), is(transactionEntity.getGatewayTransactionId()));
         assertThat(csvDataMap.get("GOV.UK Payment ID"), is(transactionEntity.getExternalId()));
-        assertThat(csvDataMap.get("Card Type"), is("debit"));
+        assertThat(csvDataMap.get("Card Type"), is("credit"));
         assertThat(csvDataMap.get("Wallet Type"), is("Apple Pay"));
     }
 }

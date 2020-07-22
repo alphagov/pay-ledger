@@ -1,12 +1,10 @@
 package uk.gov.pay.ledger.transaction.resource;
 
 import com.google.common.collect.ImmutableMap;
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
@@ -84,6 +82,7 @@ public class TransactionResourceCsvIT {
                 .withAmount(100L)
                 .withTotalAmount(100L)
                 .withState(TransactionState.ERROR_GATEWAY)
+                .withRefundForPayment(transactionFixture)
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
@@ -372,7 +371,6 @@ public class TransactionResourceCsvIT {
         assertThat(csvRecord.get("Cardholder Name"), is("J Doe"));
         assertThat(csvRecord.get("Card Expiry Date"), is("10/21"));
         assertThat(csvRecord.get("Card Number"), is("1234"));
-        assertThat(csvRecord.get("Provider ID"), is("gateway-transaction-id"));
         assertThat(csvRecord.get("GOV.UK Payment ID"), is(transactionFixture.getExternalId()));
         assertThat(csvRecord.get("Card Type"), is("credit"));
     }

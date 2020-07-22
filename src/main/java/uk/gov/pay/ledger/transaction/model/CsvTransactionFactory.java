@@ -84,19 +84,19 @@ public class CsvTransactionFactory {
                         getPaymentTransactionAttributes(transactionEntity, transactionDetails)
                 );
 
+                result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getExternalId());
                 result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount()));
                 result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalAmount));
                 result.put(FIELD_NET, penceToCurrency(netAmount));
                 result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
                 result.put(FIELD_STATE, PaymentState.getDisplayName(transactionEntity.getState()));
+                result.put(FIELD_MOTO, transactionEntity.isMoto());
             }
             if (TransactionType.REFUND.toString().equals(transactionEntity.getTransactionType())) {
-                if (transactionEntity.getParentTransactionEntity() != null) {
                     result.putAll(
                             getPaymentTransactionAttributes(transactionEntity, transactionDetails.get("payment_details"))
                     );
-                }
-
+                result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getParentExternalId());
                 result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount() * -1));
                 result.put(FIELD_NET, penceToCurrency(netAmount * -1));
                 result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalAmount * -1));
@@ -138,13 +138,11 @@ public class CsvTransactionFactory {
         result.put(FIELD_EMAIL, sanitiseAgainstSpreadsheetFormulaInjection(transactionEntity.getEmail()));
         result.put(FIELD_CARDHOLDER_NAME, sanitiseAgainstSpreadsheetFormulaInjection(transactionEntity.getCardholderName()));
         result.put(FIELD_CARD_NUMBER, transactionEntity.getLastDigitsCardNumber());
-        result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getExternalId());
 
         result.put(FIELD_CARD_BRAND, safeGetAsString(details, "card_brand_label"));
         result.put(FIELD_CARD_EXPIRY_DATE, safeGetAsString(details, "expiry_date"));
         result.put(FIELD_PROVIDER_ID, sanitiseAgainstSpreadsheetFormulaInjection(transactionEntity.getGatewayTransactionId()));
         result.put(FIELD_CARD_TYPE, StringUtils.lowerCase(safeGetAsString(details, "card_type")));
-        result.put(FIELD_MOTO, transactionEntity.isMoto());
 
         result.put(FIELD_WALLET_TYPE, capitalizeFully(
                 replaceChars(safeGetAsString(details, "wallet"), '_', ' '))
