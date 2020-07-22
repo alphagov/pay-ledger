@@ -140,7 +140,7 @@ public class TransactionFactory {
                     .withParentExternalId(entity.getParentExternalId())
                     .withParentTransaction(parentTransaction)
                     .withGatewayPayoutId(entity.getGatewayPayoutId())
-                    .withSharedPaymentDetails(paymentDetails)
+                    .withPaymentDetails(paymentDetails)
                     .build();
 
         } catch (IOException e) {

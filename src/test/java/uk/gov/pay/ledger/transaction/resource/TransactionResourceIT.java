@@ -249,10 +249,10 @@ public class TransactionResourceIT {
                 .body("transactions[0].refunded_by", is("refund-by-user-id"))
                 .body("transactions[0].transaction_type", is(refundTransactionEntity.getTransactionType()))
                 .body("transactions[0].transaction_id", is(refundTransactionEntity.getExternalId()))
-                .body("transactions[0].shared_payment_details.description", is(parentTransactionEntity.getDescription()))
-                .body("transactions[0].shared_payment_details.reference", is(parentTransactionEntity.getReference()))
-                .body("transactions[0].shared_payment_details.email", is(parentTransactionEntity.getEmail()))
-                .body("transactions[0].shared_payment_details.card_details.cardholder_name", is(parentTransactionEntity.getCardholderName()));
+                .body("transactions[0].payment_details.description", is(parentTransactionEntity.getDescription()))
+                .body("transactions[0].payment_details.reference", is(parentTransactionEntity.getReference()))
+                .body("transactions[0].payment_details.email", is(parentTransactionEntity.getEmail()))
+                .body("transactions[0].payment_details.card_details.cardholder_name", is(parentTransactionEntity.getCardholderName()));
     }
 
     @Test

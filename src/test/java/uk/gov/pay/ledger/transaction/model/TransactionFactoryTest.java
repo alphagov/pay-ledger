@@ -236,19 +236,19 @@ public class TransactionFactoryTest {
         assertThat(refundEntity.getCreatedDate(), is(createdDate));
         assertThat(refundEntity.getEventCount(), is(eventCount));
 
-        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getCardHolderName(), is("a-cardholder-name"));
-        assertThat(refundEntity.getSharedPaymentDetails().getEmail(), is("a-email"));
-        assertThat(refundEntity.getSharedPaymentDetails().getDescription(), is("a-description"));
+        assertThat(refundEntity.getPaymentDetails().getCardDetails().getCardHolderName(), is("a-cardholder-name"));
+        assertThat(refundEntity.getPaymentDetails().getEmail(), is("a-email"));
+        assertThat(refundEntity.getPaymentDetails().getDescription(), is("a-description"));
 
-        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getCardBrand(), is("Visa"));
+        assertThat(refundEntity.getPaymentDetails().getCardDetails().getCardBrand(), is("Visa"));
 
-        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getLastDigitsCardNumber(), is("5678"));
-        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getFirstDigitsCardNumber(), is("1234"));
+        assertThat(refundEntity.getPaymentDetails().getCardDetails().getLastDigitsCardNumber(), is("5678"));
+        assertThat(refundEntity.getPaymentDetails().getCardDetails().getFirstDigitsCardNumber(), is("1234"));
 
-        assertThat(refundEntity.getSharedPaymentDetails().getReference(), is("a-reference"));
-        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getExpiryDate(), is("10/27"));
-        assertThat(refundEntity.getSharedPaymentDetails().getCardDetails().getCardType(), is(CardType.CREDIT));
-        assertThat(refundEntity.getSharedPaymentDetails().getWalletType(), is("APPLE_PAY"));
+        assertThat(refundEntity.getPaymentDetails().getReference(), is("a-reference"));
+        assertThat(refundEntity.getPaymentDetails().getCardDetails().getExpiryDate(), is("10/27"));
+        assertThat(refundEntity.getPaymentDetails().getCardDetails().getCardType(), is(CardType.CREDIT));
+        assertThat(refundEntity.getPaymentDetails().getWalletType(), is("APPLE_PAY"));
 
         assertCorrectPaymentTransactionWithFullData((Payment) refundEntity.getParentTransaction().get());
     }

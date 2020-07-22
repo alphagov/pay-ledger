@@ -1,7 +1,6 @@
 package uk.gov.pay.ledger.transaction.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -16,7 +15,6 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Payment extends Transaction {
 
