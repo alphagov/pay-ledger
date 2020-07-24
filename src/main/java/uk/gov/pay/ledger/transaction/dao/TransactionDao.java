@@ -278,7 +278,7 @@ public class TransactionDao {
     public List<TransactionEntity> cursorTransactionSearch(TransactionSearchParams searchParams, ZonedDateTime startingAfterCreatedDate, Long startingAfterId) {
         Long cursorPageSize = searchParams.getDisplaySize();
         String cursorTemplate = "";
-        String searchTemplate = createSearchTemplate(searchParams.getFilterTemplatesWithParentTransactionSearch(), SEARCH_TRANSACTIONS_CURSOR);
+        String searchTemplate = createSearchTemplate(searchParams.getFilterTemplates(), SEARCH_TRANSACTIONS_CURSOR);
 
         if (startingAfterCreatedDate != null && startingAfterId != null) {
             cursorTemplate = searchParams.getQueryMap().isEmpty() ? "WHERE " : "AND ";

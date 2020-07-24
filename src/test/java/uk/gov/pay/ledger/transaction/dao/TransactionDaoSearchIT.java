@@ -872,6 +872,11 @@ public class TransactionDaoSearchIT {
 
         transactionFixture = aTransactionFixture()
                 .withGatewayAccountId("1")
+                .withReference("ref1")
+                .withCardholderName("test 1")
+                .withLastDigitsCardNumber("1234")
+                .withCardBrand("visa")
+                .withEmail("test@example.org")
                 .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
                 .insert(rule.getJdbi());
 
@@ -881,10 +886,14 @@ public class TransactionDaoSearchIT {
                 .insert(rule.getJdbi());
 
         searchParams.setAccountIds(List.of("1"));
+        searchParams.setReference("ref");
+        searchParams.setCardHolderName("test");
+        searchParams.setEmail("test@example.org");
+        searchParams.setCardBrands(new CommaDelimitedSetParameter("visa"));
 
         List<TransactionEntity> transactionList = transactionDao.cursorTransactionSearch(searchParams, null, null);
 
-        assertThat(transactionList.size(), is(2));
+        assertThat(transactionList.size(), is(1));
     }
 
     @Test
