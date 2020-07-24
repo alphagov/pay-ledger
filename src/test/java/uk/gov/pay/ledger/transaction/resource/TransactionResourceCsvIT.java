@@ -1,12 +1,10 @@
 package uk.gov.pay.ledger.transaction.resource;
 
 import com.google.common.collect.ImmutableMap;
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
@@ -75,7 +73,7 @@ public class TransactionResourceCsvIT {
                 .withGatewayAccountId(otherGatewayAccountId)
                 .insert(rule.getJdbi());
 
-        aTransactionFixture()
+        TransactionFixture refundTransactionFixture = aTransactionFixture()
                 .withTransactionType("REFUND")
                 .withParentExternalId(transactionFixture.getExternalId())
                 .withGatewayAccountId(transactionFixture.getGatewayAccountId())
@@ -84,6 +82,8 @@ public class TransactionResourceCsvIT {
                 .withAmount(100L)
                 .withTotalAmount(100L)
                 .withState(TransactionState.ERROR_GATEWAY)
+                .withGatewayTransactionId("refund-gateway-transaction-id")
+                .withDefaultPaymentDetails()
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
@@ -110,8 +110,10 @@ public class TransactionResourceCsvIT {
 
         CSVRecord paymentRecord = csvRecords.get(0);
         assertThat(paymentRecord.size(), is(22));
-        assertPaymentTransactionDetails(paymentRecord, transactionFixture);
+        assertCommonPaymentFields(paymentRecord, transactionFixture);
         assertThat(paymentRecord.get("Amount"), is("1.23"));
+        assertThat(paymentRecord.get("GOV.UK Payment ID"), is(transactionFixture.getExternalId()));
+        assertThat(paymentRecord.get("Provider ID"), is(transactionFixture.getGatewayTransactionId()));
         assertThat(paymentRecord.get("State"), is("Error"));
         assertThat(paymentRecord.get("Finished"), is("true"));
         assertThat(paymentRecord.get("Error Code"), is("P0050"));
@@ -127,8 +129,10 @@ public class TransactionResourceCsvIT {
         assertThat(paymentRecord.isMapped("MOTO"), is(false));
 
         CSVRecord refundRecord = csvRecords.get(1);
-        assertPaymentTransactionDetails(refundRecord, transactionFixture);
+        assertCommonPaymentFields(refundRecord, refundTransactionFixture);
         assertThat(refundRecord.get("Amount"), is("-1.00"));
+        assertThat(refundRecord.get("GOV.UK Payment ID"), is(refundTransactionFixture.getParentExternalId()));
+        assertThat(refundRecord.get("Provider ID"), is(refundTransactionFixture.getGatewayTransactionId()));
         assertThat(refundRecord.get("State"), is("Refund error"));
         assertThat(refundRecord.get("Finished"), is("true"));
         assertThat(refundRecord.get("Error Code"), is("P0050"));
@@ -139,6 +143,7 @@ public class TransactionResourceCsvIT {
         assertThat(refundRecord.get("Total Amount"), is("-1.00"));
         assertThat(refundRecord.get("Wallet Type"), is("Apple Pay"));
         assertThat(refundRecord.get("Issued By"), is("refund-by-user-email@example.org"));
+        assertThat(refundRecord.isMapped("MOTO"), is(false));
     }
 
     @Test
@@ -364,16 +369,14 @@ public class TransactionResourceCsvIT {
         assertThat(paymentRecord.get("GOV.UK Payment ID"), is(transactionFixture.getExternalId()));
     }
 
-    private void assertPaymentTransactionDetails(CSVRecord csvRecord, TransactionFixture transactionFixture) {
+    private void assertCommonPaymentFields(CSVRecord csvRecord, TransactionFixture transactionFixture) {
         assertThat(csvRecord.get("Reference"), is(transactionFixture.getReference()));
         assertThat(csvRecord.get("Description"), is(transactionFixture.getDescription()));
         assertThat(csvRecord.get("Email"), is("someone@example.org"));
-        assertThat(csvRecord.get("Card Brand"), is("Diners Club"));
-        assertThat(csvRecord.get("Cardholder Name"), is("J Doe"));
+        assertThat(csvRecord.get("Card Brand"), is(transactionFixture.getCardBrandLabel()));
+        assertThat(csvRecord.get("Cardholder Name"), is(transactionFixture.getCardholderName()));
         assertThat(csvRecord.get("Card Expiry Date"), is("10/21"));
         assertThat(csvRecord.get("Card Number"), is("1234"));
-        assertThat(csvRecord.get("Provider ID"), is("gateway-transaction-id"));
-        assertThat(csvRecord.get("GOV.UK Payment ID"), is(transactionFixture.getExternalId()));
         assertThat(csvRecord.get("Card Type"), is("credit"));
     }
 }
