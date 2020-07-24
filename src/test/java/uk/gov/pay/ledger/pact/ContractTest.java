@@ -388,8 +388,7 @@ public abstract class ContractTest {
                 .withReference(reference)
                 .withDescription(description)
                 .withCreatedDate(ZonedDateTime.parse(createdDate))
-                .withCardBrand(null)
-                .withEmail(null)
+                .withDefaultPaymentDetails()
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
@@ -455,7 +454,7 @@ public abstract class ContractTest {
                 .withCardBrandLabel("Visa")
                 .withGatewayTransactionId("gateway-transaction-id")
                 .withCardholderName("J Doe")
-                .withEmail("gds-payments-team-smoke@digital.cabinet-office.gov.uk")
+                .withEmail("test@example.org")
                 .withCreatedDate(ZonedDateTime.parse(createdDate))
                 .withCaptureSubmittedDate(ZonedDateTime.parse(createdDate).plusMinutes(2L))
                 .withCapturedDate(ZonedDateTime.parse(createdDate).plusHours(1L))
