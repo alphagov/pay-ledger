@@ -188,41 +188,6 @@ public class TransactionSearchParams extends SearchParams {
         return List.copyOf(filters);
     }
 
-    public List<String> getFilterTemplatesWithParentTransactionSearch() {
-        List<String> filters = new ArrayList<>();
-
-        addCommonFilterTemplates(filters);
-
-        if (isNotBlank(email)) {
-            filters.add(" (lower(t.email) like lower(:" + EMAIL_FIELD + ")" +
-                    " or lower(parent.email) like lower(:" + EMAIL_FIELD + "))");
-        }
-        if (isNotBlank(cardHolderName)) {
-            filters.add(" (lower(t.cardholder_name) like lower(:" + CARDHOLDER_NAME_FIELD + ")" +
-                    " or lower(parent.cardholder_name) like lower(:" + CARDHOLDER_NAME_FIELD + "))");
-        }
-        if (isNotBlank(lastDigitsCardNumber)) {
-            filters.add(" (t.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD +
-                    " or parent.last_digits_card_number = :" + LAST_DIGITS_CARD_NUMBER_FIELD + ")");
-        }
-        if (cardBrands != null && cardBrands.isNotEmpty()) {
-            filters.add(" (lower(t.card_brand) IN (<" + CARD_BRAND_FIELD + ">)" +
-                    " or lower(parent.card_brand) IN (<" + CARD_BRAND_FIELD + ">))");
-        }
-
-        if (isNotBlank(reference)) {
-            if (exactReferenceMatch) {
-                filters.add(" (lower(t.reference) = lower(:" + REFERENCE_FIELD + ")" +
-                        " or lower(parent.reference) = lower(:" + REFERENCE_FIELD + "))");
-            } else {
-                filters.add(" (lower(t.reference) like lower(:" + REFERENCE_FIELD + ")" +
-                        " or lower(parent.reference) like lower(:" + REFERENCE_FIELD + "))");
-            }
-        }
-
-        return List.copyOf(filters);
-    }
-
     private void addCommonFilterTemplates(List<String> filters) {
 
         if (accountIds != null && !accountIds.isEmpty()) {
