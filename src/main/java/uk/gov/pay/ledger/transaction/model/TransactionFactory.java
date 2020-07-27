@@ -109,9 +109,6 @@ public class TransactionFactory {
         try {
             JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
 
-            Optional<Transaction> parentTransaction = Optional.ofNullable(entity.getParentTransactionEntity())
-                    .map(this::createTransactionEntity);
-
             JsonNode refundPaymentDetails = transactionDetails.get("payment_details");
 
             CardType cardType = CardType.fromString(safeGetAsString(refundPaymentDetails, "card_type"));
@@ -138,7 +135,6 @@ public class TransactionFactory {
                     .withRefundedBy(safeGetAsString(transactionDetails, "refunded_by"))
                     .withRefundedByUserEmail(safeGetAsString(transactionDetails, "user_email"))
                     .withParentExternalId(entity.getParentExternalId())
-                    .withParentTransaction(parentTransaction)
                     .withGatewayPayoutId(entity.getGatewayPayoutId())
                     .withPaymentDetails(paymentDetails)
                     .build();

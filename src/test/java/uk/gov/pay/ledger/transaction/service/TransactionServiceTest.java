@@ -160,7 +160,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void searchTransactionsWithoutParent_shouldThrowNotFoundException_forInvalidPaginationParams() {
+    public void searchTransactions_shouldThrowNotFoundException_forInvalidPaginationParams() {
         List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 10);
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
         when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(10L);
@@ -173,25 +173,6 @@ public class TransactionServiceTest {
 
         verify(mockTransactionDao).searchTransactions(searchParams);
         verify(mockTransactionDao).getTotalForSearch(searchParams);
-    }
-
-    @Test
-    public void shouldListTransactionsWithCorrectQueryParamsAndPaginationLinks_whenParentTransactionIsTrue() {
-        List<TransactionEntity> transactionViewList = TransactionFixture
-                .aTransactionList(gatewayAccountId, 100);
-
-        when(mockTransactionDao.searchTransactionsAndParent(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
-        when(mockTransactionDao.getTotalForSearchTransactionAndParent(any(TransactionSearchParams.class))).thenReturn(100L);
-
-        setAllSearchParams();
-        searchParams.setWithParentTransaction(true);
-
-        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(List.of(gatewayAccountId), searchParams, mockUriInfo);
-
-        verify(mockTransactionDao).searchTransactionsAndParent(searchParams);
-        verify(mockTransactionDao).getTotalForSearchTransactionAndParent(searchParams);
-
-        assertCorrectPaginationQueryParams(transactionSearchResponse);
     }
 
     @Test

@@ -1,10 +1,8 @@
 package uk.gov.pay.ledger.transaction.resource;
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.model.Payment;
@@ -19,8 +17,6 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static java.time.ZoneOffset.UTC;
-import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
@@ -332,7 +328,6 @@ public class TransactionResourceSearchIT {
         String targetGatewayAccountId = "123";
         String otherGatewayAccountId = "456";
 
-
         TransactionFixture firstPayment = aTransactionFixture()
                 .withTransactionType("PAYMENT")
                 .withState(TransactionState.SUBMITTED)
@@ -358,57 +353,6 @@ public class TransactionResourceSearchIT {
                 .body("count", is(2))
                 .body("results[0].transaction_id", is(firstPayment.getExternalId()))
                 .body("results[1].transaction_id", is(secondPayment.getExternalId()));
-    }
-
-    @Test
-    public void shouldSearchCorrectlyOnTransactionAndParentTransaction_WhenWithParentTransactionIsTrue() {
-        String gatewayAccountId = String.valueOf(nextLong());
-        TransactionFixture payment = aTransactionFixture()
-                .withTransactionType("PAYMENT")
-                .withState(TransactionState.SUCCESS)
-                .withLastDigitsCardNumber("4242")
-                .withCardBrand("visa")
-                .withCardBrandLabel("Visa")
-                .withGatewayAccountId(gatewayAccountId)
-                .withDefaultTransactionDetails()
-                .withCreatedDate(ZonedDateTime.now(UTC).minusHours(1))
-                .insert(rule.getJdbi());
-
-        TransactionFixture successfulRefund = aTransactionFixture()
-                .withTransactionType("REFUND")
-                .withState(TransactionState.SUCCESS)
-                .withParentExternalId(payment.getExternalId())
-                .withGatewayAccountId(gatewayAccountId)
-                .withCreatedDate(ZonedDateTime.now(UTC))
-                .insert(rule.getJdbi());
-
-        given().port(port)
-                .contentType(JSON)
-                .accept(JSON)
-                .get("/v1/transaction?" +
-                        "account_id=" + gatewayAccountId +
-                        "&with_parent_transaction=true" +
-                        "&card_brands=" + payment.getCardBrand() +
-                        "&cardholder_name=" + payment.getCardholderName() +
-                        "&email=" + payment.getEmail() +
-                        "&reference=" + payment.getReference() +
-                        "&last_digits_card_number=" + payment.getLastDigitsCardNumber()
-                )
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON)
-                .body("count", is(2))
-                .body("results[0].transaction_id", is(successfulRefund.getExternalId()))
-                .body("results[0].transaction_type", is("REFUND"))
-                .body("results[0].parent_transaction.transaction_id", is(payment.getExternalId()))
-                .body("results[0].parent_transaction.transaction_type", is("PAYMENT"))
-                .body("results[0].parent_transaction.reference", is(payment.getReference()))
-                .body("results[0].parent_transaction.email", is(payment.getEmail()))
-                .body("results[0].parent_transaction.card_details.card_brand", is("Visa"))
-                .body("results[0].parent_transaction.card_details.last_digits_card_number", is(payment.getLastDigitsCardNumber()))
-                .body("results[0].parent_transaction.card_details.cardholder_name", is(payment.getCardholderName()))
-                .body("results[1].transaction_id", is(payment.getExternalId()))
-                .body("results[1].parent_transaction", is(nullValue()));
     }
 
     @Test

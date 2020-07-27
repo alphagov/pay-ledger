@@ -145,6 +145,7 @@ public class TransactionResourceIT {
                 .withRefundedById(refundedBy)
                 .withRefundedByUserEmail(refundedByUserEmail)
                 .withGatewayTransactionId("gateway-transaction-id")
+                .withDefaultPaymentDetails()
                 .withDefaultTransactionDetails()
                 .withGatewayPayoutId(gatewayPayoutId);
         transactionFixture.insert(rule.getJdbi());
@@ -162,7 +163,17 @@ public class TransactionResourceIT {
                 .body("created_date", is(now.toString()))
                 .body("refunded_by", is(refundedBy))
                 .body("refunded_by_user_email", is(refundedByUserEmail))
-                .body("gateway_payout_id", is(gatewayPayoutId));
+                .body("gateway_payout_id", is(gatewayPayoutId))
+                .body("payment_details.description", is(transactionFixture.getDescription()))
+                .body("payment_details.reference", is(transactionFixture.getReference()))
+                .body("payment_details.email", is(transactionFixture.getEmail()))
+                .body("payment_details.transaction_type", is("PAYMENT"))
+                .body("payment_details.card_details.cardholder_name", is(transactionFixture.getCardholderName()))
+                .body("payment_details.card_details.card_brand", is(transactionFixture.getCardBrandLabel()))
+                .body("payment_details.card_details.last_digits_card_number", is(transactionFixture.getLastDigitsCardNumber()))
+                .body("payment_details.card_details.first_digits_card_number", is(transactionFixture.getFirstDigitsCardNumber()))
+                .body("payment_details.card_details.expiry_date", is(transactionFixture.getCardExpiryDate()))
+                .body("payment_details.card_details.card_type", is("credit"));
     }
 
     @Test

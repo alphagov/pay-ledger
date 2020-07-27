@@ -3,7 +3,6 @@ package uk.gov.pay.ledger.transaction.model;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
-import java.util.Optional;
 
 public class Refund extends Transaction {
     private final TransactionState state;
@@ -14,7 +13,6 @@ public class Refund extends Transaction {
     private final String parentExternalId;
     private final String gatewayTransactionId;
     private final Payment paymentDetails;
-    private final Optional<Transaction> parentTransaction;
 
     public Refund(Builder builder) {
         super(builder.id, builder.gatewayAccountId, builder.amount, builder.externalId, builder.gatewayPayoutId);
@@ -24,7 +22,6 @@ public class Refund extends Transaction {
         this.refundedBy = builder.refundedBy;
         this.refundedByUserEmail = builder.refundedByUserEmail;
         this.parentExternalId = builder.parentExternalId;
-        this.parentTransaction = builder.parentTransaction;
         this.gatewayTransactionId = builder.gatewayTransactionId;
         this.paymentDetails = builder.paymentDetails;
     }
@@ -47,10 +44,6 @@ public class Refund extends Transaction {
 
     public String getParentExternalId() {
         return parentExternalId;
-    }
-
-    public Optional<Transaction> getParentTransaction() {
-        return parentTransaction;
     }
 
     public String getGatewayTransactionId() {
@@ -82,7 +75,6 @@ public class Refund extends Transaction {
         private String externalId;
         private String parentExternalId;
         private Payment paymentDetails;
-        private Optional<Transaction> parentTransaction;
         private String gatewayPayoutId;
         private String gatewayTransactionId;
 
@@ -140,11 +132,6 @@ public class Refund extends Transaction {
 
         public Builder withParentExternalId(String parentExternalId) {
             this.parentExternalId = parentExternalId;
-            return this;
-        }
-
-        public Builder withParentTransaction(Optional<Transaction> transaction) {
-            this.parentTransaction = transaction;
             return this;
         }
 
