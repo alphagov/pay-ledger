@@ -182,7 +182,6 @@ public class TransactionFactoryTest {
                 .withState(state)
                 .withCreatedDate(createdDate)
                 .withEventCount(eventCount)
-                .withParentTransactionEntity(fullDataObject)
                 .withTransactionDetails("{\"refunded_by\": \"some_user_id\", \"user_email\": \"test@example.com\"}")
                 .build();
         Refund refundEntity = (Refund) transactionFactory.createTransactionEntity(refund);
@@ -212,7 +211,6 @@ public class TransactionFactoryTest {
                 .withState(state)
                 .withCreatedDate(createdDate)
                 .withEventCount(eventCount)
-                .withParentTransactionEntity(fullDataObject)
                 .withTransactionDetails("{\"refunded_by\": \"some_user_id\", \"user_email\": \"test@example.com\", \"payment_details\": {\"expiry_date\": \"10/27\", \"card_type\": \"credit\", \"wallet\": \"APPLE_PAY\", \"card_brand_label\": \"Visa\"}}")
                 .withCardholderName("a-cardholder-name")
                 .withFirstDigitsCardNumber("1234")
