@@ -15,10 +15,6 @@ public class TransactionSearchParamsValidator {
 
     public static void validateSearchParams(TransactionSearchParams searchParams, CommaDelimitedSetParameter gatewayAccountIds) {
         validateDates(searchParams);
-
-        if (searchParams.getWithParentTransaction() && isEmpty(gatewayAccountIds)) {
-            throw new ValidationException("gateway_account_id is mandatory to search with parent transaction");
-        }
     }
 
     public static void validateSearchParamsForCsv(TransactionSearchParams searchParams, CommaDelimitedSetParameter gatewayAccountIds) {

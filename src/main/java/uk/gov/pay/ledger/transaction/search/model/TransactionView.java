@@ -53,7 +53,6 @@ public class TransactionView {
     private String refundedBy;
     private String refundedByUserEmail;
     private TransactionType transactionType;
-    private TransactionView parentTransaction;
     private Boolean moto;
     private Boolean live;
     private Source source;
@@ -88,7 +87,6 @@ public class TransactionView {
         this.refundedBy = builder.refundedBy;
         this.refundedByUserEmail = builder.refundedByUserEmail;
         this.transactionType = builder.transactionType;
-        this.parentTransaction = builder.parentTransaction;
         this.moto = builder.moto;
         this.live = builder.live;
         this.source = builder.source;
@@ -153,7 +151,6 @@ public class TransactionView {
                 .withRefundedBy(refund.getRefundedBy())
                 .withRefundedByUserEmail(refund.getRefundedByUserEmail())
                 .withTransactionType(refund.getTransactionType())
-                .withParentTransaction(refund.getParentTransaction().map(parentTransaction -> from(parentTransaction, statusVersion)).orElse(null))
                 .withGatewayPayoutId(refund.getGatewayPayoutId());
         if (refund.getPaymentDetails() != null) {
             refundBuilder = refundBuilder
@@ -285,10 +282,6 @@ public class TransactionView {
         return transactionType;
     }
 
-    public TransactionView getParentTransaction() {
-        return parentTransaction;
-    }
-
     public Boolean getLive() {
         return live;
     }
@@ -310,7 +303,6 @@ public class TransactionView {
     }
 
     public static class Builder {
-        private TransactionView parentTransaction;
         private Long id;
         private String gatewayAccountId;
         private Long amount;
@@ -479,11 +471,6 @@ public class TransactionView {
 
         public Builder withTransactionType(TransactionType transactionType) {
             this.transactionType = transactionType;
-            return this;
-        }
-
-        public Builder withParentTransaction(TransactionView parentTransaction) {
-            this.parentTransaction = parentTransaction;
             return this;
         }
 

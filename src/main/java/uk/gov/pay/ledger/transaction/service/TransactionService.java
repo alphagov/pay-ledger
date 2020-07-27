@@ -19,8 +19,8 @@ import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
-import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -93,14 +93,6 @@ public class TransactionService {
             searchParams.setAccountIds(gatewayAccountIds);
         }
 
-        if (searchParams.getWithParentTransaction()) {
-            return searchTransactionsAndParent(searchParams, uriInfo);
-        } else {
-            return searchTransactionsWithoutParent(searchParams, uriInfo);
-        }
-    }
-
-    private TransactionSearchResponse searchTransactionsWithoutParent(TransactionSearchParams searchParams, UriInfo uriInfo) {
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams)
                 .stream()
                 .map(transactionFactory::createTransactionEntity)
@@ -117,17 +109,6 @@ public class TransactionService {
                         Response.Status.NOT_FOUND);
             }
         }
-
-        return buildTransactionSearchResponse(searchParams, uriInfo, transactionList, total);
-    }
-
-    private TransactionSearchResponse searchTransactionsAndParent(TransactionSearchParams searchParams, UriInfo uriInfo) {
-        List<Transaction> transactionList = transactionDao.searchTransactionsAndParent(searchParams)
-                .stream()
-                .map(transactionFactory::createTransactionEntity)
-                .collect(Collectors.toList());
-
-        Long total = transactionDao.getTotalForSearchTransactionAndParent(searchParams);
 
         return buildTransactionSearchResponse(searchParams, uriInfo, transactionList, total);
     }

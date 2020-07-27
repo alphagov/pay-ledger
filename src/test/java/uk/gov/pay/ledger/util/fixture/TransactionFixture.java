@@ -69,7 +69,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private boolean live;
     private boolean moto;
     private String refundedByUserEmail;
-    private TransactionEntity parentTransactionEntity;
     private String source;
     private String gatewayPayoutId;
 
@@ -296,11 +295,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withParentTransactionEntity(TransactionEntity parentTransactionEntity) {
-        this.parentTransactionEntity = parentTransactionEntity;
-        return this;
-    }
-
     public TransactionFixture withLive(boolean live) {
         this.live = live;
         return this;
@@ -468,7 +462,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withLive(live)
                 .withMoto(moto)
                 .withGatewayTransactionId(gatewayTransactionId)
-                .withParentTransactionEntity(parentTransactionEntity)
                 .withGatewayPayoutId(gatewayPayoutId);
         Source.from(source).ifPresent(builder::withSource);
         return builder.build();
