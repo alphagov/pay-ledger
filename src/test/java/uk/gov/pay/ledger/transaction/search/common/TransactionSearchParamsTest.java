@@ -147,4 +147,12 @@ public class TransactionSearchParamsTest {
         transactionSearchParams.setToDate("2018-09-22T10:14:16.067Z");
         assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("to_date=2018-09-22T10:14:16.067Z"));
     }
+
+    @Test
+    public void getLimitTotalSizeShouldReturnDefaultValueIfBelowDisplaySize() {
+        transactionSearchParams.setDisplaySize(100L);
+        transactionSearchParams.setLimitTotalSize(10L);
+
+        assertThat(transactionSearchParams.getLimitTotalSize(), is(10000L));
+    }
 }

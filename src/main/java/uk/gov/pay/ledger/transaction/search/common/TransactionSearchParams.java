@@ -37,6 +37,7 @@ public class TransactionSearchParams extends SearchParams {
     private static final String GATEWAY_PAYOUT_ID = "gateway_payout_id";
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
+    private static final Long DEFAULT_LIMIT_TOTAL_SIZE = 10000L;
 
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
@@ -80,6 +81,10 @@ public class TransactionSearchParams extends SearchParams {
     @DefaultValue("500")
     @QueryParam("display_size")
     private Long displaySize = DEFAULT_MAX_DISPLAY_SIZE;
+    @DefaultValue("10000")
+    @QueryParam("limit_total_size")
+    private Long limitTotalSize = DEFAULT_LIMIT_TOTAL_SIZE;
+
     private Map<String, Object> queryMap;
     @QueryParam("gateway_transaction_id")
     private String gatewayTransactionId;
@@ -151,6 +156,10 @@ public class TransactionSearchParams extends SearchParams {
 
     public void setDisplaySize(Long displaySize) {
         this.displaySize = displaySize;
+    }
+
+    public void setLimitTotalSize(Long limitTotalSize) {
+        this.limitTotalSize = limitTotalSize;
     }
 
     public void overrideMaxDisplaySize(Long maxDisplaySize) {
@@ -299,6 +308,13 @@ public class TransactionSearchParams extends SearchParams {
         } else {
             return this.displaySize;
         }
+    }
+
+    public Long getLimitTotalSize() {
+        if (limitTotalSize < displaySize) {
+            return DEFAULT_LIMIT_TOTAL_SIZE;
+        }
+        return this.limitTotalSize;
     }
 
     public String getFromDate() {

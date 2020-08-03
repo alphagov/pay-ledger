@@ -1,11 +1,9 @@
 package uk.gov.pay.ledger.transaction.dao;
 
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -17,15 +15,16 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import static java.time.ZonedDateTime.now;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aPersistedTransactionList;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class TransactionDaoSearchIT {
@@ -702,42 +701,27 @@ public class TransactionDaoSearchIT {
         assertThat(fourthPage.size(), is(0));
     }
 
-    private void assertTransactionEquals(TransactionEntity actualTransactionEntity, TransactionFixture transactionFixture) {
-        assertThat(actualTransactionEntity.getId(), is(transactionFixture.getId()));
-        assertThat(actualTransactionEntity.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
-        assertThat(actualTransactionEntity.getExternalId(), is(transactionFixture.getExternalId()));
-        assertThat(actualTransactionEntity.getParentExternalId(), is(transactionFixture.getParentExternalId()));
-        assertThat(actualTransactionEntity.getAmount(), is(transactionFixture.getAmount()));
-        assertThat(actualTransactionEntity.getReference(), is(transactionFixture.getReference()));
-        assertThat(actualTransactionEntity.getDescription(), is(transactionFixture.getDescription()));
-        assertThat(actualTransactionEntity.getState(), is(transactionFixture.getState()));
-        assertThat(actualTransactionEntity.getEmail(), is(transactionFixture.getEmail()));
-        if (transactionFixture.getCardDetails() != null) {
-            assertThat(actualTransactionEntity.getCardholderName(), is(transactionFixture.getCardDetails().getCardHolderName()));
-            assertThat(actualTransactionEntity.getCardBrand(), is(transactionFixture.getCardDetails().getCardBrand()));
-        }
-        assertThat(actualTransactionEntity.getCreatedDate(), is(transactionFixture.getCreatedDate()));
-        assertThat(actualTransactionEntity.getCardBrand(), is(transactionFixture.getCardBrand()));
-        assertThat(actualTransactionEntity.getLastDigitsCardNumber(), is(transactionFixture.getLastDigitsCardNumber()));
-        assertThat(actualTransactionEntity.getFirstDigitsCardNumber(), is(transactionFixture.getFirstDigitsCardNumber()));
-        assertThat(actualTransactionEntity.isMoto(), is(transactionFixture.isMoto()));
-    }
+    @Test
+    public void getTotalWithLimitForSearchShouldApplyLimitTotalSizeCorrectly() {
+        String gatewayAccountId = "account-id-" + nextLong();
 
-    private TransactionFixture insertTransaction() {
-        return aTransactionFixture()
-                .withState(TransactionState.CREATED)
-                .withDefaultCardDetails()
-                .withMoto(true)
+        aPersistedTransactionList(gatewayAccountId, 15, rule.getJdbi(), true);
+        aTransactionFixture().withGatewayAccountId(gatewayAccountId).withReference("to_exclude")
                 .insert(rule.getJdbi());
-    }
+        aTransactionFixture().withGatewayAccountId(randomAlphanumeric(26)).withReference("to_exclude")
+                .insert(rule.getJdbi());
 
-    private TransactionFixture insertRefundChildTransaction(TransactionFixture parentTransactionFixture, ZonedDateTime createdDate) {
-        return aTransactionFixture()
-                .withParentExternalId(parentTransactionFixture.getExternalId())
-                .withGatewayAccountId(parentTransactionFixture.getGatewayAccountId())
-                .withTransactionType("REFUND")
-                .withState(TransactionState.CREATED)
-                .withCreatedDate(createdDate)
-                .insert(rule.getJdbi());
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setReference("reference");
+        searchParams.setEmail("example.org");
+        searchParams.setCardHolderName("smith");
+        searchParams.setLastDigitsCardNumber("1234");
+        searchParams.setFromDate("2019-10-01T10:00:00.000Z");
+        searchParams.setToDate(now().plusDays(2).toString());
+        searchParams.setLimitTotalSize(15L);
+
+        Long total = transactionDao.getTotalWithLimitForSearch(searchParams);
+        assertThat(total, is(15L));
     }
 }
