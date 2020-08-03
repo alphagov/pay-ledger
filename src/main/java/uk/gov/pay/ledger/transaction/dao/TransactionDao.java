@@ -49,6 +49,12 @@ public class TransactionDao {
             "FROM transaction t " +
             ":searchExtraFields ";
 
+    private static final String COUNT_TRANSACTIONS_WITH_LIMIT = "select count(id) from (SELECT t.id " +
+            "FROM transaction t " +
+            " :searchExtraFields " +
+            " OFFSET 0 LIMIT :limit" +
+            ") txs";
+
     private static final String UPSERT_STRING =
             "INSERT INTO transaction(" +
                     "external_id," +
@@ -214,6 +220,18 @@ public class TransactionDao {
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplates(), COUNT_TRANSACTIONS));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
+            return query
+                    .mapTo(Long.class)
+                    .one();
+        });
+    }
+
+    public Long getTotalWithLimitForSearch(TransactionSearchParams searchParams) {
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplates(), COUNT_TRANSACTIONS_WITH_LIMIT));
+            searchParams.getQueryMap().forEach(bindSearchParameter(query));
+            query.bind("limit", searchParams.getLimitTotalSize());
+
             return query
                     .mapTo(Long.class)
                     .one();
