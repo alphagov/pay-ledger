@@ -17,6 +17,7 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
@@ -39,7 +40,7 @@ public class TransactionResourceSearchIT {
 
     @Test
     public void shouldSearchUsingAllFieldsAndReturnAllFieldsCorrectly() {
-        String gatewayAccountId = RandomStringUtils.randomAlphanumeric(20);
+        String gatewayAccountId = randomAlphanumeric(20);
         List<Transaction> transactionList = aPersistedTransactionList(gatewayAccountId, 20, rule.getJdbi(), true);
         Payment transactionToVerify = (Payment) transactionList.get(15);
         given().port(port)
@@ -292,6 +293,27 @@ public class TransactionResourceSearchIT {
     }
 
     @Test
+    public void shouldSearchTransactionWithLimitAppliedOnTotal_WhenLimitTotalFlagIsSet() {
+        String gatewayAccountId = "gateway-account-id" + randomAlphanumeric(5);
+        aPersistedTransactionList(gatewayAccountId, 100, rule.getJdbi(), true);
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&limit_total=true" +
+                        "&limit_total_size=10" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("total", is(10))
+                .body("count", is(5));
+    }
+
+    @Test
     public void shouldSearchUsingGatewayAccountId() {
         String targetGatewayAccountId = "123";
         String otherGatewayAccountId = "456";
@@ -383,7 +405,7 @@ public class TransactionResourceSearchIT {
                 .contentType(JSON)
                 .accept(JSON)
                 .get("/v1/transaction?" +
-                        "account_id=" + targetGatewayAccountId+ "," + targetGatewayAccountId2+
+                        "account_id=" + targetGatewayAccountId + "," + targetGatewayAccountId2 +
                         "&page=1" +
                         "&display_size=5"
                 )

@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -173,6 +174,28 @@ public class TransactionServiceTest {
 
         verify(mockTransactionDao).searchTransactions(searchParams);
         verify(mockTransactionDao).getTotalForSearch(searchParams);
+    }
+
+    @Test
+    public void shouldListTransactionsWithCorrectQueryParamsAndPaginationLinks_WhenLimitTotalParamIsSet() {
+        List<TransactionEntity> transactionViewList = TransactionFixture.aTransactionList(gatewayAccountId, 10);
+        when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
+        when(mockTransactionDao.getTotalWithLimitForSearch(any(TransactionSearchParams.class))).thenReturn(10L);
+
+        setAllSearchParams();
+        searchParams.setLimitTotal(true);
+
+        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(searchParams, mockUriInfo);
+
+        verify(mockTransactionDao).searchTransactions(searchParams);
+        verify(mockTransactionDao).getTotalWithLimitForSearch(searchParams);
+        assertThat(transactionSearchResponse.getTotal(), is(10L));
+
+        PaginationBuilder paginationBuilder = transactionSearchResponse.getPaginationBuilder();
+        assertThat(paginationBuilder.getLastLink(), is(nullValue()));
+        assertThat(paginationBuilder.getPrevLink(), is(nullValue()));
+
+        assertCorrectPaginationQueryParams(transactionSearchResponse);
     }
 
     @Test

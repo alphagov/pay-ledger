@@ -48,9 +48,14 @@ public class PaginationBuilder {
     }
 
     public PaginationBuilder buildResponse() {
-        Long pageSize = searchParams.getDisplaySize();
-        long lastPage = totalCount > 0 ? (totalCount + pageSize - 1) / pageSize : 1;
-        buildLinks(lastPage);
+
+        if (searchParams.limitTotal()) {
+            buildLinksForLimitTotal();
+        } else {
+            Long pageSize = searchParams.getDisplaySize();
+            long lastPage = totalCount > 0 ? (totalCount + pageSize - 1) / pageSize : 1;
+            buildLinks(lastPage);
+        }
 
         return this;
     }
@@ -73,6 +78,19 @@ public class PaginationBuilder {
 
     public PaginationLink getNextLink() {
         return nextLink;
+    }
+
+    private void buildLinksForLimitTotal() {
+        selfLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString(searchParams.getPageNumber())));
+        firstLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString(1L)));
+
+        nextLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString(selfPageNum + 1)));
+
+        if (selfPageNum == 1L) {
+            prevLink = null;
+        } else {
+            prevLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString(selfPageNum - 1)));
+        }
     }
 
     private void buildLinks(long lastPage) {

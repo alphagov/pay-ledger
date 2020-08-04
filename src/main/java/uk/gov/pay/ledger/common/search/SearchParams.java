@@ -10,6 +10,10 @@ public abstract class SearchParams {
 
     public abstract Long getDisplaySize();
 
+    public boolean limitTotal() {
+        return false;
+    }
+
     protected boolean isSet(CommaDelimitedSetParameter commaDelimitedSetParameter) {
         return commaDelimitedSetParameter != null && commaDelimitedSetParameter.isNotEmpty();
     }
