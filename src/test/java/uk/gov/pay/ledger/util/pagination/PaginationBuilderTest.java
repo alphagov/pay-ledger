@@ -95,4 +95,34 @@ public class PaginationBuilderTest {
         assertThat(builder.getNextLink().getHref().contains("page=4&display_size=10"), is(true));
         assertThat(builder.getSelfLink().getHref().contains("page=3&display_size=10"), is(true));
     }
+
+    @Test
+    public void shouldBuildLinksCorrectly_whenLimitTotalParamIsSetAndFirstPageIsAccessed() {
+        transactionSearchParams.setPageNumber(1L);
+        transactionSearchParams.setDisplaySize(10L);
+        transactionSearchParams.setLimitTotal(true);
+        PaginationBuilder builder = new PaginationBuilder(transactionSearchParams, mockedUriInfo)
+                .withTotalCount(120L);
+        builder = builder.buildResponse();
+        assertThat(builder.getFirstLink().getHref().contains("page=1&display_size=10"), is(true));
+        assertThat(builder.getLastLink(), is(nullValue()));
+        assertThat(builder.getPrevLink(), is(nullValue()));
+        assertThat(builder.getNextLink().getHref().contains("page=2&display_size=10"), is(true));
+        assertThat(builder.getSelfLink().getHref().contains("page=1&display_size=10"), is(true));
+    }
+
+    @Test
+    public void shouldShowAllLinksCorrectly_whenLimitTotalParamIsSetAndMultiplePagesExists() {
+        transactionSearchParams.setPageNumber(3L);
+        transactionSearchParams.setDisplaySize(10L);
+        transactionSearchParams.setLimitTotal(true);
+        PaginationBuilder builder = new PaginationBuilder(transactionSearchParams, mockedUriInfo)
+                .withTotalCount(120L);
+        builder = builder.buildResponse();
+        assertThat(builder.getFirstLink().getHref().contains("page=1&display_size=10"), is(true));
+        assertThat(builder.getLastLink(), is(nullValue()));
+        assertThat(builder.getPrevLink().getHref().contains("page=2&display_size=10"), is(true));
+        assertThat(builder.getNextLink().getHref().contains("page=4&display_size=10"), is(true));
+        assertThat(builder.getSelfLink().getHref().contains("page=3&display_size=10"), is(true));
+    }
 }

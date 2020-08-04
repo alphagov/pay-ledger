@@ -47,7 +47,6 @@ public class TransactionSearchParams extends SearchParams {
     @DefaultValue("false")
     @QueryParam("exact_reference_match")
     private boolean exactReferenceMatch;
-    @DefaultValue("false")
     private List<String> accountIds;
     @QueryParam("email")
     private String email;
@@ -75,12 +74,15 @@ public class TransactionSearchParams extends SearchParams {
     private TransactionType transactionType;
     @QueryParam("gateway_payout_id")
     private String gatewayPayoutId;
-    @DefaultValue("true")
     private Long pageNumber = 1L;
 
     @DefaultValue("500")
     @QueryParam("display_size")
     private Long displaySize = DEFAULT_MAX_DISPLAY_SIZE;
+
+    @DefaultValue("false")
+    @QueryParam("limit_total")
+    private boolean limitTotal;
     @DefaultValue("10000")
     @QueryParam("limit_total_size")
     private Long limitTotalSize = DEFAULT_LIMIT_TOTAL_SIZE;
@@ -160,6 +162,10 @@ public class TransactionSearchParams extends SearchParams {
 
     public void setLimitTotalSize(Long limitTotalSize) {
         this.limitTotalSize = limitTotalSize;
+    }
+
+    public void setLimitTotal(boolean limitTotal) {
+        this.limitTotal = limitTotal;
     }
 
     public void overrideMaxDisplaySize(Long maxDisplaySize) {
@@ -308,6 +314,11 @@ public class TransactionSearchParams extends SearchParams {
         } else {
             return this.displaySize;
         }
+    }
+
+    @Override
+    public boolean limitTotal() {
+        return limitTotal;
     }
 
     public Long getLimitTotalSize() {
