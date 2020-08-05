@@ -125,7 +125,10 @@ public class TransactionService {
     private TransactionSearchResponse buildTransactionSearchResponse(TransactionSearchParams searchParams, UriInfo uriInfo, List<Transaction> transactionList, Long totalCount) {
         Long total = Optional.ofNullable(totalCount).orElse(0L);
         PaginationBuilder paginationBuilder = new PaginationBuilder(searchParams, uriInfo);
-        paginationBuilder = paginationBuilder.withTotalCount(total).buildResponse();
+        paginationBuilder = paginationBuilder
+                .withTotalCount(total)
+                .withCount((long) transactionList.size())
+                .buildResponse();
 
         List<TransactionView> transactionViewList = mapToTransactionViewList(transactionList, searchParams.getStatusVersion());
 

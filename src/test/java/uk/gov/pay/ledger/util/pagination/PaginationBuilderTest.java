@@ -102,7 +102,8 @@ public class PaginationBuilderTest {
         transactionSearchParams.setDisplaySize(10L);
         transactionSearchParams.setLimitTotal(true);
         PaginationBuilder builder = new PaginationBuilder(transactionSearchParams, mockedUriInfo)
-                .withTotalCount(120L);
+                .withTotalCount(120L)
+                .withCount(10L);
         builder = builder.buildResponse();
         assertThat(builder.getFirstLink().getHref().contains("page=1&display_size=10"), is(true));
         assertThat(builder.getLastLink(), is(nullValue()));
@@ -117,12 +118,24 @@ public class PaginationBuilderTest {
         transactionSearchParams.setDisplaySize(10L);
         transactionSearchParams.setLimitTotal(true);
         PaginationBuilder builder = new PaginationBuilder(transactionSearchParams, mockedUriInfo)
-                .withTotalCount(120L);
+                .withTotalCount(120L)
+                .withCount(10L);
         builder = builder.buildResponse();
         assertThat(builder.getFirstLink().getHref().contains("page=1&display_size=10"), is(true));
         assertThat(builder.getLastLink(), is(nullValue()));
         assertThat(builder.getPrevLink().getHref().contains("page=2&display_size=10"), is(true));
         assertThat(builder.getNextLink().getHref().contains("page=4&display_size=10"), is(true));
         assertThat(builder.getSelfLink().getHref().contains("page=3&display_size=10"), is(true));
+    }
+
+    @Test
+    public void shouldNotGenerateNextLink_whenLimitTotalIsSetAndCountIsLessThanPageSize() {
+        transactionSearchParams.setDisplaySize(10L);
+        transactionSearchParams.setLimitTotal(true);
+        PaginationBuilder builder = new PaginationBuilder(transactionSearchParams, mockedUriInfo)
+                .withTotalCount(120L)
+                .withCount(9L);
+        builder = builder.buildResponse();
+        assertThat(builder.getNextLink(), is(nullValue()));
     }
 }
