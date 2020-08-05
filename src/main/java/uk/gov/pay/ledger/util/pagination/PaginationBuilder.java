@@ -7,6 +7,7 @@ import uk.gov.pay.ledger.common.search.SearchParams;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -23,6 +24,8 @@ public class PaginationBuilder {
 
     @JsonIgnore
     private Long totalCount;
+    @JsonIgnore
+    private Long count;
     @JsonIgnore
     private Long selfPageNum;
     @JsonProperty(SELF_LINK)
@@ -44,6 +47,11 @@ public class PaginationBuilder {
 
     public PaginationBuilder withTotalCount(Long total) {
         this.totalCount = total;
+        return this;
+    }
+
+    public PaginationBuilder withCount(Long count) {
+        this.count = count;
         return this;
     }
 
@@ -84,7 +92,9 @@ public class PaginationBuilder {
         selfLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString(searchParams.getPageNumber())));
         firstLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString(1L)));
 
-        nextLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString(selfPageNum + 1)));
+        if (Objects.equals(count, searchParams.getDisplaySize())) {
+            nextLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString(selfPageNum + 1)));
+        }
 
         if (selfPageNum == 1L) {
             prevLink = null;
