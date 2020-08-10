@@ -186,6 +186,10 @@ public class TransactionService {
                 .findFirst();
     }
 
+    public List<TransactionEntity> getChildTransactions(String parentExternalId) {
+        return transactionDao.findTransactionByParentId(parentExternalId);
+    }
+
     private Map<String, TransactionEntity> getTransactionsAsMap(String externalId, String gatewayAccountId) {
         return transactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(
                 externalId, gatewayAccountId)

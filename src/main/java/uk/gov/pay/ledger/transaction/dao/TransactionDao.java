@@ -35,6 +35,9 @@ public class TransactionDao {
             " WHERE parent_external_id = :parentExternalId" +
             "   AND gateway_account_id = :gatewayAccountId";
 
+    private static final String FIND_TRANSACTIONS_BY_PARENT_EXT_ID = "SELECT * FROM transaction " +
+            " WHERE parent_external_id = :parentExternalId";
+
     private static final String SEARCH_TRANSACTIONS = "SELECT * FROM transaction t " +
             ":searchExtraFields " +
             "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
@@ -201,6 +204,15 @@ public class TransactionDao {
                         .bind("gatewayAccountId", gatewayAccountId)
                         .map(new TransactionMapper())
                         .stream().collect(Collectors.toList())
+        );
+    }
+
+    public List<TransactionEntity> findTransactionByParentId(String parentExternalId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery(FIND_TRANSACTIONS_BY_PARENT_EXT_ID)
+                    .bind("parentExternalId", parentExternalId)
+                    .map(new TransactionMapper())
+                    .stream().collect(Collectors.toList())
         );
     }
 
