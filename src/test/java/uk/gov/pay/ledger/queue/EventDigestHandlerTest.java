@@ -86,7 +86,7 @@ public class EventDigestHandlerTest {
         eventDigestHandler.processEvent(event);
 
         verify(eventService).getEventDigestForResource(event);
-        verify(transactionService).upsertTransaction(any(TransactionEntity.class));
+        verify(transactionService).upsertTransactionFor(eventDigest);
     }
 
     @Test
@@ -122,14 +122,22 @@ public class EventDigestHandlerTest {
     @Test
     public void shouldAddPaymentDetailsForRefundIfParentExternalIdIsSet() {
         String parentExternalId = "parent-external-id";
-        when(eventService.getEventDigestForResource(any(Event.class)))
-                .thenReturn(EventDigest.fromEventList(List.of(anEventFixture().withParentResourceExternalId(parentExternalId).toEntity())));
+        EventDigest refundEventDigest = EventDigest.fromEventList(List.of(anEventFixture().withParentResourceExternalId(parentExternalId).toEntity()));
+        EventDigest paymentEventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));
+
         Event event = anEventFixture().withResourceType(REFUND)
                 .withParentResourceExternalId(parentExternalId)
                 .toEntity();
+
+        when(eventService.getEventDigestForResource(event))
+                .thenReturn(refundEventDigest);
+        when(eventService.getEventDigestForResource(parentExternalId))
+                .thenReturn(paymentEventDigest);
+
         eventDigestHandler.processEvent(event);
 
         verify(eventService).getEventDigestForResource(event);
         verify(eventService).getEventDigestForResource(parentExternalId);
+        verify(transactionService).upsertTransaction(any(TransactionEntity.class));
     }
 }

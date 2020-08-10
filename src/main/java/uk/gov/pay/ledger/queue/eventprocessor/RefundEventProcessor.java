@@ -33,6 +33,21 @@ public class RefundEventProcessor extends EventProcessor {
         EventDigest refundEventDigest = eventService.getEventDigestForResource(event);
         Optional<EventDigest> mayBePaymentEventDigest = Optional.empty();
 
+        if (isNotBlank(refundEventDigest.getParentResourceExternalId())) {
+            mayBePaymentEventDigest = getPaymentEventDigest(refundEventDigest.getParentResourceExternalId());
+        }
+
+        mayBePaymentEventDigest.ifPresentOrElse(
+                paymentEventDigest -> projectRefundTransactionWithPaymentDetails(refundEventDigest, paymentEventDigest),
+                () -> transactionService.upsertTransactionFor(refundEventDigest));
+    }
+
+    public void reprojectRefundTransaction(String refundExternalId, EventDigest paymentEventDigest) {
+        EventDigest refundEventDigest = eventService.getEventDigestForResource(refundExternalId);
+        projectRefundTransactionWithPaymentDetails(refundEventDigest, paymentEventDigest);
+    }
+
+    private void projectRefundTransactionWithPaymentDetails(EventDigest refundEventDigest, EventDigest paymentEventDigest) {
         /**
          * Apply shared refund payment attributes to the refund digest
          *
@@ -43,20 +58,12 @@ public class RefundEventProcessor extends EventProcessor {
          * If there is no longer a frontend requirement to display payment information on a refund, this shared data
          * for the digest can be removed.
          */
-        if (isNotBlank(refundEventDigest.getParentResourceExternalId())) {
-            mayBePaymentEventDigest = getPaymentEventDigest(refundEventDigest.getParentResourceExternalId());
-            mayBePaymentEventDigest.ifPresent(paymentEventDigest -> {
-                Map<String, Object> fieldsFromPayment = getPaymentFieldsToProjectOnToRefund(paymentEventDigest);
-                refundEventDigest.getEventPayload().put("payment_details", fieldsFromPayment);
-            });
-        }
+        Map<String, Object> fieldsFromPayment = getPaymentFieldsToProjectOnToRefund(paymentEventDigest);
+        refundEventDigest.getEventPayload().put("payment_details", fieldsFromPayment);
 
         TransactionEntity refundTransactionEntity = transactionEntityFactory.create(refundEventDigest);
-
-        mayBePaymentEventDigest.ifPresent(paymentEventDigest -> {
-            TransactionEntity paymentTransactionEntity = transactionEntityFactory.create(paymentEventDigest);
-            refundTransactionEntity.setEntityFieldsFromOriginalPayment(paymentTransactionEntity);
-        });
+        TransactionEntity paymentTransactionEntity = transactionEntityFactory.create(paymentEventDigest);
+        refundTransactionEntity.setEntityFieldsFromOriginalPayment(paymentTransactionEntity);
 
         transactionService.upsertTransaction(refundTransactionEntity);
     }
@@ -79,8 +86,8 @@ public class RefundEventProcessor extends EventProcessor {
         return paymentPayloadIsEmpty
                 ? Map.of()
                 : paymentEventDigest.getEventPayload()
-                    .entrySet()
-                    .stream().filter(entry -> paymentsFieldsToCopyToRefunds.contains(entry.getKey()))
-                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .entrySet()
+                .stream().filter(entry -> paymentsFieldsToCopyToRefunds.contains(entry.getKey()))
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
