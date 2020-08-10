@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toMap;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 
 public class TransactionService {
@@ -152,8 +153,38 @@ public class TransactionService {
         transactionDao.upsert(transaction);
     }
 
-    public void upsertTransaction(TransactionEntity transaction) {
-        transactionDao.upsert(transaction);
+    public void upsertRefundTransactionWithPaymentInfo(EventDigest refundEventDigest, EventDigest paymentEventDigest) {
+        /**
+         * Apply shared refund payment attributes to the refund digest
+         *
+         * Frontend consumers rely on searching/ filtering/ downloading attributes that belong to a payment on the
+         * refund. Previously this was done at the "view" level by joining transactions to transactions, for performance
+         * reasons this is now done here during domain object projection (as transactions are de-normalised).
+         *
+         * If there is no longer a frontend requirement to display payment information on a refund, this shared data
+         * for the digest can be removed.
+         */
+        Map<String, Object> fieldsFromPayment = getPaymentFieldsToProjectOnToRefund(paymentEventDigest);
+        refundEventDigest.getEventPayload().put("payment_details", fieldsFromPayment);
+
+        TransactionEntity refundTransactionEntity = transactionEntityFactory.create(refundEventDigest);
+        TransactionEntity paymentTransactionEntity = transactionEntityFactory.create(paymentEventDigest);
+        refundTransactionEntity.setEntityFieldsFromOriginalPayment(paymentTransactionEntity);
+
+        transactionDao.upsert(refundTransactionEntity);
+    }
+
+    private Map<String, Object> getPaymentFieldsToProjectOnToRefund(EventDigest paymentEventDigest) {
+        List<String> paymentsFieldsToCopyToRefunds = List.of("card_brand_label", "expiry_date", "card_type", "wallet_type");
+
+        var paymentPayloadIsEmpty = paymentEventDigest == null || paymentEventDigest.getEventPayload() == null;
+
+        return paymentPayloadIsEmpty
+                ? Map.of()
+                : paymentEventDigest.getEventPayload()
+                .entrySet()
+                .stream().filter(entry -> paymentsFieldsToCopyToRefunds.contains(entry.getKey()))
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public TransactionEventResponse findTransactionEvents(String externalId, String gatewayAccountId,
