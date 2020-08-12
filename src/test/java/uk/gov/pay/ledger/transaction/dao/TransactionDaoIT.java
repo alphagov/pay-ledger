@@ -287,7 +287,31 @@ public class TransactionDaoIT {
         TransactionEntity transactionEntity = transactionEntityList.get(0);
 
         assertThat(transactionEntity.getId(), is(transactionWithParentExternalId.getId()));
+    }
 
+    @Test
+    public void findTransactionByParentId_shouldFilterByParentExternalId() {
+        TransactionEntity transaction1 = aTransactionFixture()
+                .withState(TransactionState.CREATED)
+                .withTransactionType("PAYMENT")
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        TransactionEntity transactionWithParentExternalId = aTransactionFixture()
+                .withState(TransactionState.SUBMITTED)
+                .withTransactionType("REFUND")
+                .withGatewayAccountId(transaction1.getGatewayAccountId())
+                .withParentExternalId(transaction1.getExternalId())
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        List<TransactionEntity> transactionEntityList =
+                transactionDao.findTransactionByParentId(transactionWithParentExternalId.getParentExternalId());
+
+        assertThat(transactionEntityList.size(), is(1));
+        TransactionEntity transactionEntity = transactionEntityList.get(0);
+
+        assertThat(transactionEntity.getId(), is(transactionWithParentExternalId.getId()));
     }
 
     @Test
