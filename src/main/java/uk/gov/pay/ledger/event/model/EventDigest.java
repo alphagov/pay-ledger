@@ -2,8 +2,8 @@ package uk.gov.pay.ledger.event.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.pay.ledger.exception.EmptyEventsException;
+import uk.gov.pay.ledger.util.JsonParser;
 
-import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -86,17 +86,9 @@ public class EventDigest {
     private static Map<String, Object> buildEventPayload(List<Event> events) {
         return events.stream()
                 .map(Event::getEventData)
-                .map(EventDigest::eventDetailsJsonStringToMap)
+                .map(JsonParser::jsonStringToMap)
                 .flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (later, earlier) -> later));
-    }
-
-    private static Map<String, Object> eventDetailsJsonStringToMap(String eventDetails) {
-        try {
-            return (Map<String, Object>) objectMapper.readValue(eventDetails, Map.class);
-        } catch (IOException | ClassCastException e) {
-            throw new RuntimeException("Error converting event Json to Map");
-        }
     }
 
     public ZonedDateTime getMostRecentEventTimestamp() {

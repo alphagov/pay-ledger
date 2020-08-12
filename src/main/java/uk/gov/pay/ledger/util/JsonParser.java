@@ -1,11 +1,15 @@
 package uk.gov.pay.ledger.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.Optional;
 
 public class JsonParser {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private JsonParser() {
     }
@@ -40,5 +44,13 @@ public class JsonParser {
             return Optional.empty();
         }
         return Optional.ofNullable(object.get(fieldName));
+    }
+
+    public static Map<String, Object> jsonStringToMap(String jsonString) {
+        try {
+            return (Map<String, Object>) objectMapper.readValue(jsonString, Map.class);
+        } catch (IOException | ClassCastException e) {
+            throw new RuntimeException("Error converting event Json to Map");
+        }
     }
 }

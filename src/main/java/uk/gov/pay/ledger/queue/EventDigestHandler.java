@@ -18,9 +18,9 @@ public class EventDigestHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventDigestHandler.class);
 
-    PaymentEventProcessor paymentEventProcessor;
-    PayoutEventProcessor payoutEventProcessor;
-    RefundEventProcessor refundEventProcessor;
+    private PaymentEventProcessor paymentEventProcessor;
+    private PayoutEventProcessor payoutEventProcessor;
+    private RefundEventProcessor refundEventProcessor;
 
     @Inject
     public EventDigestHandler(EventService eventService,
@@ -28,9 +28,9 @@ public class EventDigestHandler {
                               TransactionMetadataService transactionMetadataService,
                               PayoutService payoutService,
                               TransactionEntityFactory transactionEntityFactory) {
-        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService);
-        payoutEventProcessor = new PayoutEventProcessor(eventService, payoutService);
         refundEventProcessor = new RefundEventProcessor(eventService, transactionService, transactionEntityFactory);
+        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, refundEventProcessor);
+        payoutEventProcessor = new PayoutEventProcessor(eventService, payoutService);
     }
 
     public EventProcessor processorFor(Event event) {

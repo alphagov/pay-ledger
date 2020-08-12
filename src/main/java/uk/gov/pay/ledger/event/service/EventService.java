@@ -18,8 +18,12 @@ public class EventService {
     }
 
     public EventDigest getEventDigestForResource(String resourceExternalId) {
-        List<Event> events = eventDao.getEventsByResourceExternalId(resourceExternalId);
+        List<Event> events = getEventsForResource(resourceExternalId);
         return EventDigest.fromEventList(events);
+    }
+
+    public List<Event> getEventsForResource(String resourceExternalId) {
+        return eventDao.getEventsByResourceExternalId(resourceExternalId);
     }
 
     public CreateEventResponse createIfDoesNotExist(Event event) {

@@ -29,6 +29,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -73,10 +74,11 @@ public class EventDigestHandlerTest {
     @Test
     public void shouldUpsertTransactionIfResourceTypeIsPayment() {
         Event event = anEventFixture().withResourceType(PAYMENT).toEntity();
+        when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(anEventFixture().toEntity()));
+
         eventDigestHandler.processEvent(event);
 
-        verify(eventService).getEventDigestForResource(event);
-        verify(transactionService).upsertTransactionFor(eventDigest);
+        verify(transactionService).upsertTransactionFor(any(EventDigest.class));
         verify(transactionMetadataService).upsertMetadataFor(event);
     }
 
