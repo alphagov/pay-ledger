@@ -5,10 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import uk.gov.pay.commons.model.Source;
+import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
-import java.util.Map;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -48,6 +49,7 @@ public class TransactionEntity {
     private String gatewayTransactionId;
     private Source source;
     private String gatewayPayoutId;
+    private PayoutEntity payoutEntity;
 
     public TransactionEntity() {
     }
@@ -81,6 +83,7 @@ public class TransactionEntity {
         this.gatewayTransactionId = builder.gatewayTransactionId;
         this.source = builder.source;
         this.gatewayPayoutId = builder.gatewayPayoutId;
+        this.payoutEntity = builder.payoutEntity;
     }
 
     public Long getId() {
@@ -223,6 +226,10 @@ public class TransactionEntity {
         return gatewayPayoutId;
     }
 
+    public Optional<PayoutEntity> getPayoutEntity() {
+        return Optional.ofNullable(payoutEntity);
+    }
+
     public void setEntityFieldsFromOriginalPayment(TransactionEntity paymentTransaction) {
         this.cardBrand = paymentTransaction.getCardBrand();
         this.cardholderName = paymentTransaction.getCardholderName();
@@ -262,6 +269,7 @@ public class TransactionEntity {
         private String gatewayTransactionId;
         private boolean moto;
         private String gatewayPayoutId;
+        private PayoutEntity payoutEntity;
 
         public Builder() {
         }
@@ -407,6 +415,11 @@ public class TransactionEntity {
 
         public Builder withGatewayPayoutId(String gatewayPayoutId) {
             this.gatewayPayoutId = gatewayPayoutId;
+            return this;
+        }
+
+        public Builder withPayoutEntity(PayoutEntity payoutEntity) {
+            this.payoutEntity = payoutEntity;
             return this;
         }
     }

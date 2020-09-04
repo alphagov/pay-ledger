@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static uk.gov.pay.ledger.payout.entity.PayoutEntity.PayoutEntityBuilder.aPayoutEntity;
 
 public class TransactionFactoryTest {
 
@@ -46,6 +47,7 @@ public class TransactionFactoryTest {
     private Long fee = 66L;
     private String cardExpiryDate = "10/27";
     private String walletType = "APPLE_PAY";
+    private ZonedDateTime paidOutDate = ZonedDateTime.parse("2017-09-19T08:46:01.123456Z");
 
     @BeforeEach
     public void setUp() {
@@ -74,6 +76,9 @@ public class TransactionFactoryTest {
         fullTransactionDetails.addProperty("expiry_date", cardExpiryDate);
         fullTransactionDetails.addProperty("wallet", walletType);
 
+        var payoutObject = aPayoutEntity()
+                .withPaidOutDate(paidOutDate)
+                .build();
 
         fullDataObject = new TransactionEntity.Builder()
                 .withId(id)
@@ -97,6 +102,7 @@ public class TransactionFactoryTest {
                 .withRefundAmountRefunded(refundAmountRefunded)
                 .withRefundAmountAvailable(refundAmountAvailable)
                 .withFee(fee)
+                .withPayoutEntity(payoutObject)
                 .build();
 
         minimalDataObject = new TransactionEntity.Builder()
@@ -167,6 +173,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getSettlementSummary(), notNullValue());
         assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.empty()));
         assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.empty()));
+        assertThat(payment.getSettlementSummary().getSettledDate(), is(Optional.empty()));
     }
 
     @Test
@@ -287,6 +294,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getSettlementSummary(), notNullValue());
         assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.of("2017-09-09")));
         assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.of("2017-09-09T08:35:45.695Z")));
+        assertThat(payment.getSettlementSummary().getSettledDate(), is(Optional.of("2017-09-19")));
         assertThat(payment.getWalletType(), is(walletType));
     }
 }

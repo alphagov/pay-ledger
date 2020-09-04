@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.transaction.resource;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -20,9 +19,11 @@ import static io.restassured.http.ContentType.JSON;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aPersistedTransactionList;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -94,6 +95,7 @@ public class TransactionResourceSearchIT {
                 .body("results[0].refund_summary.amount_available", is(transactionToVerify.getRefundSummary().getAmountAvailable().intValue()))
                 .body("results[0].refund_summary.amount_submitted", is(transactionToVerify.getRefundSummary().getAmountSubmitted().intValue()))
                 .body("results[0].refund_summary.amount_refunded", is(transactionToVerify.getRefundSummary().getAmountRefunded().intValue()))
+                .body("results[0].settlement_summary.settled_date", is(nullValue()))
 
                 .body("count", is(2))
                 .body("page", is(2))
@@ -413,5 +415,37 @@ public class TransactionResourceSearchIT {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("count", is(2));
+    }
+
+    @Test
+    public void shouldReturnSettledDateForSearch() {
+        String gatewayAccountId = "12345678";
+        String gatewayPayoutId = "payout-id";
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId)
+                .insert(rule.getJdbi());
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withPaidOutDate(ZonedDateTime.now())
+                .build()
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].settlement_summary.settled_date", is(notNullValue()));
     }
 }
