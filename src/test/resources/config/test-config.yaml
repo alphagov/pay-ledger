@@ -62,5 +62,4 @@ queueMessageReceiverConfig:
   messageRetryDelayInSeconds: ${QUEUE_MESSAGE_RETRY_DELAY_IN_SECONDS:-900}
 
 reportingConfig:
-  maximumCsvRowsSize: ${REPORTING_MAX_CSV_ROWS_SIZE:-100000}
   streamingCsvPageSize: ${STREAMING_CSV_PAGE_SIZE:-5000}

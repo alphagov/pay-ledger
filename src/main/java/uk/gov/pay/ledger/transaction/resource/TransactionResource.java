@@ -136,7 +136,7 @@ public class TransactionResource {
                     );
                     outputStream.flush();
                 }
-            } while (!page.isEmpty() && count < configuration.getReportingConfig().getMaximumCsvRowsSize());
+            } while (!page.isEmpty());
             outputStream.close();
             long elapsed = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
             LOGGER.info("CSV stream took:",
