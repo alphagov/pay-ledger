@@ -17,13 +17,6 @@ applications:
     env:
       ENV_MAP_BP_USE_APP_PROFILE_DIR: true
 
-      # Provided by the ledger-db service - see src/main/resources/env-map.yml
-      DB_HOST: ''
-      DB_NAME: ''
-      DB_PASSWORD: ''
-      DB_USER: ''
-      DB_SSL_OPTION: ''
-
       # Provided by the sqs service - see src/main/resources/env-map.yml
       AWS_SQS_REGION: ''
       AWS_SQS_PAYMENT_EVENT_QUEUE_URL: ''
@@ -32,6 +25,11 @@ applications:
       AWS_ACCESS_KEY: ""
       AWS_SECRET_KEY: ""
       SENTRY_DSN: ""
+      DB_HOST: ""
+      DB_NAME: ""
+      DB_PASSWORD: ""
+      DB_USER: ""
+      DB_SSL_OPTION: ""
 
       # Other sqs settings
       AWS_SQS_MESSAGE_MAXIMUM_WAIT_TIME_IN_SECONDS: '20'
