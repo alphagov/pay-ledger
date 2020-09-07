@@ -1,9 +1,7 @@
 package uk.gov.pay.ledger.transaction.dao;
 
 import com.google.common.collect.ImmutableMap;
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.commons.model.Source;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
@@ -12,15 +10,18 @@ import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class TransactionDaoIT {
@@ -77,10 +78,20 @@ public class TransactionDaoIT {
 
     @Test
     public void shouldRetrieveTransactionByExternalIdAndGatewayAccount() {
+        ZonedDateTime paidOutDate = ZonedDateTime.parse("2019-12-12T10:00:00Z");
+        String payOutId = randomAlphanumeric(20);
+
         TransactionFixture fixture = aTransactionFixture()
                 .withDefaultCardDetails()
                 .withExternalMetadata(ImmutableMap.of("key1", "value1", "anotherKey", ImmutableMap.of("nestedKey", "value")))
                 .withDefaultTransactionDetails()
+                .withGatewayPayoutId(payOutId)
+                .insert(rule.getJdbi());
+        aPayoutFixture()
+                .withGatewayAccountId(fixture.getGatewayAccountId())
+                .withGatewayPayoutId(payOutId)
+                .withPaidOutDate(paidOutDate)
+                .build()
                 .insert(rule.getJdbi());
 
         TransactionEntity retrievedTransaction = transactionDao.findTransactionByExternalIdAndGatewayAccountId(
@@ -90,6 +101,8 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getFee(), is(nullValue()));
         assertThat(retrievedTransaction.getTotalAmount(), is(nullValue()));
         assertThat(retrievedTransaction.getNetAmount(), is(nullValue()));
+        assertThat(retrievedTransaction.getPayoutEntity().isPresent(), is(true));
+        assertThat(retrievedTransaction.getPayoutEntity().get().getPaidOutDate(), is(paidOutDate));
     }
 
     private void assertTransactionEntity(TransactionEntity transaction, TransactionFixture fixture) {
@@ -122,11 +135,22 @@ public class TransactionDaoIT {
 
     @Test
     public void shouldRetrieveTransactionByExternalIdAndGatewayAccountId() {
+        String payOutId = randomAlphanumeric(20);
+        ZonedDateTime paidOutDate = ZonedDateTime.parse("2019-12-12T10:00:00Z");
+
         TransactionFixture fixture = aTransactionFixture()
                 .withDefaultCardDetails()
                 .withTransactionType("PAYMENT")
                 .withExternalMetadata(ImmutableMap.of("key1", "value1", "anotherKey", ImmutableMap.of("nestedKey", "value")))
                 .withDefaultTransactionDetails()
+                .withGatewayPayoutId(payOutId)
+                .insert(rule.getJdbi());
+
+        aPayoutFixture()
+                .withPaidOutDate(paidOutDate)
+                .withGatewayPayoutId(payOutId)
+                .withGatewayAccountId(fixture.getGatewayAccountId())
+                .build()
                 .insert(rule.getJdbi());
 
         TransactionEntity transaction = transactionDao
@@ -138,6 +162,8 @@ public class TransactionDaoIT {
         assertTransactionEntity(transaction, fixture);
         assertThat(transaction.getFee(), is(nullValue()));
         assertThat(transaction.getTotalAmount(), is(nullValue()));
+        assertThat(transaction.getPayoutEntity().isPresent(), is(true));
+        assertThat(transaction.getPayoutEntity().get().getPaidOutDate(), is(paidOutDate));
     }
 
     @Test
@@ -220,10 +246,14 @@ public class TransactionDaoIT {
 
     @Test
     public void shouldFilterTransactionByExternalIdOrParentExternalIdAndGatewayAccountId() {
+        String payOutId = randomAlphanumeric(20);
+        ZonedDateTime paidOutDate = ZonedDateTime.parse("2019-12-12T10:00:00Z");
+
         TransactionEntity transaction1 = aTransactionFixture()
                 .withState(TransactionState.CREATED)
                 .withExternalId("external-id-1")
                 .withGatewayAccountId("gateway-account-id-1")
+                .withGatewayPayoutId(payOutId)
                 .insert(rule.getJdbi())
                 .toEntity();
 
@@ -233,6 +263,13 @@ public class TransactionDaoIT {
                 .withGatewayAccountId("gateway-account-id-2")
                 .insert(rule.getJdbi());
 
+        aPayoutFixture()
+                .withPaidOutDate(paidOutDate)
+                .withGatewayPayoutId(payOutId)
+                .withGatewayAccountId(transaction1.getGatewayAccountId())
+                .build()
+                .insert(rule.getJdbi());
+
         List<TransactionEntity> transactionEntityList =
                 transactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(
                         transaction1.getExternalId(), transaction1.getGatewayAccountId());
@@ -240,6 +277,8 @@ public class TransactionDaoIT {
         assertThat(transactionEntityList.size(), is(1));
         assertThat(transactionEntityList.get(0).getExternalId(), is(transaction1.getExternalId()));
         assertThat(transactionEntityList.get(0).getGatewayAccountId(), is(transaction1.getGatewayAccountId()));
+        assertThat(transactionEntityList.get(0).getPayoutEntity().isPresent(), is(true));
+        assertThat(transactionEntityList.get(0).getPayoutEntity().get().getPaidOutDate(), is(paidOutDate));
     }
 
     @Test
@@ -291,6 +330,9 @@ public class TransactionDaoIT {
 
     @Test
     public void findTransactionByParentId_shouldFilterByParentExternalId() {
+        String payOutId = randomAlphanumeric(20);
+        ZonedDateTime paidOutDate = ZonedDateTime.parse("2019-12-12T10:00:00Z");
+
         TransactionEntity transaction1 = aTransactionFixture()
                 .withState(TransactionState.CREATED)
                 .withTransactionType("PAYMENT")
@@ -302,8 +344,16 @@ public class TransactionDaoIT {
                 .withTransactionType("REFUND")
                 .withGatewayAccountId(transaction1.getGatewayAccountId())
                 .withParentExternalId(transaction1.getExternalId())
+                .withGatewayPayoutId(payOutId)
                 .insert(rule.getJdbi())
                 .toEntity();
+
+        aPayoutFixture()
+                .withPaidOutDate(paidOutDate)
+                .withGatewayPayoutId(payOutId)
+                .withGatewayAccountId(transaction1.getGatewayAccountId())
+                .build()
+                .insert(rule.getJdbi());
 
         List<TransactionEntity> transactionEntityList =
                 transactionDao.findTransactionByParentId(transactionWithParentExternalId.getParentExternalId());
@@ -312,6 +362,8 @@ public class TransactionDaoIT {
         TransactionEntity transactionEntity = transactionEntityList.get(0);
 
         assertThat(transactionEntity.getId(), is(transactionWithParentExternalId.getId()));
+        assertThat(transactionEntity.getPayoutEntity().isPresent(), is(true));
+        assertThat(transactionEntity.getPayoutEntity().get().getPaidOutDate(), is(paidOutDate));
     }
 
     @Test
