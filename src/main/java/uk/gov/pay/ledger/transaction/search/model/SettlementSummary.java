@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.search.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.ZonedDateTime;
@@ -12,10 +13,12 @@ import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_
 public class SettlementSummary {
     private ZonedDateTime settlementSubmittedTime;
     private ZonedDateTime capturedDate;
+    private ZonedDateTime settledDate;
 
-    public SettlementSummary(ZonedDateTime settlementSubmittedTime, ZonedDateTime capturedDate) {
+    public SettlementSummary(ZonedDateTime settlementSubmittedTime, ZonedDateTime capturedDate, ZonedDateTime settledDate) {
         this.settlementSubmittedTime = settlementSubmittedTime;
         this.capturedDate = capturedDate;
+        this.settledDate = settledDate;
     }
 
     @JsonProperty("capture_submit_time")
@@ -30,6 +33,13 @@ public class SettlementSummary {
                 .map(t -> t.format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
 
+    @JsonProperty("settled_date")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public Optional<String> getSettledDate() {
+        return Optional.ofNullable(settledDate)
+                .map(t -> t.format(DateTimeFormatter.ISO_LOCAL_DATE));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -39,6 +49,10 @@ public class SettlementSummary {
 
         if (!Objects.equals(settlementSubmittedTime, that.settlementSubmittedTime))
             return false;
+
+        if(!Objects.equals(settledDate, that.settledDate))
+            return false;
+
         return Objects.equals(capturedDate, that.capturedDate);
     }
 
@@ -46,6 +60,7 @@ public class SettlementSummary {
     public int hashCode() {
         int result = settlementSubmittedTime != null ? settlementSubmittedTime.hashCode() : 0;
         result = 31 * result + (capturedDate != null ? capturedDate.hashCode() : 0);
+        result = 31 * result + (settledDate != null ? settledDate.hashCode() : 0);
         return result;
     }
 

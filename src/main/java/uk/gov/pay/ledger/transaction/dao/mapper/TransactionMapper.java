@@ -13,11 +13,13 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import static uk.gov.pay.ledger.payout.entity.PayoutEntity.PayoutEntityBuilder.aPayoutEntity;
+
 public class TransactionMapper implements RowMapper<TransactionEntity> {
 
     @Override
     public TransactionEntity map(ResultSet rs, StatementContext ctx) throws SQLException {
-        var builder = new TransactionEntity.Builder()
+        var transactionBuilder = new TransactionEntity.Builder()
                 .withId(rs.getLong("id"))
                 .withGatewayAccountId(rs.getString("gateway_account_id"))
                 .withExternalId(rs.getString("external_id"))
@@ -45,8 +47,14 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withMoto(rs.getBoolean("moto"))
                 .withGatewayTransactionId(rs.getString("gateway_transaction_id"))
                 .withGatewayPayoutId(rs.getString("gateway_payout_id"));
-        Source.from(rs.getString("source")).ifPresent(builder::withSource);
-        return builder.build();
+        Source.from(rs.getString("source")).ifPresent(transactionBuilder::withSource);
+        if (rs.getString("gateway_payout_id") != null) {
+            var payoutBuilder = aPayoutEntity()
+                    .withGatewayPayoutId(rs.getString("gateway_payout_id"))
+                    .withPaidOutDate(getZonedDateTime(rs, "paid_out_date").orElse(null));
+            transactionBuilder.withPayoutEntity(payoutBuilder.build());
+        }
+        return transactionBuilder.build();
     }
 
     private Long getLongWithNullCheck(ResultSet rs, String columnName) throws SQLException {
@@ -54,8 +62,13 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
         return rs.wasNull() ? null : value;
     }
 
-    private Optional<ZonedDateTime> getZonedDateTime(ResultSet rs, String columnLabel) throws SQLException {
-        Timestamp timestamp = rs.getTimestamp(columnLabel);
+    private Optional<ZonedDateTime> getZonedDateTime(ResultSet rs, String columnLabel) {
+        Timestamp timestamp;
+        try {
+            timestamp = rs.getTimestamp(columnLabel);
+        } catch (SQLException ex) {
+            timestamp = null;
+        }
 
         return Optional.ofNullable(timestamp)
                 .map(t -> ZonedDateTime.ofInstant(t.toInstant(), ZoneOffset.UTC));

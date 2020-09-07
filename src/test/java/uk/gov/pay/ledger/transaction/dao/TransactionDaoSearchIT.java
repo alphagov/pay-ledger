@@ -24,6 +24,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aPersistedTransactionList;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -723,5 +724,47 @@ public class TransactionDaoSearchIT {
 
         Long total = transactionDao.getTotalWithLimitForSearch(searchParams);
         assertThat(total, is(15L));
+    }
+
+    @Test
+    public void shouldGetAndMapTransactionWithPaidOutDateCorrectly() {
+        String gatewayPayoutId = randomAlphanumeric(15);
+
+        transactionFixture = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withMoto(true)
+                .withGatewayPayoutId(gatewayPayoutId)
+                .insert(rule.getJdbi());
+
+        var payoutFixture = aPayoutFixture()
+                .withGatewayAccountId(transactionFixture.getGatewayAccountId())
+                .withGatewayPayoutId(gatewayPayoutId)
+                .build()
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(1));
+        TransactionEntity transaction = transactionList.get(0);
+
+        assertThat(transaction.getId(), is(transactionFixture.getId()));
+        assertThat(transaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
+        assertThat(transaction.getExternalId(), is(transactionFixture.getExternalId()));
+        assertThat(transaction.getAmount(), is(transactionFixture.getAmount()));
+        assertThat(transaction.getReference(), is(transactionFixture.getReference()));
+        assertThat(transaction.getDescription(), is(transactionFixture.getDescription()));
+        assertThat(transaction.getState(), is(transactionFixture.getState()));
+        assertThat(transaction.getEmail(), is(transactionFixture.getEmail()));
+        assertThat(transaction.getCardholderName(), is(transactionFixture.getCardDetails().getCardHolderName()));
+        assertThat(transaction.getCardBrand(), is(transactionFixture.getCardDetails().getCardBrand()));
+        assertThat(transaction.getCreatedDate(), is(transactionFixture.getCreatedDate()));
+        assertThat(transaction.isMoto(), is(transactionFixture.isMoto()));
+        assertThat(transaction.getPayoutEntity().get().getPaidOutDate(), is(payoutFixture.getPaidOutDate()));
+
+        Long total = transactionDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
     }
 }

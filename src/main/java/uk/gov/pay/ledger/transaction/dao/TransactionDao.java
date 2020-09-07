@@ -38,9 +38,14 @@ public class TransactionDao {
     private static final String FIND_TRANSACTIONS_BY_PARENT_EXT_ID = "SELECT * FROM transaction " +
             " WHERE parent_external_id = :parentExternalId";
 
-    private static final String SEARCH_TRANSACTIONS = "SELECT * FROM transaction t " +
+    private static final String SEARCH_TRANSACTIONS = "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
+            "LEFT OUTER JOIN payout po on " +
+            "t.gateway_payout_id = po.gateway_payout_id " +
+            ":payoutAccountId " +
             ":searchExtraFields " +
             "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
+
+    private static final String SEARCH_CLAUSE_TRANSACTIONS_WITH_PAYOUT = "AND po.gateway_account_id IN (<account_id>) ";
 
     private static final String SEARCH_TRANSACTIONS_CURSOR =
             "SELECT * FROM transaction t " +
@@ -218,7 +223,7 @@ public class TransactionDao {
 
     public List<TransactionEntity> searchTransactions(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplates(), SEARCH_TRANSACTIONS));
+            Query query = handle.createQuery(createSearchTemplate(searchParams, SEARCH_TRANSACTIONS));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             query.bind("offset", searchParams.getOffset());
             query.bind("limit", searchParams.getDisplaySize());
@@ -230,7 +235,7 @@ public class TransactionDao {
 
     public Long getTotalForSearch(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplates(), COUNT_TRANSACTIONS));
+            Query query = handle.createQuery(createSearchTemplate(searchParams, COUNT_TRANSACTIONS));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             return query
                     .mapTo(Long.class)
@@ -240,7 +245,7 @@ public class TransactionDao {
 
     public Long getTotalWithLimitForSearch(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplates(), COUNT_TRANSACTIONS_WITH_LIMIT));
+            Query query = handle.createQuery(createSearchTemplate(searchParams, COUNT_TRANSACTIONS_WITH_LIMIT));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             query.bind("limit", searchParams.getLimitTotalSize());
 
@@ -253,7 +258,7 @@ public class TransactionDao {
     public List<TransactionEntity> cursorTransactionSearch(TransactionSearchParams searchParams, ZonedDateTime startingAfterCreatedDate, Long startingAfterId) {
         Long cursorPageSize = searchParams.getDisplaySize();
         String cursorTemplate = "";
-        String searchTemplate = createSearchTemplate(searchParams.getFilterTemplates(), SEARCH_TRANSACTIONS_CURSOR);
+        String searchTemplate = createSearchTemplate(searchParams, SEARCH_TRANSACTIONS_CURSOR);
 
         if (startingAfterCreatedDate != null && startingAfterId != null) {
             cursorTemplate = searchParams.getQueryMap().isEmpty() ? "WHERE " : "AND ";
@@ -275,13 +280,17 @@ public class TransactionDao {
     }
 
     private String createSearchTemplate(
-            List<String> filterTemplates,
+            TransactionSearchParams searchParams,
             String baseQueryString
     ) {
-        String searchClauseTemplate = String.join(" AND ", filterTemplates);
+        String searchClauseTemplate = String.join(" AND ", searchParams.getFilterTemplates());
         searchClauseTemplate = StringUtils.isNotBlank(searchClauseTemplate) ?
                 "WHERE " + searchClauseTemplate :
                 "";
+        baseQueryString = baseQueryString
+                .replace(":payoutAccountId",
+                        (searchParams.getAccountIds() != null && !searchParams.getAccountIds().isEmpty())
+                        ? SEARCH_CLAUSE_TRANSACTIONS_WITH_PAYOUT : "");
 
         return baseQueryString.replace(
                 ":searchExtraFields",
