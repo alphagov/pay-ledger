@@ -2,7 +2,7 @@ env_vars:
   DB_HOST:                          '.[][] | select(.name == "ledger-secret-service") | .credentials.db_host                         '
   DB_NAME:                          '.[][] | select(.name == "ledger-secret-service") | .credentials.db_name                         '
   DB_PASSWORD:                      '.[][] | select(.name == "ledger-secret-service") | .credentials.db_password                     '
-  DB_USER:                          '.[][] | select(.name == "ledger-secret-service") | .credentials.db_username                     '
+  DB_USER:                          '.[][] | select(.name == "ledger-secret-service") | .credentials.db_user                         '
   DB_SSL_OPTION:                    '.[][] | select(.name == "ledger-secret-service") | .credentials.db_ssl_option      // "ssl=true"'
   AWS_SQS_REGION:                   '.[][] | select(.name == "sqs")       | .credentials.region                       '
   AWS_SQS_PAYMENT_EVENT_QUEUE_URL:  '.[][] | select(.name == "sqs")       | .credentials.event_queue_url              '
