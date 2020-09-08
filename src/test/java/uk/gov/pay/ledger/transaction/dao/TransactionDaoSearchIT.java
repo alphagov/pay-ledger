@@ -767,4 +767,32 @@ public class TransactionDaoSearchIT {
         Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(1L));
     }
+
+    @Test
+    public void searchTransactionsByCursorWithPaidoutDate() {
+        String gatewayPayoutId = randomAlphanumeric(15);
+
+        transactionFixture = aTransactionFixture()
+                .withGatewayAccountId("1")
+                .withReference("ref1")
+                .withCardholderName("test 1")
+                .withLastDigitsCardNumber("1234")
+                .withCardBrand("visa")
+                .withEmail("test@example.org")
+                .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
+                .withGatewayPayoutId(gatewayPayoutId)
+                .insert(rule.getJdbi());
+
+        var payoutFixture = aPayoutFixture()
+                .withGatewayAccountId(transactionFixture.getGatewayAccountId())
+                .withGatewayPayoutId(gatewayPayoutId)
+                .build()
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        List<TransactionEntity> transactionList = transactionDao.cursorTransactionSearch(searchParams, null, null);
+
+        assertThat(transactionList.size(), is(1));
+        assertThat(transactionList.get(0).getPayoutEntity().get().getPaidOutDate(), is(payoutFixture.getPaidOutDate()));
+    }
 }

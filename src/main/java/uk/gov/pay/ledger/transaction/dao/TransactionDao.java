@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TransactionDao {
-    private static final String SEARCH_CLAUSE_TRANSACTION_WITH_PAYOUT = "AND po.gateway_account_id = :gatewayAccountId " ;
+    private static final String SEARCH_CLAUSE_TRANSACTION_WITH_PAYOUT = "AND po.gateway_account_id = :gatewayAccountId ";
     private static final String SEARCH_CLAUSE_TRANSACTIONS_WITH_PAYOUT = "AND po.gateway_account_id IN (<account_id>) ";
 
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID =
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
             "LEFT OUTER JOIN payout po on " +
             "t.gateway_payout_id = po.gateway_payout_id " +
-            ":payoutAccountId " +
+            ":payoutJoinOnGatewayIdField " +
             "WHERE t.external_id = :externalId " +
             "AND (:gatewayAccountId is NULL OR t.gateway_account_id = :gatewayAccountId)";
 
@@ -33,7 +33,7 @@ public class TransactionDao {
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
             "LEFT OUTER JOIN payout po on " +
             "t.gateway_payout_id = po.gateway_payout_id " +
-            SEARCH_CLAUSE_TRANSACTION_WITH_PAYOUT +
+            "AND po.gateway_account_id = :gatewayAccountId " +
             "WHERE t.external_id = :externalId " +
             "AND t.gateway_account_id = :gatewayAccountId " +
             "AND (:transactionType::transaction_type is NULL OR type = :transactionType::transaction_type) " +
@@ -43,7 +43,7 @@ public class TransactionDao {
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
             "LEFT OUTER JOIN payout po on " +
             "t.gateway_payout_id = po.gateway_payout_id " +
-            SEARCH_CLAUSE_TRANSACTION_WITH_PAYOUT +
+            "AND po.gateway_account_id = :gatewayAccountId " +
             "WHERE (t.external_id = :externalId or t.parent_external_id = :externalId) " +
             "AND t.gateway_account_id = :gatewayAccountId";
 
@@ -51,7 +51,7 @@ public class TransactionDao {
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
             "LEFT OUTER JOIN payout po on " +
             "t.gateway_payout_id = po.gateway_payout_id " +
-            ":payoutAccountId " +
+            ":payoutJoinOnGatewayIdField " +
             "WHERE t.parent_external_id = :parentExternalId " +
             "AND t.gateway_account_id = :gatewayAccountId";
 
@@ -65,12 +65,15 @@ public class TransactionDao {
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
             "LEFT OUTER JOIN payout po on " +
             "t.gateway_payout_id = po.gateway_payout_id " +
-            ":payoutAccountId " +
+            ":payoutJoinOnGatewayIdField " +
             ":searchExtraFields " +
             "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
 
     private static final String SEARCH_TRANSACTIONS_CURSOR =
-            "SELECT * FROM transaction t " +
+            "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
+            "LEFT OUTER JOIN payout po on " +
+            "t.gateway_payout_id = po.gateway_payout_id " +
+            ":payoutJoinOnGatewayIdField " +
             ":searchExtraFields " +
             ":cursorFields " +
             "ORDER BY t.created_date DESC, t.id DESC LIMIT :limit";
@@ -207,7 +210,7 @@ public class TransactionDao {
 
     public Optional<TransactionEntity> findTransactionByExternalIdAndGatewayAccountId(String externalId, String gatewayAccountId) {
         String query = FIND_TRANSACTION_BY_EXTERNAL_ID
-                .replace(":payoutAccountId",
+                .replace(":payoutJoinOnGatewayIdField",
                         isBlank(gatewayAccountId)
                                 ? SEARCH_CLAUSE_TRANSACTION_WITH_PAYOUT : "");
         return jdbi.withHandle(handle ->
@@ -230,7 +233,7 @@ public class TransactionDao {
 
     public List<TransactionEntity> findTransactionByParentIdAndGatewayAccountId(String parentExternalId, String gatewayAccountId) {
         String query = FIND_TRANSACTIONS_BY_PARENT_EXT_ID_AND_GATEWAY_ACCOUNT_ID
-                .replace(":payoutAccountId",
+                .replace(":payoutJoinOnGatewayIdField",
                         isBlank(gatewayAccountId)
                                 ? SEARCH_CLAUSE_TRANSACTION_WITH_PAYOUT : "");
         return jdbi.withHandle(handle ->
@@ -315,7 +318,7 @@ public class TransactionDao {
                 "WHERE " + searchClauseTemplate :
                 "";
         baseQueryString = baseQueryString
-                .replace(":payoutAccountId",
+                .replace(":payoutJoinOnGatewayIdField",
                         (searchParams.getAccountIds() != null && !searchParams.getAccountIds().isEmpty())
                         ? SEARCH_CLAUSE_TRANSACTIONS_WITH_PAYOUT : "");
 
