@@ -62,13 +62,8 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
         return rs.wasNull() ? null : value;
     }
 
-    private Optional<ZonedDateTime> getZonedDateTime(ResultSet rs, String columnLabel) {
-        Timestamp timestamp;
-        try {
-            timestamp = rs.getTimestamp(columnLabel);
-        } catch (SQLException ex) {
-            timestamp = null;
-        }
+    private Optional<ZonedDateTime> getZonedDateTime(ResultSet rs, String columnLabel) throws SQLException {
+        Timestamp timestamp = rs.getTimestamp(columnLabel);
 
         return Optional.ofNullable(timestamp)
                 .map(t -> ZonedDateTime.ofInstant(t.toInstant(), ZoneOffset.UTC));

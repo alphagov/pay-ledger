@@ -12,6 +12,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TransactionSearchParamsValidator {
     private static final String FROM_DATE_FIELD = "from_date";
     private static final String TO_DATE_FIELD = "to_date";
+    private static final String FROM_SETTLED_DATE_FIELD = "from_settled_date";
+    private static final String TO_SETTLED_DATE_FIELD = "to_settled_date";
 
     public static void validateSearchParams(TransactionSearchParams searchParams, CommaDelimitedSetParameter gatewayAccountIds) {
         validateDates(searchParams);
@@ -35,6 +37,12 @@ public class TransactionSearchParamsValidator {
         }
         if (isNotBlank(searchParams.getToDate())) {
             validateDate(TO_DATE_FIELD, searchParams.getToDate());
+        }
+        if (isNotBlank(searchParams.getFromSettledDate())) {
+            validateDate(FROM_SETTLED_DATE_FIELD, searchParams.getFromSettledDate());
+        }
+        if (isNotBlank(searchParams.getToSettledDate())) {
+            validateDate(TO_SETTLED_DATE_FIELD, searchParams.getToSettledDate());
         }
     }
 

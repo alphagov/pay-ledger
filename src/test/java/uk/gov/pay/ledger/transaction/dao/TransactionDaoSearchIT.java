@@ -15,6 +15,7 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import static java.time.ZonedDateTime.now;
@@ -794,5 +795,66 @@ public class TransactionDaoSearchIT {
 
         assertThat(transactionList.size(), is(1));
         assertThat(transactionList.get(0).getPayoutEntity().get().getPaidOutDate(), is(payoutFixture.getPaidOutDate()));
+    }
+
+    @Test
+    public void shouldReturn1Records_WhenSearchingBySettledDate() {
+        String gatewayAccountId = "account-id-" + nextLong();
+        String gatewayPayoutId1 = randomAlphanumeric(20);
+        String gatewayPayoutId2 = randomAlphanumeric(20);
+        String paidoutDate = "2020-09-08T00:04:08.000Z";
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId1)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId2)
+                .insert(rule.getJdbi());
+
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId1)
+                .withPaidOutDate(ZonedDateTime.parse(paidoutDate).minusMinutes(5L))
+                .withGatewayAccountId(gatewayAccountId)
+                .build()
+                .insert(rule.getJdbi());
+
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId2)
+                .withPaidOutDate(ZonedDateTime.parse(paidoutDate).plusDays(1L))
+                .withGatewayAccountId(gatewayAccountId)
+                .build()
+                .insert(rule.getJdbi());
+
+
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setFromSettledDate(paidoutDate);
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+        assertThat(transactionList.size(), is(1));
+
+        Long total = transactionDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
+
+        searchParams = new TransactionSearchParams();
+        searchParams.setToSettledDate(paidoutDate);
+
+        transactionList = transactionDao.searchTransactions(searchParams);
+        assertThat(transactionList.size(), is(1));
+
+        total = transactionDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
+
+        searchParams = new TransactionSearchParams();
+        searchParams.setFromSettledDate("2020-09-08T00:25:00.000Z");
+        searchParams.setToSettledDate("2020-09-10T00:00:25.000Z");
+
+        transactionList = transactionDao.searchTransactions(searchParams);
+        assertThat(transactionList.size(), is(1));
+
+        total = transactionDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
     }
 }
