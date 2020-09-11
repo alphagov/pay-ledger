@@ -125,6 +125,12 @@ public class TransactionFactory {
                     .withWalletType(safeGetAsString(refundPaymentDetails, "wallet"))
                     .build();
 
+            SettlementSummary settlementSummary = new SettlementSummary(
+                    safeGetAsDate(transactionDetails, "capture_submitted_date"),
+                    safeGetAsDate(transactionDetails, "captured_date"),
+                    entity.getPayoutEntity().map(payoutEntity -> payoutEntity.getPaidOutDate()).orElse(null)
+            );
+
             return new Refund.Builder()
                     .withGatewayAccountId(entity.getGatewayAccountId())
                     .withAmount(entity.getAmount())
@@ -138,6 +144,7 @@ public class TransactionFactory {
                     .withParentExternalId(entity.getParentExternalId())
                     .withGatewayPayoutId(entity.getGatewayPayoutId())
                     .withPaymentDetails(paymentDetails)
+                    .withSettlementSummary(settlementSummary)
                     .build();
 
         } catch (IOException e) {

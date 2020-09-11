@@ -15,12 +15,15 @@ import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class TransactionResourceIT {
@@ -136,7 +139,7 @@ public class TransactionResourceIT {
         var now = ZonedDateTime.parse("2019-07-31T14:52:07.073Z");
         var refundedBy = "some_user_id";
         var refundedByUserEmail = "test@example.com";
-        var gatewayPayoutId = "payout-id";
+        var gatewayPayoutId = "payout-id" + randomAlphanumeric(10);
 
         transactionFixture = aTransactionFixture()
                 .withTransactionType("REFUND")
@@ -145,10 +148,19 @@ public class TransactionResourceIT {
                 .withRefundedById(refundedBy)
                 .withRefundedByUserEmail(refundedByUserEmail)
                 .withGatewayTransactionId("gateway-transaction-id")
+                .withCaptureSubmittedDate(now)
+                .withCapturedDate(now)
                 .withDefaultPaymentDetails()
                 .withDefaultTransactionDetails()
                 .withGatewayPayoutId(gatewayPayoutId);
         transactionFixture.insert(rule.getJdbi());
+
+        aPayoutFixture()
+                .withGatewayAccountId(transactionFixture.getGatewayAccountId())
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withPaidOutDate(now)
+                .build()
+                .insert(rule.getJdbi());
 
         given().port(port)
                 .contentType(JSON)
@@ -173,7 +185,10 @@ public class TransactionResourceIT {
                 .body("payment_details.card_details.last_digits_card_number", is(transactionFixture.getLastDigitsCardNumber()))
                 .body("payment_details.card_details.first_digits_card_number", is(transactionFixture.getFirstDigitsCardNumber()))
                 .body("payment_details.card_details.expiry_date", is(transactionFixture.getCardExpiryDate()))
-                .body("payment_details.card_details.card_type", is("credit"));
+                .body("payment_details.card_details.card_type", is("credit"))
+                .body("settlement_summary.capture_submit_time", is(now.toString()))
+                .body("settlement_summary.captured_date", is(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+                .body("settlement_summary.settled_date", is(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
     }
 
     @Test
