@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.model;
 
+import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
@@ -13,6 +14,7 @@ public class Refund extends Transaction {
     private final String parentExternalId;
     private final String gatewayTransactionId;
     private final Payment paymentDetails;
+    private final SettlementSummary settlementSummary;
 
     public Refund(Builder builder) {
         super(builder.id, builder.gatewayAccountId, builder.amount, builder.externalId, builder.gatewayPayoutId);
@@ -24,6 +26,7 @@ public class Refund extends Transaction {
         this.parentExternalId = builder.parentExternalId;
         this.gatewayTransactionId = builder.gatewayTransactionId;
         this.paymentDetails = builder.paymentDetails;
+        this.settlementSummary = builder.settlementSummary;
     }
 
     public TransactionState getState() {
@@ -63,6 +66,10 @@ public class Refund extends Transaction {
         return paymentDetails;
     }
 
+    public SettlementSummary getSettlementSummary() {
+        return settlementSummary;
+    }
+
     public static class Builder {
         private TransactionState state;
         private ZonedDateTime createdDate;
@@ -77,6 +84,7 @@ public class Refund extends Transaction {
         private Payment paymentDetails;
         private String gatewayPayoutId;
         private String gatewayTransactionId;
+        private SettlementSummary settlementSummary;
 
         public Builder() {
         }
@@ -147,6 +155,11 @@ public class Refund extends Transaction {
 
         public Builder withPaymentDetails(Payment paymentDetails) {
             this.paymentDetails = paymentDetails;
+            return this;
+        }
+
+        public Builder withSettlementSummary(SettlementSummary refundSettlementSummary) {
+            this.settlementSummary = refundSettlementSummary;
             return this;
         }
     }

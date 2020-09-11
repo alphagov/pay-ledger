@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.commons.model.Source;
+import uk.gov.pay.ledger.transaction.search.model.PaymentSettlementSummary;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
-import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.ZonedDateTime;
@@ -40,7 +40,7 @@ public class Payment extends Transaction {
     private Long netAmount;
     private Long totalAmount;
     private RefundSummary refundSummary;
-    private SettlementSummary settlementSummary;
+    private PaymentSettlementSummary settlementSummary;
     private Boolean live;
     private Source source;
     private String walletType;
@@ -164,7 +164,7 @@ public class Payment extends Transaction {
         return totalAmount;
     }
 
-    public SettlementSummary getSettlementSummary() {
+    public PaymentSettlementSummary getSettlementSummary() {
         return settlementSummary;
     }
 
@@ -202,7 +202,7 @@ public class Payment extends Transaction {
         private Long totalAmount;
         private Long amount;
         private RefundSummary refundSummary;
-        private SettlementSummary settlementSummary;
+        private PaymentSettlementSummary settlementSummary;
         private Boolean live;
         private Source source;
         private String walletType;
@@ -318,8 +318,8 @@ public class Payment extends Transaction {
             return this;
         }
 
-        public Builder withSettlementSummary(SettlementSummary settlementSummary) {
-            this.settlementSummary = settlementSummary;
+        public Builder withSettlementSummary(PaymentSettlementSummary paymentSettlementSummary) {
+            this.settlementSummary = paymentSettlementSummary;
             return this;
         }
 

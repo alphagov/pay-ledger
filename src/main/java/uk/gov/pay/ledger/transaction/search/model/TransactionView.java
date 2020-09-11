@@ -151,7 +151,8 @@ public class TransactionView {
                 .withRefundedBy(refund.getRefundedBy())
                 .withRefundedByUserEmail(refund.getRefundedByUserEmail())
                 .withTransactionType(refund.getTransactionType())
-                .withGatewayPayoutId(refund.getGatewayPayoutId());
+                .withGatewayPayoutId(refund.getGatewayPayoutId())
+                .withSettlementSummary(refund.getSettlementSummary());
         if (refund.getPaymentDetails() != null) {
             refundBuilder = refundBuilder
                     .withPaymentDetails(from(refund.getPaymentDetails(), statusVersion));
