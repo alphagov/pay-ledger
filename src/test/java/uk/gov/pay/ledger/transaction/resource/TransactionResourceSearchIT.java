@@ -448,4 +448,68 @@ public class TransactionResourceSearchIT {
                 .body("count", is(1))
                 .body("results[0].settlement_summary.settled_date", is(notNullValue()));
     }
+
+    @Test
+    public void shouldReturnSettledDateForSearchBySettledDate() {
+        String gatewayAccountId = "12345678";
+        String gatewayPayoutId1 = randomAlphanumeric(20);
+        String gatewayPayoutId2 = randomAlphanumeric(20);
+        String gatewayPayoutId3 = randomAlphanumeric(20);
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId1)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId2)
+                .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId3)
+                .insert(rule.getJdbi());
+
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId1)
+                .withGatewayAccountId(gatewayAccountId)
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-07T10:15:30Z"))
+                .build()
+                .insert(rule.getJdbi());
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId2)
+                .withGatewayAccountId(gatewayAccountId)
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-05T10:15:30Z"))
+                .build()
+                .insert(rule.getJdbi());
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId3)
+                .withGatewayAccountId(gatewayAccountId)
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-09T10:15:30Z"))
+                .build()
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&from_settled_date=2020-09-07T09:30:00Z" +
+                        "&to_settled_date=2020-09-08T10:30:00Z" +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].settlement_summary.settled_date", is(notNullValue()))
+                .body("_links.self.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_settled_date=2020-09-07T09%3A30%3A00Z&to_settled_date=2020-09-08T10%3A30%3A00Z&page=1&display_size=5"))
+                .body("_links.first_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_settled_date=2020-09-07T09%3A30%3A00Z&to_settled_date=2020-09-08T10%3A30%3A00Z&page=1&display_size=5"))
+                .body("_links.last_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_settled_date=2020-09-07T09%3A30%3A00Z&to_settled_date=2020-09-08T10%3A30%3A00Z&page=1&display_size=5"))
+                .body("_links.prev_page.href", is(nullValue()))
+                .body("_links.next_page.href", is(nullValue()));
+    }
 }

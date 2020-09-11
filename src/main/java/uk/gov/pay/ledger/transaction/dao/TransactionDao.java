@@ -16,6 +16,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionDao {
     private static final String SEARCH_CLAUSE_TRANSACTION_WITH_PAYOUT = "AND po.gateway_account_id = :gatewayAccountId ";
@@ -78,12 +79,28 @@ public class TransactionDao {
             ":cursorFields " +
             "ORDER BY t.created_date DESC, t.id DESC LIMIT :limit";
 
-    private static final String COUNT_TRANSACTIONS = "SELECT count(1) " +
+    private static final String COUNT_TRANSACTIONS = "SELECT count(*) " +
             "FROM transaction t " +
             ":searchExtraFields ";
 
-    private static final String COUNT_TRANSACTIONS_WITH_LIMIT = "select count(id) from (SELECT t.id " +
+    private static final String COUNT_TRANSACTIONS_WITH_PAIDOUT_DATE = "SELECT count(*) " +
             "FROM transaction t " +
+            "LEFT OUTER JOIN payout po on " +
+            "t.gateway_payout_id = po.gateway_payout_id " +
+            ":payoutJoinOnGatewayIdField " +
+            ":searchExtraFields ";
+
+    private static final String COUNT_TRANSACTIONS_WITH_LIMIT = "SELECT count(*) FROM (SELECT t.id " +
+            "FROM transaction t " +
+            " :searchExtraFields " +
+            " OFFSET 0 LIMIT :limit" +
+            ") txs";
+
+    private static final String COUNT_TRANSACTIONS_WITH_LIMIT_AND_PAIDOUT_DATE = "SELECT count(*) FROM (SELECT t.id " +
+            "FROM transaction t " +
+            "LEFT OUTER JOIN payout po on " +
+            "t.gateway_payout_id = po.gateway_payout_id " +
+            ":payoutJoinOnGatewayIdField " +
             " :searchExtraFields " +
             " OFFSET 0 LIMIT :limit" +
             ") txs";
@@ -268,7 +285,9 @@ public class TransactionDao {
 
     public Long getTotalForSearch(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(createSearchTemplate(searchParams, COUNT_TRANSACTIONS));
+            Query query = handle.createQuery(createSearchTemplate(searchParams,
+                    (isNotBlank(searchParams.getFromSettledDate()) || isNotBlank(searchParams.getToSettledDate())) ?
+                            COUNT_TRANSACTIONS_WITH_PAIDOUT_DATE : COUNT_TRANSACTIONS));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             return query
                     .mapTo(Long.class)
@@ -278,7 +297,9 @@ public class TransactionDao {
 
     public Long getTotalWithLimitForSearch(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(createSearchTemplate(searchParams, COUNT_TRANSACTIONS_WITH_LIMIT));
+            Query query = handle.createQuery(createSearchTemplate(searchParams,
+                    (isNotBlank(searchParams.getFromSettledDate()) || isNotBlank(searchParams.getToSettledDate())) ?
+                            COUNT_TRANSACTIONS_WITH_LIMIT_AND_PAIDOUT_DATE : COUNT_TRANSACTIONS_WITH_LIMIT));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             query.bind("limit", searchParams.getLimitTotalSize());
 

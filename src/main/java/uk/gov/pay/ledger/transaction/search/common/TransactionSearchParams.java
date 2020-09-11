@@ -35,6 +35,8 @@ public class TransactionSearchParams extends SearchParams {
     private static final String TRANSACTION_TYPE_FIELD = "transaction_type";
     private static final String GATEWAY_TRANSACTION_ID_FIELD = "gateway_transaction_id";
     private static final String GATEWAY_PAYOUT_ID = "gateway_payout_id";
+    private static final String FROM_SETTLED_DATE_FIELD = "from_settled_date";
+    private static final String TO_SETTLED_DATE_FIELD = "to_settled_date";
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
     private static final Long DEFAULT_LIMIT_TOTAL_SIZE = 10000L;
@@ -74,6 +76,10 @@ public class TransactionSearchParams extends SearchParams {
     private TransactionType transactionType;
     @QueryParam("gateway_payout_id")
     private String gatewayPayoutId;
+    @QueryParam("from_settled_date")
+    private String fromSettledDate;
+    @QueryParam("to_settled_date")
+    private String toSettledDate;
     private Long pageNumber = 1L;
 
     @DefaultValue("500")
@@ -151,6 +157,14 @@ public class TransactionSearchParams extends SearchParams {
         this.gatewayPayoutId = gatewayPayoutId;
     }
 
+    public void setFromSettledDate(String fromSettledDate) {
+        this.fromSettledDate = fromSettledDate;
+    }
+
+    public void setToSettledDate(String toSettledDate) {
+        this.toSettledDate = toSettledDate;
+    }
+
     @QueryParam("page")
     public void setPageNumber(Long pageNumber) {
         this.pageNumber = Objects.requireNonNullElse(pageNumber, DEFAULT_PAGE_NUMBER);
@@ -198,6 +212,12 @@ public class TransactionSearchParams extends SearchParams {
         }
         if (isNotBlank(gatewayTransactionId)) {
             filters.add(" t.gateway_transaction_id = :" + GATEWAY_TRANSACTION_ID_FIELD);
+        }
+        if (isNotBlank(fromSettledDate)) {
+            filters.add(" po.paid_out_date >= :" + FROM_SETTLED_DATE_FIELD);
+        }
+        if (isNotBlank(toSettledDate)) {
+            filters.add(" po.paid_out_date < :" + TO_SETTLED_DATE_FIELD);
         }
 
         return List.copyOf(filters);
@@ -288,6 +308,12 @@ public class TransactionSearchParams extends SearchParams {
             if (isNotBlank(gatewayPayoutId)) {
                 queryMap.put(GATEWAY_PAYOUT_ID, gatewayPayoutId);
             }
+            if (isNotBlank(fromSettledDate)) {
+                queryMap.put(FROM_SETTLED_DATE_FIELD, ZonedDateTime.parse(fromSettledDate));
+            }
+            if (isNotBlank(toSettledDate)) {
+                queryMap.put(TO_SETTLED_DATE_FIELD, ZonedDateTime.parse(toSettledDate));
+            }
         }
         return queryMap;
     }
@@ -344,6 +370,14 @@ public class TransactionSearchParams extends SearchParams {
         return statusVersion;
     }
 
+    public String getFromSettledDate() {
+        return fromSettledDate;
+    }
+
+    public String getToSettledDate() {
+        return toSettledDate;
+    }
+
     @Override
     public String buildQueryParamString(Long forPage) {
         List<String> queries = new ArrayList<>();
@@ -390,6 +424,12 @@ public class TransactionSearchParams extends SearchParams {
         }
         if (isNotBlank(gatewayPayoutId)) {
             queries.add(GATEWAY_PAYOUT_ID + "=" + gatewayPayoutId);
+        }
+        if (isNotBlank(fromSettledDate)) {
+            queries.add(FROM_SETTLED_DATE_FIELD + "=" + fromSettledDate);
+        }
+        if (isNotBlank(toSettledDate)) {
+            queries.add(TO_SETTLED_DATE_FIELD + "=" + toSettledDate);
         }
         queries.add("page=" + forPage);
         queries.add("display_size=" + getDisplaySize());
