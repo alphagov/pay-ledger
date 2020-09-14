@@ -254,6 +254,20 @@ public class TransactionFactoryTest {
         assertThat(refundEntity.getPaymentDetails().getWalletType(), is("APPLE_PAY"));
     }
 
+    @Test
+    public void createsRefundWithSettlementSummaryFromTransactionEntity() {
+        var payoutObject = aPayoutEntity()
+                .withPaidOutDate(paidOutDate)
+                .build();
+        var refund = new TransactionEntity.Builder()
+                .withTransactionType(TransactionType.REFUND.name())
+                .withTransactionDetails(fullTransactionDetails.toString())
+                .withPayoutEntity(payoutObject)
+                .build();
+        assertThat(refund.getPayoutEntity().isPresent(), is(true));
+        assertThat(refund.getPayoutEntity().get().getPaidOutDate(), is(notNullValue()));
+    }
+
     private void assertCorrectPaymentTransactionWithFullData(Payment payment) {
         assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
         assertThat(payment.getAmount(), is(amount));

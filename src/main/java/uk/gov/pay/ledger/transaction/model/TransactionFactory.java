@@ -7,8 +7,9 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
+import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
+import uk.gov.pay.ledger.transaction.search.model.PaymentSettlementSummary;
 
 import java.io.IOException;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class TransactionFactory {
             }
 
             RefundSummary refundSummary = RefundSummary.from(entity);
-            SettlementSummary settlementSummary = new SettlementSummary(
+            PaymentSettlementSummary paymentSettlementSummary = new PaymentSettlementSummary(
                     safeGetAsDate(transactionDetails, "capture_submitted_date"),
                     safeGetAsDate(transactionDetails, "captured_date"),
                     entity.getPayoutEntity().map(payoutEntity -> payoutEntity.getPaidOutDate()).orElse(null)
@@ -92,7 +93,7 @@ public class TransactionFactory {
                     .withNetAmount(entity.getNetAmount())
                     .withRefundSummary(refundSummary)
                     .withTotalAmount(entity.getTotalAmount())
-                    .withSettlementSummary(settlementSummary)
+                    .withSettlementSummary(paymentSettlementSummary)
                     .withMoto(entity.isMoto())
                     .withLive(entity.isLive())
                     .withSource(entity.getSource())
@@ -125,6 +126,10 @@ public class TransactionFactory {
                     .withWalletType(safeGetAsString(refundPaymentDetails, "wallet"))
                     .build();
 
+            SettlementSummary refundSettlementSummary = new SettlementSummary(
+                    entity.getPayoutEntity().map(payoutEntity -> payoutEntity.getPaidOutDate()).orElse(null)
+            );
+
             return new Refund.Builder()
                     .withGatewayAccountId(entity.getGatewayAccountId())
                     .withAmount(entity.getAmount())
@@ -138,6 +143,7 @@ public class TransactionFactory {
                     .withParentExternalId(entity.getParentExternalId())
                     .withGatewayPayoutId(entity.getGatewayPayoutId())
                     .withPaymentDetails(paymentDetails)
+                    .withSettlementSummary(refundSettlementSummary)
                     .build();
 
         } catch (IOException e) {
