@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.model;
 
+import uk.gov.pay.ledger.transaction.search.model.RefundSettlementSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
@@ -14,7 +15,7 @@ public class Refund extends Transaction {
     private final String parentExternalId;
     private final String gatewayTransactionId;
     private final Payment paymentDetails;
-    private final SettlementSummary settlementSummary;
+    private final RefundSettlementSummary refundSettlementSummary;
 
     public Refund(Builder builder) {
         super(builder.id, builder.gatewayAccountId, builder.amount, builder.externalId, builder.gatewayPayoutId);
@@ -26,7 +27,7 @@ public class Refund extends Transaction {
         this.parentExternalId = builder.parentExternalId;
         this.gatewayTransactionId = builder.gatewayTransactionId;
         this.paymentDetails = builder.paymentDetails;
-        this.settlementSummary = builder.settlementSummary;
+        this.refundSettlementSummary = builder.refundSettlementSummary;
     }
 
     public TransactionState getState() {
@@ -66,8 +67,8 @@ public class Refund extends Transaction {
         return paymentDetails;
     }
 
-    public SettlementSummary getSettlementSummary() {
-        return settlementSummary;
+    public RefundSettlementSummary getRefundSettlementSummary() {
+        return refundSettlementSummary;
     }
 
     public static class Builder {
@@ -84,7 +85,7 @@ public class Refund extends Transaction {
         private Payment paymentDetails;
         private String gatewayPayoutId;
         private String gatewayTransactionId;
-        private SettlementSummary settlementSummary;
+        private RefundSettlementSummary refundSettlementSummary;
 
         public Builder() {
         }
@@ -158,8 +159,8 @@ public class Refund extends Transaction {
             return this;
         }
 
-        public Builder withSettlementSummary(SettlementSummary settlementSummary) {
-            this.settlementSummary = settlementSummary;
+        public Builder withRefundSettlementSummary(RefundSettlementSummary refundSettlementSummary) {
+            this.refundSettlementSummary = refundSettlementSummary;
             return this;
         }
     }

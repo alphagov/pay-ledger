@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.search.model.RefundSettlementSummary;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
 
@@ -125,9 +126,7 @@ public class TransactionFactory {
                     .withWalletType(safeGetAsString(refundPaymentDetails, "wallet"))
                     .build();
 
-            SettlementSummary settlementSummary = new SettlementSummary(
-                    safeGetAsDate(transactionDetails, "capture_submitted_date"),
-                    safeGetAsDate(transactionDetails, "captured_date"),
+            RefundSettlementSummary settlementSummary = new RefundSettlementSummary(
                     entity.getPayoutEntity().map(payoutEntity -> payoutEntity.getPaidOutDate()).orElse(null)
             );
 
@@ -144,7 +143,7 @@ public class TransactionFactory {
                     .withParentExternalId(entity.getParentExternalId())
                     .withGatewayPayoutId(entity.getGatewayPayoutId())
                     .withPaymentDetails(paymentDetails)
-                    .withSettlementSummary(settlementSummary)
+                    .withRefundSettlementSummary(settlementSummary)
                     .build();
 
         } catch (IOException e) {

@@ -186,8 +186,6 @@ public class TransactionResourceIT {
                 .body("payment_details.card_details.first_digits_card_number", is(transactionFixture.getFirstDigitsCardNumber()))
                 .body("payment_details.card_details.expiry_date", is(transactionFixture.getCardExpiryDate()))
                 .body("payment_details.card_details.card_type", is("credit"))
-                .body("settlement_summary.capture_submit_time", is(now.toString()))
-                .body("settlement_summary.captured_date", is(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
                 .body("settlement_summary.settled_date", is(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
     }
 

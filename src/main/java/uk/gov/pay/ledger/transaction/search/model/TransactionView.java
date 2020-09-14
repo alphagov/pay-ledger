@@ -59,6 +59,7 @@ public class TransactionView {
     private String walletType;
     private String gatewayPayoutId;
     private TransactionView paymentDetails;
+    private RefundSettlementSummary refundSettlementSummary;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -93,6 +94,7 @@ public class TransactionView {
         this.walletType = builder.walletType;
         this.gatewayPayoutId = builder.gatewayPayoutId;
         this.paymentDetails = builder.paymentDetails;
+        this.refundSettlementSummary = builder.refundSettlementSummary;
     }
 
     public TransactionView() {
@@ -152,7 +154,7 @@ public class TransactionView {
                 .withRefundedByUserEmail(refund.getRefundedByUserEmail())
                 .withTransactionType(refund.getTransactionType())
                 .withGatewayPayoutId(refund.getGatewayPayoutId())
-                .withSettlementSummary(refund.getSettlementSummary());
+                .withRefundSettlementSummary(refund.getRefundSettlementSummary());
         if (refund.getPaymentDetails() != null) {
             refundBuilder = refundBuilder
                     .withPaymentDetails(from(refund.getPaymentDetails(), statusVersion));
@@ -232,6 +234,11 @@ public class TransactionView {
 
     public String getRefundedByUserEmail() {
         return refundedByUserEmail;
+    }
+
+    @JsonProperty(value = "settlement_summary")
+    public RefundSettlementSummary getRefundSettlementSummary() {
+        return refundSettlementSummary;
     }
 
     @Override
@@ -337,6 +344,7 @@ public class TransactionView {
         private String walletType;
         private String gatewayPayoutId;
         private TransactionView paymentDetails;
+        private RefundSettlementSummary refundSettlementSummary;
 
         public Builder() {
         }
@@ -502,6 +510,11 @@ public class TransactionView {
 
         public Builder withPaymentDetails(TransactionView sharedPaymentDetails) {
             this.paymentDetails = sharedPaymentDetails;
+            return this;
+        }
+
+        public Builder withRefundSettlementSummary(RefundSettlementSummary refundSettlementSummary) {
+            this.refundSettlementSummary = refundSettlementSummary;
             return this;
         }
     }
