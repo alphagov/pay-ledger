@@ -12,7 +12,6 @@ applications:
     disk_quota: ((disk_quota))
     services:
       - ledger-secret-service
-      - ledger-db
       - sqs
     env:
       ENV_MAP_BP_USE_APP_PROFILE_DIR: true
