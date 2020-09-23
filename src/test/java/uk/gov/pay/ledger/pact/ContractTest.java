@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.pact;
 
+import au.com.dius.pact.provider.junit.IgnoreNoPactsToVerify;
 import au.com.dius.pact.provider.junit.State;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
@@ -28,6 +29,7 @@ import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
+@IgnoreNoPactsToVerify
 public abstract class ContractTest {
 
     @ClassRule
@@ -372,6 +374,48 @@ public abstract class ContractTest {
                 .withState(PayoutState.PAID_OUT)
                 .build()
                 .insert(app.getJdbi());
+    }
+
+    @State("a payment with payout date exists")
+    public void createAPaymentWithPayoutDate(Map<String, String> params) {
+        String gatewayAccountId = params.get("account_id");
+        String transactionExternalId = params.get("charge_id");
+        String createdDate = params.get("created_date");
+        String settledDate = params.get("settled_date");
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
+        if (isBlank(createdDate)) {
+            createdDate = "2019-05-03T00:00:01.000Z";
+        }
+        if (isBlank(settledDate)) {
+            settledDate = "2019-05-06T00:00:01.000Z";
+        }
+        if (isBlank(transactionExternalId)) {
+            transactionExternalId = "ch_123abc456settlement";
+        }
+
+        String gatewayPayoutId = randomAlphanumeric(15);
+
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .withCaptureSubmittedDate(ZonedDateTime.parse(createdDate).plusMinutes(20L))
+                .withCapturedDate(ZonedDateTime.parse(createdDate).plusHours(1L))
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withDefaultTransactionDetails()
+                .insert(app.getJdbi());
+
+        aPayoutFixture()
+                .withPaidOutDate(ZonedDateTime.parse(settledDate))
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId)
+                .build().insert(app.getJdbi());
     }
 
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
