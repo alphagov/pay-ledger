@@ -228,7 +228,7 @@ public class TransactionDao {
     public Optional<TransactionEntity> findTransactionByExternalIdAndGatewayAccountId(String externalId, String gatewayAccountId) {
         String query = FIND_TRANSACTION_BY_EXTERNAL_ID
                 .replace(":payoutJoinOnGatewayIdField",
-                        isBlank(gatewayAccountId)
+                        isNotBlank(gatewayAccountId)
                                 ? SEARCH_CLAUSE_TRANSACTION_WITH_PAYOUT : "");
         return jdbi.withHandle(handle ->
                 handle.createQuery(query)
@@ -251,7 +251,7 @@ public class TransactionDao {
     public List<TransactionEntity> findTransactionByParentIdAndGatewayAccountId(String parentExternalId, String gatewayAccountId) {
         String query = FIND_TRANSACTIONS_BY_PARENT_EXT_ID_AND_GATEWAY_ACCOUNT_ID
                 .replace(":payoutJoinOnGatewayIdField",
-                        isBlank(gatewayAccountId)
+                        isNotBlank(gatewayAccountId)
                                 ? SEARCH_CLAUSE_TRANSACTION_WITH_PAYOUT : "");
         return jdbi.withHandle(handle ->
                 handle.createQuery(query)
