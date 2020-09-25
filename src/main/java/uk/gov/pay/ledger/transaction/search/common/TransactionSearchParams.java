@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static uk.gov.pay.commons.validation.DateTimeUtils.fromLocalDateOnlyString;
 
 public class TransactionSearchParams extends SearchParams {
 
@@ -493,10 +494,10 @@ public class TransactionSearchParams extends SearchParams {
     }
 
     private ZonedDateTime parseFromSettledDate() {
-        return LocalDate.parse(fromSettledDate, DATE_TIME_FORMATTER).atStartOfDay().atZone(UTC);
+        return fromLocalDateOnlyString(fromSettledDate).get();
     }
 
     private ZonedDateTime parseToSettledDate() {
-        return LocalDate.parse(toSettledDate, DATE_TIME_FORMATTER).plusDays(1L).atStartOfDay().atZone(UTC);
+        return fromLocalDateOnlyString(toSettledDate).get().plusDays(1L);
     }
 }
