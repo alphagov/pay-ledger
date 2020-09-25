@@ -7,7 +7,9 @@ import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionSearchParams extends SearchParams {
@@ -40,6 +43,8 @@ public class TransactionSearchParams extends SearchParams {
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
     private static final Long DEFAULT_LIMIT_TOTAL_SIZE = 10000L;
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
@@ -309,10 +314,10 @@ public class TransactionSearchParams extends SearchParams {
                 queryMap.put(GATEWAY_PAYOUT_ID, gatewayPayoutId);
             }
             if (isNotBlank(fromSettledDate)) {
-                queryMap.put(FROM_SETTLED_DATE_FIELD, ZonedDateTime.parse(fromSettledDate));
+                queryMap.put(FROM_SETTLED_DATE_FIELD, parseFromSettledDate());
             }
             if (isNotBlank(toSettledDate)) {
-                queryMap.put(TO_SETTLED_DATE_FIELD, ZonedDateTime.parse(toSettledDate));
+                queryMap.put(TO_SETTLED_DATE_FIELD, parseToSettledDate());
             }
         }
         return queryMap;
@@ -485,5 +490,13 @@ public class TransactionSearchParams extends SearchParams {
 
     public void setGatewayTransactionId(String gatewayTransactionId) {
         this.gatewayTransactionId = gatewayTransactionId;
+    }
+
+    private ZonedDateTime parseFromSettledDate() {
+        return LocalDate.parse(fromSettledDate, DATE_TIME_FORMATTER).atStartOfDay().atZone(UTC);
+    }
+
+    private ZonedDateTime parseToSettledDate() {
+        return LocalDate.parse(toSettledDate, DATE_TIME_FORMATTER).plusDays(1L).atStartOfDay().atZone(UTC);
     }
 }

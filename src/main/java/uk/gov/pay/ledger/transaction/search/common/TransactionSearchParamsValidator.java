@@ -5,6 +5,7 @@ import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -39,10 +40,10 @@ public class TransactionSearchParamsValidator {
             validateDate(TO_DATE_FIELD, searchParams.getToDate());
         }
         if (isNotBlank(searchParams.getFromSettledDate())) {
-            validateDate(FROM_SETTLED_DATE_FIELD, searchParams.getFromSettledDate());
+            validSettledDate(FROM_SETTLED_DATE_FIELD, searchParams.getFromSettledDate());
         }
         if (isNotBlank(searchParams.getToSettledDate())) {
-            validateDate(TO_SETTLED_DATE_FIELD, searchParams.getToSettledDate());
+            validSettledDate(TO_SETTLED_DATE_FIELD, searchParams.getToSettledDate());
         }
     }
 
@@ -51,6 +52,14 @@ public class TransactionSearchParamsValidator {
             ZonedDateTime.parse(dateToParse);
         } catch (DateTimeParseException e) {
             throw new UnparsableDateException(fieldName, dateToParse);
+        }
+    }
+
+    private static void validSettledDate(String fieldName, String settledDateToParse) {
+        try {
+            DateTimeFormatter.ofPattern("yyyy-MM-dd").parse(settledDateToParse);
+        } catch (DateTimeParseException e) {
+            throw new UnparsableDateException(fieldName, settledDateToParse);
         }
     }
 }

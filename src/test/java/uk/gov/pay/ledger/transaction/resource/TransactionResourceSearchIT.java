@@ -451,10 +451,11 @@ public class TransactionResourceSearchIT {
 
     @Test
     public void shouldReturnSettledDateForSearchBySettledDate() {
-        String gatewayAccountId = "12345678";
+        String gatewayAccountId = randomAlphanumeric(10);
         String gatewayPayoutId1 = randomAlphanumeric(20);
         String gatewayPayoutId2 = randomAlphanumeric(20);
         String gatewayPayoutId3 = randomAlphanumeric(20);
+        String gatewayPayoutId4 = randomAlphanumeric(20);
 
         aTransactionFixture()
                 .withTransactionType("PAYMENT")
@@ -471,23 +472,34 @@ public class TransactionResourceSearchIT {
                 .withGatewayAccountId(gatewayAccountId)
                 .withGatewayPayoutId(gatewayPayoutId3)
                 .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId4)
+                .insert(rule.getJdbi());
 
         aPayoutFixture()
                 .withGatewayPayoutId(gatewayPayoutId1)
                 .withGatewayAccountId(gatewayAccountId)
-                .withPaidOutDate(ZonedDateTime.parse("2020-09-07T10:15:30Z"))
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-07T00:00:01Z"))
                 .build()
                 .insert(rule.getJdbi());
         aPayoutFixture()
                 .withGatewayPayoutId(gatewayPayoutId2)
                 .withGatewayAccountId(gatewayAccountId)
-                .withPaidOutDate(ZonedDateTime.parse("2020-09-05T10:15:30Z"))
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-06T23:59:59.999Z"))
                 .build()
                 .insert(rule.getJdbi());
         aPayoutFixture()
                 .withGatewayPayoutId(gatewayPayoutId3)
                 .withGatewayAccountId(gatewayAccountId)
-                .withPaidOutDate(ZonedDateTime.parse("2020-09-09T10:15:30Z"))
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-09T00:00:00Z"))
+                .build()
+                .insert(rule.getJdbi());
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId4)
+                .withGatewayAccountId(gatewayAccountId)
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-08T23:59:59Z"))
                 .build()
                 .insert(rule.getJdbi());
 
@@ -496,19 +508,20 @@ public class TransactionResourceSearchIT {
                 .accept(JSON)
                 .get("/v1/transaction?" +
                         "account_id=" + gatewayAccountId +
-                        "&from_settled_date=2020-09-07T09:30:00Z" +
-                        "&to_settled_date=2020-09-08T10:30:00Z" +
+                        "&from_settled_date=2020-09-07" +
+                        "&to_settled_date=2020-09-08" +
                         "&page=1" +
                         "&display_size=5"
                 )
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("count", is(1))
-                .body("results[0].settlement_summary.settled_date", is(notNullValue()))
-                .body("_links.self.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_settled_date=2020-09-07T09%3A30%3A00Z&to_settled_date=2020-09-08T10%3A30%3A00Z&page=1&display_size=5"))
-                .body("_links.first_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_settled_date=2020-09-07T09%3A30%3A00Z&to_settled_date=2020-09-08T10%3A30%3A00Z&page=1&display_size=5"))
-                .body("_links.last_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_settled_date=2020-09-07T09%3A30%3A00Z&to_settled_date=2020-09-08T10%3A30%3A00Z&page=1&display_size=5"))
+                .body("count", is(2))
+                .body("results[0].settlement_summary.settled_date", is("2020-09-08"))
+                .body("results[1].settlement_summary.settled_date", is("2020-09-07"))
+                .body("_links.self.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_settled_date=2020-09-07&to_settled_date=2020-09-08&page=1&display_size=5"))
+                .body("_links.first_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_settled_date=2020-09-07&to_settled_date=2020-09-08&page=1&display_size=5"))
+                .body("_links.last_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_settled_date=2020-09-07&to_settled_date=2020-09-08&page=1&display_size=5"))
                 .body("_links.prev_page.href", is(nullValue()))
                 .body("_links.next_page.href", is(nullValue()));
     }
