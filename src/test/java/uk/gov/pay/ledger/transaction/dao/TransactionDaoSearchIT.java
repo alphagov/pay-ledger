@@ -830,7 +830,7 @@ public class TransactionDaoSearchIT {
 
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setFromSettledDate(paidoutDate);
+        searchParams.setFromSettledDate("2020-09-08");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
         assertThat(transactionList.size(), is(1));
@@ -839,7 +839,7 @@ public class TransactionDaoSearchIT {
         assertThat(total, is(1L));
 
         searchParams = new TransactionSearchParams();
-        searchParams.setToSettledDate(paidoutDate);
+        searchParams.setToSettledDate("2020-09-08");
 
         transactionList = transactionDao.searchTransactions(searchParams);
         assertThat(transactionList.size(), is(1));
@@ -848,8 +848,8 @@ public class TransactionDaoSearchIT {
         assertThat(total, is(1L));
 
         searchParams = new TransactionSearchParams();
-        searchParams.setFromSettledDate("2020-09-08T00:25:00.000Z");
-        searchParams.setToSettledDate("2020-09-10T00:00:25.000Z");
+        searchParams.setFromSettledDate("2020-09-08");
+        searchParams.setToSettledDate("2020-09-10");
 
         transactionList = transactionDao.searchTransactions(searchParams);
         assertThat(transactionList.size(), is(1));

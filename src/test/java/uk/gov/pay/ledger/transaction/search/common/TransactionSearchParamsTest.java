@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.search.common;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -154,5 +155,19 @@ public class TransactionSearchParamsTest {
         transactionSearchParams.setLimitTotalSize(10L);
 
         assertThat(transactionSearchParams.getLimitTotalSize(), is(10000L));
+    }
+
+    @Test
+    public void shouldApplyFromSettledDateCorrectly() {
+        transactionSearchParams.setFromSettledDate("2020-09-25");
+        assertThat(transactionSearchParams.getQueryMap().get("from_settled_date"), is(ZonedDateTime.parse("2020-09-25T00:00:00.000Z")));
+        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("from_settled_date=2020-09-25"));
+    }
+
+    @Test
+    public void shouldApplyToSettledDateCorrectly() {
+        transactionSearchParams.setToSettledDate("2020-09-26");
+        assertThat(transactionSearchParams.getQueryMap().get("to_settled_date"), is(ZonedDateTime.parse("2020-09-27T00:00:00.000Z")));
+        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("to_settled_date=2020-09-26"));
     }
 }

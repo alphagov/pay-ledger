@@ -62,8 +62,8 @@ public class TransactionSearchParamsValidatorTest {
 
     @Test
     public void shouldNotThrowException_whenValidSettledDateFormats() {
-        searchParams.setFromSettledDate("2020-09-10T10:15:30Z");
-        searchParams.setToSettledDate("2020-09-10T10:15:30Z");
+        searchParams.setFromSettledDate("2020-09-10");
+        searchParams.setToSettledDate("2020-09-10");
         TransactionSearchParamsValidator.validateSearchParams(searchParams, null);
     }
 
@@ -98,5 +98,21 @@ public class TransactionSearchParamsValidatorTest {
 
         assertThrows(UnparsableDateException.class, () -> TransactionSearchParamsValidator.validateSearchParamsForCsv(
                 searchParams, new CommaDelimitedSetParameter("1")));
+    }
+
+    @Test
+    public void validateFromSettledDateSearchParamsShouldThrowExceptionForInvalidDates() {
+        searchParams.setFromSettledDate("25/09/2020");
+        UnparsableDateException unparsableDateException = assertThrows(UnparsableDateException.class,
+                () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, null));
+        assertThat(unparsableDateException.getMessage(), is("Input from_settled_date (25/09/2020) is wrong format"));
+    }
+
+    @Test
+    public void validateToSettledDateSearchParamsShouldThrowExceptionForInvalidDates() {
+        searchParams.setToSettledDate("2020.09.25");
+        UnparsableDateException unparsableDateException = assertThrows(UnparsableDateException.class,
+                () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, null));
+        assertThat(unparsableDateException.getMessage(), is("Input to_settled_date (2020.09.25) is wrong format"));
     }
 }

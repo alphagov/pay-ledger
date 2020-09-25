@@ -418,6 +418,64 @@ public abstract class ContractTest {
                 .build().insert(app.getJdbi());
     }
 
+    @State("three payments with payout dates exists")
+    public void createThreePaymentsWithPaidoutDates(Map<String, String> params) {
+        String gatewayAccountId = params.get("account_id");
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
+        String gatewayPayoutId1 = randomAlphanumeric(20);
+        String gatewayPayoutId2 = randomAlphanumeric(20);
+        String gatewayPayoutId3 = randomAlphanumeric(20);
+        String gatewayPayoutId4 = randomAlphanumeric(20);
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId1)
+                .insert(app.getJdbi());
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId2)
+                .insert(app.getJdbi());
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId3)
+                .insert(app.getJdbi());
+        aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayPayoutId(gatewayPayoutId4)
+                .insert(app.getJdbi());
+
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId1)
+                .withGatewayAccountId(gatewayAccountId)
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-19T10:15:30Z"))
+                .build()
+                .insert(app.getJdbi());
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId2)
+                .withGatewayAccountId(gatewayAccountId)
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-18T23:59:59.999Z"))
+                .build()
+                .insert(app.getJdbi());
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId3)
+                .withGatewayAccountId(gatewayAccountId)
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-21T00:00:00Z"))
+                .build()
+                .insert(app.getJdbi());
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId4)
+                .withGatewayAccountId(gatewayAccountId)
+                .withPaidOutDate(ZonedDateTime.parse("2020-09-19T19:05:00Z"))
+                .build()
+                .insert(app.getJdbi());
+    }
+
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
                                           String externalId, Long amount,
                                           String reference, String description,
