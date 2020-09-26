@@ -105,6 +105,30 @@ public class TransactionDaoIT {
         assertThat(retrievedTransaction.getPayoutEntity().get().getPaidOutDate(), is(paidOutDate));
     }
 
+    @Test
+    public void shouldRetrieveTransactionWithPayoutDateByExternalIdAndNoGatewayAccount() {
+        ZonedDateTime paidOutDate = ZonedDateTime.parse("2019-12-12T10:00:00Z");
+        String payOutId = randomAlphanumeric(20);
+
+        TransactionFixture fixture = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withExternalMetadata(ImmutableMap.of("key1", "value1", "anotherKey", ImmutableMap.of("nestedKey", "value")))
+                .withDefaultTransactionDetails()
+                .withGatewayPayoutId(payOutId)
+                .insert(rule.getJdbi());
+        aPayoutFixture()
+                .withGatewayAccountId(fixture.getGatewayAccountId())
+                .withGatewayPayoutId(payOutId)
+                .withPaidOutDate(paidOutDate)
+                .build()
+                .insert(rule.getJdbi());
+
+        TransactionEntity retrievedTransaction = transactionDao.findTransactionByExternalId(fixture.getExternalId()).get();
+        
+        assertThat(retrievedTransaction.getPayoutEntity().isPresent(), is(true));
+        assertThat(retrievedTransaction.getPayoutEntity().get().getPaidOutDate(), is(paidOutDate));
+    }
+
     private void assertTransactionEntity(TransactionEntity transaction, TransactionFixture fixture) {
         assertThat(transaction.getId(), notNullValue());
         assertThat(transaction.getGatewayAccountId(), is(fixture.getGatewayAccountId()));

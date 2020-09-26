@@ -770,6 +770,34 @@ public class TransactionDaoSearchIT {
     }
 
     @Test
+    public void shouldGetAndMapTransactionWithPaidOutDateCorrectlyWhenNoGatewayAccount() {
+        String gatewayPayoutId = randomAlphanumeric(15);
+
+        transactionFixture = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withMoto(true)
+                .withGatewayPayoutId(gatewayPayoutId)
+                .insert(rule.getJdbi());
+
+        var payoutFixture = aPayoutFixture()
+                .withGatewayAccountId(transactionFixture.getGatewayAccountId())
+                .withGatewayPayoutId(gatewayPayoutId)
+                .build()
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(1));
+        TransactionEntity transaction = transactionList.get(0);
+
+        assertThat(transaction.getPayoutEntity().get().getPaidOutDate(), is(payoutFixture.getPaidOutDate()));
+
+        Long total = transactionDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
+    }
+
+    @Test
     public void searchTransactionsByCursorWithPaidoutDate() {
         String gatewayPayoutId = randomAlphanumeric(15);
 
