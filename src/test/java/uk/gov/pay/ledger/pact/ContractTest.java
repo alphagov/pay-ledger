@@ -17,6 +17,7 @@ import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
+import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -429,7 +430,7 @@ public abstract class ContractTest {
         String gatewayPayoutId3 = randomAlphanumeric(20);
         String gatewayPayoutId4 = randomAlphanumeric(20);
 
-        aTransactionFixture()
+        TransactionFixture refundParentFixture = aTransactionFixture()
                 .withTransactionType("PAYMENT")
                 .withGatewayAccountId(gatewayAccountId)
                 .withGatewayPayoutId(gatewayPayoutId1)
@@ -446,7 +447,7 @@ public abstract class ContractTest {
                 .insert(app.getJdbi());
         aTransactionFixture()
                 .withTransactionType("REFUND")
-                .withParentExternalId(randomAlphanumeric(15))
+                .withParentExternalId(refundParentFixture.getExternalId())
                 .withGatewayAccountId(gatewayAccountId)
                 .withGatewayPayoutId(gatewayPayoutId4)
                 .insert(app.getJdbi());
