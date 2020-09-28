@@ -446,6 +446,7 @@ public abstract class ContractTest {
                 .insert(app.getJdbi());
         aTransactionFixture()
                 .withTransactionType("REFUND")
+                .withParentExternalId(randomAlphanumeric(15))
                 .withGatewayAccountId(gatewayAccountId)
                 .withGatewayPayoutId(gatewayPayoutId4)
                 .insert(app.getJdbi());
