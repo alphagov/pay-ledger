@@ -36,7 +36,7 @@ applications:
 
       ADMIN_PORT: '10701'
       DISABLE_INTERNAL_HTTPS: ((disable_internal_https))
-      ENVIRONMENT: ((space))
+      ENVIRONMENT: paas-((space))
       JAVA_OPTS: -Xms512m -Xmx1G
       JBP_CONFIG_JAVA_MAIN: '{ arguments: "server /home/vcap/app/config/config.yaml" }'
       JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+ } }'
