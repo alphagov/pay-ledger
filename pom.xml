@@ -15,7 +15,7 @@
         <testcontainers.version>1.14.3</testcontainers.version>
         <postgresql.version>42.2.16</postgresql.version>
         <pay-java-commons.version>1.0.20201001124822</pay-java-commons.version>
-        <junit5.version>5.7.0</junit5.version>
+        <junit5.version>5.6.2</junit5.version>
         <surefire.version>3.0.0-M5</surefire.version>
         <guice.version>4.2.3</guice.version>
         <rest-assured.version>4.3.1</rest-assured.version>
@@ -182,13 +182,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit5.version}</version>
+            <version>5.6.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
