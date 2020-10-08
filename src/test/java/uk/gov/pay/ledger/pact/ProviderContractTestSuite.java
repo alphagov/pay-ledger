@@ -14,6 +14,7 @@ public class ProviderContractTestSuite {
         ImmutableSetMultimap.Builder<String, JUnit4TestAdapter> consumerToJUnitTest = ImmutableSetMultimap.builder();
         consumerToJUnitTest.put("publicapi", new JUnit4TestAdapter(PublicApiContractTest.class));
         consumerToJUnitTest.put("selfservice", new JUnit4TestAdapter(SelfServiceContractTest.class));
+        consumerToJUnitTest.put("connector", new JUnit4TestAdapter(ConnectorContractTest.class));
         return CreateTestSuite.create(consumerToJUnitTest.build());
     }
 }
