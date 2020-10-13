@@ -69,14 +69,13 @@ public class PaymentDetailsEnteredEventQueueContractTest {
 
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
-                        && transactionDao.findTransactionByExternalId(externalId).get().getEmail() != null
+                        && transactionDao.findTransactionByExternalId(externalId).get().getCardholderName() != null
         );
 
         Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
 
         assertThat(transaction.isPresent(), is(true));
         assertThat(transaction.get().getExternalId(), is(externalId));
-        assertThat(transaction.get().getEmail(), is("j.doe@example.org"));
         assertThat(transaction.get().getCardBrand(), is("visa"));
         assertThat(transaction.get().getFirstDigitsCardNumber(), is("424242"));
         assertThat(transaction.get().getLastDigitsCardNumber(), is("4242"));
