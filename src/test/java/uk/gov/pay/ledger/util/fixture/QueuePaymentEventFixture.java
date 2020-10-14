@@ -175,6 +175,9 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                             .put("gateway_transaction_id", "providerId")
                             .build());
                 break;
+            case "CANCELLED_BY_USER":
+                eventData = gsonBuilder.create().toJson(Map.of("gateway_transaction_id", "validGatewayTransactionId"));
+                break;
             default:
                 eventData = gsonBuilder.create().toJson(Map.of("event_data", "event_data"));
         }
