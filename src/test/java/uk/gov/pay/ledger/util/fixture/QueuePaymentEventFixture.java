@@ -124,7 +124,6 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
             case "PAYMENT_DETAILS_ENTERED":
                 eventData = gsonBuilder.create()
                         .toJson(ImmutableMap.builder()
-                                .put("email", "j.doe@example.org")
                                 .put("last_digits_card_number", "4242")
                                 .put("first_digits_card_number", "424242")
                                 .put("cardholder_name", "J citizen")
