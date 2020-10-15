@@ -178,6 +178,9 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
             case "CANCELLED_BY_USER":
                 eventData = gsonBuilder.create().toJson(Map.of("gateway_transaction_id", "validGatewayTransactionId"));
                 break;
+            case "USER_EMAIL_COLLECTED":
+                eventData = gsonBuilder.create().toJson(Map.of("email", "test@example.org"));
+                break;
             default:
                 eventData = gsonBuilder.create().toJson(Map.of("event_data", "event_data"));
         }

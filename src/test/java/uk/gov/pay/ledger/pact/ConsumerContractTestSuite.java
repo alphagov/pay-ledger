@@ -24,6 +24,7 @@ public class ConsumerContractTestSuite {
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(PaymentIncludedInPayoutEventQueueContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(RefundIncludedInPayoutEventQueueContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(CancelledByUserEventQueueContractTest.class));
+        consumerToJUnitTest.put("connector", new JUnit4TestAdapter(UserEmailCollectedEventQueueContractTest.class));
         return CreateTestSuite.create(consumerToJUnitTest.build());
     }
 
