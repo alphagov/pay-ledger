@@ -103,6 +103,7 @@ public enum TransactionState {
                     Map.entry(SalientEventType.CANCEL_BY_EXPIRATION_FAILED, FAILED_EXPIRED),
                     Map.entry(SalientEventType.CANCELLED_BY_EXPIRATION, FAILED_EXPIRED),
                     Map.entry(SalientEventType.CANCEL_BY_EXTERNAL_SERVICE_SUBMITTED, CANCELLED),
+                    Map.entry(SalientEventType.CANCEL_BY_EXTERNAL_SERVICE_FAILED, CANCELLED),
                     Map.entry(SalientEventType.CANCELLED_BY_EXTERNAL_SERVICE, CANCELLED),
                     Map.entry(SalientEventType.CANCEL_BY_USER_SUBMITTED, FAILED_CANCELLED),
                     Map.entry(SalientEventType.CANCEL_BY_USER_FAILED, FAILED_CANCELLED),
