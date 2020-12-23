@@ -12,17 +12,17 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class TransactionSearchParamsValidatorTest {
+class TransactionSearchParamsValidatorTest {
 
-    TransactionSearchParams searchParams;
+    private TransactionSearchParams searchParams;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         searchParams = new TransactionSearchParams();
     }
 
     @Test
-    public void shouldThrowException_whenInvalidFromDate() {
+    void shouldThrowException_whenInvalidFromDate() {
         searchParams.setFromDate("wrong-date");
         UnparsableDateException unparsableDateException = assertThrows(UnparsableDateException.class,
                 () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, null));
@@ -30,7 +30,7 @@ public class TransactionSearchParamsValidatorTest {
     }
 
     @Test
-    public void shouldThrowException_whenInvalidToDate() {
+    void shouldThrowException_whenInvalidToDate() {
         searchParams.setToDate("wrong-date");
         UnparsableDateException unparsableDateException = assertThrows(UnparsableDateException.class,
                 () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, null));
@@ -38,7 +38,7 @@ public class TransactionSearchParamsValidatorTest {
     }
 
     @Test
-    public void shouldThrowException_whenInvalidFromSettledDate() {
+    void shouldThrowException_whenInvalidFromSettledDate() {
         searchParams.setFromSettledDate("wrong-date");
         UnparsableDateException unparsableDateException = assertThrows(UnparsableDateException.class,
                 () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, null));
@@ -46,7 +46,7 @@ public class TransactionSearchParamsValidatorTest {
     }
 
     @Test
-    public void shouldThrowException_whenInvalidToSettledDate() {
+    void shouldThrowException_whenInvalidToSettledDate() {
         searchParams.setToSettledDate("wrong-date");
         UnparsableDateException unparsableDateException = assertThrows(UnparsableDateException.class,
                 () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, null));
@@ -54,21 +54,21 @@ public class TransactionSearchParamsValidatorTest {
     }
 
     @Test
-    public void shouldNotThrowException_whenValidDateFormats() {
+    void shouldNotThrowException_whenValidDateFormats() {
         searchParams.setFromDate("2019-05-01T10:15:30Z");
         searchParams.setToDate("2019-05-01T10:15:30Z");
         TransactionSearchParamsValidator.validateSearchParams(searchParams, null);
     }
 
     @Test
-    public void shouldNotThrowException_whenValidSettledDateFormats() {
+    void shouldNotThrowException_whenValidSettledDateFormats() {
         searchParams.setFromSettledDate("2020-09-10");
         searchParams.setToSettledDate("2020-09-10");
         TransactionSearchParamsValidator.validateSearchParams(searchParams, null);
     }
 
     @Test
-    public void validateSearchParamsForCsvShouldNotThrowExceptionForValidParams() {
+    void validateSearchParamsForCsvShouldNotThrowExceptionForValidParams() {
         searchParams.setFromDate("2019-05-01T10:15:30Z");
         searchParams.setToDate("2019-05-01T10:15:30Z");
         TransactionSearchParamsValidator.validateSearchParamsForCsv(
@@ -76,13 +76,13 @@ public class TransactionSearchParamsValidatorTest {
     }
 
     @Test
-    public void validateSearchParamsForCsvShouldThrowExceptionIfGatewayAccountIsNotAvailable() {
+    void validateSearchParamsForCsvShouldThrowExceptionIfGatewayAccountIsNotAvailable() {
         assertThrows(ValidationException.class, () -> TransactionSearchParamsValidator.validateSearchParamsForCsv(
                 searchParams, null));
     }
 
     @Test
-    public void validateSearchParamsForCsvShouldThrowExceptionIfGatewayAccountIdsIsEmptyString() {
+    void validateSearchParamsForCsvShouldThrowExceptionIfGatewayAccountIdsIsEmptyString() {
         assertThrows(ValidationException.class, () -> TransactionSearchParamsValidator.validateSearchParamsForCsv(
                 searchParams, new CommaDelimitedSetParameter("")));
     }
@@ -92,7 +92,7 @@ public class TransactionSearchParamsValidatorTest {
             "wrong-date, 2019-05-01T10:15:30Z",
             "2019-05-01T10:15:30Z, wrong-date"
     })
-    public void validateSearchParamsForCsvShouldThrowExceptionForInvalidDates(String fromDate, String toDate) {
+    void validateSearchParamsForCsvShouldThrowExceptionForInvalidDates(String fromDate, String toDate) {
         searchParams.setFromDate(fromDate);
         searchParams.setToDate(toDate);
 
@@ -101,7 +101,7 @@ public class TransactionSearchParamsValidatorTest {
     }
 
     @Test
-    public void validateFromSettledDateSearchParamsShouldThrowExceptionForInvalidDates() {
+    void validateFromSettledDateSearchParamsShouldThrowExceptionForInvalidDates() {
         searchParams.setFromSettledDate("25/09/2020");
         UnparsableDateException unparsableDateException = assertThrows(UnparsableDateException.class,
                 () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, null));
@@ -109,7 +109,7 @@ public class TransactionSearchParamsValidatorTest {
     }
 
     @Test
-    public void validateToSettledDateSearchParamsShouldThrowExceptionForInvalidDates() {
+    void validateToSettledDateSearchParamsShouldThrowExceptionForInvalidDates() {
         searchParams.setToSettledDate("2020.09.25");
         UnparsableDateException unparsableDateException = assertThrows(UnparsableDateException.class,
                 () -> TransactionSearchParamsValidator.validateSearchParams(searchParams, null));
