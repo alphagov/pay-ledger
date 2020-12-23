@@ -21,10 +21,10 @@ import static uk.gov.pay.commons.model.Source.CARD_API;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
-public class QueueMessageReceiverForTransactionIT {
+class QueueMessageReceiverForTransactionIT {
 
     @RegisterExtension
-    public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension(
+    static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension(
             config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true"));
 
     private final String gatewayAccountId = "test_gateway_account_id";
@@ -35,7 +35,7 @@ public class QueueMessageReceiverForTransactionIT {
             "false",
             "null"
     })
-    public void paymentCreatedMessageIsPersistedCorrectly(Boolean moto) throws InterruptedException {
+    void paymentCreatedMessageIsPersistedCorrectly(Boolean moto) throws InterruptedException {
         String resourceExternalId = RandomStringUtils.random(10, true, true);
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
