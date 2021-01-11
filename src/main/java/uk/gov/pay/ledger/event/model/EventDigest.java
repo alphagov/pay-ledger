@@ -51,7 +51,8 @@ public class EventDigest {
                 .orElseThrow(() -> new EmptyEventsException("No events found"));
 
         var latestSalientEventType = events.stream()
-                .map(e -> SalientEventType.from(e.getEventType()))
+                .map(Event::getEventType)
+                .map(SalientEventType::from)
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElse(null);
