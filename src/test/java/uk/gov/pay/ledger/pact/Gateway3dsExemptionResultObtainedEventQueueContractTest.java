@@ -36,7 +36,7 @@ public class Gateway3dsExemptionResultObtainedEventQueueContractTest {
     );
 
     private byte[] currentMessage;
-    private String externalId = "gateway3dsExemptionResultObtained_externalId";
+    private String externalId = "exemptionResult_externalId";
     private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
 
     @Pact(provider = "connector", consumer = "ledger")
