@@ -393,7 +393,6 @@ class TransactionDaoIT {
     }
 
     @Test
-    @Disabled
     void sourceTypeInDatabase_shouldMatchValuesInEnum() {
         var sourceArray = Arrays.stream(Source.values()).map(Enum::toString).collect(Collectors.toList());
         transactionDao.getSourceTypeValues().forEach(x -> assertThat(sourceArray.contains(x), is(true)));
