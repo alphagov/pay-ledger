@@ -1,9 +1,7 @@
 package uk.gov.pay.ledger.metadatakey.dao;
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
@@ -15,7 +13,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 
-public class TransactionMetadataKeyDaoIT {
+public class MetadataKeyDaoIT {
 
     @RegisterExtension
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();

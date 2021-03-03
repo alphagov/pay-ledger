@@ -9,6 +9,8 @@ import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class TransactionMetadataDao {
 
     private static final String FIND_METADATA_KEYS = "SELECT distinct mk.key FROM transaction t, transaction_metadata tm, metadata_key mk " +
@@ -16,6 +18,15 @@ public class TransactionMetadataDao {
             "  AND tm.metadata_key_id = mk.id" +
             "  AND transaction_details??'external_metadata'" +
             " :searchExtraFields ";
+
+    private static final String FIND_METADATA_KEYS_FOR_TX_SEARCH_INCLUDING_METADATA_VALUE = "SELECT distinct mk.key from metadata_key mk, transaction_metadata tm " +
+            " WHERE tm.metadata_key_id = mk.id" +
+            "  AND tm.transaction_id in " +
+            "        (SELECT tm2.transaction_id " +
+            "           FROM transaction t, transaction_metadata tm2 " +
+            "          WHERE tm2.transaction_id = t.id " +
+            "          AND lower(tm2.value) = :metadata_value" +
+            "          :searchExtraFields)";
 
     private static final String INSERT_STRING = "INSERT INTO transaction_metadata(transaction_id, metadata_key_id) " +
             "SELECT :transactionId, (select id from metadata_key where key = :key) " +
@@ -51,7 +62,11 @@ public class TransactionMetadataDao {
                 searchClauseTemplate = "AND " + searchClauseTemplate;
             }
 
-            String queryString = FIND_METADATA_KEYS.replace(":searchExtraFields", searchClauseTemplate);
+            String queryString = isNotBlank(searchParams.getMetadataValue()) ?
+                    FIND_METADATA_KEYS_FOR_TX_SEARCH_INCLUDING_METADATA_VALUE : FIND_METADATA_KEYS;
+
+            queryString = queryString.replace(":searchExtraFields", searchClauseTemplate);
+
             Query query = handle.createQuery(queryString);
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
 

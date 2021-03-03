@@ -7,9 +7,7 @@ import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +16,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.pay.commons.validation.DateTimeUtils.fromLocalDateOnlyString;
 
@@ -44,8 +41,7 @@ public class TransactionSearchParams extends SearchParams {
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
     private static final Long DEFAULT_LIMIT_TOTAL_SIZE = 10000L;
-
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final String METADATA_VALUE = "metadata_value";
 
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
@@ -86,6 +82,8 @@ public class TransactionSearchParams extends SearchParams {
     private String fromSettledDate;
     @QueryParam("to_settled_date")
     private String toSettledDate;
+    @QueryParam("metadata_value")
+    private String metadataValue;
     private Long pageNumber = 1L;
 
     @DefaultValue("500")
@@ -169,6 +167,10 @@ public class TransactionSearchParams extends SearchParams {
 
     public void setToSettledDate(String toSettledDate) {
         this.toSettledDate = toSettledDate;
+    }
+
+    public void setMetadataValue(String metadataValue) {
+        this.metadataValue = metadataValue;
     }
 
     @QueryParam("page")
@@ -320,6 +322,9 @@ public class TransactionSearchParams extends SearchParams {
             if (isNotBlank(toSettledDate)) {
                 queryMap.put(TO_SETTLED_DATE_FIELD, parseToSettledDate());
             }
+            if (isNotBlank(metadataValue)) {
+                queryMap.put(METADATA_VALUE, metadataValue);
+            }
         }
         return queryMap;
     }
@@ -384,6 +389,10 @@ public class TransactionSearchParams extends SearchParams {
         return toSettledDate;
     }
 
+    public String getMetadataValue() {
+        return metadataValue;
+    }
+
     @Override
     public String buildQueryParamString(Long forPage) {
         List<String> queries = new ArrayList<>();
@@ -436,6 +445,9 @@ public class TransactionSearchParams extends SearchParams {
         }
         if (isNotBlank(toSettledDate)) {
             queries.add(TO_SETTLED_DATE_FIELD + "=" + toSettledDate);
+        }
+        if (isNotBlank(metadataValue)) {
+            queries.add(METADATA_VALUE + "=" + metadataValue);
         }
         queries.add("page=" + forPage);
         queries.add("display_size=" + getDisplaySize());
