@@ -46,11 +46,11 @@ public class TransactionMetadataService {
         if (eventDataNode != null && eventDataNode.has("external_metadata")) {
             transactionDao.findTransactionByExternalId(event.getResourceExternalId())
                     .ifPresent(transactionEntity -> {
-                        Iterator<String> metadataKeys = eventDataNode.get("external_metadata").fieldNames();
-                        metadataKeys.forEachRemaining(metadataKey -> {
-                            metadataKeyDao.insertIfNotExist(metadataKey);
+                        eventDataNode.get("external_metadata").fields().forEachRemaining(metadata -> {
+                            metadataKeyDao.insertIfNotExist(metadata.getKey());
+                            String value = metadata.getValue().textValue();
                             transactionMetadataDao
-                                    .insertIfNotExist(transactionEntity.getId(), metadataKey);
+                                    .upsert(transactionEntity.getId(), metadata.getKey(), value);
                         });
                     });
         }
