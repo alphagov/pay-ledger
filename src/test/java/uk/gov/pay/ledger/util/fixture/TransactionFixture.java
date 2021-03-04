@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.pay.ledger.transaction.model.CardType.CREDIT;
+import static uk.gov.pay.ledger.util.fixture.MetadataKeyFixture.insertMedataKeyIfNotExists;
+import static uk.gov.pay.ledger.util.fixture.TransactionMetadataFixture.aTransactionMetadataFixture;
 
 public class TransactionFixture implements DbFixture<TransactionFixture, TransactionEntity> {
 
@@ -310,6 +312,12 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture insertTransactionAndTransactionMetadata(Jdbi jdbi) {
+        insert(jdbi);
+        insertTransactionMetadata(jdbi, externalMetadata);
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -377,6 +385,22 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 )
         );
         return this;
+    }
+
+    private void insertTransactionMetadata(Jdbi jdbi, JsonElement externalMetadata) {
+        Optional.ofNullable(externalMetadata)
+                .ifPresent(cd ->
+                        cd.getAsJsonObject()
+                                .entrySet()
+                                .forEach(metadataJsonElement -> {
+                                    if (!metadataJsonElement.getValue().isJsonObject()) {
+                                        insertMedataKeyIfNotExists(jdbi, metadataJsonElement.getKey());
+                                        aTransactionMetadataFixture().withTransactionId(id)
+                                                .withMetadataKey(metadataJsonElement.getKey())
+                                                .withValue(metadataJsonElement.getValue().getAsString())
+                                                .insert(jdbi);
+                                    }
+                                }));
     }
 
     @NotNull

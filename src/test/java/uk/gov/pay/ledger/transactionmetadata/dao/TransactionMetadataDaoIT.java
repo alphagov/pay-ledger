@@ -131,7 +131,7 @@ public class TransactionMetadataDaoIT {
         aTransactionMetadataFixture().withTransactionId(transaction1.getId())
                 .withMetadataKey("test-key-2").withValue("value3").insert(rule.getJdbi());
         aTransactionMetadataFixture().withTransactionId(transaction2.getId())
-                .withMetadataKey("test-key-n").withValue("value1").insert(rule.getJdbi());
+                .withMetadataKey("test-key-n").withValue("VALUE1").insert(rule.getJdbi());
         aTransactionMetadataFixture().withTransactionId(transactionToBeExcluded.getId())
                 .withMetadataKey("test-key-3").withValue("value3").insert(rule.getJdbi());
 

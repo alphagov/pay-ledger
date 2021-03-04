@@ -227,6 +227,9 @@ public class TransactionSearchParams extends SearchParams {
         if (isNotBlank(toSettledDate)) {
             filters.add(" po.paid_out_date < :" + TO_SETTLED_DATE_FIELD);
         }
+        if (isNotBlank(metadataValue)) {
+            filters.add(" lower(tm.value) = lower(:" + METADATA_VALUE + ")");
+        }
 
         return List.copyOf(filters);
     }
