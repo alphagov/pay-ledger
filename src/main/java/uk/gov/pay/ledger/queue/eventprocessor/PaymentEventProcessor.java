@@ -37,7 +37,7 @@ public class PaymentEventProcessor extends EventProcessor {
         EventDigest paymentEventDigest = EventDigest.fromEventList(events);
 
         transactionService.upsertTransactionFor(paymentEventDigest);
-        transactionMetadataService.upsertMetadataFor(event);
+        transactionMetadataService.upsertMetadataFor(paymentEventDigest);
 
         /**
          * If the payment has associated refunds, we want to update the payment details that we also store on refunds to

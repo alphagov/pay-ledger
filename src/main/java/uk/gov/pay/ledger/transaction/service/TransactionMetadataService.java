@@ -1,20 +1,17 @@
 package uk.gov.pay.ledger.transaction.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import jersey.repackaged.com.google.common.base.Stopwatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transactionmetadata.dao.TransactionMetadataDao;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
@@ -35,25 +32,23 @@ public class TransactionMetadataService {
         this.transactionDao = transactionDao;
     }
 
-    public void upsertMetadataFor(Event event) {
-        JsonNode eventDataNode;
-        try {
-            eventDataNode = new ObjectMapper().readTree(event.getEventData());
-        } catch (JsonProcessingException e) {
-            LOGGER.error("Unable to parse incoming event payload: {}", e.getMessage());
-            return;
-        }
-        if (eventDataNode != null && eventDataNode.has("external_metadata")) {
-            transactionDao.findTransactionByExternalId(event.getResourceExternalId())
+    public void upsertMetadataFor(EventDigest eventDigest) {
+        var eventData = eventDigest.getEventPayload();
+
+        transactionDao.findTransactionByExternalId(eventDigest.getResourceExternalId())
                     .ifPresent(transactionEntity -> {
-                        eventDataNode.get("external_metadata").fields().forEachRemaining(metadata -> {
-                            metadataKeyDao.insertIfNotExist(metadata.getKey());
-                            String value = metadata.getValue().textValue();
-                            transactionMetadataDao
-                                    .upsert(transactionEntity.getId(), metadata.getKey(), value);
-                        });
-                    });
-        }
+                        if (eventData.containsKey("external_metadata")) {
+                                @SuppressWarnings("unchecked")
+                                var metadata = (Map<String, Object>) eventData.get("external_metadata");
+                                metadata.forEach((key, value) -> {
+                                    metadataKeyDao.insertIfNotExist(key);
+                                    transactionMetadataDao
+                                            .upsert(transactionEntity.getId(),
+                                                    key,
+                                                    value.toString());
+                                });
+                        }
+        });
     }
 
     public List<String> findMetadataKeysForTransactions(TransactionSearchParams searchParams) {
