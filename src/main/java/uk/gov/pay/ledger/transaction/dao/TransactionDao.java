@@ -20,6 +20,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TransactionDao {
     private static final String SEARCH_CLAUSE_TRANSACTION_WITH_PAYOUT = "AND po.gateway_account_id = :gatewayAccountId ";
     private static final String SEARCH_CLAUSE_TRANSACTIONS_WITH_PAYOUT = "AND po.gateway_account_id IN (<account_id>) ";
+    private static final String SEARCH_CLAUSE_JOIN_TRANSACTION_METADATA = " INNER JOIN transaction_metadata tm " +
+            "  on t.id = tm.transaction_id ";
 
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID =
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
@@ -62,15 +64,17 @@ public class TransactionDao {
             "WHERE t.parent_external_id = :parentExternalId";
 
     private static final String SEARCH_TRANSACTIONS =
-            "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
-            "LEFT OUTER JOIN payout po on " +
+            "SELECT :distinctClauseWhenSearchingByMetadataValue t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
+            " :transactionMetadataJoin " +
+            " LEFT OUTER JOIN payout po on " +
             "t.gateway_payout_id = po.gateway_payout_id " +
             ":payoutJoinOnGatewayIdField " +
             ":searchExtraFields " +
             "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
 
     private static final String SEARCH_TRANSACTIONS_CURSOR =
-            "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
+            "SELECT :distinctClauseWhenSearchingByMetadataValue t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
+            " :transactionMetadataJoin " +
             "LEFT OUTER JOIN payout po on " +
             "t.gateway_payout_id = po.gateway_payout_id " +
             ":payoutJoinOnGatewayIdField " +
@@ -78,25 +82,29 @@ public class TransactionDao {
             ":cursorFields " +
             "ORDER BY t.created_date DESC, t.id DESC LIMIT :limit";
 
-    private static final String COUNT_TRANSACTIONS = "SELECT count(*) " +
+    private static final String COUNT_TRANSACTIONS = "SELECT count(:distinctClauseWhenSearchingByMetadataValue t.id) " +
             "FROM transaction t " +
+            " :transactionMetadataJoin " +
             ":searchExtraFields ";
 
-    private static final String COUNT_TRANSACTIONS_WITH_PAIDOUT_DATE = "SELECT count(*) " +
+    private static final String COUNT_TRANSACTIONS_WITH_PAIDOUT_DATE = "SELECT count(:distinctClauseWhenSearchingByMetadataValue t.id) " +
             "FROM transaction t " +
+            " :transactionMetadataJoin " +
             "LEFT OUTER JOIN payout po on " +
             "t.gateway_payout_id = po.gateway_payout_id " +
             ":payoutJoinOnGatewayIdField " +
             ":searchExtraFields ";
 
-    private static final String COUNT_TRANSACTIONS_WITH_LIMIT = "SELECT count(*) FROM (SELECT t.id " +
+    private static final String COUNT_TRANSACTIONS_WITH_LIMIT = "SELECT count(*) FROM (SELECT :distinctClauseWhenSearchingByMetadataValue t.id " +
             "FROM transaction t " +
+            " :transactionMetadataJoin " +
             " :searchExtraFields " +
             " OFFSET 0 LIMIT :limit" +
             ") txs";
 
-    private static final String COUNT_TRANSACTIONS_WITH_LIMIT_AND_PAIDOUT_DATE = "SELECT count(*) FROM (SELECT t.id " +
+    private static final String COUNT_TRANSACTIONS_WITH_LIMIT_AND_PAIDOUT_DATE = "SELECT count(*) FROM (SELECT :distinctClauseWhenSearchingByMetadataValue t.id " +
             "FROM transaction t " +
+            " :transactionMetadataJoin " +
             "LEFT OUTER JOIN payout po on " +
             "t.gateway_payout_id = po.gateway_payout_id " +
             ":payoutJoinOnGatewayIdField " +
@@ -341,6 +349,13 @@ public class TransactionDao {
                 .replace(":payoutJoinOnGatewayIdField",
                         (searchParams.getAccountIds() != null && !searchParams.getAccountIds().isEmpty())
                         ? SEARCH_CLAUSE_TRANSACTIONS_WITH_PAYOUT : "");
+
+        baseQueryString = baseQueryString
+                .replace(":transactionMetadataJoin",
+                        (isNotBlank(searchParams.getMetadataValue())) ? SEARCH_CLAUSE_JOIN_TRANSACTION_METADATA : "");
+
+        baseQueryString = baseQueryString.replace(
+                ":distinctClauseWhenSearchingByMetadataValue", isNotBlank(searchParams.getMetadataValue()) ? " distinct " : "");
 
         return baseQueryString.replace(
                 ":searchExtraFields",

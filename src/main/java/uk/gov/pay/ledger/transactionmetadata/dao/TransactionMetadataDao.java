@@ -19,13 +19,13 @@ public class TransactionMetadataDao {
             "  AND transaction_details??'external_metadata'" +
             " :searchExtraFields ";
 
-    private static final String FIND_METADATA_KEYS_FOR_TX_SEARCH_INCLUDING_METADATA_VALUE = "SELECT distinct mk.key from metadata_key mk, transaction_metadata tm " +
-            " WHERE tm.metadata_key_id = mk.id" +
-            "  AND tm.transaction_id in " +
-            "        (SELECT tm2.transaction_id " +
-            "           FROM transaction t, transaction_metadata tm2 " +
-            "          WHERE tm2.transaction_id = t.id " +
-            "          AND lower(tm2.value) = :metadata_value" +
+    private static final String FIND_METADATA_KEYS_FOR_TX_SEARCH_INCLUDING_METADATA_VALUE = "SELECT distinct mk.key from metadata_key mk, transaction_metadata tm2 " +
+            " WHERE tm2.metadata_key_id = mk.id" +
+            "  AND tm2.transaction_id in " +
+            "        (SELECT tm.transaction_id " +
+            "           FROM transaction t, transaction_metadata tm " +
+            "          WHERE tm.transaction_id = t.id " +
+            "          AND lower(tm.value) = lower(:metadata_value)" +
             "          :searchExtraFields)";
 
     private static final String INSERT_STRING = "INSERT INTO transaction_metadata(transaction_id, metadata_key_id) " +

@@ -1,12 +1,15 @@
 package uk.gov.pay.ledger.transaction.dao;
 
-
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -17,6 +20,7 @@ import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static java.time.ZonedDateTime.now;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -518,6 +522,38 @@ public class TransactionDaoSearchIT {
     }
 
     @Test
+    public void searchTransactionsByMetadataValue() {
+        String gatewayAccountId = "account-id-" + nextLong();
+        String reference = randomAlphanumeric(15);
+
+        TransactionEntity transaction1 = insertTransaction(gatewayAccountId, reference, ZonedDateTime.now().minusDays(2),
+                ImmutableMap.of("test-key-1", "value1", "test-key-2", "value1"));
+        TransactionEntity transaction2 = insertTransaction(gatewayAccountId, reference, ZonedDateTime.now(),
+                ImmutableMap.of("test-key-n", "VALUE1"));
+        TransactionEntity transactionToBeExcluded = insertTransaction(gatewayAccountId, "ref123", ZonedDateTime.now(),
+                ImmutableMap.of("test-key-3", "value3"));
+
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setReference(reference);
+        searchParams.setMetadataValue("value1");
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+        Long totalForSearch = transactionDao.getTotalForSearch(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(2));
+        assertThat(totalForSearch, Matchers.is(2L));
+
+        assertThat(transactionList.get(0).getExternalId(), is(transaction2.getExternalId()));
+        JsonElement externalMetadata = JsonParser.parseString(transactionList.get(0).getTransactionDetails()).getAsJsonObject().get("external_metadata");
+        assertThat(externalMetadata.getAsJsonObject().get("test-key-n").getAsString(), is("VALUE1"));
+
+        assertThat(transactionList.get(1).getExternalId(), is(transaction1.getExternalId()));
+        externalMetadata = JsonParser.parseString(transactionList.get(1).getTransactionDetails()).getAsJsonObject().get("external_metadata");
+        assertThat(externalMetadata.getAsJsonObject().get("test-key-1").getAsString(), is("value1"));
+        assertThat(externalMetadata.getAsJsonObject().get("test-key-2").getAsString(), is("value1"));
+    }
+
+    @Test
     public void shouldFilterByGatewayPayoutIdWhenSpecified() {
         String gatewayAccountId = "account-id-" + nextLong();
         String gatewayPayoutId = "payout-id-" + nextLong();
@@ -704,6 +740,37 @@ public class TransactionDaoSearchIT {
     }
 
     @Test
+    public void searchTransactionsByCursorAndetadataValue() {
+        String gatewayAccountId = "account-id-" + nextLong();
+        String reference = randomAlphanumeric(15);
+
+        TransactionEntity transaction1 = insertTransaction(gatewayAccountId, reference, ZonedDateTime.now().minusDays(2),
+                ImmutableMap.of("test-key-1", "value1", "test-key-2", "value2"));
+        TransactionEntity transaction2 = insertTransaction(gatewayAccountId, reference, ZonedDateTime.now(),
+                ImmutableMap.of("test-key-n", "VALUE1"));
+        TransactionEntity transactionToBeExcluded = insertTransaction(gatewayAccountId, "ref123", ZonedDateTime.now(),
+                ImmutableMap.of("test-key-3", "value3"));
+        List<Transaction> transactionsToExclude = aPersistedTransactionList(gatewayAccountId, 15, rule.getJdbi(), true);
+
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setReference(reference);
+        searchParams.setMetadataValue("value1");
+
+        List<TransactionEntity> transactionList = transactionDao.cursorTransactionSearch(searchParams, null, null);
+
+        assertThat(transactionList.size(), Matchers.is(2));
+
+        assertThat(transactionList.get(0).getExternalId(), is(transaction2.getExternalId()));
+        JsonElement externalMetadata = JsonParser.parseString(transactionList.get(0).getTransactionDetails()).getAsJsonObject().get("external_metadata");
+        assertThat(externalMetadata.getAsJsonObject().get("test-key-n").getAsString(), is("VALUE1"));
+
+        assertThat(transactionList.get(1).getExternalId(), is(transaction1.getExternalId()));
+        externalMetadata = JsonParser.parseString(transactionList.get(1).getTransactionDetails()).getAsJsonObject().get("external_metadata");
+        assertThat(externalMetadata.getAsJsonObject().get("test-key-1").getAsString(), is("value1"));
+        assertThat(externalMetadata.getAsJsonObject().get("test-key-2").getAsString(), is("value2"));
+    }
+
+    @Test
     public void getTotalWithLimitForSearchShouldApplyLimitTotalSizeCorrectly() {
         String gatewayAccountId = "account-id-" + nextLong();
 
@@ -725,6 +792,25 @@ public class TransactionDaoSearchIT {
 
         Long total = transactionDao.getTotalWithLimitForSearch(searchParams);
         assertThat(total, is(15L));
+    }
+
+    @Test
+    public void getTotalWithLimitForSearchShouldApplySearchByMetadataValueCorrectly() {
+        String gatewayAccountId = "account-id-" + nextLong();
+        String reference = randomAlphanumeric(15);
+
+        insertTransaction(gatewayAccountId, reference, ZonedDateTime.now().minusDays(2),
+                ImmutableMap.of("test-key-1", "value1", "test-key-2", "value2"));
+        insertTransaction(gatewayAccountId, reference, ZonedDateTime.now(),
+                ImmutableMap.of("test-key-n", "VALUE1"));
+        List<Transaction> transactionsToExclude = aPersistedTransactionList(gatewayAccountId, 15, rule.getJdbi(), true);
+
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setReference(reference);
+        searchParams.setMetadataValue("value1");
+
+        Long total = transactionDao.getTotalWithLimitForSearch(searchParams);
+        assertThat(total, is(2L));
     }
 
     @Test
@@ -884,5 +970,19 @@ public class TransactionDaoSearchIT {
 
         total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(1L));
+    }
+
+    private TransactionEntity insertTransaction(String gatewayAccountId, String reference, ZonedDateTime createdDate,
+                                                Map<String, Object> externalMetadata) {
+        return aTransactionFixture()
+                .withState(TransactionState.CREATED)
+                .withTransactionType("PAYMENT")
+                .withReference(reference)
+                .withCreatedDate(createdDate)
+                .withGatewayAccountId(gatewayAccountId)
+                .withExternalMetadata(externalMetadata)
+                .withDefaultTransactionDetails()
+                .insertTransactionAndTransactionMetadata(rule.getJdbi())
+                .toEntity();
     }
 }

@@ -369,6 +369,42 @@ public class TransactionResourceCsvIT {
         assertThat(paymentRecord.get("GOV.UK Payment ID"), is(transactionFixture.getExternalId()));
     }
 
+    @Test
+    public void shouldGetTransactionsWithCorrectMetadataColumnsForSearchByCSV() throws IOException {
+        String targetGatewayAccountId = "123";
+
+        TransactionFixture transactionFixture = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withReference("ref1")
+                .withGatewayAccountId(targetGatewayAccountId)
+                .withExternalMetadata(ImmutableMap.of("a-metadata-key", "value1", "metadata-key-2", "value2"))
+                .withDefaultTransactionDetails()
+                .insertTransactionAndTransactionMetadata(rule.getJdbi());
+        TransactionFixture transactionWithoutMetadataToExclude = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withReference("ref1")
+                .withGatewayAccountId(targetGatewayAccountId)
+                .withDefaultTransactionDetails()
+                .insertTransactionAndTransactionMetadata(rule.getJdbi());
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction?" +
+                        "account_id=" + targetGatewayAccountId +
+                        "&metadata_value=value1")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(1));
+        CSVRecord record = csvRecords.get(0);
+        assertThat(record.get("a-metadata-key (metadata)"), is("value1"));
+        assertThat(record.get("metadata-key-2 (metadata)"), is("value2"));
+    }
+
     private void assertCommonPaymentFields(CSVRecord csvRecord, TransactionFixture transactionFixture) {
         assertThat(csvRecord.get("Reference"), is(transactionFixture.getReference()));
         assertThat(csvRecord.get("Description"), is(transactionFixture.getDescription()));

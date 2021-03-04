@@ -1,9 +1,11 @@
 package uk.gov.pay.ledger.transaction.resource;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
@@ -16,7 +18,9 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.time.ZonedDateTime.now;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.notNullValue;
@@ -117,7 +121,7 @@ public class TransactionResourceSearchIT {
                 .withDefaultCardDetails()
                 .withGatewayAccountId(gatewayAccountId)
                 .withDefaultTransactionDetails()
-                .withCreatedDate(ZonedDateTime.now())
+                .withCreatedDate(now())
                 .insert(rule.getJdbi());
 
 
@@ -127,7 +131,7 @@ public class TransactionResourceSearchIT {
                 .withDefaultCardDetails()
                 .withGatewayAccountId(gatewayAccountId)
                 .withDefaultTransactionDetails()
-                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .withCreatedDate(now().minusHours(1))
                 .insert(rule.getJdbi());
 
         TransactionFixture successTransaction = aTransactionFixture()
@@ -165,7 +169,7 @@ public class TransactionResourceSearchIT {
                 .withDefaultCardDetails()
                 .withGatewayAccountId(gatewayAccountId)
                 .withDefaultTransactionDetails()
-                .withCreatedDate(ZonedDateTime.now())
+                .withCreatedDate(now())
                 .insert(rule.getJdbi());
 
 
@@ -175,7 +179,7 @@ public class TransactionResourceSearchIT {
                 .withDefaultCardDetails()
                 .withGatewayAccountId(gatewayAccountId)
                 .withDefaultTransactionDetails()
-                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .withCreatedDate(now().minusHours(1))
                 .insert(rule.getJdbi());
 
         TransactionFixture successTransaction = aTransactionFixture()
@@ -212,7 +216,7 @@ public class TransactionResourceSearchIT {
                 .withDefaultCardDetails()
                 .withGatewayAccountId(gatewayAccountId)
                 .withDefaultTransactionDetails()
-                .withCreatedDate(ZonedDateTime.now())
+                .withCreatedDate(now())
                 .insert(rule.getJdbi());
 
         aTransactionFixture()
@@ -221,7 +225,7 @@ public class TransactionResourceSearchIT {
                 .withDefaultCardDetails()
                 .withGatewayAccountId(gatewayAccountId)
                 .withDefaultTransactionDetails()
-                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .withCreatedDate(now().minusHours(1))
                 .insert(rule.getJdbi());
 
         TransactionFixture submittedPayment = aTransactionFixture()
@@ -229,7 +233,7 @@ public class TransactionResourceSearchIT {
                 .withState(TransactionState.SUBMITTED)
                 .withDefaultCardDetails()
                 .withGatewayAccountId(gatewayAccountId)
-                .withCreatedDate(ZonedDateTime.now().minusHours(2))
+                .withCreatedDate(now().minusHours(2))
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
@@ -362,7 +366,7 @@ public class TransactionResourceSearchIT {
                 .withTransactionType("PAYMENT")
                 .withState(TransactionState.SUBMITTED)
                 .withGatewayAccountId(otherGatewayAccountId)
-                .withCreatedDate(ZonedDateTime.now().minusHours(1))
+                .withCreatedDate(now().minusHours(1))
                 .insert(rule.getJdbi());
 
         given().port(port)
@@ -430,7 +434,7 @@ public class TransactionResourceSearchIT {
         aPayoutFixture()
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withGatewayAccountId(gatewayAccountId)
-                .withPaidOutDate(ZonedDateTime.now())
+                .withPaidOutDate(now())
                 .build()
                 .insert(rule.getJdbi());
 
@@ -524,5 +528,46 @@ public class TransactionResourceSearchIT {
                 .body("_links.last_page.href", containsString("v1/transaction?account_id=" + gatewayAccountId + "&from_settled_date=2020-09-07&to_settled_date=2020-09-08&page=1&display_size=5"))
                 .body("_links.prev_page.href", is(nullValue()))
                 .body("_links.next_page.href", is(nullValue()));
+    }
+
+
+    @Test
+    public void shouldSearchTransactionsCorrectlyByMetadataValue() {
+        String gatewayAccountId = "account-id-" + nextLong();
+
+        TransactionEntity transaction1 = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(now().minusHours(1))
+                .withExternalMetadata(ImmutableMap.of("test-key-1", "value1", "test-key-2", "value2"))
+                .withDefaultTransactionDetails()
+                .insertTransactionAndTransactionMetadata(rule.getJdbi())
+                .toEntity();
+        TransactionEntity transaction2 = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(now())
+                .withExternalMetadata(ImmutableMap.of("test-key-n", "VALUE1"))
+                .withDefaultTransactionDetails()
+                .insertTransactionAndTransactionMetadata(rule.getJdbi()).toEntity();
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayAccountId(gatewayAccountId)
+                .insertTransactionAndTransactionMetadata(rule.getJdbi());
+        List<Transaction> transactionsToExclude = aPersistedTransactionList(gatewayAccountId, 15, rule.getJdbi(), true);
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&metadata_value=value1"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(2))
+                .body("results[0].transaction_id", is(transaction2.getExternalId()))
+                .body("results[1].transaction_id", is(transaction1.getExternalId()));
     }
 }
