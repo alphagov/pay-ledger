@@ -64,7 +64,7 @@ class PaymentEventProcessorTest {
         paymentEventProcessor.process(event);
 
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
-        verify(transactionMetadataService).upsertMetadataFor(event);
+        verify(transactionMetadataService).upsertMetadataFor(any(EventDigest.class));
         verify(refundEventProcessor).reprojectRefundTransaction(eq(refundTransaction1.getExternalId()), any(EventDigest.class));
         verify(refundEventProcessor).reprojectRefundTransaction(eq(refundTransaction2.getExternalId()), any(EventDigest.class));
     }
@@ -86,7 +86,7 @@ class PaymentEventProcessorTest {
 
         paymentEventProcessor.process(event);
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
-        verify(transactionMetadataService).upsertMetadataFor(event);
+        verify(transactionMetadataService).upsertMetadataFor(any(EventDigest.class));
         verify(transactionService, never()).getChildTransactions(any());
         verify(refundEventProcessor, never()).reprojectRefundTransaction(any(), any());
     }
@@ -108,7 +108,7 @@ class PaymentEventProcessorTest {
 
         paymentEventProcessor.process(event);
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
-        verify(transactionMetadataService).upsertMetadataFor(event);
+        verify(transactionMetadataService).upsertMetadataFor(any(EventDigest.class));
         verify(transactionService, never()).getChildTransactions(any());
         verify(refundEventProcessor, never()).reprojectRefundTransaction(any(), any());
     }

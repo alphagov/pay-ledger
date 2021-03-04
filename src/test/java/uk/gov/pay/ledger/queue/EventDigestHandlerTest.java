@@ -79,7 +79,7 @@ public class EventDigestHandlerTest {
         eventDigestHandler.processEvent(event);
 
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
-        verify(transactionMetadataService).upsertMetadataFor(event);
+        verify(transactionMetadataService).upsertMetadataFor(any(EventDigest.class));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class EventDigestHandlerTest {
         assertThrows(RuntimeException.class, () -> eventDigestHandler.processEvent(event));
 
         verify(transactionService, never()).upsertTransactionFor(any());
-        verify(transactionMetadataService, never()).upsertMetadataFor(any());
+        verify(transactionMetadataService, never()).upsertMetadataFor(any(EventDigest.class));
         verify(payoutService, never()).upsertPayoutFor(any());
 
         verify(mockAppender, times(1)).doAppend(loggingEventArgumentCaptor.capture());
