@@ -50,31 +50,6 @@ public class TransactionMetadataDaoIT {
     }
 
     @Test
-    public void shouldInsertTransactionMetadataForAGivenTransactionIdAndMetadataKey() {
-        transactionMetadataDao.insertIfNotExist(transactionFixture.getId(), key);
-
-        List<Map<String, Object>> transactionMetadata = dbHelper.getTransactionMetadata(transactionFixture.getId(), key);
-
-        assertThat(transactionMetadata.size(), is(1));
-        assertThat(transactionMetadata.get(0).get("transaction_id"), is(transactionFixture.getId()));
-        assertThat(transactionMetadata.get(0).get("metadata_key_id"), is(notNullValue()));
-    }
-
-    @Test
-    public void shouldNotInsertTransactionMetadataForTransactionAndMetadataKeyIfAlreadyExists() {
-        String duplicateKey = "key-1";
-
-        transactionMetadataDao.insertIfNotExist(transactionFixture.getId(), key);
-        transactionMetadataDao.insertIfNotExist(transactionFixture.getId(), duplicateKey);
-
-        List<Map<String, Object>> transactionMetadata = dbHelper.getTransactionMetadata(transactionFixture.getId(), key);
-
-        assertThat(transactionMetadata.size(), is(1));
-        assertThat(transactionMetadata.get(0).get("transaction_id"), is(transactionFixture.getId()));
-        assertThat(transactionMetadata.get(0).get("metadata_key_id"), is(notNullValue()));
-    }
-
-    @Test
     public void shouldReturnCorrectMetadataKeysForTransactionSearch() {
         String gatewayAccountId = randomAlphanumeric(15);
         String reference = randomAlphanumeric(15);
@@ -89,8 +64,8 @@ public class TransactionMetadataDaoIT {
         metadataKeyDao.insertIfNotExist("test-key-2");
         metadataKeyDao.insertIfNotExist("test-key-3");
 
-        transactionMetadataDao.insertIfNotExist(transaction1.getId(), "test-key-1");
-        transactionMetadataDao.insertIfNotExist(transaction2.getId(), "test-key-2");
+        transactionMetadataDao.upsert(transaction1.getId(), "test-key-1", "value-1");
+        transactionMetadataDao.upsert(transaction2.getId(), "test-key-2", "value-1");
 
         searchParams.setAccountIds(List.of(transaction1.getGatewayAccountId()));
         searchParams.setFromDate(ZonedDateTime.now().minusDays(10).toString());
@@ -125,15 +100,10 @@ public class TransactionMetadataDaoIT {
         metadataKeyDao.insertIfNotExist("test-key-3");
         metadataKeyDao.insertIfNotExist("test-key-n");
 
-        //todo: replace with transactionMetadataDao.insertIfNotExist() when this supports inserting 'value'
-        aTransactionMetadataFixture().withTransactionId(transaction1.getId())
-                .withMetadataKey("test-key-1").withValue("value1").insert(rule.getJdbi());
-        aTransactionMetadataFixture().withTransactionId(transaction1.getId())
-                .withMetadataKey("test-key-2").withValue("value3").insert(rule.getJdbi());
-        aTransactionMetadataFixture().withTransactionId(transaction2.getId())
-                .withMetadataKey("test-key-n").withValue("VALUE1").insert(rule.getJdbi());
-        aTransactionMetadataFixture().withTransactionId(transactionToBeExcluded.getId())
-                .withMetadataKey("test-key-3").withValue("value3").insert(rule.getJdbi());
+        transactionMetadataDao.upsert(transaction1.getId(), "test-key-1", "value1");
+        transactionMetadataDao.upsert(transaction1.getId(), "test-key-2", "value3");
+        transactionMetadataDao.upsert(transaction2.getId(), "test-key-n", "value1");
+        transactionMetadataDao.upsert(transactionToBeExcluded.getId(), "test-key-3", "value3");
 
         searchParams.setAccountIds(List.of(transaction1.getGatewayAccountId()));
         searchParams.setFromDate(ZonedDateTime.now().minusDays(10).toString());

@@ -59,16 +59,6 @@ public class TransactionMetadataDao {
         );
     }
 
-    public void insertIfNotExist(Long transactionId,
-                                 String key) {
-        jdbi.withHandle(handle ->
-                handle.createUpdate(INSERT_STRING)
-                        .bind("transactionId", transactionId)
-                        .bind("key", key)
-                        .execute()
-        );
-    }
-
     public List<String> findMetadataKeysForTransactions(TransactionSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
 

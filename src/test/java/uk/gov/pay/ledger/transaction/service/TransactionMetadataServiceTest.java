@@ -58,8 +58,8 @@ public class TransactionMetadataServiceTest {
 
         verify(mockMetadataKeyDao).insertIfNotExist("meta1");
         verify(mockMetadataKeyDao).insertIfNotExist("meta2");
-        verify(mockTransactionMetadataDao).insertIfNotExist(transaction.getId(), "meta1");
-        verify(mockTransactionMetadataDao).insertIfNotExist(transaction.getId(), "meta2");
+        verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta1", "data1");
+        verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta2", "data2");
     }
 
     @Test
@@ -79,6 +79,6 @@ public class TransactionMetadataServiceTest {
         service.upsertMetadataFor(paymentCreatedEvent);
 
         verify(mockMetadataKeyDao, never()).insertIfNotExist(anyString());
-        verify(mockTransactionMetadataDao, never()).insertIfNotExist(anyLong(), anyString());
+        verify(mockTransactionMetadataDao, never()).upsert(anyLong(), anyString(), anyString());
     }
 }

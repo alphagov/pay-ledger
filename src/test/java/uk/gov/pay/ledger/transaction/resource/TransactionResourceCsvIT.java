@@ -90,7 +90,7 @@ public class TransactionResourceCsvIT {
         metadataKeyDao.insertIfNotExist("test-key-1");
         metadataKeyDao.insertIfNotExist("test-key-2");
 
-        transactionMetadataDao.insertIfNotExist(transactionFixture.getId(), "test-key-1");
+        transactionMetadataDao.upsert(transactionFixture.getId(), "test-key-1", "value1");
 
         InputStream csvResponseStream = given().port(port)
                 .accept("text/csv")
@@ -279,7 +279,7 @@ public class TransactionResourceCsvIT {
                 .insert(rule.getJdbi());
 
         metadataKeyDao.insertIfNotExist(metadataKey);
-        transactionMetadataDao.insertIfNotExist(transactionFixture.getId(), metadataKey);
+        transactionMetadataDao.upsert(transactionFixture.getId(), metadataKey, "value1");
 
         InputStream csvResponseStream = given().port(port)
                 .accept("text/csv")
