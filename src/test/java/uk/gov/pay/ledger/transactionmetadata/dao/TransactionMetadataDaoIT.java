@@ -159,6 +159,42 @@ public class TransactionMetadataDaoIT {
         assertThat(transactionEntityList, hasItem("test-key-2"));
     }
 
+    @Test
+    public void shouldUpsertValueWhenExisting() {
+        String gatewayAccountId = randomAlphanumeric(15);
+        String reference = randomAlphanumeric(15);
+        TransactionEntity transaction = insertTransaction(gatewayAccountId, reference,
+                ImmutableMap.of("test-key-1", "value1"));
+        metadataKeyDao.insertIfNotExist("test-key-1");
+        aTransactionMetadataFixture().withTransactionId(transaction.getId())
+                .withMetadataKey("test-key-1").withValue("value1").insert(rule.getJdbi());
+
+        transactionMetadataDao.upsert(transaction.getId(), "test-key-1", "value3");
+
+        List<Map<String, Object>> transactionMetadata = dbHelper.getTransactionMetadata(transaction.getId(), "test-key-1");
+
+        assertThat(transactionMetadata.size(), is(1));
+        assertThat(transactionMetadata.get(0).get("transaction_id"), is(transaction.getId()));
+        assertThat(transactionMetadata.get(0).get("metadata_key_id"), is(notNullValue()));
+        assertThat(transactionMetadata.get(0).get("value"), is("value3"));
+    }
+
+    @Test
+    public void shouldInsertWhenNotExisting() {
+        String gatewayAccountId = randomAlphanumeric(15);
+        String reference = randomAlphanumeric(15);
+        TransactionEntity transaction = insertTransaction(gatewayAccountId, reference,
+                ImmutableMap.of("test-key-2", "value2"));
+
+        metadataKeyDao.insertIfNotExist("test-key-2");
+
+        transactionMetadataDao.upsert(transaction.getId(), "test-key-2", "value2");
+
+        List<Map<String, Object>> transactionMetadata = dbHelper.getTransactionMetadata(transaction.getId(), "test-key-2");
+
+        assertThat(transactionMetadata.get(0).get("value"), is("value2"));
+    }
+
     private TransactionEntity insertTransaction(String gatewayAccountId, String reference, Map<String, Object> externalMetadata) {
         return aTransactionFixture()
                 .withState(TransactionState.CREATED)
