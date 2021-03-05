@@ -91,14 +91,9 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     public QueuePaymentEventFixture withDefaultEventDataForEventType(String eventType) {
         switch (eventType) {
             case "PAYMENT_CREATED":
-                var externalMetadata = new JsonObject();
-                if (!metadata.isEmpty()) {
-                    metadata.forEach((key, value) ->
-                            externalMetadata.addProperty(key, String.valueOf(value)));
-                } else if (includeMetada) {
-                    externalMetadata.addProperty("key", "value");
+                if (metadata.isEmpty() && includeMetada) {
+                    metadata.put("key", "value");
                 }
-
                 eventData = gsonBuilder.create()
                         .toJson(ImmutableMap.builder()
                                 .put("amount", 1000)
@@ -111,7 +106,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("delayed_capture", false)
                                 .put("moto", false)
                                 .put("live", true)
-                                .put("external_metadata", externalMetadata)
+                                .put("external_metadata", metadata)
                                 .put("email", "j.doe@example.org")
                                 .put("cardholder_name", "J citizen")
                                 .put("address_line1", "12 Rouge Avenue")
@@ -151,7 +146,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 eventData = gsonBuilder.create().toJson(Map.of("capture_submitted_date", eventDate.toString()));
                 break;
             case "PAYMENT_NOTIFICATION_CREATED":
-                externalMetadata = new JsonObject();
+                var externalMetadata = new JsonObject();
                 externalMetadata.addProperty("telephone_number", "+447700900796");
                 externalMetadata.addProperty("processor_id", "processorId");
                 externalMetadata.addProperty("authorised_date", "2018-02-21T16:05:33Z");

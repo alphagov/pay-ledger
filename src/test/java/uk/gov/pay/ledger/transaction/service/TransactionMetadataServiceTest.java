@@ -50,7 +50,8 @@ public class TransactionMetadataServiceTest {
                 .withResourceType(ResourceType.PAYMENT)
                 .withSource(Source.CARD_API)
                 .withMetadata("meta1", "data1")
-                .withMetadata("meta2", "data2")
+                .withMetadata("meta2", 2)
+                .withMetadata("meta3", true)
                 .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
                 .toEntity();
 
@@ -59,7 +60,8 @@ public class TransactionMetadataServiceTest {
         verify(mockMetadataKeyDao).insertIfNotExist("meta1");
         verify(mockMetadataKeyDao).insertIfNotExist("meta2");
         verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta1", "data1");
-        verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta2", "data2");
+        verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta2", "2");
+        verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta3", "true");
     }
 
     @Test
