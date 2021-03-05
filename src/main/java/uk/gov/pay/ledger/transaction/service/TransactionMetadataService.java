@@ -48,7 +48,7 @@ public class TransactionMetadataService {
                     .ifPresent(transactionEntity -> {
                         eventDataNode.get("external_metadata").fields().forEachRemaining(metadata -> {
                             metadataKeyDao.insertIfNotExist(metadata.getKey());
-                            String value = metadata.getValue().textValue();
+                            String value = metadata.getValue().asText();
                             transactionMetadataDao
                                     .upsert(transactionEntity.getId(), metadata.getKey(), value);
                         });

@@ -28,19 +28,12 @@ public class TransactionMetadataDao {
             "          AND lower(tm.value) = lower(:metadata_value)" +
             "          :searchExtraFields)";
 
-    private static final String INSERT_STRING = "INSERT INTO transaction_metadata(transaction_id, metadata_key_id) " +
-            "SELECT :transactionId, (select id from metadata_key where key = :key) " +
-            "WHERE NOT EXISTS ( " +
-            "    SELECT 1 " +
-            "    FROM transaction_metadata " +
-            "    WHERE metadata_key_id in (select id from metadata_key where key = :key ) " +
-            "      and transaction_id = :transactionId)";
-
     private static final String UPSERT_STRING = "INSERT INTO transaction_metadata(transaction_id, metadata_key_id, value) " +
             "VALUES(:transactionId, (select id from metadata_key where key = :key ), :value) " +
-            "ON CONFLICT ON CONSTRAINT  transaction_id_and_metadata_key_id_key DO UPDATE SET "+
-            "value = EXCLUDED.value WHERE transaction_metadata.transaction_id = EXCLUDED.transaction_id AND " +
-            "transaction_metadata.metadata_key_id = EXCLUDED.metadata_key_id";
+            "ON CONFLICT ON CONSTRAINT transaction_id_and_metadata_key_id_key " +
+            "DO UPDATE SET value = EXCLUDED.value " +
+            "WHERE transaction_metadata.transaction_id = EXCLUDED.transaction_id " +
+            "AND transaction_metadata.metadata_key_id = EXCLUDED.metadata_key_id";
 
     private final Jdbi jdbi;
 
