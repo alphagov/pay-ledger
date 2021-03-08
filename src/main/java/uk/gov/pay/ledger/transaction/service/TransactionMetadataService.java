@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import jersey.repackaged.com.google.common.base.Stopwatch;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.Event;
@@ -13,7 +14,6 @@ import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transactionmetadata.dao.TransactionMetadataDao;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -47,7 +47,13 @@ public class TransactionMetadataService {
             transactionDao.findTransactionByExternalId(event.getResourceExternalId())
                     .ifPresent(transactionEntity -> {
                         eventDataNode.get("external_metadata").fields().forEachRemaining(metadata -> {
-                            metadataKeyDao.insertIfNotExist(metadata.getKey());
+                            try {
+                                metadataKeyDao.insertIfNotExist(metadata.getKey());
+                            } catch (UnableToExecuteStatementException ex) {
+                                LOGGER.info("Metadata key already exists",
+                                        kv("key", metadata.getKey()),
+                                        kv("exception", ex.getMessage()));
+                            }
                             String value = metadata.getValue().asText();
                             transactionMetadataDao
                                     .upsert(transactionEntity.getId(), metadata.getKey(), value);
