@@ -165,7 +165,7 @@ public abstract class ContractTest {
                 .withAmount(100L)
                 .withExternalMetadata(metadata)
                 .withDefaultTransactionDetails()
-                .insert(app.getJdbi());
+                .insertTransactionAndTransactionMetadata(app.getJdbi());
     }
 
     @State("a transaction with a gateway transaction id exists")
