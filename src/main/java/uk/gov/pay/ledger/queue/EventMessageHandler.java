@@ -14,6 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
+import static uk.gov.pay.ledger.event.model.response.CreateEventResponse.ignoredEventResponse;
 
 public class EventMessageHandler {
 
@@ -54,19 +55,29 @@ public class EventMessageHandler {
 
     private void processSingleMessage(EventMessage message) throws QueueException {
         Event event = message.getEvent();
-        CreateEventResponse response = eventService.createIfDoesNotExist(event);
+
+        CreateEventResponse response;
+
+        // we don't persist events created by internal admins for re-projecting domain objects so as to not pollute
+        // the event feed.
+        if (event.isReprojectDomainObject()) {
+            response = ignoredEventResponse();
+        } else {
+            response = eventService.createIfDoesNotExist(event);
+        }
 
         final long ingestLag = event.getEventDate().until(ZonedDateTime.now(), ChronoUnit.MICROS);
 
-        if(response.isSuccessful()) {
+        if (response.isSuccessful()) {
             eventDigestHandler.processEvent(event);
             eventQueue.markMessageAsProcessed(message);
             metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
             LOGGER.info("The event message has been processed.",
                     kv("id", message.getId()),
-                    kv("resource_external_id", message.getEvent().getResourceExternalId()),
+                    kv("resource_external_id", event.getResourceExternalId()),
                     kv("state", response.getState()),
-                    kv("ingest_lag_micro_seconds", ingestLag));
+                    kv("ingest_lag_micro_seconds", ingestLag),
+                    kv("reproject_domain_object_event", event.isReprojectDomainObject()));
         } else {
             eventQueue.scheduleMessageForRetry(message);
             LOGGER.warn("The event message has been scheduled for retry.",

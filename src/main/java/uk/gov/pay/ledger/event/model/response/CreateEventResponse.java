@@ -24,6 +24,15 @@ public class CreateEventResponse {
         this.state = CreateEventState.ERROR;
     }
 
+    private CreateEventResponse(CreateEventState state) {
+        this.isSuccessful = true;
+        this.state = state;
+    }
+
+    public static CreateEventResponse ignoredEventResponse() {
+        return new CreateEventResponse(CreateEventState.IGNORED);
+    }
+
     public boolean isSuccessful() {
         return isSuccessful;
     }

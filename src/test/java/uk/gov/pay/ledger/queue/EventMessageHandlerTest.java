@@ -13,12 +13,13 @@ import uk.gov.pay.ledger.event.service.EventService;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 @ExtendWith(MockitoExtension.class)
-public class EventMessageHandlerTest {
+class EventMessageHandlerTest {
 
     @Mock
     private EventQueue eventQueue;
@@ -35,29 +36,43 @@ public class EventMessageHandlerTest {
     @Mock
     private EventMessage eventMessage;
 
-    private Event event = aQueuePaymentEventFixture().toEntity();
-
     @InjectMocks
     private EventMessageHandler eventMessageHandler;
 
     @BeforeEach
-    public void setUp() throws QueueException {
+    void setUp() throws QueueException {
         when(eventQueue.retrieveEvents()).thenReturn(List.of(eventMessage));
-        when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
-        when(eventMessage.getEvent()).thenReturn(event);
     }
 
     @Test
-    public void shouldMarkMessageAsProcessed_WhenEventIsProcessedSuccessfully() throws QueueException {
+    void shouldMarkMessageAsProcessed_WhenEventIsProcessedSuccessfully() throws QueueException {
+        Event event = aQueuePaymentEventFixture().toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+        when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
         when(createEventResponse.isSuccessful()).thenReturn(true);
 
         eventMessageHandler.handle();
 
+        verify(eventDigestHandler).processEvent(event);
         verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
     }
 
     @Test
-    public void shouldScheduleMessageForRetry_WhenEventIsNotProcessedSuccessfully() throws QueueException {
+    void shouldMarkMessageAsProcessedAndNotInsert_WhenReprojectDomainObjectEvent() throws QueueException {
+        Event event = aQueuePaymentEventFixture().withIsReprojectDomainObject(true).toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+        
+        eventMessageHandler.handle();
+        verify(eventDigestHandler).processEvent(event);
+        verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
+        verify(eventService, never()).createIfDoesNotExist(any());
+    }
+
+    @Test
+    void shouldScheduleMessageForRetry_WhenEventIsNotProcessedSuccessfully() throws QueueException {
+        Event event = aQueuePaymentEventFixture().toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+        when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
         when(createEventResponse.isSuccessful()).thenReturn(false);
 
         eventMessageHandler.handle();

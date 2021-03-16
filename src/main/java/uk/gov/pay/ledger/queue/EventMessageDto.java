@@ -31,6 +31,9 @@ public class EventMessageDto {
     @JsonProperty("event_details")
     private JsonNode eventData;
 
+    @JsonProperty("reproject_domain_object")
+    private boolean reprojectDomainObject;
+
     public ResourceType getResourceType() {
         return resourceType;
     }
@@ -53,5 +56,9 @@ public class EventMessageDto {
 
     public String getParentExternalId() {
         return parentExternalId;
+    }
+
+    public boolean isReprojectDomainObject() {
+        return reprojectDomainObject;
     }
 }

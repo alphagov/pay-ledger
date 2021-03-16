@@ -29,6 +29,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     private Source source;
     private Map<String, Object> metadata = new HashMap<>();
     private boolean includeMetada = true;
+    private boolean reprojectDomainObject;
     private GsonBuilder gsonBuilder = new GsonBuilder();
 
     private QueuePaymentEventFixture() {
@@ -85,6 +86,11 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
 
     public QueuePaymentEventFixture includeMetadata(boolean includeMetada) {
         this.includeMetada = includeMetada;
+        return this;
+    }
+
+    public QueuePaymentEventFixture withIsReprojectDomainObject(boolean reprojectDomainObject) {
+        this.reprojectDomainObject = reprojectDomainObject;
         return this;
     }
 
@@ -187,7 +193,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
 
     @Override
     public Event toEntity() {
-        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData);
+        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
     }
 
     public String getSqsMessageId() {
