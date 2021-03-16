@@ -42,7 +42,7 @@ import static uk.gov.pay.ledger.event.model.ResourceType.REFUND;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 
 @ExtendWith(MockitoExtension.class)
-public class EventDigestHandlerTest {
+class EventDigestHandlerTest {
 
     @Mock
     private EventService eventService;
@@ -62,7 +62,7 @@ public class EventDigestHandlerTest {
     private EventDigest eventDigest;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         transactionEntityFactory = new TransactionEntityFactory(new ObjectMapper());
         eventDigestHandler =  new EventDigestHandler(eventService, transactionService,
                 transactionMetadataService, payoutService, transactionEntityFactory);
@@ -72,7 +72,7 @@ public class EventDigestHandlerTest {
     }
 
     @Test
-    public void shouldUpsertTransactionIfResourceTypeIsPayment() {
+    void shouldUpsertTransactionIfResourceTypeIsPayment() {
         Event event = anEventFixture().withResourceType(PAYMENT).toEntity();
         when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(anEventFixture().toEntity()));
 
@@ -83,7 +83,22 @@ public class EventDigestHandlerTest {
     }
 
     @Test
-    public void shouldUpsertTransactionIfResourceTypeIsRefund() {
+    void shouldReprojectTransactionMetadataIfReprojectEvent() {
+        Event event = anEventFixture()
+                .withResourceType(PAYMENT)
+                .withIsReprojectDomainObject(true)
+                .toEntity();
+
+        when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(anEventFixture().toEntity()));
+        eventDigestHandler.processEvent(event);
+
+        verify(transactionService).upsertTransactionFor(any(EventDigest.class));
+        verify(transactionMetadataService).reprojectFromEventDigest(any(EventDigest.class));
+        verify(transactionMetadataService, never()).upsertMetadataFor(event);
+    }
+
+    @Test
+    void shouldUpsertTransactionIfResourceTypeIsRefund() {
         Event event = anEventFixture().withResourceType(REFUND).toEntity();
         eventDigestHandler.processEvent(event);
 
@@ -92,7 +107,7 @@ public class EventDigestHandlerTest {
     }
 
     @Test
-    public void shouldUpsertPayoutIfResourceTypeIsPayout() {
+    void shouldUpsertPayoutIfResourceTypeIsPayout() {
         Event event = anEventFixture().withResourceType(PAYOUT).toEntity();
         eventDigestHandler.processEvent(event);
 
@@ -101,7 +116,7 @@ public class EventDigestHandlerTest {
     }
 
     @Test
-    public void shouldLogErrorAndThrowExceptionIfResourceTypeIsNotSupported() {
+    void shouldLogErrorAndThrowExceptionIfResourceTypeIsNotSupported() {
         Logger root = (Logger) LoggerFactory.getLogger(EventDigestHandler.class);
         root.addAppender(mockAppender);
 
@@ -122,7 +137,7 @@ public class EventDigestHandlerTest {
     }
 
     @Test
-    public void shouldAddPaymentDetailsForRefundIfParentExternalIdIsSet() {
+    void shouldAddPaymentDetailsForRefundIfParentExternalIdIsSet() {
         String parentExternalId = "parent-external-id";
         EventDigest refundEventDigest = EventDigest.fromEventList(List.of(anEventFixture().withParentResourceExternalId(parentExternalId).toEntity()));
         EventDigest paymentEventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));

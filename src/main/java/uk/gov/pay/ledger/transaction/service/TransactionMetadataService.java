@@ -9,12 +9,15 @@ import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transactionmetadata.dao.TransactionMetadataDao;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
@@ -62,7 +65,24 @@ public class TransactionMetadataService {
         }
     }
 
-    public List<String> findMetadataKeysForTransactions(TransactionSearchParams searchParams) {
+    public void reprojectFromEventDigest(EventDigest eventDigest) {
+        var eventData = eventDigest.getEventPayload();
+
+        transactionDao.findTransactionByExternalId(eventDigest.getResourceExternalId())
+                .ifPresent(transactionEntity -> {
+                    Optional.ofNullable(eventData.get("external_metadata"))
+                            .ifPresent(metadataObj -> {
+                                @SuppressWarnings("unchecked")
+                                var metadata = (Map<String, Object>) metadataObj;
+                                metadata.forEach((key, value) -> {
+                                    metadataKeyDao.insertIfNotExist(key);
+                                    transactionMetadataDao.upsert(transactionEntity.getId(), key, value.toString());
+                                });
+                            });
+                });
+    }
+
+    List<String> findMetadataKeysForTransactions(TransactionSearchParams searchParams) {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
         List<String> metadataKeysForTransactions = transactionMetadataDao.findMetadataKeysForTransactions(searchParams);

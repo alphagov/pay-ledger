@@ -58,8 +58,9 @@ public class EventMessageHandler {
 
         CreateEventResponse response;
 
-        // we don't persist events created by internal admins for re-projecting domain objects so as to not pollute
-        // the event feed.
+        // We don't persist events created by internal admins for re-projecting domain objects so as to not pollute
+        // the event feed. This also means that any event data on the event will be ignored when processing, and only
+        // previous events will be used when re-projecting the domain object.
         if (event.isReprojectDomainObject()) {
             response = ignoredEventResponse();
         } else {
