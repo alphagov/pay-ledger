@@ -22,11 +22,20 @@ public class Event {
     private ZonedDateTime eventDate;
     private String eventType;
     private String eventData;
+    private boolean reprojectDomainObject;
 
-    public Event() { }
+    public Event() {
+    }
 
-    public Event(Long id, String sqsMessageId, ResourceType resourceType, String resourceExternalId,
-                 String parentResourceExternalId, ZonedDateTime eventDate, String eventType, String eventData) {
+    public Event(Long id,
+                 String sqsMessageId,
+                 ResourceType resourceType,
+                 String resourceExternalId,
+                 String parentResourceExternalId,
+                 ZonedDateTime eventDate,
+                 String eventType,
+                 String eventData,
+                 boolean reprojectDomainObject) {
         this.id = id;
         this.sqsMessageId = sqsMessageId;
         this.resourceType = resourceType;
@@ -35,11 +44,19 @@ public class Event {
         this.eventDate = eventDate;
         this.eventType = eventType;
         this.eventData = eventData;
+        this.reprojectDomainObject = reprojectDomainObject;
     }
 
-    public Event(String queueMessageId, ResourceType resourceType, String resourceExternalId, String parentResourceExternalId, ZonedDateTime eventDate,
-                 String eventType, String eventData) {
-        this(null, queueMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData);
+    public Event(String queueMessageId,
+                 ResourceType resourceType,
+                 String resourceExternalId,
+                 String parentResourceExternalId,
+                 ZonedDateTime eventDate,
+                 String eventType,
+                 String eventData,
+                 boolean reprojectDomainObject) {
+        this(null, queueMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType,
+                eventData, reprojectDomainObject);
     }
 
     public Long getId() {
@@ -72,6 +89,10 @@ public class Event {
 
     public String getEventData() {
         return eventData;
+    }
+
+    public boolean isReprojectDomainObject() {
+        return reprojectDomainObject;
     }
 
     @Override

@@ -19,12 +19,13 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class EventQueueTest {
+class EventQueueTest {
 
     @Mock
     private LedgerConfig ledgerConfig;
@@ -35,13 +36,14 @@ public class EventQueueTest {
     private EventQueue eventQueue;
 
     @BeforeEach
-    public void setUp() throws QueueException {
+    void setUp() throws QueueException {
         String validJsonMessage = "{" +
                 "\"id\": \"my-id\"," +
                 "\"timestamp\": \"2018-03-12T16:25:01.123456Z\"," +
                 "\"resource_external_id\": \"3uwuyr38rry\"," +
                 "\"event_type\":\"PAYMENT_CREATED\"," +
                 "\"resource_type\": \"payment\"," +
+                "\"reproject_domain_object\": \"true\"," +
                 "\"event_details\": {" +
                 "\"example_event_details_field\": \"and its value\"" +
                 "}" +
@@ -63,7 +65,7 @@ public class EventQueueTest {
     }
 
     @Test
-    public void retrieveEvents() throws QueueException {
+    void retrieveEvents() throws QueueException {
         List<EventMessage> eventsList = eventQueue.retrieveEvents();
 
         assertNotNull(eventsList);
@@ -73,5 +75,6 @@ public class EventQueueTest {
         assertEquals("PAYMENT_CREATED", eventsList.get(0).getEvent().getEventType());
         assertEquals(ResourceType.PAYMENT, eventsList.get(0).getEvent().getResourceType());
         assertEquals("{\"example_event_details_field\":\"and its value\"}", eventsList.get(0).getEvent().getEventData());
+        assertTrue(eventsList.get(0).getEvent().isReprojectDomainObject());
     }
 }

@@ -86,7 +86,7 @@ public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFix
 
     @Override
     public Event toEntity() {
-        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, EMPTY, eventDate, eventType, eventData);
+        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, EMPTY, eventDate, eventType, eventData, false);
     }
 
     @Override

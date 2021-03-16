@@ -31,7 +31,8 @@ public class EventMessage {
                 eventDto.getParentExternalId(),
                 eventDto.getEventDate(),
                 eventDto.getEventType(),
-                eventDto.getEventData()
+                eventDto.getEventData(),
+                eventDto.isReprojectDomainObject()
         );
     }
 

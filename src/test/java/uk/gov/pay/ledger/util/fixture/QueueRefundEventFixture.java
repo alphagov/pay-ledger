@@ -101,7 +101,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
 
     @Override
     public Event toEntity() {
-        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData);
+        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, false);
     }
 
     public String getSqsMessageId() {

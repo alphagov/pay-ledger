@@ -19,6 +19,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
     private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
+    private boolean reprojectDomainObject;
 
     private EventFixture() {
     }
@@ -67,6 +68,11 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         return this;
     }
 
+    public EventFixture withIsReprojectDomainObject(boolean reprojectDomainObject) {
+        this.reprojectDomainObject = reprojectDomainObject;
+        return this;
+    }
+
     @Override
     public EventFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -98,7 +104,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
 
     @Override
     public Event toEntity() {
-        return new Event(id, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData);
+        return new Event(id, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
     }
 
     public Long getId() {
