@@ -37,7 +37,12 @@ public class PaymentEventProcessor extends EventProcessor {
         EventDigest paymentEventDigest = EventDigest.fromEventList(events);
 
         transactionService.upsertTransactionFor(paymentEventDigest);
-        transactionMetadataService.upsertMetadataFor(event);
+
+        if (event.isReprojectDomainObject()) {
+            transactionMetadataService.reprojectFromEventDigest(paymentEventDigest);
+        } else {
+            transactionMetadataService.upsertMetadataFor(event);
+        }
 
         /**
          * If the payment has associated refunds, we want to update the payment details that we also store on refunds to
