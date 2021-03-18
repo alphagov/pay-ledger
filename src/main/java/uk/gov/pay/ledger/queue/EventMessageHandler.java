@@ -1,6 +1,8 @@
 package uk.gov.pay.ledger.queue;
 
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import io.sentry.Sentry;
 import org.slf4j.Logger;
@@ -11,9 +13,11 @@ import uk.gov.pay.ledger.event.service.EventService;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.pay.ledger.event.model.response.CreateEventResponse.ignoredEventResponse;
 
 public class EventMessageHandler {
@@ -44,10 +48,10 @@ public class EventMessageHandler {
                 processSingleMessage(message);
             } catch (Exception e) {
                 Sentry.capture(e);
-                LOGGER.warn("Error during handling the event message. [id={}] [queueMessageId={}] [errorMessage={}]",
-                        message.getId(),
-                        message.getQueueMessageId(),
-                        e.getMessage()
+                LOGGER.warn("Error during handling the event message",
+                        kv("id", message.getQueueMessageId()),
+                        kv("resource_external_id", message.getEvent().getResourceExternalId() ),
+                        kv("error", e.getMessage())
                 );
             }
         }
@@ -74,7 +78,7 @@ public class EventMessageHandler {
             eventQueue.markMessageAsProcessed(message);
             metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
             LOGGER.info("The event message has been processed.",
-                    kv("id", message.getId()),
+                    kv("id", message.getQueueMessageId()),
                     kv("resource_external_id", event.getResourceExternalId()),
                     kv("state", response.getState()),
                     kv("ingest_lag_micro_seconds", ingestLag),
@@ -82,7 +86,7 @@ public class EventMessageHandler {
         } else {
             eventQueue.scheduleMessageForRetry(message);
             LOGGER.warn("The event message has been scheduled for retry.",
-                    kv("id", message.getId()),
+                    kv("id", message.getQueueMessageId()),
                     kv("resource_external_id", message.getEvent().getResourceExternalId()),
                     kv("state", response.getState()),
                     kv("error", response.getErrorMessage()));
