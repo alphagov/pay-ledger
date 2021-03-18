@@ -79,6 +79,5 @@ public class EventQueueIT {
 
         List<EventMessage> result = eventQueue.retrieveEvents();
         assertFalse(result.isEmpty());
-        assertThat(result.get(0).getId(), is(event.getResourceExternalId()));
     }
 }
