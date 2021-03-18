@@ -15,10 +15,6 @@ public class EventMessage {
         return new EventMessage(eventDto, queueMessage);
     }
 
-    public String getId() {
-        return eventDto.getExternalId();
-    }
-
     public String getQueueMessageId() {
         return queueMessage.getMessageId();
     }
