@@ -11,6 +11,7 @@ import uk.gov.pay.ledger.event.service.EventService;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
@@ -73,12 +74,18 @@ public class EventMessageHandler {
             eventDigestHandler.processEvent(event);
             eventQueue.markMessageAsProcessed(message);
             metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
-            LOGGER.info("The event message has been processed.",
+            var loggingArgs = new ArrayList<>(List.of(
                     kv("id", message.getId()),
                     kv("resource_external_id", event.getResourceExternalId()),
                     kv("state", response.getState()),
-                    kv("ingest_lag_micro_seconds", ingestLag),
-                    kv("reproject_domain_object_event", event.isReprojectDomainObject()));
+                    kv("ingest_lag_micro_seconds", ingestLag)));
+
+            if(event.isReprojectDomainObject()) {
+                loggingArgs.add(kv("reproject_domain_object_event", event.isReprojectDomainObject()));
+                loggingArgs.add(kv("event_type", event.getEventType()));
+            }
+
+            LOGGER.info("The event message has been processed.", loggingArgs.toArray());
         } else {
             eventQueue.scheduleMessageForRetry(message);
             LOGGER.warn("The event message has been scheduled for retry.",
