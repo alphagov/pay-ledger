@@ -77,12 +77,9 @@ public class EventMessageHandler {
             eventDigestHandler.processEvent(event);
             eventQueue.markMessageAsProcessed(message);
             metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
-            LOGGER.info("The event message has been processed.",
-                    kv("id", message.getQueueMessageId()),
-                    kv("resource_external_id", event.getResourceExternalId()),
-                    kv("state", response.getState()),
-                    kv("ingest_lag_micro_seconds", ingestLag),
-                    kv("reproject_domain_object_event", event.isReprojectDomainObject()));
+
+            Object[] structuredLoggingArguments = getStructuredLoggingArgs(message, event, response, ingestLag);
+            LOGGER.info("The event message has been processed.", structuredLoggingArguments);
         } else {
             eventQueue.scheduleMessageForRetry(message);
             LOGGER.warn("The event message has been scheduled for retry.",
@@ -91,5 +88,28 @@ public class EventMessageHandler {
                     kv("state", response.getState()),
                     kv("error", response.getErrorMessage()));
         }
+    }
+
+    private Object[] getStructuredLoggingArgs(EventMessage message, Event event, CreateEventResponse response, long ingestLag) throws QueueException {
+        var args = new ArrayList<>(List.of(
+                kv("id", message.getQueueMessageId()),
+                kv("resource_external_id", event.getResourceExternalId()),
+                kv("state", response.getState()),
+                kv("ingest_lag_micro_seconds", ingestLag)
+        ));
+        if (event.isReprojectDomainObject()) {
+            args.add(kv("reproject_domain_object_event", true));
+        }
+        if (isNotBlank(event.getEventData())) {
+            try {
+                var eventDataNode = new ObjectMapper().readTree(event.getEventData());
+                if (eventDataNode.has("reason")) {
+                    args.add(kv("reason", eventDataNode.get("reason").textValue()));
+                }
+            } catch (JsonProcessingException e) {
+                throw new QueueException("Unable to parse incoming event payload", e);
+            }
+        }
+        return args.toArray();
     }
 }
