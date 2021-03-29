@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static uk.gov.pay.commons.validation.DateTimeUtils.fromLocalDateOnlyString;
+import static uk.gov.service.payments.commons.validation.DateTimeUtils.fromLocalDateOnlyString;
 
 public class TransactionSearchParams extends SearchParams {
 

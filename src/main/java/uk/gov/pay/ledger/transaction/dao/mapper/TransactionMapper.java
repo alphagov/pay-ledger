@@ -2,7 +2,7 @@ package uk.gov.pay.ledger.transaction.dao.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.commons.model.Source;
+import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 

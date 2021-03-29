@@ -5,8 +5,8 @@ import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-import uk.gov.pay.commons.utils.startup.ApplicationStartupDependentResourceChecker;
-import uk.gov.pay.commons.utils.startup.DatabaseStartupResource;
+import uk.gov.service.payments.commons.utils.startup.ApplicationStartupDependentResourceChecker;
+import uk.gov.service.payments.commons.utils.startup.DatabaseStartupResource;
 import uk.gov.pay.ledger.app.LedgerConfig;
 
 public class DependentResourceWaitCommand extends ConfiguredCommand<LedgerConfig> {

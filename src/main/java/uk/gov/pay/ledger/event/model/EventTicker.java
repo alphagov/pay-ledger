@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import uk.gov.pay.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
+import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;

@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.transaction.dao;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import uk.gov.pay.commons.model.Source;
+import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;

@@ -17,7 +17,7 @@ import static io.dropwizard.testing.ConfigOverride.config;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
-import static uk.gov.pay.commons.model.Source.CARD_API;
+import static uk.gov.service.payments.commons.model.Source.CARD_API;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 @ExtendWith(DropwizardExtensionsSupport.class)

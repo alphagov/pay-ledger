@@ -9,7 +9,7 @@ import java.util.List;
 
 import static uk.gov.pay.ledger.filters.LoggingMDCRequestFilter.PARENT_TRANSACTION_EXTERNAL_ID;
 import static uk.gov.pay.ledger.filters.LoggingMDCRequestFilter.TRANSACTION_EXTERNAL_ID;
-import static uk.gov.pay.logging.LoggingKeys.LEDGER_EVENT_ID;
+import static uk.gov.service.payments.logging.LoggingKeys.LEDGER_EVENT_ID;
 
 public class LoggingMDCResponseFilter implements ContainerResponseFilter {
 

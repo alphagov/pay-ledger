@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.payout.model;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.payout.state.PayoutState;
 

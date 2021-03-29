@@ -25,9 +25,9 @@ import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
 import uk.gov.pay.ledger.report.resource.PerformanceReportResource;
 import uk.gov.pay.ledger.report.resource.ReportResource;
 import uk.gov.pay.ledger.transaction.resource.TransactionResource;
-import uk.gov.pay.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
-import uk.gov.pay.logging.LoggingFilter;
-import uk.gov.pay.logging.LogstashConsoleAppenderFactory;
+import uk.gov.service.payments.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
+import uk.gov.service.payments.logging.LoggingFilter;
+import uk.gov.service.payments.logging.LogstashConsoleAppenderFactory;
 
 import static java.util.EnumSet.of;
 import static javax.servlet.DispatcherType.REQUEST;

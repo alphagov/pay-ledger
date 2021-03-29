@@ -6,7 +6,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import java.util.Optional;
 
-import static uk.gov.pay.logging.LoggingKeys.LEDGER_EVENT_ID;
+import static uk.gov.service.payments.logging.LoggingKeys.LEDGER_EVENT_ID;
 
 public class LoggingMDCRequestFilter implements ContainerRequestFilter {
 

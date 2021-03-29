@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.pay.commons.model.Source;
+import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
 import java.io.IOException;
