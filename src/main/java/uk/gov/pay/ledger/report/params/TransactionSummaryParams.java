@@ -1,6 +1,6 @@
 package uk.gov.pay.ledger.report.params;
 
-import uk.gov.pay.commons.validation.ValidDate;
+import uk.gov.service.payments.commons.validation.ValidDate;
 
 import javax.ws.rs.QueryParam;
 import java.util.Objects;

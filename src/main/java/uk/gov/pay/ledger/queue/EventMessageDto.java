@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import uk.gov.pay.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
+import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
 import java.time.ZonedDateTime;

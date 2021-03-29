@@ -9,7 +9,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jetbrains.annotations.NotNull;
-import uk.gov.pay.commons.model.Source;
+import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;

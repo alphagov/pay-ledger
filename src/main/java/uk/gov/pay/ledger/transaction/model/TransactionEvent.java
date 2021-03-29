@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.SalientEventType;

@@ -14,7 +14,7 @@
         <jackson.version>2.12.2</jackson.version>
         <testcontainers.version>1.15.2</testcontainers.version>
         <postgresql.version>42.2.19</postgresql.version>
-        <pay-java-commons.version>1.0.20210310094438</pay-java-commons.version>
+        <pay-java-commons.version>1.0.20210326162042</pay-java-commons.version>
         <junit5.version>5.7.1</junit5.version>
         <surefire.version>3.0.0-M5</surefire.version>
         <guice.version>5.0.1</guice.version>
@@ -25,17 +25,6 @@
         <PACT_CONSUMER_VERSION/>
         <PACT_CONSUMER_TAG/>
     </properties>
-
-    <repositories>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-govuk-pay-pay-java-commons</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/govuk-pay/pay-java-commons</url>
-        </repository>
-    </repositories>
 
     <parent>
         <groupId>io.dropwizard</groupId>
@@ -95,12 +84,12 @@
             <version>${postgresql.version}</version>
         </dependency>
         <dependency>
-            <groupId>uk.gov.pay</groupId>
+            <groupId>uk.gov.service.payments</groupId>
             <artifactId>model</artifactId>
             <version>${pay-java-commons.version}</version>
         </dependency>
         <dependency>
-            <groupId>uk.gov.pay</groupId>
+            <groupId>uk.gov.service.payments</groupId>
             <artifactId>utils</artifactId>
             <version>${pay-java-commons.version}</version>
             <exclusions>
@@ -111,12 +100,12 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>uk.gov.pay</groupId>
+            <groupId>uk.gov.service.payments</groupId>
             <artifactId>validation</artifactId>
             <version>${pay-java-commons.version}</version>
         </dependency>
         <dependency>
-            <groupId>uk.gov.pay</groupId>
+            <groupId>uk.gov.service.payments</groupId>
             <artifactId>logging</artifactId>
             <version>${pay-java-commons.version}</version>
         </dependency>
@@ -239,7 +228,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.pay</groupId>
+            <groupId>uk.gov.service.payments</groupId>
             <artifactId>testing</artifactId>
             <version>${pay-java-commons.version}</version>
             <scope>test</scope>

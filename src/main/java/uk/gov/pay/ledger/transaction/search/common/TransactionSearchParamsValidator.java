@@ -1,6 +1,6 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
-import uk.gov.pay.commons.validation.DateTimeUtils;
+import uk.gov.service.payments.commons.validation.DateTimeUtils;
 import uk.gov.pay.ledger.exception.UnparsableDateException;
 import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;

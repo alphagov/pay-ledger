@@ -7,7 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import uk.gov.pay.commons.model.Source;
+import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static uk.gov.pay.commons.model.Source.CARD_API;
+import static uk.gov.service.payments.commons.model.Source.CARD_API;
 
 public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventFixture, Event> {
     private String sqsMessageId;
