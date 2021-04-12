@@ -64,7 +64,7 @@ public class PerformanceReportResourceIT {
                 .get("/v1/report/performance-report")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON).log().body()
+                .contentType(JSON)
                 .body("total_volume", is(3))
                 .body("total_amount", is(3000))
                 .body("average_amount", is(1000.0f));
@@ -115,7 +115,7 @@ public class PerformanceReportResourceIT {
                 .get("/v1/report/performance-report")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON).log().body()
+                .contentType(JSON)
                 .body("total_volume", is(3))
                 .body("total_amount", is(3000))
                 .body("average_amount", is(1000.0f));
@@ -161,7 +161,7 @@ public class PerformanceReportResourceIT {
                 .get("/v1/report/gateway-performance-report")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON).log().body()
+                .contentType(JSON)
                 .body("[0].gateway_account_id", is(1))
                 .body("[0].total_volume", is(1))
                 .body("[0].total_amount", is(1000))

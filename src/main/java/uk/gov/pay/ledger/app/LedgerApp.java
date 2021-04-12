@@ -24,6 +24,7 @@ import uk.gov.pay.ledger.payout.resource.PayoutResource;
 import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
 import uk.gov.pay.ledger.report.resource.PerformanceReportResource;
 import uk.gov.pay.ledger.report.resource.ReportResource;
+import uk.gov.pay.ledger.task.resource.TransactionSummaryResource;
 import uk.gov.pay.ledger.transaction.resource.TransactionResource;
 import uk.gov.service.payments.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
 import uk.gov.service.payments.logging.LoggingFilter;
@@ -68,6 +69,7 @@ public class LedgerApp extends Application<LedgerConfig> {
         environment.jersey().register(injector.getInstance(EventResource.class));
         environment.jersey().register(injector.getInstance(TransactionResource.class));
         environment.jersey().register(injector.getInstance(ReportResource.class));
+        environment.jersey().register(injector.getInstance(TransactionSummaryResource.class));
         environment.jersey().register(injector.getInstance(PerformanceReportResource.class));
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
 

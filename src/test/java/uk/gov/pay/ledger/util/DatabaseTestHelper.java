@@ -34,7 +34,9 @@ public class DatabaseTestHelper {
     public void truncateAllData() {
         jdbi.withHandle(h -> h.createScript(
                 "TRUNCATE TABLE event CASCADE; " +
-                        "TRUNCATE TABLE transaction CASCADE"
+                     "TRUNCATE TABLE transaction CASCADE; " +
+                     "TRUNCATE TABLE transaction_summary;" +
+                     "TRUNCATE TABLE transaction_summary_refresh_status;"
         ).execute());
     }
 
