@@ -1,0 +1,1166 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "description" : "Ledger API",
+    "title" : "Ledger API",
+    "version" : "v1.0.0"
+  },
+  "servers" : [ {
+    "url" : "http://ledger_url"
+  } ],
+  "paths" : {
+    "/v1/event/ticker" : {
+      "get" : {
+        "operationId" : "eventTickerList",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from_date",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to_date",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/EventTicker"
+                  }
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/event/{eventId}" : {
+      "get" : {
+        "operationId" : "getEvent",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "eventId",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Event"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/payout" : {
+      "get" : {
+        "operationId" : "search",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "state",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "display_size",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "override_account_id_restriction",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "gateway_account_id",
+          "schema" : {
+            "$ref" : "#/components/schemas/CommaDelimitedSetParameter"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PayoutSearchResponse"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/report/gateway-performance-report" : {
+      "get" : {
+        "operationId" : "getGatewayMonthlyPerformanceReport",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to_date",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GatewayAccountMonthlyPerformanceReportEntity"
+                  }
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/report/payments_by_state" : {
+      "get" : {
+        "operationId" : "getPaymentCountsByState",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "account_id",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "include_moto_statistics",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "from_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "override_account_id_restriction",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/report/performance-report" : {
+      "get" : {
+        "operationId" : "getPerformanceReport",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "state",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PerformanceReportEntity"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/report/transactions-by-hour" : {
+      "get" : {
+        "operationId" : "getTransactionsByHour",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to_date",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TimeseriesReportSlice"
+                  }
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/report/transactions-summary" : {
+      "get" : {
+        "operationId" : "getTransactionSummaryResult",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "account_id",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "include_moto_statistics",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "from_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "override_account_id_restriction",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "override_from_date_validation",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TransactionSummaryResult"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/transaction" : {
+      "get" : {
+        "operationId" : "streamCsv",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "status_version",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 2
+          }
+        }, {
+          "in" : "query",
+          "name" : "from_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "transaction_type",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "PAYMENT", "REFUND" ]
+          }
+        }, {
+          "in" : "query",
+          "name" : "from_settled_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to_settled_date",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "metadata_value",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "display_size",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64",
+            "default" : 500
+          }
+        }, {
+          "in" : "query",
+          "name" : "limit_total_size",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64",
+            "default" : 10000
+          }
+        }, {
+          "in" : "query",
+          "name" : "account_id",
+          "schema" : {
+            "$ref" : "#/components/schemas/CommaDelimitedSetParameter"
+          }
+        }, {
+          "in" : "query",
+          "name" : "fee_headers",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "moto_header",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "text/csv; qs=.5" : { }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/transaction/gateway-transaction/{gatewayTransactionId}" : {
+      "get" : {
+        "operationId" : "findByGatewayTransactionId",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "gatewayTransactionId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "payment_provider",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; qs=1" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TransactionView"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/transaction/{parentTransactionExternalId}/transaction" : {
+      "get" : {
+        "operationId" : "getTransactionsForParentTransaction",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "parentTransactionExternalId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "gateway_account_id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; qs=1" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TransactionsForTransactionResponse"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/transaction/{transactionExternalId}" : {
+      "get" : {
+        "operationId" : "getById",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "transactionExternalId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "account_id",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "override_account_id_restriction",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "transaction_type",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "PAYMENT", "REFUND" ]
+          }
+        }, {
+          "in" : "query",
+          "name" : "parent_external_id",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status_version",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 2
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; qs=1" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TransactionView"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/v1/transaction/{transactionExternalId}/event" : {
+      "get" : {
+        "operationId" : "events",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "transactionExternalId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "gateway_account_id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "include_all_events",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status_version",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 2
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; qs=1" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TransactionEventResponse"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Address" : {
+        "type" : "object",
+        "properties" : {
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
+            "type" : "string"
+          },
+          "line1" : {
+            "type" : "string"
+          },
+          "line2" : {
+            "type" : "string"
+          },
+          "postcode" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CardDetails" : {
+        "type" : "object",
+        "properties" : {
+          "billing_address" : {
+            "$ref" : "#/components/schemas/Address"
+          },
+          "card_brand" : {
+            "type" : "string"
+          },
+          "card_type" : {
+            "type" : "string",
+            "enum" : [ "CREDIT", "DEBIT" ]
+          },
+          "cardholder_name" : {
+            "type" : "string"
+          },
+          "expiry_date" : {
+            "type" : "string"
+          },
+          "first_digits_card_number" : {
+            "type" : "string"
+          },
+          "last_digits_card_number" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CommaDelimitedSetParameter" : {
+        "type" : "object",
+        "properties" : {
+          "notEmpty" : {
+            "type" : "boolean"
+          },
+          "parameters" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "rawString" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Event" : {
+        "type" : "object",
+        "properties" : {
+          "event_data" : {
+            "type" : "string"
+          },
+          "event_date" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "event_type" : {
+            "type" : "string"
+          },
+          "parent_resource_external_id" : {
+            "type" : "string"
+          },
+          "reproject_domain_object" : {
+            "type" : "boolean"
+          },
+          "resource_external_id" : {
+            "type" : "string"
+          },
+          "resource_type" : {
+            "type" : "string",
+            "enum" : [ "agreement", "payment", "refund", "service", "card_payment", "payout" ]
+          },
+          "sqs_message_id" : {
+            "type" : "string"
+          }
+        }
+      },
+      "EventTicker" : {
+        "type" : "object",
+        "properties" : {
+          "amount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "card_brand" : {
+            "type" : "string"
+          },
+          "event_date" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "event_type" : {
+            "type" : "string"
+          },
+          "gateway_account_id" : {
+            "type" : "string"
+          },
+          "payment_provider" : {
+            "type" : "string"
+          },
+          "resource_external_id" : {
+            "type" : "string"
+          },
+          "resource_type" : {
+            "type" : "string",
+            "enum" : [ "agreement", "payment", "refund", "service", "card_payment", "payout" ]
+          },
+          "transaction_type" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ExternalTransactionState" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "finished" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
+      "GatewayAccountMonthlyPerformanceReportEntity" : {
+        "type" : "object",
+        "properties" : {
+          "average_amount" : {
+            "type" : "number"
+          },
+          "gateway_account_id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "maximum_amount" : {
+            "type" : "number"
+          },
+          "minimum_amount" : {
+            "type" : "number"
+          },
+          "month" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "total_amount" : {
+            "type" : "number"
+          },
+          "total_volume" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "year" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PaginationBuilder" : {
+        "type" : "object",
+        "properties" : {
+          "first_page" : {
+            "$ref" : "#/components/schemas/PaginationLink"
+          },
+          "last_page" : {
+            "$ref" : "#/components/schemas/PaginationLink"
+          },
+          "next_page" : {
+            "$ref" : "#/components/schemas/PaginationLink"
+          },
+          "prev_page" : {
+            "$ref" : "#/components/schemas/PaginationLink"
+          },
+          "self" : {
+            "$ref" : "#/components/schemas/PaginationLink"
+          }
+        }
+      },
+      "PaginationLink" : {
+        "type" : "object",
+        "properties" : {
+          "href" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PayoutSearchResponse" : {
+        "type" : "object",
+        "properties" : {
+          "_links" : {
+            "$ref" : "#/components/schemas/PaginationBuilder"
+          },
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "results" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PayoutView"
+            }
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PayoutView" : {
+        "type" : "object",
+        "properties" : {
+          "amount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "created_date" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "gateway_account_id" : {
+            "type" : "string"
+          },
+          "gateway_payout_id" : {
+            "type" : "string"
+          },
+          "paid_out_date" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "state" : {
+            "type" : "string",
+            "enum" : [ "UNDEFINED", "IN_TRANSIT", "PAID_OUT", "FAILED" ]
+          }
+        }
+      },
+      "PerformanceReportEntity" : {
+        "type" : "object",
+        "properties" : {
+          "average_amount" : {
+            "type" : "number"
+          },
+          "total_amount" : {
+            "type" : "number"
+          },
+          "total_volume" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "RefundSummary" : {
+        "type" : "object",
+        "properties" : {
+          "amount_available" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "amount_refunded" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "amount_submitted" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "user_external_id" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SettlementSummary" : {
+        "type" : "object",
+        "properties" : {
+          "settled_date" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TimeseriesReportSlice" : {
+        "type" : "object",
+        "properties" : {
+          "all_payments" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "amount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "completed_payments" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "errored_payments" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "fee" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "net_amount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "timestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "total_amount" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "TransactionEvent" : {
+        "type" : "object",
+        "properties" : {
+          "amount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "data" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object"
+            }
+          },
+          "event_type" : {
+            "type" : "string"
+          },
+          "resource_type" : {
+            "type" : "string"
+          },
+          "state" : {
+            "$ref" : "#/components/schemas/ExternalTransactionState"
+          },
+          "timestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "TransactionEventResponse" : {
+        "type" : "object",
+        "properties" : {
+          "events" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TransactionEvent"
+            }
+          },
+          "transaction_id" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TransactionSearchResponse" : {
+        "type" : "object",
+        "properties" : {
+          "_links" : {
+            "$ref" : "#/components/schemas/PaginationBuilder"
+          },
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "results" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TransactionView"
+            }
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "TransactionSummaryResult" : {
+        "type" : "object",
+        "properties" : {
+          "moto_payments" : {
+            "$ref" : "#/components/schemas/TransactionsStatisticsResult"
+          },
+          "net_income" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "payments" : {
+            "$ref" : "#/components/schemas/TransactionsStatisticsResult"
+          },
+          "refunds" : {
+            "$ref" : "#/components/schemas/TransactionsStatisticsResult"
+          }
+        }
+      },
+      "TransactionView" : {
+        "type" : "object",
+        "properties" : {
+          "amount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "card_details" : {
+            "$ref" : "#/components/schemas/CardDetails"
+          },
+          "corporate_card_surcharge" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "created_date" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "delayed_capture" : {
+            "type" : "boolean"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "fee" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "gateway_account_id" : {
+            "type" : "string"
+          },
+          "gateway_payout_id" : {
+            "type" : "string"
+          },
+          "gateway_transaction_id" : {
+            "type" : "string"
+          },
+          "language" : {
+            "type" : "string"
+          },
+          "live" : {
+            "type" : "boolean"
+          },
+          "metadata" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object"
+            }
+          },
+          "moto" : {
+            "type" : "boolean"
+          },
+          "net_amount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "parent_transaction_id" : {
+            "type" : "string"
+          },
+          "payment_details" : {
+            "$ref" : "#/components/schemas/TransactionView"
+          },
+          "payment_provider" : {
+            "type" : "string"
+          },
+          "reference" : {
+            "type" : "string"
+          },
+          "refund_summary" : {
+            "$ref" : "#/components/schemas/RefundSummary"
+          },
+          "refunded_by" : {
+            "type" : "string"
+          },
+          "refunded_by_user_email" : {
+            "type" : "string"
+          },
+          "return_url" : {
+            "type" : "string"
+          },
+          "settlement_summary" : {
+            "$ref" : "#/components/schemas/SettlementSummary"
+          },
+          "source" : {
+            "type" : "string",
+            "enum" : [ "CARD_API", "CARD_PAYMENT_LINK", "CARD_AGENT_INITIATED_MOTO", "CARD_EXTERNAL_TELEPHONE" ]
+          },
+          "state" : {
+            "$ref" : "#/components/schemas/ExternalTransactionState"
+          },
+          "total_amount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "transaction_id" : {
+            "type" : "string"
+          },
+          "transaction_type" : {
+            "type" : "string",
+            "enum" : [ "PAYMENT", "REFUND" ]
+          },
+          "wallet_type" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TransactionsForTransactionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "parent_transaction_id" : {
+            "type" : "string"
+          },
+          "transactions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TransactionView"
+            }
+          }
+        }
+      },
+      "TransactionsStatisticsResult" : {
+        "type" : "object",
+        "properties" : {
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "gross_amount" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      }
+    }
+  }
+}

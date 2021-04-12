@@ -19,6 +19,7 @@
         <surefire.version>3.0.0-M5</surefire.version>
         <guice.version>5.0.1</guice.version>
         <rest-assured.version>4.3.3</rest-assured.version>
+        <swaggger-version>2.1.7</swaggger-version>
         <PACT_BROKER_URL/>
         <PACT_BROKER_USERNAME/>
         <PACT_BROKER_PASSWORD/>
@@ -245,6 +246,12 @@
             <version>1.8</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>${swaggger-version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -394,6 +401,25 @@
                         <argument>src/main/resources/config/config.yaml</argument>
                     </arguments>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>${swaggger-version}</version>
+                <configuration>
+                    <outputPath>openapi</outputPath>
+                    <outputFileName>ledger_spec</outputFileName>
+                    <outputFormat>JSON</outputFormat>
+                    <configurationFilePath>${basedir}/src/main/resources/swagger-config.yaml</configurationFilePath>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>resolve</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

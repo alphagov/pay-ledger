@@ -43,11 +43,11 @@ public class ReportResource {
     @Timed
     public Response getPaymentCountsByState(
             @Valid @BeanParam TransactionSummaryParams transactionSummaryParams,
-            @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
-            @QueryParam("account_id") String gatewayAccountId) {
+            @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction
+                ) {
 
         AccountIdSupplierManager<Map<String, Long>> accountIdSupplierManager =
-                AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId);
+                AccountIdSupplierManager.of(overrideAccountRestriction, transactionSummaryParams.getAccountId());
 
         Map<String, Long> paymentCountsByState = accountIdSupplierManager
                 .withSupplier(accountId -> reportService.getPaymentCountsByState(transactionSummaryParams))

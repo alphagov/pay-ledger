@@ -1,0 +1,17 @@
+resourceClasses:
+  - uk.gov.pay.ledger.event.resource.EventResource
+  - uk.gov.pay.ledger.payout.resource.PayoutResource
+  - uk.gov.pay.ledger.report.resource.PerformanceReportResource
+  - uk.gov.pay.ledger.report.resource.ReportResource
+  - uk.gov.pay.ledger.transaction.resource.TransactionResource
+readAllResources: true
+sortOutput: true
+prettyPrint: true
+
+openAPI:
+  info:
+    description: 'Ledger API'
+    title: 'Ledger API'
+    version: 'v1.0.0'
+  servers:
+    - url: 'http://ledger_url'
