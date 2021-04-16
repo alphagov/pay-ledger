@@ -4,14 +4,20 @@ import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.event.service.EventService;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.transactionsummary.dao.TransactionSummaryDao;
 import uk.gov.pay.ledger.util.JsonParser;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static uk.gov.pay.ledger.transaction.state.TransactionState.fromEventType;
 
 public class PaymentEventProcessor extends EventProcessor {
 
@@ -19,16 +25,18 @@ public class PaymentEventProcessor extends EventProcessor {
     private TransactionService transactionService;
     private TransactionMetadataService transactionMetadataService;
     private RefundEventProcessor refundEventProcessor;
+    private TransactionSummaryDao transactionSummaryDao;
 
     public PaymentEventProcessor(EventService eventService,
                                  TransactionService transactionService,
                                  TransactionMetadataService transactionMetadataService,
-                                 RefundEventProcessor refundEventProcessor) {
-
+                                 RefundEventProcessor refundEventProcessor,
+                                 TransactionSummaryDao transactionSummaryDao) {
         this.eventService = eventService;
         this.transactionService = transactionService;
         this.transactionMetadataService = transactionMetadataService;
         this.refundEventProcessor = refundEventProcessor;
+        this.transactionSummaryDao = transactionSummaryDao;
     }
 
     @Override
@@ -36,7 +44,7 @@ public class PaymentEventProcessor extends EventProcessor {
         List<Event> events = eventService.getEventsForResource(event.getResourceExternalId());
         EventDigest paymentEventDigest = EventDigest.fromEventList(events);
 
-        transactionService.upsertTransactionFor(paymentEventDigest);
+        TransactionEntity transactionEntity = transactionService.upsertTransactionFor(paymentEventDigest);
 
         if (event.isReprojectDomainObject()) {
             transactionMetadataService.reprojectFromEventDigest(paymentEventDigest);
@@ -60,11 +68,63 @@ public class PaymentEventProcessor extends EventProcessor {
             transactionService.getChildTransactions(event.getResourceExternalId())
                     .forEach(refundTransactionEntity -> refundEventProcessor.reprojectRefundTransaction(refundTransactionEntity.getExternalId(), paymentEventDigest));
         }
+
+        if (!event.isReprojectDomainObject()) {
+            projectTransactionSummary(transactionEntity, events, event);
+        }
+    }
+
+    private void projectTransactionSummary(TransactionEntity transactionEntity, List<Event> events, Event currentEvent) {
+
+        Optional<TransactionState> mayBeTransactionEventState = SalientEventType.from(currentEvent.getEventType())
+                .map(TransactionState::fromEventType);
+
+        mayBeTransactionEventState.ifPresent(transactionState -> {
+            // todo:
+            // 1. check if created exists for payment transaction. If event is created, check if any previous event has terminal state
+            // 2. separate for refund. need refunds now ?
+            // 3. scenario for multiple terminal events
+            // 4. handle out of order events - PAYMENT_CREATED and then terminal state , terminal state and then PAYMENT_CREATED event
+            if (transactionState.isFinished()) {
+                List<Event> finishedEvents = events.stream().
+                        filter(event1 -> SalientEventType.from(event1.getEventType())
+                                .map(TransactionState::fromEventType)
+                                .map(TransactionState::isFinished)
+                                .orElse(false))
+                        .sorted(Comparator.comparing(Event::getEventDate).reversed())
+                        .collect(Collectors.toList());
+
+                if (finishedEvents.size() == 1) {
+                    transactionSummaryDao.upsert(transactionEntity.getGatewayAccountId(),
+                            transactionEntity.getCreatedDate(),
+                            transactionEntity.getState(),
+                            transactionEntity.isLive(),
+                            transactionEntity.getTotalAmount() != null ? transactionEntity.getTotalAmount() : transactionEntity.getAmount());
+                } else {
+                    Event previousEvent = finishedEvents.get(1);
+                    TransactionState previousEventState = SalientEventType.from(previousEvent.getEventType())
+                            .map(TransactionState::fromEventType).get();
+
+                    if (!previousEventState.getStatus().equals(transactionState.getStatus())) {
+                        transactionSummaryDao.upsert(transactionEntity.getGatewayAccountId(),
+                                transactionEntity.getCreatedDate(),
+                                transactionEntity.getState(),
+                                transactionEntity.isLive(),
+                                transactionEntity.getTotalAmount() != null ? transactionEntity.getTotalAmount() : transactionEntity.getAmount());
+                        transactionSummaryDao.updateSummary(transactionEntity.getGatewayAccountId(),
+                                transactionEntity.getCreatedDate(),
+                                previousEventState,
+                                transactionEntity.isLive(),
+                                transactionEntity.getTotalAmount() != null ? transactionEntity.getTotalAmount() : transactionEntity.getAmount());
+                    }
+                }
+            }
+        });
     }
 
     private boolean hasSuccessEvent(List<Event> events) {
         return events.stream().map(event -> SalientEventType.from(event.getEventType()))
                 .flatMap(Optional::stream)
-                .anyMatch(salientEventType -> TransactionState.fromEventType(salientEventType) == TransactionState.SUCCESS);
+                .anyMatch(salientEventType -> fromEventType(salientEventType) == TransactionState.SUCCESS);
     }
 }
