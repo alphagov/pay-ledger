@@ -7,12 +7,14 @@ import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEnt
 import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 import uk.gov.pay.ledger.report.params.PerformanceReportParams.PerformanceReportParamsBuilder;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.transactionsummary.dao.TransactionSummaryDao;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -26,10 +28,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class PerformanceReportResource {
 
     private final PerformanceReportDao performanceReportDao;
+    private final TransactionSummaryDao transactionSummaryDao;
 
     @Inject
-    public PerformanceReportResource(PerformanceReportDao performanceReportDao) {
+    public PerformanceReportResource(PerformanceReportDao performanceReportDao, TransactionSummaryDao transactionSummaryDao) {
         this.performanceReportDao = performanceReportDao;
+        this.transactionSummaryDao = transactionSummaryDao;
     }
 
     @Path("/performance-report")
@@ -73,10 +77,10 @@ public class PerformanceReportResource {
                                                                                                  @QueryParam("to_date") String toDate) {
         if (isBlank(fromDate) || isBlank(toDate)) {
             throw new ValidationException("Both from_date and to_date must be provided");
-        } else if (ZonedDateTime.parse(fromDate).isAfter(ZonedDateTime.parse(toDate))) {
+        } else if (LocalDate.parse(fromDate).isAfter(LocalDate.parse(toDate))) {
             throw new ValidationException("from_date must be earlier or equal to to_date");
         }
 
-        return performanceReportDao.monthlyPerformanceReportForGatewayAccounts(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
+        return transactionSummaryDao.monthlyPerformanceReportForGatewayAccounts(LocalDate.parse(fromDate), LocalDate.parse(toDate));
     }
 }

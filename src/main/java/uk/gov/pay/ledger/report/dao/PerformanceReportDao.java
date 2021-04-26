@@ -23,23 +23,6 @@ public class PerformanceReportDao {
 
     private static final String WITH_DATE_RANGE = " and created_date between :startDate and :toDate";
 
-    private static final String MONTHLY_GATEWAY_ACCOUNT_PERFORMANCE_STATISTICS = "SELECT " +
-            "t.gateway_account_id, " +
-            "COALESCE(COUNT(t.amount), 0) AS volume, " +
-            "COALESCE(SUM(t.amount), 0) AS total_amount, " +
-            "COALESCE(AVG(t.amount), 0) AS avg_amount, " +
-            "COALESCE(MIN(t.amount), 0) AS min_amount, " +
-            "COALESCE(MAX(t.amount), 0) AS max_amount, " +
-            "EXTRACT(YEAR from created_date) AS year, " +
-            "EXTRACT(MONTH from created_date) AS month " +
-            "FROM transaction t " +
-            "WHERE t.state = 'SUCCESS' " +
-            "AND t.type = 'PAYMENT' " +
-            "AND t.live = TRUE " +
-            "AND created_date BETWEEN :startDate AND :endDate " +
-            "GROUP BY t.gateway_account_id, year, month " +
-            "ORDER BY t.gateway_account_id, year, month";
-
     private final Jdbi jdbi;
 
     @Inject
@@ -61,14 +44,5 @@ public class PerformanceReportDao {
             });
             return query.map(new PerformanceReportEntityMapper()).one();
         });
-    }
-
-    public List<GatewayAccountMonthlyPerformanceReportEntity> monthlyPerformanceReportForGatewayAccounts(ZonedDateTime startDate, ZonedDateTime endDate) {
-        return jdbi.withHandle(handle ->
-                handle
-                        .createQuery(MONTHLY_GATEWAY_ACCOUNT_PERFORMANCE_STATISTICS)
-                        .bind("startDate", startDate)
-                        .bind("endDate", endDate)
-                        .map(new GatewayAccountMonthlyPerformanceReportEntityMapper()).list());
     }
 }

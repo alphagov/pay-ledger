@@ -1,21 +1,30 @@
 package uk.gov.pay.ledger.transactionsummary.dao;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
+import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.TransactionSummaryFixture;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static java.math.BigDecimal.ZERO;
 import static java.time.ZonedDateTime.parse;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.number.BigDecimalCloseTo.closeTo;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
+import static uk.gov.pay.ledger.transaction.model.TransactionType.REFUND;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.FAILED_REJECTED;
+import static uk.gov.pay.ledger.transaction.state.TransactionState.STARTED;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.SUCCESS;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionSummaryFixture.aTransactionSummaryFixture;
@@ -144,5 +153,71 @@ public class TransactionSummaryDaoIT {
         assertThat(transactionSummary.get(0).get("moto"), is(false));
         assertThat(transactionSummary.get(0).get("total_amount_in_pence"), is(1000L));
         assertThat(transactionSummary.get(0).get("total_fee_in_pence"), is(123L));
+    }
+
+    @Test
+    public void verifyMonthlyGatewayPerformanceReportTest() {
+        aTransactionSummaryFixture()
+                .withGatewayAccountId("1")
+                .withAmount(1000L)
+                .withState(STARTED)
+                .withType(PAYMENT)
+                .withLive(true)
+                .withTransactionDate(ZonedDateTime.parse("2019-01-01T02:00:00Z"))
+                .insert(rule.getJdbi());
+
+        aTransactionSummaryFixture()
+                .withGatewayAccountId("1")
+                .withAmount(1000L)
+                .withState(SUCCESS)
+                .withType(REFUND)
+                .withLive(true)
+                .withTransactionDate(ZonedDateTime.parse("2019-01-01T02:00:00Z"))
+                .insert(rule.getJdbi());
+
+        aTransactionSummaryFixture()
+                .withGatewayAccountId("1")
+                .withAmount(1000L)
+                .withState(SUCCESS)
+                .withType(PAYMENT)
+                .withLive(true)
+                .withTransactionDate(ZonedDateTime.parse("2018-01-01T02:00:00Z"))
+                .insert(rule.getJdbi());
+
+        List<String> relevantGatewayAccounts = List.of("1", "2");
+        relevantGatewayAccounts.forEach(account -> aTransactionSummaryFixture()
+                .withGatewayAccountId(account)
+                .withAmount(1000L)
+                .withNoOfTransactions(1L)
+                .withState(SUCCESS)
+                .withType(PAYMENT)
+                .withLive(true)
+                .withTransactionDate(ZonedDateTime.parse("2019-01-01T02:00:00Z"))
+                .insert(rule.getJdbi()));
+
+        BigDecimal expectedValue = BigDecimal.valueOf(1000);
+        LocalDate startDate = LocalDate.parse("2019-01-01");
+        LocalDate endDate = LocalDate.parse("2019-02-01");
+
+        List<GatewayAccountMonthlyPerformanceReportEntity> performanceReport = transactionSummaryDao.monthlyPerformanceReportForGatewayAccounts(startDate, endDate);
+
+        GatewayAccountMonthlyPerformanceReportEntity gatewayAccountOnePerformanceReport = performanceReport.get(0);
+        GatewayAccountMonthlyPerformanceReportEntity gatewayAccountTwoPerformanceReport = performanceReport.get(1);
+
+        assertThat(performanceReport.size(), CoreMatchers.is(2));
+
+        assertThat(gatewayAccountOnePerformanceReport.getGatewayAccountId(), CoreMatchers.is(1L));
+        assertThat(gatewayAccountOnePerformanceReport.getTotalVolume(), CoreMatchers.is(1L));
+        assertThat(gatewayAccountOnePerformanceReport.getTotalAmount(), CoreMatchers.is(expectedValue));
+        assertThat(gatewayAccountOnePerformanceReport.getAverageAmount(), CoreMatchers.is(closeTo(expectedValue, ZERO)));
+        assertThat(gatewayAccountOnePerformanceReport.getYear(), CoreMatchers.is(2019L));
+        assertThat(gatewayAccountOnePerformanceReport.getMonth(), CoreMatchers.is(1L));
+
+        assertThat(gatewayAccountTwoPerformanceReport.getGatewayAccountId(), CoreMatchers.is(2L));
+        assertThat(gatewayAccountTwoPerformanceReport.getTotalVolume(), CoreMatchers.is(1L));
+        assertThat(gatewayAccountTwoPerformanceReport.getTotalAmount(), CoreMatchers.is(expectedValue));
+        assertThat(gatewayAccountTwoPerformanceReport.getAverageAmount(), CoreMatchers.is(closeTo(expectedValue, ZERO)));
+        assertThat(gatewayAccountTwoPerformanceReport.getYear(), CoreMatchers.is(2019L));
+        assertThat(gatewayAccountTwoPerformanceReport.getMonth(), CoreMatchers.is(1L));
     }
 }

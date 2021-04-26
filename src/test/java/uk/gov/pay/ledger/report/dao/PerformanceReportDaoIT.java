@@ -1,12 +1,9 @@
 package uk.gov.pay.ledger.report.dao;
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
-import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
 import uk.gov.pay.ledger.report.params.PerformanceReportParams.PerformanceReportParamsBuilder;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
@@ -112,74 +109,5 @@ public class PerformanceReportDaoIT {
         assertThat(performanceReportEntity.getTotalVolume(), is(3L));
         assertThat(performanceReportEntity.getTotalAmount(), is(closeTo(new BigDecimal(3000L), ZERO)));
         assertThat(performanceReportEntity.getAverageAmount(), is(closeTo(new BigDecimal(1000L), ZERO)));
-    }
-
-    @Test
-    public void verifyMonthlyGatewayPerformanceReportTest() {
-        aTransactionFixture()
-                .withGatewayAccountId("1")
-                .withAmount(1000L)
-                .withState(TransactionState.STARTED)
-                .withTransactionType("PAYMENT")
-                .withLive(true)
-                .withCreatedDate(ZonedDateTime.parse("2019-01-01T02:00:00Z"))
-                .insert(rule.getJdbi());
-
-        aTransactionFixture()
-                .withGatewayAccountId("1")
-                .withAmount(1000L)
-                .withState(TransactionState.SUCCESS)
-                .withTransactionType("REFUND")
-                .withLive(true)
-                .withCreatedDate(ZonedDateTime.parse("2019-01-01T02:00:00Z"))
-                .insert(rule.getJdbi());
-
-        aTransactionFixture()
-                .withGatewayAccountId("1")
-                .withAmount(1000L)
-                .withState(TransactionState.SUCCESS)
-                .withTransactionType("PAYMENT")
-                .withLive(true)
-                .withCreatedDate(ZonedDateTime.parse("2018-01-01T02:00:00Z"))
-                .insert(rule.getJdbi());
-
-        List<String> relevantGatewayAccounts = List.of("1", "2");
-        relevantGatewayAccounts.forEach(account -> aTransactionFixture()
-                .withGatewayAccountId(account)
-                .withAmount(1000L)
-                .withState(TransactionState.SUCCESS)
-                .withTransactionType("PAYMENT")
-                .withLive(true)
-                .withCreatedDate(ZonedDateTime.parse("2019-01-01T02:00:00Z"))
-                .insert(rule.getJdbi()));
-
-        BigDecimal expectedValue = BigDecimal.valueOf(1000);
-        ZonedDateTime startDate = ZonedDateTime.parse("2019-01-01T00:00:00Z");
-        ZonedDateTime endDate = ZonedDateTime.parse("2019-02-01T00:00:00Z");
-
-        List<GatewayAccountMonthlyPerformanceReportEntity> performanceReport = transactionDao.monthlyPerformanceReportForGatewayAccounts(startDate, endDate);
-
-        GatewayAccountMonthlyPerformanceReportEntity gatewayAccountOnePerformanceReport = performanceReport.get(0);
-        GatewayAccountMonthlyPerformanceReportEntity gatewayAccountTwoPerformanceReport = performanceReport.get(1);
-
-        assertThat(performanceReport.size(), is(2));
-
-        assertThat(gatewayAccountOnePerformanceReport.getGatewayAccountId(), is(1L));
-        assertThat(gatewayAccountOnePerformanceReport.getTotalVolume(), is(1L));
-        assertThat(gatewayAccountOnePerformanceReport.getTotalAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountOnePerformanceReport.getAverageAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountOnePerformanceReport.getMinimumAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountOnePerformanceReport.getMaximumAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountOnePerformanceReport.getYear(), is(2019L));
-        assertThat(gatewayAccountOnePerformanceReport.getMonth(), is(1L));
-
-        assertThat(gatewayAccountTwoPerformanceReport.getGatewayAccountId(), is(2L));
-        assertThat(gatewayAccountTwoPerformanceReport.getTotalVolume(), is(1L));
-        assertThat(gatewayAccountTwoPerformanceReport.getTotalAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountTwoPerformanceReport.getAverageAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountTwoPerformanceReport.getMinimumAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountTwoPerformanceReport.getMaximumAmount(), is(closeTo(expectedValue, ZERO)));
-        assertThat(gatewayAccountTwoPerformanceReport.getYear(), is(2019L));
-        assertThat(gatewayAccountTwoPerformanceReport.getMonth(), is(1L));
     }
 }
