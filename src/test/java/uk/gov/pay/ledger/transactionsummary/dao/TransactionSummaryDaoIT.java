@@ -39,9 +39,9 @@ public class TransactionSummaryDaoIT {
         String gatewayAccountId1 = "account-" + randomAlphanumeric(10);
         String gatewayAccountId2 = "account-" + randomAlphanumeric(10);
         transactionSummaryDao.upsert(gatewayAccountId1, "PAYMENT",
-                parse("2018-09-22T08:46:01.123456Z"), SUCCESS, false, false, 100L, 10L);
+                parse("2018-09-22T08:46:01.123456Z"), SUCCESS, false, false, 100L);
         transactionSummaryDao.upsert(gatewayAccountId2, "PAYMENT",
-                parse("2018-09-23T09:46:01.123456Z"), FAILED_REJECTED, true, true, 200L, 0L);
+                parse("2018-09-23T09:46:01.123456Z"), FAILED_REJECTED, true, true, 200L);
 
         List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId1, PAYMENT,
                 SUCCESS, parse("2018-09-22T00:00:00.000000Z"), false, false);
@@ -52,7 +52,6 @@ public class TransactionSummaryDaoIT {
         assertThat(transactionSummary.get(0).get("moto"), is(false));
         assertThat(transactionSummary.get(0).get("total_amount_in_pence"), is(100L));
         assertThat(transactionSummary.get(0).get("no_of_transactions"), is(1L));
-        assertThat(transactionSummary.get(0).get("total_fee_in_pence"), is(10L));
 
         transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId2, PAYMENT,
                 FAILED_REJECTED, parse("2018-09-23T00:00:00.000000Z"), true, true);
@@ -63,7 +62,6 @@ public class TransactionSummaryDaoIT {
         assertThat(transactionSummary.get(0).get("moto"), is(true));
         assertThat(transactionSummary.get(0).get("total_amount_in_pence"), is(200L));
         assertThat(transactionSummary.get(0).get("no_of_transactions"), is(1L));
-        assertThat(transactionSummary.get(0).get("total_fee_in_pence"), is(0L));
     }
 
     @Test
@@ -80,7 +78,7 @@ public class TransactionSummaryDaoIT {
                 .insert(rule.getJdbi());
         transactionSummaryDao.upsert(gatewayAccountId, PAYMENT.name(),
                 transactionSummaryFixture.getTransactionDate(), transactionSummaryFixture.getState(),
-                false, false, 123L, 23L);
+                false, false, 123L);
 
         List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT,
                 SUCCESS, parse("2018-09-22T00:00:00.000000Z"), false, false);
@@ -91,7 +89,6 @@ public class TransactionSummaryDaoIT {
         assertThat(transactionSummary.get(0).get("moto"), is(false));
         assertThat(transactionSummary.get(0).get("total_amount_in_pence"), is(1123L));
         assertThat(transactionSummary.get(0).get("no_of_transactions"), is(11L));
-        assertThat(transactionSummary.get(0).get("total_fee_in_pence"), is(100L));
     }
 
     @Test
@@ -120,5 +117,32 @@ public class TransactionSummaryDaoIT {
         assertThat(transactionSummary.get(0).get("total_amount_in_pence"), is(877L));
         assertThat(transactionSummary.get(0).get("no_of_transactions"), is(9L));
         assertThat(transactionSummary.get(0).get("total_fee_in_pence"), is(77L));
+    }
+
+    @Test
+    public void shouldUpdateFeeForTransactionSummaryCorrectly() {
+        String gatewayAccountId = "account-" + randomAlphanumeric(10);
+        TransactionSummaryFixture transactionSummaryFixture = aTransactionSummaryFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionDate(parse("2018-09-22T00:00:00.000000Z"))
+                .withType(PAYMENT)
+                .withState(SUCCESS)
+                .withAmount(1000L)
+                .withFee(100L)
+                .withNoOfTransactions(10L)
+                .insert(rule.getJdbi());
+        transactionSummaryDao.updateFee(gatewayAccountId, PAYMENT.name(),
+                transactionSummaryFixture.getTransactionDate(), transactionSummaryFixture.getState(),
+                false, false, 23L);
+
+        List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT,
+                SUCCESS, parse("2018-09-22T00:00:00.000000Z"), false, false);
+        assertThat(transactionSummary.get(0).get("gateway_account_id"), is(gatewayAccountId));
+        assertThat(transactionSummary.get(0).get("transaction_date").toString(), is("2018-09-22"));
+        assertThat(transactionSummary.get(0).get("state"), is("SUCCESS"));
+        assertThat(transactionSummary.get(0).get("live"), is(false));
+        assertThat(transactionSummary.get(0).get("moto"), is(false));
+        assertThat(transactionSummary.get(0).get("total_amount_in_pence"), is(1000L));
+        assertThat(transactionSummary.get(0).get("total_fee_in_pence"), is(123L));
     }
 }
