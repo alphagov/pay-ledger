@@ -1,8 +1,6 @@
 package uk.gov.pay.ledger.queue;
 
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import io.sentry.Sentry;
 import org.slf4j.Logger;
@@ -17,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.pay.ledger.event.model.response.CreateEventResponse.ignoredEventResponse;
 
 public class EventMessageHandler {
