@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
+import uk.gov.pay.ledger.report.params.PerformanceReportParams;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.TransactionSummaryFixture;
 
@@ -14,6 +16,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.math.BigDecimal.ZERO;
 import static java.time.ZonedDateTime.parse;
@@ -219,5 +222,82 @@ public class TransactionSummaryDaoIT {
         assertThat(gatewayAccountTwoPerformanceReport.getAverageAmount(), CoreMatchers.is(closeTo(expectedValue, ZERO)));
         assertThat(gatewayAccountTwoPerformanceReport.getYear(), CoreMatchers.is(2019L));
         assertThat(gatewayAccountTwoPerformanceReport.getMonth(), CoreMatchers.is(1L));
+    }
+
+    @Test
+    public void report_volume_total_amount_and_average_amount_for_date_range() {
+        Stream.of("2019-12-31T10:00:00Z", "2019-12-30T10:00:00Z", "2017-11-29T10:00:00Z").forEach(time -> aTransactionSummaryFixture()
+                .withTransactionDate(ZonedDateTime.parse(time))
+                .withAmount(100L)
+                .withState(TransactionState.SUCCESS)
+                .withType(PAYMENT)
+                .withLive(true)
+                .withNoOfTransactions(1L)
+                .insert(rule.getJdbi()));
+
+        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionSummaryFixture()
+                .withTransactionDate(ZonedDateTime.parse(time))
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .withType(PAYMENT)
+                .withLive(true)
+                .withNoOfTransactions(1L)
+                .insert(rule.getJdbi()));
+
+        var performanceReportParams = PerformanceReportParams.PerformanceReportParamsBuilder.builder()
+                .withFromDate(LocalDate.parse("2017-11-30"))
+                .withToDate(LocalDate.parse("2019-12-12"))
+                .build();
+        var performanceReportEntity = transactionSummaryDao.performanceReportForPaymentTransactions(performanceReportParams);
+        assertThat(performanceReportEntity.getTotalVolume(), CoreMatchers.is(3L));
+        assertThat(performanceReportEntity.getTotalAmount(), CoreMatchers.is(closeTo(new BigDecimal(3000L), ZERO)));
+        assertThat(performanceReportEntity.getAverageAmount(), CoreMatchers.is(closeTo(new BigDecimal(1000L), ZERO)));
+    }
+
+    @Test
+    public void report_volume_total_amount_and_average_amount_by_state() {
+        aTransactionSummaryFixture().withAmount(1000L).withState(TransactionState.STARTED).withType(PAYMENT)
+                .withLive(true).withNoOfTransactions(1L).insert(rule.getJdbi());
+
+        aTransactionSummaryFixture().withAmount(1000L).withState(TransactionState.SUCCESS).withType(REFUND)
+                .withLive(true).withNoOfTransactions(1L).insert(rule.getJdbi());
+
+        aTransactionSummaryFixture().withAmount(1000L).withState(TransactionState.SUCCESS).withType(PAYMENT)
+                .withLive(false).withNoOfTransactions(1L).insert(rule.getJdbi());
+
+        List<Long> relevantAmounts = List.of(1200L, 1020L, 750L);
+        relevantAmounts.forEach(amount -> aTransactionSummaryFixture()
+                .withAmount(amount)
+                .withState(TransactionState.SUCCESS)
+                .withType(PAYMENT)
+                .withLive(true)
+                .withNoOfTransactions(1L)
+                .insert(rule.getJdbi()));
+        BigDecimal expectedTotalAmount = new BigDecimal(relevantAmounts.stream().mapToLong(amount -> amount).sum());
+        BigDecimal expectedAverageAmount = BigDecimal.valueOf(relevantAmounts.stream().mapToLong(amount -> amount).average().getAsDouble());
+
+        var performanceReportParams = PerformanceReportParams.PerformanceReportParamsBuilder.builder().withState(TransactionState.SUCCESS).build();
+        var performanceReportEntity = transactionSummaryDao.performanceReportForPaymentTransactions(performanceReportParams);
+        assertThat(performanceReportEntity.getTotalVolume(), CoreMatchers.is(3L));
+        assertThat(performanceReportEntity.getTotalAmount(), CoreMatchers.is(closeTo(expectedTotalAmount, ZERO)));
+        assertThat(performanceReportEntity.getAverageAmount(), CoreMatchers.is(closeTo(expectedAverageAmount, ZERO)));
+    }
+
+    @Test
+    public void report_volume_total_amount_and_average_amount_for_all_payments() {
+        Stream.of(TransactionState.STARTED, TransactionState.SUCCESS, TransactionState.SUBMITTED).forEach(state ->
+                aTransactionSummaryFixture()
+                        .withAmount(1000L)
+                        .withState(state)
+                        .withType(PAYMENT)
+                        .withLive(true)
+                        .withNoOfTransactions(1L)
+                        .insert(rule.getJdbi()));
+
+        var performanceReportParams = PerformanceReportParams.PerformanceReportParamsBuilder.builder().build();
+        var performanceReportEntity = transactionSummaryDao.performanceReportForPaymentTransactions(performanceReportParams);
+        assertThat(performanceReportEntity.getTotalVolume(), CoreMatchers.is(3L));
+        assertThat(performanceReportEntity.getTotalAmount(), CoreMatchers.is(closeTo(new BigDecimal(3000L), ZERO)));
+        assertThat(performanceReportEntity.getAverageAmount(), CoreMatchers.is(closeTo(new BigDecimal(1000L), ZERO)));
     }
 }

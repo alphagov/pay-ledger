@@ -2,16 +2,16 @@ package uk.gov.pay.ledger.report.params;
 
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class PerformanceReportParams {
 
     private final TransactionState state;
-    private final ZonedDateTime fromDate;
-    private final ZonedDateTime toDate;
+    private final LocalDate fromDate;
+    private final LocalDate toDate;
 
-    private PerformanceReportParams(TransactionState state, ZonedDateTime fromDate, ZonedDateTime toDate) {
+    private PerformanceReportParams(TransactionState state, LocalDate fromDate, LocalDate toDate) {
         this.state = state;
         this.fromDate = fromDate;
         this.toDate = toDate;
@@ -30,8 +30,8 @@ public class PerformanceReportParams {
 
     public static final class PerformanceReportParamsBuilder {
         private TransactionState state;
-        private ZonedDateTime fromDate;
-        private ZonedDateTime toDate;
+        private LocalDate fromDate;
+        private LocalDate toDate;
 
         private PerformanceReportParamsBuilder() {
         }
@@ -45,12 +45,12 @@ public class PerformanceReportParams {
             return this;
         }
 
-        public PerformanceReportParamsBuilder withFromDate(ZonedDateTime fromDate) {
+        public PerformanceReportParamsBuilder withFromDate(LocalDate fromDate) {
             this.fromDate = fromDate;
             return this;
         }
 
-        public PerformanceReportParamsBuilder withToDate(ZonedDateTime toDate) {
+        public PerformanceReportParamsBuilder withToDate(LocalDate toDate) {
             this.toDate = toDate;
             return this;
         }
@@ -61,19 +61,19 @@ public class PerformanceReportParams {
     }
 
     public static final class DateRange {
-        private final ZonedDateTime fromDate;
-        private final ZonedDateTime toDate;
+        private final LocalDate fromDate;
+        private final LocalDate toDate;
 
-        public DateRange(ZonedDateTime fromDate, ZonedDateTime toDate) {
+        public DateRange(LocalDate fromDate, LocalDate toDate) {
             this.fromDate = fromDate;
             this.toDate = toDate;
         }
 
-        public ZonedDateTime getFromDate() {
+        public LocalDate getFromDate() {
             return fromDate;
         }
 
-        public ZonedDateTime getToDate() {
+        public LocalDate getToDate() {
             return toDate;
         }
     }

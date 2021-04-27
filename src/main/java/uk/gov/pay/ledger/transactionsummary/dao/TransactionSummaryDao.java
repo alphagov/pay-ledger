@@ -2,8 +2,12 @@ package uk.gov.pay.ledger.transactionsummary.dao;
 
 import com.google.inject.Inject;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
+import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 import uk.gov.pay.ledger.report.mapper.GatewayAccountMonthlyPerformanceReportEntityMapper;
+import uk.gov.pay.ledger.report.mapper.PerformanceReportEntityMapper;
+import uk.gov.pay.ledger.report.params.PerformanceReportParams;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.LocalDate;
@@ -58,6 +62,17 @@ public class TransactionSummaryDao {
             "AND transaction_date BETWEEN :startDate AND :endDate " +
             "GROUP BY t.gateway_account_id, year, month " +
             "ORDER BY t.gateway_account_id, year, month";
+
+    private static final String PERFORMANCE_REPORT_QUERY = "SELECT COALESCE(SUM(t.no_of_transactions),0) AS volume, " +
+            "COALESCE(SUM(t.total_amount_in_pence), 0) AS total_amount, " +
+            "COALESCE(SUM(t.total_amount_in_pence)/SUM(t.no_of_transactions), 0) AS avg_amount " +
+            "FROM transaction_summary t " +
+            "WHERE t.type= 'PAYMENT' " +
+            "AND t.live= TRUE";
+
+    private static final String WITH_STATE = " AND t.state=:state";
+
+    private static final String WITH_DATE_RANGE = " AND t.transaction_date BETWEEN :startDate AND :toDate";
 
     private final Jdbi jdbi;
 
@@ -120,5 +135,21 @@ public class TransactionSummaryDao {
                         .bind("startDate", startDate)
                         .bind("endDate", endDate)
                         .map(new GatewayAccountMonthlyPerformanceReportEntityMapper()).list());
+    }
+
+    public PerformanceReportEntity performanceReportForPaymentTransactions(PerformanceReportParams params) {
+        StringBuilder queryString = new StringBuilder(PERFORMANCE_REPORT_QUERY);
+        params.getState().ifPresent(state -> queryString.append(WITH_STATE));
+        params.getDateRange().ifPresent(dateRange -> queryString.append(WITH_DATE_RANGE));
+
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(queryString.toString());
+            params.getState().ifPresent(state -> query.bind("state", state.name()));
+            params.getDateRange().ifPresent(dateRange -> {
+                query.bind("startDate", dateRange.getFromDate());
+                query.bind("toDate", dateRange.getToDate());
+            });
+            return query.map(new PerformanceReportEntityMapper()).one();
+        });
     }
 }

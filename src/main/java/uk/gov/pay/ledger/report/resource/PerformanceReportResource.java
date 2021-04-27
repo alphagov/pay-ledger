@@ -2,7 +2,6 @@ package uk.gov.pay.ledger.report.resource;
 
 import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.ledger.exception.ValidationException;
-import uk.gov.pay.ledger.report.dao.PerformanceReportDao;
 import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
 import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 import uk.gov.pay.ledger.report.params.PerformanceReportParams.PerformanceReportParamsBuilder;
@@ -15,7 +14,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,12 +25,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Produces(APPLICATION_JSON)
 public class PerformanceReportResource {
 
-    private final PerformanceReportDao performanceReportDao;
     private final TransactionSummaryDao transactionSummaryDao;
 
     @Inject
-    public PerformanceReportResource(PerformanceReportDao performanceReportDao, TransactionSummaryDao transactionSummaryDao) {
-        this.performanceReportDao = performanceReportDao;
+    public PerformanceReportResource(TransactionSummaryDao transactionSummaryDao) {
         this.transactionSummaryDao = transactionSummaryDao;
     }
 
@@ -46,7 +42,7 @@ public class PerformanceReportResource {
         var paramsBuilder = PerformanceReportParamsBuilder.builder();
         addDateRangeParamsOrThrow(paramsBuilder, fromDate, toDate);
         addStateParamOrThrow(paramsBuilder, state);
-        return performanceReportDao.performanceReportForPaymentTransactions(paramsBuilder.build());
+        return transactionSummaryDao.performanceReportForPaymentTransactions(paramsBuilder.build());
     }
 
     private void addStateParamOrThrow(PerformanceReportParamsBuilder builder, String state) {
@@ -65,7 +61,7 @@ public class PerformanceReportResource {
             if (isBlank(fromDate) || isBlank(toDate)) {
                 throw new ValidationException("Both from_date and to_date must be provided");
             } else {
-                builder.withFromDate(ZonedDateTime.parse(fromDate)).withToDate(ZonedDateTime.parse(toDate));
+                builder.withFromDate(LocalDate.parse(fromDate)).withToDate(LocalDate.parse(toDate));
             }
         }
     }
