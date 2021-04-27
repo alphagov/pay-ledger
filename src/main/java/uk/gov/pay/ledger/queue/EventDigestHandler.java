@@ -13,6 +13,7 @@ import uk.gov.pay.ledger.queue.eventprocessor.PayoutEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.RefundEventProcessor;
 import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
+import uk.gov.pay.ledger.transactionsummary.service.TransactionSummaryService;
 
 public class EventDigestHandler {
 
@@ -27,9 +28,9 @@ public class EventDigestHandler {
                               TransactionService transactionService,
                               TransactionMetadataService transactionMetadataService,
                               PayoutService payoutService,
-                              TransactionEntityFactory transactionEntityFactory) {
+                              TransactionEntityFactory transactionEntityFactory, TransactionSummaryService transactionSummaryService) {
         refundEventProcessor = new RefundEventProcessor(eventService, transactionService, transactionEntityFactory);
-        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, refundEventProcessor);
+        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, refundEventProcessor, transactionSummaryService);
         payoutEventProcessor = new PayoutEventProcessor(eventService, payoutService);
     }
 

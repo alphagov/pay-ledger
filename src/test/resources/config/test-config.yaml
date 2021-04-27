@@ -58,8 +58,8 @@ sqsConfig:
 queueMessageReceiverConfig:
   backgroundProcessingEnabled: ${BACKGROUND_PROCESSING_ENABLED:-false}
   threadDelayInMilliseconds: ${QUEUE_MESSAGE_RECEIVER_THREAD_DELAY_IN_MILLISECONDS:-1}
-  numberOfThreads: ${QUEUE_MESSAGE_RECEIVER_NUMBER_OF_THREADS:-1}
-  messageRetryDelayInSeconds: ${QUEUE_MESSAGE_RETRY_DELAY_IN_SECONDS:-900}
+  numberOfThreads: ${QUEUE_MESSAGE_RECEIVER_NUMBER_OF_THREADS:-3}
+  messageRetryDelayInSeconds: ${QUEUE_MESSAGE_RETRY_DELAY_IN_SECONDS:-1}
 
 reportingConfig:
   streamingCsvPageSize: ${STREAMING_CSV_PAGE_SIZE:-5000}

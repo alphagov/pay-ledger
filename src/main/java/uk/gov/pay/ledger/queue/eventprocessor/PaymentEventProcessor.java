@@ -4,14 +4,18 @@ import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.event.service.EventService;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.transactionsummary.service.TransactionSummaryService;
 import uk.gov.pay.ledger.util.JsonParser;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static uk.gov.pay.ledger.transaction.state.TransactionState.fromEventType;
 
 public class PaymentEventProcessor extends EventProcessor {
 
@@ -19,16 +23,18 @@ public class PaymentEventProcessor extends EventProcessor {
     private TransactionService transactionService;
     private TransactionMetadataService transactionMetadataService;
     private RefundEventProcessor refundEventProcessor;
+    private TransactionSummaryService transactionSummaryService;
 
     public PaymentEventProcessor(EventService eventService,
                                  TransactionService transactionService,
                                  TransactionMetadataService transactionMetadataService,
-                                 RefundEventProcessor refundEventProcessor) {
-
+                                 RefundEventProcessor refundEventProcessor,
+                                 TransactionSummaryService transactionSummaryService) {
         this.eventService = eventService;
         this.transactionService = transactionService;
         this.transactionMetadataService = transactionMetadataService;
         this.refundEventProcessor = refundEventProcessor;
+        this.transactionSummaryService = transactionSummaryService;
     }
 
     @Override
@@ -36,7 +42,7 @@ public class PaymentEventProcessor extends EventProcessor {
         List<Event> events = eventService.getEventsForResource(event.getResourceExternalId());
         EventDigest paymentEventDigest = EventDigest.fromEventList(events);
 
-        transactionService.upsertTransactionFor(paymentEventDigest);
+        TransactionEntity transactionEntity = transactionService.upsertTransactionFor(paymentEventDigest);
 
         if (event.isReprojectDomainObject()) {
             transactionMetadataService.reprojectFromEventDigest(paymentEventDigest);
@@ -60,11 +66,15 @@ public class PaymentEventProcessor extends EventProcessor {
             transactionService.getChildTransactions(event.getResourceExternalId())
                     .forEach(refundTransactionEntity -> refundEventProcessor.reprojectRefundTransaction(refundTransactionEntity.getExternalId(), paymentEventDigest));
         }
+
+        if (!event.isReprojectDomainObject()) {
+            transactionSummaryService.projectTransactionSummary(transactionEntity, event);
+        }
     }
 
     private boolean hasSuccessEvent(List<Event> events) {
         return events.stream().map(event -> SalientEventType.from(event.getEventType()))
                 .flatMap(Optional::stream)
-                .anyMatch(salientEventType -> TransactionState.fromEventType(salientEventType) == TransactionState.SUCCESS);
+                .anyMatch(salientEventType -> fromEventType(salientEventType) == TransactionState.SUCCESS);
     }
 }

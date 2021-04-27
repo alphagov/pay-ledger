@@ -11,6 +11,7 @@ import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
+import uk.gov.pay.ledger.transactionsummary.service.TransactionSummaryService;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
@@ -34,12 +36,15 @@ class PaymentEventProcessorTest {
     private TransactionMetadataService transactionMetadataService;
     @Mock
     private RefundEventProcessor refundEventProcessor;
+    @Mock
+    private TransactionSummaryService transactionSummaryService;
 
     private PaymentEventProcessor paymentEventProcessor;
 
+
     @BeforeEach
     void setUp() {
-        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, refundEventProcessor);
+        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, refundEventProcessor, transactionSummaryService);
     }
 
     @Test
@@ -111,5 +116,38 @@ class PaymentEventProcessorTest {
         verify(transactionMetadataService).upsertMetadataFor(event);
         verify(transactionService, never()).getChildTransactions(any());
         verify(refundEventProcessor, never()).reprojectRefundTransaction(any(), any());
+    }
+
+    @Test
+    void shouldProjectTransactionSummary() {
+        String paymentExternalId = "payment-external-id";
+        Event event = anEventFixture().withResourceType(PAYMENT)
+                .withResourceExternalId(paymentExternalId)
+                .withEventType("PAYMENT_CREATED")
+                .toEntity();
+
+        List<Event> events = List.of(event);
+        TransactionEntity transactionEntity = aTransactionFixture().toEntity();
+
+        when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(events);
+        when(transactionService.upsertTransactionFor(any(EventDigest.class))).thenReturn(transactionEntity);
+
+        paymentEventProcessor.process(event);
+        verify(transactionSummaryService).projectTransactionSummary(transactionEntity, event);
+    }
+
+    @Test
+    void shouldNotProjectTransactionSummaryForAReprojectionEvent() {
+        String refundExternalId = "refund-external-id";
+        Event event = anEventFixture().withResourceType(PAYMENT)
+                .withResourceExternalId(refundExternalId)
+                .withEventType("PAYMENT_CREATED")
+                .withIsReprojectDomainObject(true)
+                .toEntity();
+
+        when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(event));
+
+        paymentEventProcessor.process(event);
+        verifyNoInteractions(transactionSummaryService);
     }
 }

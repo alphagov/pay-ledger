@@ -21,6 +21,7 @@ import uk.gov.pay.ledger.payout.service.PayoutService;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
+import uk.gov.pay.ledger.transactionsummary.service.TransactionSummaryService;
 
 import java.util.List;
 
@@ -51,20 +52,21 @@ class EventDigestHandlerTest {
     private TransactionMetadataService transactionMetadataService;
     @Mock
     private PayoutService payoutService;
-    private TransactionEntityFactory transactionEntityFactory;
     @Captor
     private ArgumentCaptor<LoggingEvent> loggingEventArgumentCaptor;
     @Mock
     private Appender<ILoggingEvent> mockAppender;
+    @Mock
+    private TransactionSummaryService transactionSummaryService;
 
     private EventDigestHandler eventDigestHandler;
     private EventDigest eventDigest;
 
     @BeforeEach
     void setUp() {
-        transactionEntityFactory = new TransactionEntityFactory(new ObjectMapper());
+        TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(new ObjectMapper());
         eventDigestHandler =  new EventDigestHandler(eventService, transactionService,
-                transactionMetadataService, payoutService, transactionEntityFactory);
+                transactionMetadataService, payoutService, transactionEntityFactory, transactionSummaryService);
         eventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));
         lenient().when(eventService.getEventDigestForResource(any(Event.class)))
                 .thenReturn(eventDigest);
