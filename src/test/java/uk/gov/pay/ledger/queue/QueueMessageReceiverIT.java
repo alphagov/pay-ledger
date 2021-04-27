@@ -255,14 +255,6 @@ public class QueueMessageReceiverIT {
 
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
-                .withGatewayAccountId(gatewayAccountId)
-                .withEventDate(CREATED_AT)
-                .withEventType("PAYMENT_CREATED")
-                .withDefaultEventDataForEventType("PAYMENT_CREATED")
-                .insert(rule.getSqsClient());
-
-        aQueuePaymentEventFixture()
-                .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT.plusSeconds(1))
                 .withEventType("USER_APPROVED_FOR_CAPTURE")
                 .withEventData("{}")
@@ -274,6 +266,14 @@ public class QueueMessageReceiverIT {
                 .withEventDate(CREATED_AT.plusSeconds(2))
                 .withEventType("CAPTURE_CONFIRMED")
                 .withDefaultEventDataForEventType("CAPTURE_CONFIRMED")
+                .insert(rule.getSqsClient());
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withEventDate(CREATED_AT)
+                .withEventType("PAYMENT_CREATED")
+                .withDefaultEventDataForEventType("PAYMENT_CREATED")
                 .insert(rule.getSqsClient());
 
         Thread.sleep(500);
