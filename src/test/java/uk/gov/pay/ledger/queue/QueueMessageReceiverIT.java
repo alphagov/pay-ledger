@@ -18,14 +18,12 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
@@ -257,14 +255,6 @@ public class QueueMessageReceiverIT {
 
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
-                .withGatewayAccountId(gatewayAccountId)
-                .withEventDate(CREATED_AT)
-                .withEventType("PAYMENT_CREATED")
-                .withDefaultEventDataForEventType("PAYMENT_CREATED")
-                .insert(rule.getSqsClient());
-
-        aQueuePaymentEventFixture()
-                .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT.plusSeconds(1))
                 .withEventType("USER_APPROVED_FOR_CAPTURE")
                 .withEventData("{}")
@@ -278,9 +268,15 @@ public class QueueMessageReceiverIT {
                 .withDefaultEventDataForEventType("CAPTURE_CONFIRMED")
                 .insert(rule.getSqsClient());
 
-        await().atMost(1000, TimeUnit.MILLISECONDS).until(
-                () -> !dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT, SUCCESS, CREATED_AT, true, false).isEmpty()
-        );
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withEventDate(CREATED_AT)
+                .withEventType("PAYMENT_CREATED")
+                .withDefaultEventDataForEventType("PAYMENT_CREATED")
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
 
         List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT, SUCCESS, CREATED_AT, true, false);
 
