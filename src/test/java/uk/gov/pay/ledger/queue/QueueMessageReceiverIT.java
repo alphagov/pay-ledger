@@ -18,14 +18,12 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
@@ -278,9 +276,7 @@ public class QueueMessageReceiverIT {
                 .withDefaultEventDataForEventType("CAPTURE_CONFIRMED")
                 .insert(rule.getSqsClient());
 
-        await().atMost(1000, TimeUnit.MILLISECONDS).until(
-                () -> !dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT, SUCCESS, CREATED_AT, true, false).isEmpty()
-        );
+        Thread.sleep(500);
 
         List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT, SUCCESS, CREATED_AT, true, false);
 
