@@ -1,15 +1,13 @@
 package uk.gov.pay.ledger.report.resource;
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import uk.gov.service.payments.commons.model.ErrorIdentifier;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
+import uk.gov.service.payments.commons.model.ErrorIdentifier;
 
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
@@ -20,8 +18,10 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
+import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.ledger.util.fixture.TransactionSummaryFixture.aTransactionSummaryFixture;
 
 public class PerformanceReportResourceIT {
 
@@ -64,7 +64,7 @@ public class PerformanceReportResourceIT {
                 .get("/v1/report/performance-report")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON).log().body()
+                .contentType(JSON)
                 .body("total_volume", is(3))
                 .body("total_amount", is(3000))
                 .body("average_amount", is(1000.0f));
@@ -115,7 +115,7 @@ public class PerformanceReportResourceIT {
                 .get("/v1/report/performance-report")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON).log().body()
+                .contentType(JSON)
                 .body("total_volume", is(3))
                 .body("total_amount", is(3000))
                 .body("average_amount", is(1000.0f));
@@ -136,62 +136,56 @@ public class PerformanceReportResourceIT {
 
     @Test
     public void report_volume_total_amount_and_average_amount_for_date_range_per_gateway_account() {
-        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionFixture()
-                .withCreatedDate(ZonedDateTime.parse(time))
+        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionSummaryFixture()
+                .withTransactionDate(ZonedDateTime.parse(time))
                 .withAmount(1000L)
                 .withGatewayAccountId("1")
                 .withState(TransactionState.SUCCESS)
-                .withTransactionType("PAYMENT")
+                .withType(PAYMENT)
                 .withLive(true)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi()));
 
-        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionFixture()
-                .withCreatedDate(ZonedDateTime.parse(time))
+        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionSummaryFixture()
+                .withTransactionDate(ZonedDateTime.parse(time))
                 .withAmount(1000L)
                 .withGatewayAccountId("2")
                 .withState(TransactionState.SUCCESS)
-                .withTransactionType("PAYMENT")
+                .withType(PAYMENT)
                 .withLive(true)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi()));
 
         given().port(port)
                 .contentType(JSON)
-                .queryParam("from_date", "2017-11-30T10:00:00Z")
-                .queryParam("to_date", "2019-12-11T10:00:00Z")
+                .queryParam("from_date", "2017-11-30")
+                .queryParam("to_date", "2019-12-11")
                 .get("/v1/report/gateway-performance-report")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON).log().body()
+                .contentType(JSON)
                 .body("[0].gateway_account_id", is(1))
                 .body("[0].total_volume", is(1))
                 .body("[0].total_amount", is(1000))
                 .body("[0].average_amount", is(1000.0f))
-                .body("[0].minimum_amount", is(1000))
-                .body("[0].maximum_amount", is(1000))
                 .body("[0].month", is(11))
                 .body("[0].year", is(2017))
                 .body("[1].gateway_account_id", is(1))
                 .body("[1].total_volume", is(1))
                 .body("[1].total_amount", is(1000))
                 .body("[1].average_amount", is(1000.0f))
-                .body("[1].minimum_amount", is(1000))
-                .body("[1].maximum_amount", is(1000))
                 .body("[1].month", is(12))
                 .body("[1].year", is(2019))
                 .body("[2].gateway_account_id", is(2))
                 .body("[2].total_volume", is(1))
                 .body("[2].total_amount", is(1000))
                 .body("[2].average_amount", is(1000.0f))
-                .body("[2].minimum_amount", is(1000))
-                .body("[2].maximum_amount", is(1000))
                 .body("[2].month", is(11))
                 .body("[2].year", is(2017))
                 .body("[3].gateway_account_id", is(2))
                 .body("[3].total_volume", is(1))
                 .body("[3].total_amount", is(1000))
                 .body("[3].average_amount", is(1000.0f))
-                .body("[3].minimum_amount", is(1000))
-                .body("[3].maximum_amount", is(1000))
                 .body("[3].month", is(12))
                 .body("[3].year", is(2019));
     }
@@ -201,7 +195,7 @@ public class PerformanceReportResourceIT {
         Stream.of("from_date", "to_date").forEach(queryParam ->
                 given().port(port)
                         .contentType(JSON)
-                        .queryParam(queryParam, "2017-11-30T00:00:00Z")
+                        .queryParam(queryParam, "2017-11-30")
                         .get("/v1/report/gateway-performance-report")
                         .then()
                         .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
@@ -214,8 +208,8 @@ public class PerformanceReportResourceIT {
 
         given().port(port)
                 .contentType(JSON)
-                .queryParam( "from_date", "2019-11-30T00:00:00Z")
-                .queryParam( "to_date", "2017-11-30T00:00:00Z")
+                .queryParam( "from_date", "2019-11-30")
+                .queryParam( "to_date", "2017-11-30")
                 .get("/v1/report/gateway-performance-report")
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())

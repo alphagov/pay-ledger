@@ -2,9 +2,13 @@ package uk.gov.pay.ledger.transactionsummary.dao;
 
 import com.google.inject.Inject;
 import org.jdbi.v3.core.Jdbi;
+import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
+import uk.gov.pay.ledger.report.mapper.GatewayAccountMonthlyPerformanceReportEntityMapper;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 public class TransactionSummaryDao {
 
@@ -40,6 +44,20 @@ public class TransactionSummaryDao {
             " AND ts.type = :type" +
             " AND ts.live = :live" +
             " AND ts.moto = :moto";
+
+    private static final String MONTHLY_GATEWAY_ACCOUNT_PERFORMANCE_STATISTICS = "SELECT " + "t.gateway_account_id, " +
+            "COALESCE(SUM(t.no_of_transactions), 0) AS volume, " +
+            "COALESCE(SUM(t.total_amount_in_pence), 0) AS total_amount, " +
+            "COALESCE(SUM(t.total_amount_in_pence)/SUM(t.no_of_transactions), 0) AS avg_amount, " +
+            "EXTRACT(YEAR from transaction_date) AS year, " +
+            "EXTRACT(MONTH from transaction_date) AS month " +
+            "FROM transaction_summary t " +
+            "WHERE t.state = 'SUCCESS' " +
+            "AND t.type = 'PAYMENT' " +
+            "AND t.live = TRUE " +
+            "AND transaction_date BETWEEN :startDate AND :endDate " +
+            "GROUP BY t.gateway_account_id, year, month " +
+            "ORDER BY t.gateway_account_id, year, month";
 
     private final Jdbi jdbi;
 
@@ -95,4 +113,12 @@ public class TransactionSummaryDao {
         );
     }
 
+    public List<GatewayAccountMonthlyPerformanceReportEntity> monthlyPerformanceReportForGatewayAccounts(LocalDate startDate, LocalDate endDate) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery(MONTHLY_GATEWAY_ACCOUNT_PERFORMANCE_STATISTICS)
+                        .bind("startDate", startDate)
+                        .bind("endDate", endDate)
+                        .map(new GatewayAccountMonthlyPerformanceReportEntityMapper()).list());
+    }
 }

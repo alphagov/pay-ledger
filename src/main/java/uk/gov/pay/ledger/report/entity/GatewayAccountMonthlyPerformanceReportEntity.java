@@ -12,8 +12,6 @@ public class GatewayAccountMonthlyPerformanceReportEntity {
     private final long totalVolume;
     private final BigDecimal totalAmount;
     private final BigDecimal averageAmount;
-    private final BigDecimal minimumAmount;
-    private final BigDecimal maximumAmount;
     private final long month;
     private final long year;
 
@@ -21,16 +19,12 @@ public class GatewayAccountMonthlyPerformanceReportEntity {
                                                         long totalVolume,
                                                         BigDecimal totalAmount,
                                                         BigDecimal averageAmount,
-                                                        BigDecimal minimumAmount,
-                                                        BigDecimal maximumAmount,
                                                         long year,
                                                         long month) {
         this.gatewayAccountId = gatewayAccountId;
         this.totalVolume = totalVolume;
         this.totalAmount = totalAmount;
         this.averageAmount = averageAmount;
-        this.minimumAmount = minimumAmount;
-        this.maximumAmount = maximumAmount;
         this.year = year;
         this.month = month;
     }
@@ -49,14 +43,6 @@ public class GatewayAccountMonthlyPerformanceReportEntity {
 
     public BigDecimal getAverageAmount() {
         return averageAmount;
-    }
-
-    public BigDecimal getMinimumAmount() {
-        return minimumAmount;
-    }
-
-    public BigDecimal getMaximumAmount() {
-        return maximumAmount;
     }
 
     public long getYear() {

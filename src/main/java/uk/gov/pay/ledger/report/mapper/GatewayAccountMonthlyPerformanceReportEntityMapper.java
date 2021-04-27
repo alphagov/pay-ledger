@@ -17,8 +17,6 @@ public class GatewayAccountMonthlyPerformanceReportEntityMapper implements RowMa
                 rs.getLong("volume"),
                 new BigDecimal(rs.getString("total_amount")),
                 new BigDecimal(rs.getString("avg_amount")),
-                new BigDecimal(rs.getString("min_amount")),
-                new BigDecimal(rs.getString("max_amount")),
                 rs.getLong("year"),
                 rs.getLong("month")
         );
