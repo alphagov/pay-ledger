@@ -20,7 +20,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
-import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionSummaryFixture.aTransactionSummaryFixture;
 
 public class PerformanceReportResourceIT {
@@ -35,6 +34,7 @@ public class PerformanceReportResourceIT {
     @AfterEach
     public void tearDown() {
         databaseTestHelper.truncateAllData();
+        databaseTestHelper.truncateTransactionSummaryData();
     }
 
     @Test
@@ -52,11 +52,12 @@ public class PerformanceReportResourceIT {
     @Test
     public void report_volume_total_amount_and_average_amount_for_all_payments() {
         Stream.of(TransactionState.STARTED, TransactionState.SUCCESS, TransactionState.SUBMITTED).forEach(state ->
-                aTransactionFixture()
+                aTransactionSummaryFixture()
                         .withAmount(1000L)
                         .withState(state)
-                        .withTransactionType("PAYMENT")
+                        .withType(PAYMENT)
                         .withLive(true)
+                        .withNoOfTransactions(1L)
                         .insert(rule.getJdbi()));
 
         given().port(port)
@@ -72,18 +73,20 @@ public class PerformanceReportResourceIT {
 
     @Test
     public void report_volume_total_amount_and_average_amount_by_state() {
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withAmount(1000L)
                 .withState(TransactionState.SUBMITTED)
-                .withTransactionType("PAYMENT")
+                .withType(PAYMENT)
                 .withLive(true)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
 
-        LongStream.of(1200L, 1020L, 750L).forEach(amount -> aTransactionFixture()
+        LongStream.of(1200L, 1020L, 750L).forEach(amount -> aTransactionSummaryFixture()
                 .withAmount(amount)
                 .withState(TransactionState.SUCCESS)
-                .withTransactionType("PAYMENT")
+                .withType(PAYMENT)
                 .withLive(true)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi()));
 
         given().port(port)
@@ -100,18 +103,19 @@ public class PerformanceReportResourceIT {
 
     @Test
     public void report_volume_total_amount_and_average_amount_for_date_range() {
-        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionFixture()
-                .withCreatedDate(ZonedDateTime.parse(time))
+        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionSummaryFixture()
+                .withTransactionDate(ZonedDateTime.parse(time))
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
-                .withTransactionType("PAYMENT")
+                .withType(PAYMENT)
                 .withLive(true)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi()));
 
         given().port(port)
                 .contentType(JSON)
-                .queryParam("from_date", "2017-11-30T10:00:00Z")
-                .queryParam("to_date", "2019-12-12T10:00:00Z")
+                .queryParam("from_date", "2017-11-30")
+                .queryParam("to_date", "2019-12-12")
                 .get("/v1/report/performance-report")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
@@ -126,7 +130,7 @@ public class PerformanceReportResourceIT {
         Stream.of("from_date", "to_date").forEach(queryParam ->
                 given().port(port)
                         .contentType(JSON)
-                        .queryParam(queryParam, "2017-11-30T10:00:00Z")
+                        .queryParam(queryParam, "2017-11-30")
                         .get("/v1/report/performance-report")
                         .then()
                         .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
