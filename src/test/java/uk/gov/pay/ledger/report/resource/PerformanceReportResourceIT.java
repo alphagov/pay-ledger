@@ -10,12 +10,12 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.service.payments.commons.model.ErrorIdentifier;
 
 import javax.ws.rs.core.Response;
-import java.time.ZonedDateTime;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.time.LocalDate.parse;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
@@ -103,8 +103,8 @@ public class PerformanceReportResourceIT {
 
     @Test
     public void report_volume_total_amount_and_average_amount_for_date_range() {
-        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionSummaryFixture()
-                .withTransactionDate(ZonedDateTime.parse(time))
+        Stream.of("2019-12-12", "2019-12-11", "2017-11-30").forEach(date -> aTransactionSummaryFixture()
+                .withTransactionDate(parse(date))
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
                 .withType(PAYMENT)
@@ -140,8 +140,8 @@ public class PerformanceReportResourceIT {
 
     @Test
     public void report_volume_total_amount_and_average_amount_for_date_range_per_gateway_account() {
-        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionSummaryFixture()
-                .withTransactionDate(ZonedDateTime.parse(time))
+        Stream.of("2019-12-12", "2019-12-11", "2017-11-30").forEach(date -> aTransactionSummaryFixture()
+                .withTransactionDate(parse(date))
                 .withAmount(1000L)
                 .withGatewayAccountId("1")
                 .withState(TransactionState.SUCCESS)
@@ -150,8 +150,8 @@ public class PerformanceReportResourceIT {
                 .withNoOfTransactions(1L)
                 .insert(rule.getJdbi()));
 
-        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionSummaryFixture()
-                .withTransactionDate(ZonedDateTime.parse(time))
+        Stream.of("2019-12-12", "2019-12-11", "2017-11-30").forEach(date -> aTransactionSummaryFixture()
+                .withTransactionDate(parse(date))
                 .withAmount(1000L)
                 .withGatewayAccountId("2")
                 .withState(TransactionState.SUCCESS)

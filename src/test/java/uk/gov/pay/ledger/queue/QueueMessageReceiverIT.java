@@ -14,6 +14,7 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -278,7 +279,7 @@ public class QueueMessageReceiverIT {
 
         Thread.sleep(500);
 
-        List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT, SUCCESS, CREATED_AT, true, false);
+        List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT, SUCCESS, LocalDate.parse("2019-06-07"), true, false);
 
         assertThat(transactionSummary.get(0).get("gateway_account_id"), is(gatewayAccountId));
         assertThat(transactionSummary.get(0).get("transaction_date").toString(), Matchers.is("2019-06-07"));

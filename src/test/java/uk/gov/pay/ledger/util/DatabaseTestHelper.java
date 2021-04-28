@@ -4,7 +4,7 @@ import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +85,7 @@ public class DatabaseTestHelper {
     }
 
     public List<Map<String, Object>> getTransactionSummary(String gatewayAccountId, TransactionType type,
-                                                           TransactionState state, ZonedDateTime transactionDate,
+                                                           TransactionState state, LocalDate transactionDate,
                                                            boolean live, boolean moto) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("SELECT * FROM transaction_summary where gateway_account_id = :gatewayAccountId" +

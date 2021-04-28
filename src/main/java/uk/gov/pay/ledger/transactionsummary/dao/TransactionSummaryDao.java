@@ -81,7 +81,7 @@ public class TransactionSummaryDao {
         this.jdbi = jdbi;
     }
 
-    public void upsert(String gatewayAccountId, String transactionType, ZonedDateTime transactionDate,
+    public void upsert(String gatewayAccountId, String transactionType, LocalDate transactionDate,
                        TransactionState state, boolean live, boolean moto, Long amount) {
         jdbi.withHandle(handle ->
                 handle.createUpdate(UPSERT_STRING)
@@ -96,7 +96,7 @@ public class TransactionSummaryDao {
         );
     }
 
-    public void updateFee(String gatewayAccountId, String transactionType, ZonedDateTime transactionDate,
+    public void updateFee(String gatewayAccountId, String transactionType, LocalDate transactionDate,
                           TransactionState state, boolean live, boolean moto, Long fee) {
         jdbi.withHandle(handle ->
                 handle.createUpdate(UPDATE_FEE)
@@ -112,7 +112,7 @@ public class TransactionSummaryDao {
     }
 
     public void deductTransactionSummaryFor(String gatewayAccountId, String transactionType,
-                                            ZonedDateTime transactionDate, TransactionState state, boolean live,
+                                            LocalDate transactionDate, TransactionState state, boolean live,
                                             boolean moto, Long amount, Long fee) {
         jdbi.withHandle(handle ->
                 handle.createUpdate(DEDUCT_TRANSACTION_SUMMARY)
