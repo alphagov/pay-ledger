@@ -6,15 +6,17 @@ import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
-import static java.time.ZonedDateTime.parse;
+import static java.time.LocalDate.parse;
+
 
 public class TransactionSummaryFixture {
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private TransactionType type = TransactionType.PAYMENT;
     private TransactionState state = TransactionState.SUCCESS;
-    private ZonedDateTime transactionDate = parse("2018-09-22T10:13:16.067Z");
+    private LocalDate transactionDate = parse("2018-09-22");
     private boolean live;
     private boolean moto;
     private Long amount = RandomUtils.nextLong(1, 99999);
@@ -69,7 +71,7 @@ public class TransactionSummaryFixture {
         return this;
     }
 
-    public TransactionSummaryFixture withTransactionDate(ZonedDateTime transactionDate) {
+    public TransactionSummaryFixture withTransactionDate(LocalDate transactionDate) {
         this.transactionDate = transactionDate;
         return this;
     }
@@ -111,7 +113,7 @@ public class TransactionSummaryFixture {
         return state;
     }
 
-    public ZonedDateTime getTransactionDate() {
+    public LocalDate getTransactionDate() {
         return transactionDate;
     }
 

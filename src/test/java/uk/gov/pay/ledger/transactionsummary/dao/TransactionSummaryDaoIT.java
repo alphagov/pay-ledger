@@ -13,13 +13,12 @@ import uk.gov.pay.ledger.util.fixture.TransactionSummaryFixture;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.math.BigDecimal.ZERO;
-import static java.time.ZonedDateTime.parse;
+import static java.time.LocalDate.parse;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -51,12 +50,12 @@ public class TransactionSummaryDaoIT {
         String gatewayAccountId1 = "account-" + randomAlphanumeric(10);
         String gatewayAccountId2 = "account-" + randomAlphanumeric(10);
         transactionSummaryDao.upsert(gatewayAccountId1, "PAYMENT",
-                parse("2018-09-22T08:46:01.123456Z"), SUCCESS, false, false, 100L);
+                parse("2018-09-22"), SUCCESS, false, false, 100L);
         transactionSummaryDao.upsert(gatewayAccountId2, "PAYMENT",
-                parse("2018-09-23T09:46:01.123456Z"), FAILED_REJECTED, true, true, 200L);
+                parse("2018-09-23"), FAILED_REJECTED, true, true, 200L);
 
         List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId1, PAYMENT,
-                SUCCESS, parse("2018-09-22T00:00:00.000000Z"), false, false);
+                SUCCESS, parse("2018-09-22"), false, false);
         assertThat(transactionSummary.get(0).get("gateway_account_id"), is(gatewayAccountId1));
         assertThat(transactionSummary.get(0).get("transaction_date").toString(), is("2018-09-22"));
         assertThat(transactionSummary.get(0).get("state"), is("SUCCESS"));
@@ -66,7 +65,7 @@ public class TransactionSummaryDaoIT {
         assertThat(transactionSummary.get(0).get("no_of_transactions"), is(1L));
 
         transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId2, PAYMENT,
-                FAILED_REJECTED, parse("2018-09-23T00:00:00.000000Z"), true, true);
+                FAILED_REJECTED, parse("2018-09-23"), true, true);
         assertThat(transactionSummary.get(0).get("gateway_account_id"), is(gatewayAccountId2));
         assertThat(transactionSummary.get(0).get("transaction_date").toString(), is("2018-09-23"));
         assertThat(transactionSummary.get(0).get("state"), is("FAILED_REJECTED"));
@@ -81,7 +80,7 @@ public class TransactionSummaryDaoIT {
         String gatewayAccountId = "account-" + randomAlphanumeric(10);
         TransactionSummaryFixture transactionSummaryFixture = aTransactionSummaryFixture()
                 .withGatewayAccountId(gatewayAccountId)
-                .withTransactionDate(parse("2018-09-22T00:00:00.000000Z"))
+                .withTransactionDate(parse("2018-09-22"))
                 .withType(PAYMENT)
                 .withState(SUCCESS)
                 .withAmount(1000L)
@@ -93,7 +92,7 @@ public class TransactionSummaryDaoIT {
                 false, false, 123L);
 
         List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT,
-                SUCCESS, parse("2018-09-22T00:00:00.000000Z"), false, false);
+                SUCCESS, parse("2018-09-22"), false, false);
         assertThat(transactionSummary.get(0).get("gateway_account_id"), is(gatewayAccountId));
         assertThat(transactionSummary.get(0).get("transaction_date").toString(), is("2018-09-22"));
         assertThat(transactionSummary.get(0).get("state"), is("SUCCESS"));
@@ -108,7 +107,7 @@ public class TransactionSummaryDaoIT {
         String gatewayAccountId = "account-" + randomAlphanumeric(10);
         TransactionSummaryFixture transactionSummaryFixture = aTransactionSummaryFixture()
                 .withGatewayAccountId(gatewayAccountId)
-                .withTransactionDate(parse("2018-09-22T00:00:00.000000Z"))
+                .withTransactionDate(parse("2018-09-22"))
                 .withType(PAYMENT)
                 .withState(SUCCESS)
                 .withAmount(1000L)
@@ -120,7 +119,7 @@ public class TransactionSummaryDaoIT {
                 false, false, 123L, 23L);
 
         List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT,
-                SUCCESS, parse("2018-09-22T00:00:00.000000Z"), false, false);
+                SUCCESS, parse("2018-09-22"), false, false);
         assertThat(transactionSummary.get(0).get("gateway_account_id"), is(gatewayAccountId));
         assertThat(transactionSummary.get(0).get("transaction_date").toString(), is("2018-09-22"));
         assertThat(transactionSummary.get(0).get("state"), is("SUCCESS"));
@@ -136,7 +135,7 @@ public class TransactionSummaryDaoIT {
         String gatewayAccountId = "account-" + randomAlphanumeric(10);
         TransactionSummaryFixture transactionSummaryFixture = aTransactionSummaryFixture()
                 .withGatewayAccountId(gatewayAccountId)
-                .withTransactionDate(parse("2018-09-22T00:00:00.000000Z"))
+                .withTransactionDate(parse("2018-09-22"))
                 .withType(PAYMENT)
                 .withState(SUCCESS)
                 .withAmount(1000L)
@@ -148,7 +147,7 @@ public class TransactionSummaryDaoIT {
                 false, false, 23L);
 
         List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId, PAYMENT,
-                SUCCESS, parse("2018-09-22T00:00:00.000000Z"), false, false);
+                SUCCESS, parse("2018-09-22"), false, false);
         assertThat(transactionSummary.get(0).get("gateway_account_id"), is(gatewayAccountId));
         assertThat(transactionSummary.get(0).get("transaction_date").toString(), is("2018-09-22"));
         assertThat(transactionSummary.get(0).get("state"), is("SUCCESS"));
@@ -166,7 +165,7 @@ public class TransactionSummaryDaoIT {
                 .withState(STARTED)
                 .withType(PAYMENT)
                 .withLive(true)
-                .withTransactionDate(ZonedDateTime.parse("2019-01-01T02:00:00Z"))
+                .withTransactionDate(parse("2019-01-01"))
                 .insert(rule.getJdbi());
 
         aTransactionSummaryFixture()
@@ -175,7 +174,7 @@ public class TransactionSummaryDaoIT {
                 .withState(SUCCESS)
                 .withType(REFUND)
                 .withLive(true)
-                .withTransactionDate(ZonedDateTime.parse("2019-01-01T02:00:00Z"))
+                .withTransactionDate(parse("2019-01-01"))
                 .insert(rule.getJdbi());
 
         aTransactionSummaryFixture()
@@ -184,7 +183,7 @@ public class TransactionSummaryDaoIT {
                 .withState(SUCCESS)
                 .withType(PAYMENT)
                 .withLive(true)
-                .withTransactionDate(ZonedDateTime.parse("2018-01-01T02:00:00Z"))
+                .withTransactionDate(parse("2018-01-01"))
                 .insert(rule.getJdbi());
 
         List<String> relevantGatewayAccounts = List.of("1", "2");
@@ -195,12 +194,12 @@ public class TransactionSummaryDaoIT {
                 .withState(SUCCESS)
                 .withType(PAYMENT)
                 .withLive(true)
-                .withTransactionDate(ZonedDateTime.parse("2019-01-01T02:00:00Z"))
+                .withTransactionDate(parse("2019-01-01"))
                 .insert(rule.getJdbi()));
 
         BigDecimal expectedValue = BigDecimal.valueOf(1000);
-        LocalDate startDate = LocalDate.parse("2019-01-01");
-        LocalDate endDate = LocalDate.parse("2019-02-01");
+        LocalDate startDate = parse("2019-01-01");
+        LocalDate endDate = parse("2019-02-01");
 
         List<GatewayAccountMonthlyPerformanceReportEntity> performanceReport = transactionSummaryDao.monthlyPerformanceReportForGatewayAccounts(startDate, endDate);
 
@@ -226,8 +225,8 @@ public class TransactionSummaryDaoIT {
 
     @Test
     public void report_volume_total_amount_and_average_amount_for_date_range() {
-        Stream.of("2019-12-31T10:00:00Z", "2019-12-30T10:00:00Z", "2017-11-29T10:00:00Z").forEach(time -> aTransactionSummaryFixture()
-                .withTransactionDate(ZonedDateTime.parse(time))
+        Stream.of("2019-12-31", "2019-12-30", "2017-11-29").forEach(date -> aTransactionSummaryFixture()
+                .withTransactionDate(LocalDate.parse(date))
                 .withAmount(100L)
                 .withState(TransactionState.SUCCESS)
                 .withType(PAYMENT)
@@ -235,8 +234,8 @@ public class TransactionSummaryDaoIT {
                 .withNoOfTransactions(1L)
                 .insert(rule.getJdbi()));
 
-        Stream.of("2019-12-12T10:00:00Z", "2019-12-11T10:00:00Z", "2017-11-30T10:00:00Z").forEach(time -> aTransactionSummaryFixture()
-                .withTransactionDate(ZonedDateTime.parse(time))
+        Stream.of("2019-12-12", "2019-12-11", "2017-11-30").forEach(date -> aTransactionSummaryFixture()
+                .withTransactionDate(LocalDate.parse(date))
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
                 .withType(PAYMENT)

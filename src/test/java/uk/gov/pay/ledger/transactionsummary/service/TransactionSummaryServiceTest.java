@@ -11,9 +11,11 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transactionsummary.dao.TransactionSummaryDao;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import static java.time.ZoneOffset.UTC;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -64,7 +66,7 @@ public class TransactionSummaryServiceTest {
         transactionSummaryService.projectTransactionSummary(transactionEntity, paymentCreatedEvent);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
-                transactionEntity.getTransactionType(), transactionEntity.getCreatedDate(),
+                transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
                 transactionEntity.getState(), transactionEntity.isLive(),
                 transactionEntity.isMoto(), transactionEntity.getAmount());
         verifyNoMoreInteractions(mockTransactionSummaryDao);
@@ -88,11 +90,11 @@ public class TransactionSummaryServiceTest {
         transactionSummaryService.projectTransactionSummary(transactionEntity, event3);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
-                transactionEntity.getTransactionType(), transactionEntity.getCreatedDate(),
+                transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
                 transactionEntity.getState(), transactionEntity.isLive(),
                 transactionEntity.isMoto(), transactionEntity.getAmount());
         verify(mockTransactionSummaryDao).deductTransactionSummaryFor(transactionEntity.getGatewayAccountId(),
-                transactionEntity.getTransactionType(), transactionEntity.getCreatedDate(),
+                transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
                 transactionEntity.getState(), transactionEntity.isLive(),
                 transactionEntity.isMoto(), transactionEntity.getAmount(), transactionEntity.getFee());
     }
@@ -114,7 +116,7 @@ public class TransactionSummaryServiceTest {
         transactionSummaryService.projectTransactionSummary(transactionEntity, event);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
-                transactionEntity.getTransactionType(), transactionEntity.getCreatedDate(),
+                transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
                 transactionEntity.getState(), transactionEntity.isLive(),
                 transactionEntity.isMoto(), transactionEntity.getAmount());
         verifyNoMoreInteractions(mockTransactionSummaryDao);
@@ -137,11 +139,11 @@ public class TransactionSummaryServiceTest {
         transactionSummaryService.projectTransactionSummary(transactionEntity, event);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
-                transactionEntity.getTransactionType(), transactionEntity.getCreatedDate(),
+                transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
                 transactionEntity.getState(), transactionEntity.isLive(),
                 transactionEntity.isMoto(), transactionEntity.getAmount());
         verify(mockTransactionSummaryDao).updateFee(transactionEntity.getGatewayAccountId(),
-                transactionEntity.getTransactionType(), transactionEntity.getCreatedDate(),
+                transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
                 transactionEntity.getState(), transactionEntity.isLive(),
                 transactionEntity.isMoto(), transactionEntity.getFee());
         verifyNoMoreInteractions(mockTransactionSummaryDao);
@@ -163,7 +165,7 @@ public class TransactionSummaryServiceTest {
         transactionSummaryService.projectTransactionSummary(transactionEntity, event);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
-                transactionEntity.getTransactionType(), transactionEntity.getCreatedDate(),
+                transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
                 transactionEntity.getState(), transactionEntity.isLive(),
                 transactionEntity.isMoto(), transactionEntity.getAmount());
 

@@ -8,11 +8,15 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.transactionsummary.dao.TransactionSummaryDao;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.time.ZoneOffset.UTC;
+import static java.time.ZonedDateTime.parse;
 import static uk.gov.pay.ledger.event.model.SalientEventType.CAPTURE_CONFIRMED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.PAYMENT_CREATED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.from;
@@ -77,13 +81,13 @@ public class TransactionSummaryService {
             }
 
             transactionSummaryDao.deductTransactionSummaryFor(transaction.getGatewayAccountId(),
-                    transaction.getTransactionType(), transaction.getCreatedDate(),
+                    transaction.getTransactionType(), toLocalDate(transaction.getCreatedDate()),
                     getTransactionState(previousEvent).get(), transaction.isLive(), transaction.isMoto(),
                     (transaction.getTotalAmount() != null ? transaction.getTotalAmount() : transaction.getAmount()),
                     transaction.getFee());
         }
         transactionSummaryDao.upsert(transaction.getGatewayAccountId(), transaction.getTransactionType(),
-                transaction.getCreatedDate(), transaction.getState(), transaction.isLive(), transaction.isMoto(),
+                toLocalDate(transaction.getCreatedDate()), transaction.getState(), transaction.isLive(), transaction.isMoto(),
                 (transaction.getTotalAmount() != null ? transaction.getTotalAmount() : transaction.getAmount()));
     }
 
@@ -102,9 +106,13 @@ public class TransactionSummaryService {
         if ((currentEvent == PAYMENT_CREATED || (currentEvent == CAPTURE_CONFIRMED && noOfCaptureConfirmedEvents == 1))
                 && transaction.getFee() != null) {
             transactionSummaryDao.updateFee(transaction.getGatewayAccountId(), transaction.getTransactionType(),
-                    transaction.getCreatedDate(), transaction.getState(), transaction.isLive(), transaction.isMoto(),
+                    toLocalDate(transaction.getCreatedDate()), transaction.getState(), transaction.isLive(), transaction.isMoto(),
                     transaction.getFee());
         }
+    }
+
+    private LocalDate toLocalDate(ZonedDateTime createdDate) {
+        return LocalDate.ofInstant(createdDate.toInstant(), UTC);
     }
 
     private boolean currentEventTransactionStateMatchesWithPreviousEvent(Event currentEvent, Event previousEvent) {
