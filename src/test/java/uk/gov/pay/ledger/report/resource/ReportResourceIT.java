@@ -8,6 +8,7 @@ import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 import static io.restassured.RestAssured.given;
@@ -15,6 +16,7 @@ import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.ledger.util.fixture.TransactionSummaryFixture.aTransactionSummaryFixture;
 
 public class ReportResourceIT {
 
@@ -27,6 +29,7 @@ public class ReportResourceIT {
     @BeforeEach
     public void setUp() {
         aDatabaseTestHelper(rule.getJdbi()).truncateAllData();
+        aDatabaseTestHelper(rule.getJdbi()).truncateTransactionSummaryData();
     }
 
     @Test
@@ -65,29 +68,24 @@ public class ReportResourceIT {
 
     @Test
     public void shouldGetTransactionSummaryStatisticsForToolbox() {
-        aTransactionFixture()
-                .withAmount(1000L)
+        aTransactionSummaryFixture()
+                .withAmount(3000L)
                 .withState(TransactionState.SUCCESS)
                 .withGatewayAccountId(gatewayAccountId)
-                .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
-                .insert(rule.getJdbi());
-        aTransactionFixture()
-                .withAmount(2000L)
-                .withState(TransactionState.SUCCESS)
-                .withGatewayAccountId(gatewayAccountId)
-                .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
+                .withTransactionDate(LocalDate.parse("2019-10-02"))
+                .withNoOfTransactions(2L)
                 .insert(rule.getJdbi());
 
         given().port(port)
                 .contentType(JSON)
                 .get("/v1/report/transactions-summary?account_id=" + gatewayAccountId +
                         "&from_date=2019-10-01T09:00:00.000Z" +
-                        "&to_date=2019-10-01T11:00:00.000Z" +
+                        "&to_date=2019-11-01T11:00:00.000Z" +
                         "&override_from_date_validation=true"
                 )
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON).log().body()
+                .contentType(JSON)
                 .body("payments.count", is(2))
                 .body("payments.gross_amount", is(3000))
                 .body("net_income", is(3000));
@@ -95,26 +93,30 @@ public class ReportResourceIT {
 
     @Test
     public void shouldGetTransactionSummaryStatisticsWithMotoForToolbox() {
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
+                .withType(TransactionType.PAYMENT)
                 .withGatewayAccountId(gatewayAccountId)
-                .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
+                .withTransactionDate(LocalDate.parse("2019-10-01"))
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withAmount(2000L)
                 .withMoto(true)
                 .withState(TransactionState.SUCCESS)
+                .withType(TransactionType.PAYMENT)
                 .withGatewayAccountId(gatewayAccountId)
-                .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
+                .withTransactionDate(LocalDate.parse("2019-10-01"))
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
 
         given().port(port)
                 .contentType(JSON)
                 .get("/v1/report/transactions-summary?account_id=" + gatewayAccountId +
                         "&include_moto_statistics=true" +
-                        "&from_date=2019-10-01T09:00:00.000Z" +
-                        "&to_date=2019-10-01T11:00:00.000Z" +
+                        "&from_date=2019-09-01T09:00:00.000Z" +
+                        "&to_date=2019-11-01T11:00:00.000Z" +
                         "&override_from_date_validation=true"
                 )
                 .then()
@@ -129,61 +131,69 @@ public class ReportResourceIT {
 
     @Test
     public void shouldGetTransactionSummaryForSelfservice() {
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withGatewayAccountId(gatewayAccountId)
-                .withTransactionType(TransactionType.PAYMENT.name())
-                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withType(TransactionType.PAYMENT)
+                .withTransactionDate(LocalDate.parse("2019-09-30"))
                 .withAmount(2000L)
                 .withState(TransactionState.FAILED_REJECTED)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withGatewayAccountId(gatewayAccountId)
-                .withTransactionType(TransactionType.PAYMENT.name())
-                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withType(TransactionType.PAYMENT)
+                .withTransactionDate(LocalDate.parse("2019-09-30"))
                 .withAmount(4000L)
                 .withState(TransactionState.SUCCESS)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withGatewayAccountId(gatewayAccountId)
-                .withTransactionType(TransactionType.PAYMENT.name())
-                .withCreatedDate(ZonedDateTime.parse("2019-09-29T00:00:00.000Z"))
+                .withType(TransactionType.PAYMENT)
+                .withTransactionDate(LocalDate.parse("2019-09-28"))
                 .withAmount(4000L)
                 .withState(TransactionState.SUCCESS)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withGatewayAccountId("another-gateway-account")
-                .withTransactionType(TransactionType.PAYMENT.name())
-                .withCreatedDate(ZonedDateTime.parse("2019-09-29T00:00:00.000Z"))
+                .withType(TransactionType.PAYMENT)
+                .withTransactionDate(LocalDate.parse("2019-09-29"))
                 .withAmount(4000L)
                 .withState(TransactionState.SUCCESS)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withGatewayAccountId(gatewayAccountId)
-                .withTransactionType(TransactionType.REFUND.name())
-                .withCreatedDate(ZonedDateTime.parse("2019-10-01T00:00:00.000Z"))
+                .withType(TransactionType.REFUND)
+                .withTransactionDate(LocalDate.parse("2019-10-01"))
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withGatewayAccountId("another-gateway-account")
-                .withTransactionType(TransactionType.REFUND.name())
-                .withCreatedDate(ZonedDateTime.parse("2019-10-01T00:00:00.000Z"))
+                .withType(TransactionType.REFUND)
+                .withTransactionDate(LocalDate.parse("2019-10-01"))
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withGatewayAccountId(gatewayAccountId)
-                .withTransactionType(TransactionType.REFUND.name())
-                .withCreatedDate(ZonedDateTime.parse("2019-09-28T00:00:00.000Z"))
+                .withType(TransactionType.REFUND)
+                .withTransactionDate(LocalDate.parse("2019-09-28"))
                 .withAmount(3000L)
                 .withState(TransactionState.SUCCESS)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
-        aTransactionFixture()
+        aTransactionSummaryFixture()
                 .withGatewayAccountId(gatewayAccountId)
-                .withTransactionType(TransactionType.REFUND.name())
-                .withCreatedDate(ZonedDateTime.parse("2019-09-30T00:00:00.000Z"))
+                .withType(TransactionType.REFUND)
+                .withTransactionDate(LocalDate.parse("2019-09-30"))
                 .withAmount(2000L)
                 .withState(TransactionState.FAILED_REJECTED)
+                .withNoOfTransactions(1L)
                 .insert(rule.getJdbi());
 
         given().port(port)

@@ -7,7 +7,6 @@ import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 
 import static java.time.LocalDate.parse;
 
