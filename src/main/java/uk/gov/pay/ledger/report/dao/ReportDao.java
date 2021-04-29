@@ -23,13 +23,6 @@ public class ReportDao {
             ":searchExtraFields " +
             "GROUP BY state";
 
-    private static final String TRANSACTION_SUMMARY_STATISTICS = "SELECT count(1) AS count, " +
-            "SUM(CASE WHEN total_amount IS NULL THEN amount ELSE total_amount END) AS grossAmount " +
-            "FROM transaction t " +
-            "WHERE type = :transactionType::transaction_type " +
-            "AND state = :state " +
-            ":searchExtraFields ";
-
     private final Jdbi jdbi;
 
     @Inject
@@ -51,23 +44,6 @@ public class ReportDao {
                 Long count = rs.getLong("count");
                 return new PaymentCountByStateResult(state, count);
             }).list();
-        });
-    }
-
-    public TransactionsStatisticsResult getTransactionSummaryStatistics(TransactionStatisticQuery transactionStatisticQuery, TransactionType transactionType) {
-        return jdbi.withHandle(handle -> {
-            String template = createSearchTemplate(transactionStatisticQuery.getFilterTemplates(), TRANSACTION_SUMMARY_STATISTICS);
-
-            Query query = handle.createQuery(template)
-                    .bind("transactionType", transactionType)
-                    .bind("state", TransactionState.SUCCESS);
-            transactionStatisticQuery.getQueryMap().forEach(query::bind);
-
-            return query.map((rs, rowNum) -> {
-                long count = rs.getLong("count");
-                long grossAmount = rs.getLong("grossAmount");
-                return new TransactionsStatisticsResult(count, grossAmount);
-            }).one();
         });
     }
 
