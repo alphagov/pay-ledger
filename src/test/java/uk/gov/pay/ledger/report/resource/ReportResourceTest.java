@@ -154,7 +154,7 @@ public class ReportResourceTest {
     public void getTransactionSummary_shouldReturn400IfGatewayAccountIsNotProvided() {
         Response response = resources
                 .target("/v1/report/transactions-summary")
-                .queryParam("from_date", "2019-10-01T10:00:00Z")
+                .queryParam("from_date", "2019-10-01T09:00:00.000Z")
                 .request()
                 .get();
 

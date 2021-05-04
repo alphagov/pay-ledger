@@ -9,13 +9,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.report.dao.ReportDao;
 import uk.gov.pay.ledger.report.dao.builder.TransactionStatisticQuery;
-import uk.gov.pay.ledger.report.dao.builder.TransactionSummaryStatisticQuery;
 import uk.gov.pay.ledger.report.entity.PaymentCountByStateResult;
 import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
 import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
-import uk.gov.pay.ledger.transactionsummary.dao.TransactionSummaryDao;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -39,14 +37,8 @@ public class ReportServiceTest {
     @Mock
     private ReportDao mockReportDao;
 
-    @Mock
-    private TransactionSummaryDao mockTransactionSummaryDao;
-
     @Captor
     private ArgumentCaptor<TransactionStatisticQuery> transactionStatisticQueryArgumentCaptor;
-
-    @Captor
-    private ArgumentCaptor<TransactionSummaryStatisticQuery> transactionSummaryStatisticQueryArgumentCaptor;
 
     @InjectMocks
     private ReportService reportService;
@@ -109,8 +101,8 @@ public class ReportServiceTest {
     @Test
     public void shouldReturnTransactionSummaryStatistics_whenMotoProvided() {
         String gatewayAccountId = "1";
-        String fromDate = "2019-10-01T10:00:00Z";
-        String toDate = "2019-11-01T10:00:00Z";
+        String fromDate = "2019-10-01T10:00:00.000Z";
+        String toDate = "2019-10-01T11:00:00.000Z";
         var params = new TransactionSummaryParams();
         params.setFromDate(fromDate);
         params.setToDate(toDate);
@@ -124,22 +116,22 @@ public class ReportServiceTest {
                 10000L
         );
 
-        var transactionStatisticQueryWithoutMoto = new TransactionSummaryStatisticQuery()
+        var transactionStatisticQueryWithoutMoto = new TransactionStatisticQuery()
                 .withAccountId(params.getAccountId())
                 .withFromDate(params.getFromDate())
                 .withToDate(params.getToDate());
 
-        var transactionStatisticQueryWithMoto = new TransactionSummaryStatisticQuery()
+        var transactionStatisticQueryWithMoto = new TransactionStatisticQuery()
                 .withAccountId(params.getAccountId())
                 .withFromDate(params.getFromDate())
                 .withToDate(params.getToDate())
                 .withMoto(params.isIncludeMotoStatistics());
 
-        when(mockTransactionSummaryDao.getTransactionSummaryStatistics(eq(transactionStatisticQueryWithoutMoto), eq(TransactionType.PAYMENT)))
+        when(mockReportDao.getTransactionSummaryStatistics(eq(transactionStatisticQueryWithoutMoto), eq(TransactionType.PAYMENT)))
                 .thenReturn(result.getPayments());
-        when(mockTransactionSummaryDao.getTransactionSummaryStatistics(eq(transactionStatisticQueryWithoutMoto), eq(TransactionType.REFUND)))
+        when(mockReportDao.getTransactionSummaryStatistics(eq(transactionStatisticQueryWithoutMoto), eq(TransactionType.REFUND)))
                 .thenReturn(result.getRefunds());
-        when(mockTransactionSummaryDao.getTransactionSummaryStatistics(eq(transactionStatisticQueryWithMoto), eq(TransactionType.PAYMENT)))
+        when(mockReportDao.getTransactionSummaryStatistics(eq(transactionStatisticQueryWithMoto), eq(TransactionType.PAYMENT)))
                 .thenReturn(result.getMotoPayments());
 
         var transactionStatistics = reportService.getTransactionsSummary(params);
@@ -150,24 +142,24 @@ public class ReportServiceTest {
     @Test
     public void shouldReturnTransactionSummaryStatistics_whenGatewayAccountIdProvided() {
         String gatewayAccountId = "1";
-        String fromDate = "2019-10-01T10:00:00Z";
-        String toDate = "2019-11-01T10:00:00Z";
+        String fromDate = "2019-10-01T10:00:00.000Z";
+        String toDate = "2019-10-01T11:00:00.000Z";
         var params = new TransactionSummaryParams();
         params.setFromDate(fromDate);
         params.setToDate(toDate);
         params.setAccountId(gatewayAccountId);
 
         var result = new TransactionSummaryResult(new TransactionsStatisticsResult(5L, 10000L), new TransactionsStatisticsResult(0L, 0L), new TransactionsStatisticsResult(0L, 0L), 10000L);
-        when(mockTransactionSummaryDao.getTransactionSummaryStatistics(transactionSummaryStatisticQueryArgumentCaptor.capture(), eq(TransactionType.PAYMENT)))
+        when(mockReportDao.getTransactionSummaryStatistics(transactionStatisticQueryArgumentCaptor.capture(), eq(TransactionType.PAYMENT)))
                 .thenReturn(result.getPayments());
-        when(mockTransactionSummaryDao.getTransactionSummaryStatistics(transactionSummaryStatisticQueryArgumentCaptor.capture(), eq(TransactionType.REFUND)))
+        when(mockReportDao.getTransactionSummaryStatistics(transactionStatisticQueryArgumentCaptor.capture(), eq(TransactionType.REFUND)))
                 .thenReturn(result.getRefunds());
 
         var transactionStatistics = reportService.getTransactionsSummary(params);
 
-        assertThat(transactionSummaryStatisticQueryArgumentCaptor.getValue().getQueryMap().get("account_id"), is(gatewayAccountId));
-        assertThat(transactionSummaryStatisticQueryArgumentCaptor.getValue().getQueryMap().get("from_date"), is(ZonedDateTime.parse(fromDate).toLocalDate()));
-        assertThat(transactionSummaryStatisticQueryArgumentCaptor.getValue().getQueryMap().get("to_date"), is(ZonedDateTime.parse(toDate).toLocalDate()));
+        assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("account_id"), is(gatewayAccountId));
+        assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("from_date"), is(ZonedDateTime.parse(fromDate)));
+        assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("to_date"), is(ZonedDateTime.parse(toDate)));
 
         assertThat(transactionStatistics, is(result));
     }
