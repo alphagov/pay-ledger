@@ -1,18 +1,13 @@
 package uk.gov.pay.ledger.transactionsummary.dao;
 
 import com.google.inject.Inject;
-import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
-import uk.gov.pay.ledger.report.dao.builder.TransactionStatisticQuery;
-import uk.gov.pay.ledger.report.dao.builder.TransactionSummaryStatisticQuery;
 import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
 import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
-import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
 import uk.gov.pay.ledger.report.mapper.GatewayAccountMonthlyPerformanceReportEntityMapper;
 import uk.gov.pay.ledger.report.mapper.PerformanceReportEntityMapper;
 import uk.gov.pay.ledger.report.params.PerformanceReportParams;
-import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.time.LocalDate;
@@ -74,13 +69,6 @@ public class TransactionSummaryDao {
             "FROM transaction_summary t " +
             "WHERE t.type= 'PAYMENT' " +
             "AND t.live= TRUE";
-
-    private static final String TRANSACTION_SUMMARY_STATISTICS = "SELECT COALESCE(SUM(t.no_of_transactions), 0) AS volume, " +
-            "COALESCE(SUM(t.total_amount_in_pence), 0) AS total_amount " +
-            "FROM transaction_summary t " +
-            "WHERE t.type = :type " +
-            "AND t.state = :state " +
-            ":searchExtraFields ";
 
     private static final String WITH_STATE = " AND t.state=:state";
 
@@ -163,35 +151,5 @@ public class TransactionSummaryDao {
             });
             return query.map(new PerformanceReportEntityMapper()).one();
         });
-    }
-
-    public TransactionsStatisticsResult getTransactionSummaryStatistics(TransactionSummaryStatisticQuery transactionSummaryStatisticQuery, TransactionType transactionType) {
-        String template = createSearchTemplate(transactionSummaryStatisticQuery.getFilterTemplates(), TRANSACTION_SUMMARY_STATISTICS);
-        return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(template)
-                    .bind("type", transactionType)
-                    .bind("state", TransactionState.SUCCESS);
-            transactionSummaryStatisticQuery.getQueryMap().forEach(query::bind);
-
-            return query.map((rs, rowNum) -> {
-                long volume = rs.getLong("volume");
-                long total_amount = rs.getLong("total_amount");
-                return new TransactionsStatisticsResult(volume, total_amount);
-            }).one();
-        });
-    }
-
-    private String createSearchTemplate(
-            List<String> filterTemplates,
-            String baseQueryString) {
-
-        String searchClauseTemplate = String.join(" AND ", filterTemplates);
-        searchClauseTemplate = StringUtils.isNotBlank(searchClauseTemplate) ?
-                "AND " + searchClauseTemplate :
-                "";
-
-        return baseQueryString.replace(
-                ":searchExtraFields",
-                searchClauseTemplate);
     }
 }

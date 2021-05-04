@@ -2,15 +2,14 @@ package uk.gov.pay.ledger.report.service;
 
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.report.dao.ReportDao;
+
 import uk.gov.pay.ledger.report.dao.builder.TransactionStatisticQuery;
-import uk.gov.pay.ledger.report.dao.builder.TransactionSummaryStatisticQuery;
 import uk.gov.pay.ledger.report.entity.TimeseriesReportSlice;
-import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
 import uk.gov.pay.ledger.report.entity.TransactionsStatisticsResult;
+import uk.gov.pay.ledger.report.entity.TransactionSummaryResult;
 import uk.gov.pay.ledger.report.params.TransactionSummaryParams;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
-import uk.gov.pay.ledger.transactionsummary.dao.TransactionSummaryDao;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -24,12 +23,9 @@ public class ReportService {
 
     private final ReportDao reportDao;
 
-    private final TransactionSummaryDao transactionSummaryDao;
-
     @Inject
-    public ReportService(ReportDao reportDao, TransactionSummaryDao transactionSummaryDao) {
+    public ReportService(ReportDao reportDao) {
         this.reportDao = reportDao;
-        this.transactionSummaryDao = transactionSummaryDao;
     }
 
     public Map<String, Long> getPaymentCountsByState(TransactionSummaryParams params) {
@@ -46,16 +42,15 @@ public class ReportService {
     }
 
     public TransactionSummaryResult getTransactionsSummary(TransactionSummaryParams params) {
-        TransactionSummaryStatisticQuery transactionSummaryStatisticQuery = buildBaseTransactionSummaryStatisticQuery(params);
+        TransactionStatisticQuery transactionStatisticQuery = buildBaseTransactionStatisticQuery(params);
 
-        TransactionsStatisticsResult payments = transactionSummaryDao.getTransactionSummaryStatistics(transactionSummaryStatisticQuery, TransactionType.PAYMENT);
-        TransactionsStatisticsResult refunds = transactionSummaryDao.getTransactionSummaryStatistics(transactionSummaryStatisticQuery, TransactionType.REFUND);
+        TransactionsStatisticsResult payments = reportDao.getTransactionSummaryStatistics(transactionStatisticQuery, TransactionType.PAYMENT);
+        TransactionsStatisticsResult refunds = reportDao.getTransactionSummaryStatistics(transactionStatisticQuery, TransactionType.REFUND);
         TransactionsStatisticsResult motoPayments = new TransactionsStatisticsResult(0L, 0L);
 
         if (params.isIncludeMotoStatistics()) {
-            TransactionSummaryStatisticQuery motoQuery = transactionSummaryStatisticQuery.withMoto(true);
-            motoPayments = transactionSummaryDao.getTransactionSummaryStatistics(motoQuery, TransactionType.PAYMENT);
-
+            TransactionStatisticQuery motoQuery = transactionStatisticQuery.withMoto(true);
+            motoPayments = reportDao.getTransactionSummaryStatistics(motoQuery, TransactionType.PAYMENT);
         }
 
         return new TransactionSummaryResult(payments, motoPayments, refunds, payments.getGrossAmount() - refunds.getGrossAmount());
@@ -82,24 +77,5 @@ public class ReportService {
         }
 
         return transactionStatisticQuery;
-    }
-
-    private TransactionSummaryStatisticQuery buildBaseTransactionSummaryStatisticQuery(TransactionSummaryParams params) {
-
-        TransactionSummaryStatisticQuery transactionSummaryStatisticQuery = new TransactionSummaryStatisticQuery();
-
-        if (isNotBlank(params.getAccountId())) {
-            transactionSummaryStatisticQuery.withAccountId(params.getAccountId());
-        }
-
-        if (isNotBlank(params.getFromDate())) {
-            transactionSummaryStatisticQuery.withFromDate(params.getFromDate());
-        }
-
-        if (isNotBlank(params.getToDate())) {
-            transactionSummaryStatisticQuery.withToDate(params.getToDate());
-        }
-
-        return transactionSummaryStatisticQuery;
     }
 }
