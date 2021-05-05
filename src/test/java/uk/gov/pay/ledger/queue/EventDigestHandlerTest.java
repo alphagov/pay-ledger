@@ -77,7 +77,7 @@ class EventDigestHandlerTest {
         Event event = anEventFixture().withResourceType(PAYMENT).toEntity();
         when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(anEventFixture().toEntity()));
 
-        eventDigestHandler.processEvent(event);
+        eventDigestHandler.processEvent(event, true);
 
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
         verify(transactionMetadataService).upsertMetadataFor(event);
@@ -91,7 +91,7 @@ class EventDigestHandlerTest {
                 .toEntity();
 
         when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(anEventFixture().toEntity()));
-        eventDigestHandler.processEvent(event);
+        eventDigestHandler.processEvent(event, true);
 
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
         verify(transactionMetadataService).reprojectFromEventDigest(any(EventDigest.class));
@@ -101,7 +101,7 @@ class EventDigestHandlerTest {
     @Test
     void shouldUpsertTransactionIfResourceTypeIsRefund() {
         Event event = anEventFixture().withResourceType(REFUND).toEntity();
-        eventDigestHandler.processEvent(event);
+        eventDigestHandler.processEvent(event, true);
 
         verify(eventService).getEventDigestForResource(event);
         verify(transactionService).upsertTransactionFor(eventDigest);
@@ -110,7 +110,7 @@ class EventDigestHandlerTest {
     @Test
     void shouldUpsertPayoutIfResourceTypeIsPayout() {
         Event event = anEventFixture().withResourceType(PAYOUT).toEntity();
-        eventDigestHandler.processEvent(event);
+        eventDigestHandler.processEvent(event, true);
 
         verify(eventService).getEventDigestForResource(event);
         verify(payoutService).upsertPayoutFor(eventDigest);
@@ -123,7 +123,7 @@ class EventDigestHandlerTest {
 
         Event event = anEventFixture().withResourceType(AGREEMENT).toEntity();
 
-        assertThrows(RuntimeException.class, () -> eventDigestHandler.processEvent(event));
+        assertThrows(RuntimeException.class, () -> eventDigestHandler.processEvent(event, true));
 
         verify(transactionService, never()).upsertTransactionFor(any());
         verify(transactionMetadataService, never()).upsertMetadataFor(any());
@@ -152,7 +152,7 @@ class EventDigestHandlerTest {
         when(eventService.getEventDigestForResource(parentExternalId))
                 .thenReturn(paymentEventDigest);
 
-        eventDigestHandler.processEvent(event);
+        eventDigestHandler.processEvent(event, true);
 
         verify(eventService).getEventDigestForResource(event);
         verify(eventService).getEventDigestForResource(parentExternalId);

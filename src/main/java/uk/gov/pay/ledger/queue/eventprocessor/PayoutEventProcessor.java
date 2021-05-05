@@ -14,7 +14,7 @@ public class PayoutEventProcessor extends EventProcessor {
     }
 
     @Override
-    public void process(Event event) {
+    public void process(Event event, boolean isANewEvent) {
         payoutService.upsertPayoutFor(eventService.getEventDigestForResource(event));
     }
 }

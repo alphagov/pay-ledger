@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transactionsummary.dao.TransactionSummaryDao;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
@@ -19,13 +18,13 @@ import static java.time.ZoneOffset.UTC;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.event.model.SalientEventType.AUTHORISATION_SUCCEEDED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.CAPTURE_CONFIRMED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.CAPTURE_ERRORED;
-import static uk.gov.pay.ledger.event.model.SalientEventType.CAPTURE_SUBMITTED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.PAYMENT_CREATED;
+import static uk.gov.pay.ledger.event.model.SalientEventType.PAYMENT_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN;
 import static uk.gov.pay.ledger.event.model.SalientEventType.REFUND_SUBMITTED;
+import static uk.gov.pay.ledger.event.model.SalientEventType.SERVICE_APPROVED_FOR_CAPTURE;
 import static uk.gov.pay.ledger.event.model.SalientEventType.USER_APPROVED_FOR_CAPTURE;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.CREATED;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.SUBMITTED;
@@ -38,12 +37,10 @@ public class TransactionSummaryServiceTest {
     private TransactionSummaryService transactionSummaryService;
     @Mock
     TransactionSummaryDao mockTransactionSummaryDao;
-    @Mock
-    EventService mockEventService;
 
     @BeforeEach
     void setUp() {
-        transactionSummaryService = new TransactionSummaryService(mockTransactionSummaryDao, mockEventService);
+        transactionSummaryService = new TransactionSummaryService(mockTransactionSummaryDao);
     }
 
     @Test
@@ -60,10 +57,32 @@ public class TransactionSummaryServiceTest {
         Event userApprovedForCaptureEvent = EventFixture.anEventFixture()
                 .withEventDate(ZonedDateTime.now().plusSeconds(11))
                 .withEventType(USER_APPROVED_FOR_CAPTURE.name()).toEntity();
-        when(mockEventService.getEventsForResource(transactionEntity.getExternalId()))
-                .thenReturn(List.of(paymentCreatedEvent, nonSalientEvent, userApprovedForCaptureEvent));
+        List<Event> events = List.of(paymentCreatedEvent, nonSalientEvent, userApprovedForCaptureEvent);
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, paymentCreatedEvent);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, paymentCreatedEvent, events);
+
+        verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
+                transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
+                transactionEntity.getState(), transactionEntity.isLive(),
+                transactionEntity.isMoto(), transactionEntity.getAmount());
+        verifyNoMoreInteractions(mockTransactionSummaryDao);
+    }
+
+    @Test
+    public void shouldProjectTransactionSummaryIfPaymentNotificationCreatedEventAndAnEventMappingToFinishedTransactionStateExists() {
+        TransactionEntity transactionEntity = aTransactionFixture()
+                .withState(SUCCESS)
+                .toEntity();
+        Event paymentCreatedEvent = EventFixture.anEventFixture()
+                .withEventDate(ZonedDateTime.now())
+                .withEventType("PAYMENT_NOTIFICATION_CREATED").toEntity();
+        Event userApprovedForCaptureEvent = EventFixture.anEventFixture()
+                .withEventDate(ZonedDateTime.now())
+                .withEventType(USER_APPROVED_FOR_CAPTURE.name()).toEntity();
+
+        List<Event> events = List.of(paymentCreatedEvent, userApprovedForCaptureEvent);
+
+        transactionSummaryService.projectTransactionSummary(transactionEntity, userApprovedForCaptureEvent, events);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
                 transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
@@ -84,10 +103,9 @@ public class TransactionSummaryServiceTest {
         Event event3 = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(2))
                 .withEventType(CAPTURE_ERRORED.name()).toEntity();
 
-        when(mockEventService.getEventsForResource(transactionEntity.getExternalId()))
-                .thenReturn(List.of(event, event2, event3));
+        List<Event> events = List.of(event, event2, event3);
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event3);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, event3, events);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
                 transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
@@ -110,10 +128,9 @@ public class TransactionSummaryServiceTest {
                 .withEventType(USER_APPROVED_FOR_CAPTURE.name()).toEntity();
         Event event3 = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(2))
                 .withEventType(CAPTURE_ERRORED.name()).toEntity();
-        when(mockEventService.getEventsForResource(transactionEntity.getExternalId()))
-                .thenReturn(List.of(event, event2, event3));
+        List<Event> events = List.of(event, event2, event3);
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, event, events);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
                 transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
@@ -133,10 +150,9 @@ public class TransactionSummaryServiceTest {
         Event event2 = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(1))
                 .withEventType(CAPTURE_CONFIRMED.name()).toEntity();
 
-        when(mockEventService.getEventsForResource(transactionEntity.getExternalId()))
-                .thenReturn(List.of(event, event2));
+        List<Event> events = List.of(event, event2);
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, event, events);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
                 transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
@@ -159,10 +175,9 @@ public class TransactionSummaryServiceTest {
         Event event2 = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(1))
                 .withEventType(CAPTURE_CONFIRMED.name()).toEntity();
 
-        when(mockEventService.getEventsForResource(transactionEntity.getExternalId()))
-                .thenReturn(List.of(event, event2));
+        List<Event> events = List.of(event, event2);
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, event, events);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
                 transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
@@ -185,10 +200,9 @@ public class TransactionSummaryServiceTest {
         Event event3 = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(2))
                 .withEventType(CAPTURE_CONFIRMED.name()).toEntity();
 
-        when(mockEventService.getEventsForResource(transactionEntity.getExternalId()))
-                .thenReturn(List.of(event, event2, event3));
+        List<Event> events = List.of(event, event2, event3);
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event3);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, event3, events);
 
         verifyNoInteractions(mockTransactionSummaryDao);
     }
@@ -202,14 +216,13 @@ public class TransactionSummaryServiceTest {
                 .withEventType(PAYMENT_CREATED.name()).toEntity();
         Event event2 = EventFixture.anEventFixture()
                 .withEventDate(ZonedDateTime.now().plusSeconds(1))
-                .withEventType(USER_APPROVED_FOR_CAPTURE.name()).toEntity();
+                .withEventType(SERVICE_APPROVED_FOR_CAPTURE.name()).toEntity();
         Event event3 = EventFixture.anEventFixture()
                 .withEventDate(ZonedDateTime.now().plusSeconds(2))
-                .withEventType(CAPTURE_SUBMITTED.name()).toEntity();
-        when(mockEventService.getEventsForResource(transactionEntity.getExternalId()))
-                .thenReturn(List.of(event, event2, event3));
+                .withEventType(PAYMENT_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN.name()).toEntity();
+        List<Event> events = List.of(event, event2, event3);
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event3);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, event3, events);
 
         verifyNoInteractions(mockTransactionSummaryDao);
     }
@@ -221,7 +234,7 @@ public class TransactionSummaryServiceTest {
                 .toEntity();
         Event event = EventFixture.anEventFixture().withEventType(PAYMENT_CREATED.name()).toEntity();
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, event, List.of(event));
 
         verifyNoInteractions(mockTransactionSummaryDao);
     }
@@ -232,10 +245,8 @@ public class TransactionSummaryServiceTest {
                 .withState(SUCCESS)
                 .toEntity();
         Event event = EventFixture.anEventFixture().withEventType(USER_APPROVED_FOR_CAPTURE.name()).toEntity();
-        when(mockEventService.getEventsForResource(transactionEntity.getExternalId()))
-                .thenReturn(List.of(event));
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, event, List.of(event));
 
         verifyNoInteractions(mockTransactionSummaryDao);
     }
@@ -247,7 +258,7 @@ public class TransactionSummaryServiceTest {
                 .toEntity();
         Event event = EventFixture.anEventFixture().withEventType(AUTHORISATION_SUCCEEDED.name()).toEntity();
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, event, List.of(event));
 
         verifyNoInteractions(mockTransactionSummaryDao);
     }
@@ -261,7 +272,7 @@ public class TransactionSummaryServiceTest {
                 .withEventDate(ZonedDateTime.now())
                 .withEventType("BACKFILLER_RECREATED_USER_EMAIL_COLLECTED").toEntity();
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, nonSalientEvent);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, nonSalientEvent, List.of(nonSalientEvent));
 
         verifyNoInteractions(mockTransactionSummaryDao);
     }
@@ -273,7 +284,7 @@ public class TransactionSummaryServiceTest {
                 .toEntity();
         Event event = EventFixture.anEventFixture().withEventType(REFUND_SUBMITTED.name()).toEntity();
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, event, List.of(event));
 
         verifyNoInteractions(mockTransactionSummaryDao);
     }

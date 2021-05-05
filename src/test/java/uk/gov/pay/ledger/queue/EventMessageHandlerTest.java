@@ -80,7 +80,7 @@ class EventMessageHandlerTest {
 
         eventMessageHandler.handle();
 
-        verify(eventDigestHandler).processEvent(event);
+        verify(eventDigestHandler).processEvent(event, false);
         verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
     }
 
@@ -97,9 +97,9 @@ class EventMessageHandlerTest {
                 .toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(metricRegistry.histogram((any()))).thenReturn(histogram);
-        
+
         eventMessageHandler.handle();
-        verify(eventDigestHandler).processEvent(event);
+        verify(eventDigestHandler).processEvent(event, false);
         verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
         verify(eventService, never()).createIfDoesNotExist(any());
 

@@ -38,7 +38,7 @@ public class PaymentEventProcessor extends EventProcessor {
     }
 
     @Override
-    public void process(Event event) {
+    public void process(Event event, boolean isANewEvent) {
         List<Event> events = eventService.getEventsForResource(event.getResourceExternalId());
         EventDigest paymentEventDigest = EventDigest.fromEventList(events);
 
@@ -67,8 +67,8 @@ public class PaymentEventProcessor extends EventProcessor {
                     .forEach(refundTransactionEntity -> refundEventProcessor.reprojectRefundTransaction(refundTransactionEntity.getExternalId(), paymentEventDigest));
         }
 
-        if (!event.isReprojectDomainObject()) {
-            transactionSummaryService.projectTransactionSummary(transactionEntity, event);
+        if (!event.isReprojectDomainObject() && isANewEvent) {
+            transactionSummaryService.projectTransactionSummary(transactionEntity, event, events);
         }
     }
 
