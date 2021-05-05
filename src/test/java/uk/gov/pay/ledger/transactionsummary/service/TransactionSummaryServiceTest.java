@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.pay.ledger.event.model.SalientEventType.AUTHORISATION_SUCCEEDED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.CAPTURE_CONFIRMED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.CAPTURE_ERRORED;
+import static uk.gov.pay.ledger.event.model.SalientEventType.CAPTURE_SUBMITTED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.PAYMENT_CREATED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.PAYMENT_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN;
 import static uk.gov.pay.ledger.event.model.SalientEventType.REFUND_SUBMITTED;
@@ -78,7 +79,7 @@ public class TransactionSummaryServiceTest {
                 .withEventType("PAYMENT_NOTIFICATION_CREATED").toEntity();
         Event userApprovedForCaptureEvent = EventFixture.anEventFixture()
                 .withEventDate(ZonedDateTime.now())
-                .withEventType(USER_APPROVED_FOR_CAPTURE.name()).toEntity();
+                .withEventType(CAPTURE_SUBMITTED.name()).toEntity();
 
         List<Event> events = List.of(paymentCreatedEvent, userApprovedForCaptureEvent);
 
@@ -99,7 +100,7 @@ public class TransactionSummaryServiceTest {
         Event event = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now())
                 .withEventType(PAYMENT_CREATED.name()).toEntity();
         Event event2 = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(1))
-                .withEventType(USER_APPROVED_FOR_CAPTURE.name()).toEntity();
+                .withEventType(CAPTURE_SUBMITTED.name()).toEntity();
         Event event3 = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(2))
                 .withEventType(CAPTURE_ERRORED.name()).toEntity();
 
@@ -216,7 +217,7 @@ public class TransactionSummaryServiceTest {
                 .withEventType(PAYMENT_CREATED.name()).toEntity();
         Event event2 = EventFixture.anEventFixture()
                 .withEventDate(ZonedDateTime.now().plusSeconds(1))
-                .withEventType(SERVICE_APPROVED_FOR_CAPTURE.name()).toEntity();
+                .withEventType(CAPTURE_SUBMITTED.name()).toEntity();
         Event event3 = EventFixture.anEventFixture()
                 .withEventDate(ZonedDateTime.now().plusSeconds(2))
                 .withEventType(PAYMENT_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN.name()).toEntity();

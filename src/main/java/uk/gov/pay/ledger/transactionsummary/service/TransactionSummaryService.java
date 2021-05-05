@@ -17,16 +17,21 @@ import java.util.stream.Collectors;
 
 import static java.time.ZoneOffset.UTC;
 import static uk.gov.pay.ledger.event.model.SalientEventType.CAPTURE_CONFIRMED;
-import static uk.gov.pay.ledger.event.model.SalientEventType.CAPTURE_SUBMITTED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.PAYMENT_CREATED;
+import static uk.gov.pay.ledger.event.model.SalientEventType.SERVICE_APPROVED_FOR_CAPTURE;
+import static uk.gov.pay.ledger.event.model.SalientEventType.USER_APPROVED_FOR_CAPTURE;
 import static uk.gov.pay.ledger.event.model.SalientEventType.from;
 
 public class TransactionSummaryService {
 
     private final TransactionSummaryDao transactionSummaryDao;
 
+    // CAPTURE_SUBMITTED event (common to payment notifications, service approved and user approved payments) will be
+    // considered to project transaction summary for success state. Ignore the following events that result into the
+    // same success state and to avoid counting the transaction multiple times
     private final List<String> ignoreEventsForTransactionAmount = List.of(CAPTURE_CONFIRMED.name(),
-            CAPTURE_SUBMITTED.name());
+            USER_APPROVED_FOR_CAPTURE.name(),
+            SERVICE_APPROVED_FOR_CAPTURE.name());
 
     @Inject
     public TransactionSummaryService(TransactionSummaryDao transactionSummaryDao) {
