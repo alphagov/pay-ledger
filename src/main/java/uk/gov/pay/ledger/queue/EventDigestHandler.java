@@ -52,7 +52,7 @@ public class EventDigestHandler {
         }
     }
 
-    public void processEvent(Event event) {
-        processorFor(event).process(event);
+    public void processEvent(Event event, boolean isANewEvent) {
+        processorFor(event).process(event, isANewEvent);
     }
 }

@@ -29,7 +29,7 @@ public class RefundEventProcessor extends EventProcessor {
     }
 
     @Override
-    public void process(Event event) {
+    public void process(Event event, boolean isANewEvent) {
         EventDigest refundEventDigest = eventService.getEventDigestForResource(event);
         Optional<EventDigest> mayBePaymentEventDigest = Optional.empty();
 

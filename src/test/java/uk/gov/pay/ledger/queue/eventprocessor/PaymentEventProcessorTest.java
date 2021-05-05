@@ -66,7 +66,7 @@ class PaymentEventProcessorTest {
         TransactionEntity refundTransaction2 = aTransactionFixture().withExternalId("refund-external-id-2").toEntity();
         when(transactionService.getChildTransactions(paymentExternalId)).thenReturn(List.of(refundTransaction1, refundTransaction2));
 
-        paymentEventProcessor.process(event);
+        paymentEventProcessor.process(event, true);
 
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
         verify(transactionMetadataService).upsertMetadataFor(event);
@@ -89,7 +89,7 @@ class PaymentEventProcessorTest {
 
         when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(previousEvent, event));
 
-        paymentEventProcessor.process(event);
+        paymentEventProcessor.process(event, true);
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
         verify(transactionMetadataService).upsertMetadataFor(event);
         verify(transactionService, never()).getChildTransactions(any());
@@ -111,7 +111,7 @@ class PaymentEventProcessorTest {
 
         when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(previousEvent, event));
 
-        paymentEventProcessor.process(event);
+        paymentEventProcessor.process(event, true);
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
         verify(transactionMetadataService).upsertMetadataFor(event);
         verify(transactionService, never()).getChildTransactions(any());
@@ -132,8 +132,8 @@ class PaymentEventProcessorTest {
         when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(events);
         when(transactionService.upsertTransactionFor(any(EventDigest.class))).thenReturn(transactionEntity);
 
-        paymentEventProcessor.process(event);
-        verify(transactionSummaryService).projectTransactionSummary(transactionEntity, event);
+        paymentEventProcessor.process(event, true);
+        verify(transactionSummaryService).projectTransactionSummary(transactionEntity, event, events);
     }
 
     @Test
@@ -147,7 +147,22 @@ class PaymentEventProcessorTest {
 
         when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(event));
 
-        paymentEventProcessor.process(event);
+        paymentEventProcessor.process(event, true);
+        verifyNoInteractions(transactionSummaryService);
+    }
+
+    @Test
+    void shouldNotProjectTransactionSummaryForAnExistingEvent() {
+        String refundExternalId = "refund-external-id";
+        Event event = anEventFixture().withResourceType(PAYMENT)
+                .withResourceExternalId(refundExternalId)
+                .withEventType("PAYMENT_CREATED")
+                .withIsReprojectDomainObject(false)
+                .toEntity();
+
+        when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(event));
+
+        paymentEventProcessor.process(event, false);
         verifyNoInteractions(transactionSummaryService);
     }
 }
