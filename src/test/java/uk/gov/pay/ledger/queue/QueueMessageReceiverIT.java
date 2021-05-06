@@ -257,7 +257,7 @@ public class QueueMessageReceiverIT {
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT.plusSeconds(1))
-                .withEventType("USER_APPROVED_FOR_CAPTURE")
+                .withEventType("CAPTURE_SUBMITTED")
                 .withEventData("{}")
                 .withDefaultEventDataForEventType("DEFAULT")
                 .insert(rule.getSqsClient());
