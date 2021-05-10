@@ -79,11 +79,11 @@ public class EventMessageHandler {
                     kv("sqs_message_id", message.getQueueMessageId()),
                     kv("resource_external_id", event.getResourceExternalId()),
                     kv("state", response.getState()),
+                    kv("event_type", event.getEventType()),
                     kv("ingest_lag_micro_seconds", ingestLag)));
 
             if (event.isReprojectDomainObject()) {
                 loggingArgs.add(kv("reproject_domain_object_event", event.isReprojectDomainObject()));
-                loggingArgs.add(kv("event_type", event.getEventType()));
             }
 
             LOGGER.info("The event message has been processed.", loggingArgs.toArray());

@@ -46,29 +46,46 @@ public class TransactionSummaryService {
 
     private void projectPaymentTransactionSummary(TransactionEntity transaction, Event currentEvent,
                                                   List<Event> events) {
-        if (!canProjectTransactionSummary(transaction, currentEvent)) {
-            return;
-        }
-
-        if (!hasPaymentCreatedOrNotificationEvent(events)) {
-            return;
-        }
-
-        if (!ignoreEventsForTransactionAmount.contains(currentEvent.getEventType())) {
+        if (canProjectTransactionAmount(currentEvent, events)) {
             projectTransactionAmount(transaction, currentEvent, events);
         }
 
-        Optional<SalientEventType> mayBeCurrentSalientEventType = from(currentEvent.getEventType());
-        mayBeCurrentSalientEventType.ifPresent(salientEventType ->
-                projectTransactionFee(transaction, mayBeCurrentSalientEventType.get(), events));
+        if (canProjectTransactionFee(transaction, currentEvent, events)) {
+            projectTransactionFee(transaction);
+        }
     }
 
-    private boolean canProjectTransactionSummary(TransactionEntity transaction, Event currentEvent) {
-        if (isAPaymentOrNotificationCreatedEvent(currentEvent) && transaction.getState().isFinished()) {
+    private boolean canProjectTransactionAmount(Event currentEvent, List<Event> events) {
+        if (!hasPaymentCreatedOrNotificationEvent(events)
+                || ignoreEventsForTransactionAmount.contains(currentEvent.getEventType())) {
+            return false;
+        }
+
+        if (isAPaymentOrNotificationCreatedEvent(currentEvent)
+                && !getEventsMappingToTransactionFinishedStateInDescendingOrder(events).isEmpty()) {
             return true;
         }
 
         return getTransactionState(currentEvent).map(TransactionState::isFinished).orElse(false);
+    }
+
+    private boolean canProjectTransactionFee(TransactionEntity transaction, Event currentEvent, List<Event> events) {
+        Optional<SalientEventType> mayBeCurrentSalientEventType = from(currentEvent.getEventType());
+        if (mayBeCurrentSalientEventType.isPresent()) {
+            long noOfCaptureConfirmedEvents = events
+                    .stream()
+                    .map(event -> from(event.getEventType()))
+                    .flatMap(Optional::stream)
+                    .filter(salientEventType -> salientEventType == CAPTURE_CONFIRMED)
+                    .count();
+
+            // Fee is currently immutable, so process fee only for the first capture_confirmed event seen
+            // or if payment_created is processed after a capture_confirmed event has been processed.
+            return (mayBeCurrentSalientEventType.get() == PAYMENT_CREATED ||
+                    (mayBeCurrentSalientEventType.get() == CAPTURE_CONFIRMED && noOfCaptureConfirmedEvents == 1))
+                    && transaction.getFee() != null;
+        }
+        return false;
     }
 
     private boolean isAPaymentOrNotificationCreatedEvent(Event event) {
@@ -101,24 +118,10 @@ public class TransactionSummaryService {
                 (transaction.getTotalAmount() != null ? transaction.getTotalAmount() : transaction.getAmount()));
     }
 
-    private void projectTransactionFee(TransactionEntity transaction, SalientEventType currentEvent,
-                                       List<Event> events) {
-
-        long noOfCaptureConfirmedEvents = events
-                .stream()
-                .map(event -> from(event.getEventType()))
-                .flatMap(Optional::stream)
-                .filter(salientEventType -> salientEventType == CAPTURE_CONFIRMED)
-                .count();
-
-        // Fee is currently immutable, so process fee only for the first capture_confirmed event seen
-        // or if payment_created is processed after a capture_confirmed event has been processed.
-        if ((currentEvent == PAYMENT_CREATED || (currentEvent == CAPTURE_CONFIRMED && noOfCaptureConfirmedEvents == 1))
-                && transaction.getFee() != null) {
-            transactionSummaryDao.updateFee(transaction.getGatewayAccountId(), transaction.getTransactionType(),
-                    toLocalDate(transaction.getCreatedDate()), transaction.getState(), transaction.isLive(),
-                    transaction.isMoto(), transaction.getFee());
-        }
+    private void projectTransactionFee(TransactionEntity transaction) {
+        transactionSummaryDao.updateFee(transaction.getGatewayAccountId(), transaction.getTransactionType(),
+                toLocalDate(transaction.getCreatedDate()), transaction.getState(), transaction.isLive(),
+                transaction.isMoto(), transaction.getFee());
     }
 
     private LocalDate toLocalDate(ZonedDateTime createdDate) {

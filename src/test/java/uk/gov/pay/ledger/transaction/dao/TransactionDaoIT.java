@@ -37,7 +37,7 @@ class TransactionDaoIT {
                 .withDefaultCardDetails()
                 .withNetAmount(55)
                 .withTotalAmount(105)
-                .withFee(33)
+                .withFee(33L)
                 .withExternalMetadata(ImmutableMap.of("key1", "value1", "anotherKey", ImmutableMap.of("nestedKey", "value")))
                 .withTransactionType("PAYMENT")
                 .withLive(true)
