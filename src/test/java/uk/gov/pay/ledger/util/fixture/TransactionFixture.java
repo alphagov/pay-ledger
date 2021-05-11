@@ -592,7 +592,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withFee(long value) {
+    public TransactionFixture withFee(Long value) {
         this.fee = value;
         return this;
     }

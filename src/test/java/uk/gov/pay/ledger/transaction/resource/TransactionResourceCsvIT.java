@@ -153,7 +153,7 @@ public class TransactionResourceCsvIT {
         aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId)
                 .withTransactionType("PAYMENT")
-                .withFee(100)
+                .withFee(100L)
                 .withNetAmount(1100)
                 .insert(rule.getJdbi());
 
@@ -220,21 +220,21 @@ public class TransactionResourceCsvIT {
         aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId)
                 .withTransactionType("PAYMENT")
-                .withFee(100)
+                .withFee(100L)
                 .withNetAmount(1100)
                 .insert(rule.getJdbi());
 
         aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId2)
                 .withTransactionType("PAYMENT")
-                .withFee(200)
+                .withFee(200L)
                 .withNetAmount(1000)
                 .insert(rule.getJdbi());
 
         aTransactionFixture()
                 .withGatewayAccountId("789")
                 .withTransactionType("PAYMENT")
-                .withFee(100)
+                .withFee(100L)
                 .withNetAmount(1100)
                 .insert(rule.getJdbi());
 
@@ -273,7 +273,7 @@ public class TransactionResourceCsvIT {
                 .withTransactionType("PAYMENT")
                 .withGatewayAccountId(targetGatewayAccountId)
                 .withExternalMetadata(ImmutableMap.of(metadataKey, "value1"))
-                .withFee(100)
+                .withFee(100L)
                 .withNetAmount(1100)
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());

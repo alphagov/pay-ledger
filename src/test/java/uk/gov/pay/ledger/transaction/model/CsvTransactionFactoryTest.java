@@ -120,7 +120,7 @@ public class CsvTransactionFactoryTest {
         TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
                 .withPaymentProvider("stripe")
                 .withTransactionType(TransactionType.PAYMENT.name())
-                .withFee(6).toEntity();
+                .withFee(6L).toEntity();
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
 
@@ -190,7 +190,7 @@ public class CsvTransactionFactoryTest {
                 .withEmail("@email.com")
                 .withCardholderName("-J Doe")
                 .withTransactionType(TransactionType.PAYMENT.name())
-                .withFee(6).toEntity();
+                .withFee(6L).toEntity();
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
 

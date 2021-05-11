@@ -57,7 +57,7 @@ public class TransactionSummaryServiceTest {
                 .withEventType("BACKFILLER_RECREATED_USER_EMAIL_COLLECTED").toEntity();
         Event userApprovedForCaptureEvent = EventFixture.anEventFixture()
                 .withEventDate(ZonedDateTime.now().plusSeconds(11))
-                .withEventType(USER_APPROVED_FOR_CAPTURE.name()).toEntity();
+                .withEventType(CAPTURE_SUBMITTED.name()).toEntity();
         List<Event> events = List.of(paymentCreatedEvent, nonSalientEvent, userApprovedForCaptureEvent);
 
         transactionSummaryService.projectTransactionSummary(transactionEntity, paymentCreatedEvent, events);
@@ -146,14 +146,16 @@ public class TransactionSummaryServiceTest {
                 .withState(SUCCESS)
                 .withFee(10L)
                 .toEntity();
-        Event event = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now())
+        Event paymentCreatedEvent = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now())
                 .withEventType(PAYMENT_CREATED.name()).toEntity();
-        Event event2 = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(1))
+        Event captureConfirmedEvent = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(1))
                 .withEventType(CAPTURE_CONFIRMED.name()).toEntity();
+        Event captureSubmittedEvent = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(1))
+                .withEventType(CAPTURE_SUBMITTED.name()).toEntity();
 
-        List<Event> events = List.of(event, event2);
+        List<Event> events = List.of(paymentCreatedEvent, captureSubmittedEvent, captureConfirmedEvent);
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event, events);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, paymentCreatedEvent, events);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
                 transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
@@ -167,18 +169,21 @@ public class TransactionSummaryServiceTest {
     }
 
     @Test
-    public void shouldNotUpdateTransactionSummaryFoFeeIfFeeIsNotAvailableOnTransaction() {
+    public void shouldNotUpdateTransactionSummaryForFeeIfFeeIsNotAvailableOnTransaction() {
         TransactionEntity transactionEntity = aTransactionFixture()
                 .withState(SUCCESS)
+                .withFee(null)
                 .toEntity();
-        Event event = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now())
+        Event paymentCreatedEvent = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now())
                 .withEventType(PAYMENT_CREATED.name()).toEntity();
-        Event event2 = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(1))
+        Event captureSubmittedEvent = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(1))
+                .withEventType(CAPTURE_SUBMITTED.name()).toEntity();
+        Event captureConfirmedEvent = EventFixture.anEventFixture().withEventDate(ZonedDateTime.now().plusSeconds(1))
                 .withEventType(CAPTURE_CONFIRMED.name()).toEntity();
 
-        List<Event> events = List.of(event, event2);
+        List<Event> events = List.of(paymentCreatedEvent, captureSubmittedEvent, captureConfirmedEvent);
 
-        transactionSummaryService.projectTransactionSummary(transactionEntity, event, events);
+        transactionSummaryService.projectTransactionSummary(transactionEntity, paymentCreatedEvent, events);
 
         verify(mockTransactionSummaryDao).upsert(transactionEntity.getGatewayAccountId(),
                 transactionEntity.getTransactionType(), LocalDate.ofInstant(transactionEntity.getCreatedDate().toInstant(), UTC),
