@@ -1,4 +1,4 @@
-name: Ledger Java CI Unit Tests
+name: Github Actions Tests
 
 on:
   push:
@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Run unit tests
+  unit-tests:
+    name: Unit tests
     runs-on: ubuntu-18.04
 
     steps:
@@ -27,5 +27,5 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Build with Maven
+      - name: Run unit tests
         run: mvn clean test
