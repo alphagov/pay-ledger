@@ -7,6 +7,7 @@ import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 import uk.gov.pay.ledger.report.mapper.GatewayAccountMonthlyPerformanceReportEntityMapper;
 import uk.gov.pay.ledger.report.mapper.PerformanceReportEntityMapper;
 import uk.gov.pay.ledger.report.params.PerformanceReportParams;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
@@ -21,7 +22,7 @@ public class PerformanceReportDao {
 
     private static final String WITH_STATE = " and state=:state";
 
-    private static final String WITH_DATE_RANGE = " and DATE(created_date) between :startDate and :toDate";
+    private static final String WITH_DATE_RANGE = " and created_date between :startDate and :toDate";
 
     private final Jdbi jdbi;
 
@@ -30,18 +31,19 @@ public class PerformanceReportDao {
         this.jdbi = jdbi;
     }
 
-    public PerformanceReportEntity performanceReportForPaymentTransactions(PerformanceReportParams params) {
+    public PerformanceReportEntity performanceReportForPaymentTransactions(String fromDate, String toDate, String state) {
         StringBuilder queryString = new StringBuilder(PERFORMANCE_REPORT);
-        params.getState().ifPresent(state -> queryString.append(WITH_STATE));
-        params.getDateRange().ifPresent(dateRange -> queryString.append(WITH_DATE_RANGE));
+
+        if (fromDate != null && toDate != null) queryString.append(WITH_DATE_RANGE);
+        if (state != null) queryString.append(WITH_STATE);
 
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(queryString.toString());
-            params.getState().ifPresent(state -> query.bind("state", state.name()));
-            params.getDateRange().ifPresent(dateRange -> {
-                query.bind("startDate", dateRange.getFromDate());
-                query.bind("toDate", dateRange.getToDate());
-            });
+            if (state != null) query.bind("state", TransactionState.from(state).name());
+            if (fromDate != null && toDate != null) {
+                query.bind("startDate", ZonedDateTime.parse(fromDate));
+                query.bind("toDate", ZonedDateTime.parse(toDate));
+            }
             return query.map(new PerformanceReportEntityMapper()).one();
         });
     }

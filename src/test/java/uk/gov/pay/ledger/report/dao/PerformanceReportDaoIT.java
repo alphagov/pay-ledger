@@ -4,13 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
-import uk.gov.pay.ledger.report.params.PerformanceReportParams.PerformanceReportParamsBuilder;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Stream;
@@ -58,11 +55,7 @@ public class PerformanceReportDaoIT {
                 .withLive(true)
                 .insert(rule.getJdbi()));
 
-        var performanceReportParams = PerformanceReportParamsBuilder.builder()
-                .withFromDate(LocalDate.parse("2017-11-30"))
-                .withToDate(LocalDate.parse("2019-12-12"))
-                .build();
-        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions(performanceReportParams);
+        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions("2017-11-30T10:00:00Z", "2019-12-12T10:00:00Z", null);
         assertThat(performanceReportEntity.getTotalVolume(), is(3L));
         assertThat(performanceReportEntity.getTotalAmount(), is(closeTo(new BigDecimal(3000L), ZERO)));
         assertThat(performanceReportEntity.getAverageAmount(), is(closeTo(new BigDecimal(1000L), ZERO)));
@@ -89,8 +82,7 @@ public class PerformanceReportDaoIT {
         BigDecimal expectedTotalAmount = new BigDecimal(relevantAmounts.stream().mapToLong(amount -> amount).sum());
         BigDecimal expectedAverageAmount = BigDecimal.valueOf(relevantAmounts.stream().mapToLong(amount -> amount).average().getAsDouble());
 
-        var performanceReportParams = PerformanceReportParamsBuilder.builder().withState(TransactionState.SUCCESS).build();
-        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions(performanceReportParams);
+        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions(null, null, "SUCCESS");
         assertThat(performanceReportEntity.getTotalVolume(), is(3L));
         assertThat(performanceReportEntity.getTotalAmount(), is(closeTo(expectedTotalAmount, ZERO)));
         assertThat(performanceReportEntity.getAverageAmount(), is(closeTo(expectedAverageAmount, ZERO)));
@@ -106,8 +98,7 @@ public class PerformanceReportDaoIT {
                         .withLive(true)
                         .insert(rule.getJdbi()));
 
-        var performanceReportParams = PerformanceReportParamsBuilder.builder().build();
-        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions(performanceReportParams);
+        var performanceReportEntity = transactionDao.performanceReportForPaymentTransactions(null, null, null);
         assertThat(performanceReportEntity.getTotalVolume(), is(3L));
         assertThat(performanceReportEntity.getTotalAmount(), is(closeTo(new BigDecimal(3000L), ZERO)));
         assertThat(performanceReportEntity.getAverageAmount(), is(closeTo(new BigDecimal(1000L), ZERO)));

@@ -57,10 +57,7 @@ public class PerformanceReportResource {
                                                         @QueryParam("to_date") String toDate,
                                                         @QueryParam("state") String state) {
 
-        var paramsBuilder = PerformanceReportParamsBuilder.builder();
-        addDateRangeParamsOrThrow(paramsBuilder, fromDate, toDate);
-        addStateParamOrThrow(paramsBuilder, state);
-        return performanceReportDao.performanceReportForPaymentTransactions(paramsBuilder.build());
+        return performanceReportDao.performanceReportForPaymentTransactions(fromDate, toDate, state);
     }
 
     private void addStateParamOrThrow(PerformanceReportParamsBuilder builder, String state) {
