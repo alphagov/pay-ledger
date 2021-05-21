@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.report.resource;
 
 import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.ledger.exception.ValidationException;
+import uk.gov.pay.ledger.report.dao.PerformanceReportDao;
 import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
 import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 import uk.gov.pay.ledger.report.params.PerformanceReportParams.PerformanceReportParamsBuilder;
@@ -26,10 +27,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class PerformanceReportResource {
 
     private final TransactionSummaryDao transactionSummaryDao;
+    private final PerformanceReportDao performanceReportDao;
 
     @Inject
-    public PerformanceReportResource(TransactionSummaryDao transactionSummaryDao) {
+    public PerformanceReportResource(TransactionSummaryDao transactionSummaryDao, PerformanceReportDao performanceReportDao) {
         this.transactionSummaryDao = transactionSummaryDao;
+        this.performanceReportDao = performanceReportDao;
     }
 
     @Path("/performance-report")
@@ -43,6 +46,18 @@ public class PerformanceReportResource {
         addDateRangeParamsOrThrow(paramsBuilder, fromDate, toDate);
         addStateParamOrThrow(paramsBuilder, state);
         return transactionSummaryDao.performanceReportForPaymentTransactions(paramsBuilder.build());
+    }
+
+    // expose aggregate data based on the transaction projection table to meet the need of
+    // consumers that require information on terminal and in-flight payments (live payments dashboard)
+    @Path("/performance-report-legacy")
+    @GET
+    @Timed
+    public PerformanceReportEntity getLegacyPerformanceReport(@QueryParam("from_date") String fromDate,
+                                                        @QueryParam("to_date") String toDate,
+                                                        @QueryParam("state") String state) {
+
+        return performanceReportDao.performanceReportForPaymentTransactions(fromDate, toDate, state);
     }
 
     private void addStateParamOrThrow(PerformanceReportParamsBuilder builder, String state) {
