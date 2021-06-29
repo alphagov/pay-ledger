@@ -87,7 +87,7 @@ public class ReportResourceIT {
                 )
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON).log().body()
+                .contentType(JSON)
                 .body("payments.count", is(2))
                 .body("payments.gross_amount", is(3000))
                 .body("net_income", is(3000));
