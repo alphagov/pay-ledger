@@ -64,6 +64,7 @@ public class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.23"));
         assertThat(csvDataMap.get("Total Amount"), is("1.23"));
         assertThat(csvDataMap.get("MOTO"), is(true));
+        assertThat(csvDataMap.get("Payment Provider"), is("sandbox"));
     }
 
     @Test
@@ -154,6 +155,7 @@ public class CsvTransactionFactoryTest {
         assertThat(csvHeaders.get("Corporate Card Surcharge"), is(notNullValue()));
         assertThat(csvHeaders.get("Wallet Type"), is(notNullValue()));
         assertThat(csvHeaders.get("Card Type"), is(notNullValue()));
+        assertThat(csvHeaders.get("Payment Provider"), is(notNullValue()));
 
         assertThat(csvHeaders.get("test-key-1 (metadata)"), is(notNullValue()));
         assertThat(csvHeaders.get("test-key-2 (metadata)"), is(notNullValue()));

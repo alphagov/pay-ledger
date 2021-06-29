@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -57,6 +56,7 @@ public class CsvTransactionFactory {
     private static final String FIELD_FEE = "Fee";
     private static final String FIELD_NET = "Net";
     private static final String FIELD_MOTO = "MOTO";
+    private static final String FIELD_PAYMENT_PROVIDER = "Payment Provider";
     private ObjectMapper objectMapper;
 
     @Inject
@@ -92,6 +92,7 @@ public class CsvTransactionFactory {
                 result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
                 result.put(FIELD_STATE, PaymentState.getDisplayName(transactionEntity.getState()));
                 result.put(FIELD_MOTO, transactionEntity.isMoto());
+                result.put(FIELD_PAYMENT_PROVIDER, safeGetAsString(transactionDetails, "payment_provider"));
             }
             if (TransactionType.REFUND.toString().equals(transactionEntity.getTransactionType())) {
                 result.putAll(
@@ -190,6 +191,8 @@ public class CsvTransactionFactory {
         if (includeMotoHeader) {
             headers.put(FIELD_MOTO, FIELD_MOTO);
         }
+
+        headers.put(FIELD_PAYMENT_PROVIDER, FIELD_PAYMENT_PROVIDER);
 
         if (metadataKeys != null) {
             metadataKeys.stream().sorted()

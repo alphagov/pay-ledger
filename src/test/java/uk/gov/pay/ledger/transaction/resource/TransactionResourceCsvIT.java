@@ -109,7 +109,7 @@ public class TransactionResourceCsvIT {
         assertThat(csvRecords.size(), is(2));
 
         CSVRecord paymentRecord = csvRecords.get(0);
-        assertThat(paymentRecord.size(), is(22));
+        assertThat(paymentRecord.size(), is(23));
         assertCommonPaymentFields(paymentRecord, transactionFixture);
         assertThat(paymentRecord.get("Amount"), is("1.23"));
         assertThat(paymentRecord.get("GOV.UK Payment ID"), is(transactionFixture.getExternalId()));
@@ -127,6 +127,7 @@ public class TransactionResourceCsvIT {
         assertThat(paymentRecord.isMapped("Net"), is(false));
         assertThat(paymentRecord.isMapped("Fee"), is(false));
         assertThat(paymentRecord.isMapped("MOTO"), is(false));
+        assertThat(paymentRecord.get("Payment Provider"), is("sandbox"));
 
         CSVRecord refundRecord = csvRecords.get(1);
         assertCommonPaymentFields(refundRecord, refundTransactionFixture);
@@ -175,7 +176,7 @@ public class TransactionResourceCsvIT {
         assertThat(csvRecords.size(), is(1));
 
         CSVRecord paymentRecord = csvRecords.get(0);
-        assertThat(paymentRecord.size(), is(23));
+        assertThat(paymentRecord.size(), is(24));
         assertThat(paymentRecord.get("Net"), is("11.00"));
         assertThat(paymentRecord.get("Fee"), is("1.00"));
     }
@@ -208,7 +209,7 @@ public class TransactionResourceCsvIT {
         assertThat(csvRecords.size(), is(1));
 
         CSVRecord paymentRecord = csvRecords.get(0);
-        assertThat(paymentRecord.size(), is(22));
+        assertThat(paymentRecord.size(), is(23));
         assertThat(paymentRecord.get("MOTO"), is("true"));
     }
 
@@ -255,11 +256,11 @@ public class TransactionResourceCsvIT {
         assertThat(csvRecords.size(), is(2));
 
         CSVRecord paymentRecord = csvRecords.get(0);
-        assertThat(paymentRecord.size(), is(23));
+        assertThat(paymentRecord.size(), is(24));
         assertThat(paymentRecord.get("Net"), is("10.00"));
         assertThat(paymentRecord.get("Fee"), is("2.00"));
         CSVRecord paymentRecord2 = csvRecords.get(1);
-        assertThat(paymentRecord2.size(), is(23));
+        assertThat(paymentRecord2.size(), is(24));
         assertThat(paymentRecord2.get("Net"), is("11.00"));
         assertThat(paymentRecord2.get("Fee"), is("1.00"));
     }
@@ -298,7 +299,7 @@ public class TransactionResourceCsvIT {
         List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, DEFAULT).getRecords();
 
         CSVRecord header = csvRecords.get(0);
-        assertThat(header.size(), is(25));
+        assertThat(header.size(), is(26));
         assertThat(header.get(0), is("Reference"));
         assertThat(header.get(1), is("Description"));
         assertThat(header.get(2), is("Email"));
@@ -323,7 +324,8 @@ public class TransactionResourceCsvIT {
         assertThat(header.get(21), is("Net"));
         assertThat(header.get(22), is("Card Type"));
         assertThat(header.get(23), is("MOTO"));
-        assertThat(header.get(24), is("a-metadata-key (metadata)"));
+        assertThat(header.get(24), is("Payment Provider"));
+        assertThat(header.get(25), is("a-metadata-key (metadata)"));
     }
 
     @Test
