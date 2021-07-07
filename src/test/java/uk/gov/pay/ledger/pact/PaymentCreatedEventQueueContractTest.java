@@ -39,6 +39,7 @@ public class PaymentCreatedEventQueueContractTest {
     private String externalId = "created_externalId";
     private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
     private String gatewayAccountId = "gateway_account_id";
+    private String credentialExternalId = "credential-external-id-1";
 
     @Pact(provider = "connector", consumer = "ledger")
     public MessagePact createPaymentCreatedEventPact(MessagePactBuilder builder) {
@@ -46,6 +47,7 @@ public class PaymentCreatedEventQueueContractTest {
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
                 .withGatewayAccountId(gatewayAccountId)
+                .withCredentialExternalId(credentialExternalId)
                 .withDefaultEventDataForEventType("PAYMENT_CREATED");
 
         Map<String, String> metadata = new HashMap<>();
@@ -88,6 +90,7 @@ public class PaymentCreatedEventQueueContractTest {
         assertThat(transaction.get().getTransactionDetails(), containsString("\"address_postcode\": \"N1 3QU\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"address_city\": \"London\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"address_country\": \"GB\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"credential_external_id\": \"" + credentialExternalId + "\""));
     }
 
     public void setMessage(byte[] messageContents) {

@@ -39,6 +39,7 @@ public class PaymentNotificationCreatedEventQueueContractTest {
     private String externalId = "notifications_externalId";
     private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
     private String gatewayAccountId = "gateway_account_id";
+    private String credentialExternalId = "credential-external-id-1";
 
     @Pact(provider = "connector", consumer = "ledger")
     public MessagePact createPaymentNotificationCreatedEventPact(MessagePactBuilder builder) {
@@ -47,6 +48,7 @@ public class PaymentNotificationCreatedEventQueueContractTest {
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
                 .withGatewayAccountId(gatewayAccountId)
+                .withCredentialExternalId(credentialExternalId)
                 .withEventType(paymentDetailsEnteredEventName)
                 .withDefaultEventDataForEventType(paymentDetailsEnteredEventName);
 
@@ -95,6 +97,7 @@ public class PaymentNotificationCreatedEventQueueContractTest {
         assertThat(transaction.get().getTransactionDetails(), containsString("\"card_brand_label\": \"Visa\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"payment_provider\": \"sandbox\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"11/21\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"credential_external_id\": \"" + credentialExternalId + "\""));
     }
 
     public void setMessage(byte[] messageContents) {

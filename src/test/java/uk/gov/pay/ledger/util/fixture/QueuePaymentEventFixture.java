@@ -26,6 +26,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(5);
+    private String credentialExternalId = RandomStringUtils.randomAlphanumeric(32);
     private Source source;
     private Map<String, Object> metadata = new HashMap<>();
     private boolean includeMetada = true;
@@ -74,6 +75,11 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
         return this;
     }
 
+    public QueuePaymentEventFixture withCredentialExternalId(String credentialExternalId) {
+        this.credentialExternalId = credentialExternalId;
+        return this;
+    }
+
     public QueuePaymentEventFixture withSource(Source source) {
         this.source = source;
         return this;
@@ -108,6 +114,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("reference", "aref")
                                 .put("return_url", "https://example.org")
                                 .put("gateway_account_id", gatewayAccountId)
+                                .put("credential_external_id", credentialExternalId)
                                 .put("payment_provider", "sandbox")
                                 .put("delayed_capture", false)
                                 .put("moto", false)
@@ -161,6 +168,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 externalMetadata.addProperty("status", "success");
                 eventData = gsonBuilder.create()
                     .toJson(ImmutableMap.builder()
+                            .put("credential_external_id", credentialExternalId)
                             .put("amount", 1000)
                             .put("description", "New passport application")
                             .put("reference", "MRPC12345")
