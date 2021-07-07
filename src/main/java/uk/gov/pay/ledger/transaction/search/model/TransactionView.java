@@ -28,6 +28,7 @@ public class TransactionView {
     @JsonIgnore
     private Long id;
     private String gatewayAccountId;
+    private String credentialExternalId;
     private Long amount;
     private Long totalAmount;
     private Long corporateCardSurcharge;
@@ -63,6 +64,7 @@ public class TransactionView {
     public TransactionView(Builder builder) {
         this.id = builder.id;
         this.gatewayAccountId = builder.gatewayAccountId;
+        this.credentialExternalId = builder.credentialExternalId;
         this.amount = builder.amount;
         this.totalAmount = builder.totalAmount;
         this.corporateCardSurcharge = builder.corporateCardSurcharge;
@@ -105,6 +107,7 @@ public class TransactionView {
             Builder paymentBuilder = new Builder()
                     .withId(payment.getId())
                     .withGatewayAccountId(payment.getGatewayAccountId())
+                    .withCredentialExternalId(payment.getCredentialExternalId())
                     .withAmount(payment.getAmount())
                     .withTotalAmount(payment.getTotalAmount())
                     .withCorporateCardSurcharge(payment.getCorporateCardSurcharge())
@@ -166,6 +169,10 @@ public class TransactionView {
 
     public String getGatewayAccountId() {
         return gatewayAccountId;
+    }
+
+    public String getCredentialExternalId() {
+        return credentialExternalId;
     }
 
     public Long getAmount() {
@@ -337,6 +344,7 @@ public class TransactionView {
         private String walletType;
         private String gatewayPayoutId;
         private TransactionView paymentDetails;
+        private String credentialExternalId;
 
         public Builder() {
         }
@@ -502,6 +510,11 @@ public class TransactionView {
 
         public Builder withPaymentDetails(TransactionView sharedPaymentDetails) {
             this.paymentDetails = sharedPaymentDetails;
+            return this;
+        }
+
+        public Builder withCredentialExternalId(String credentialExternalId) {
+            this.credentialExternalId = credentialExternalId;
             return this;
         }
     }

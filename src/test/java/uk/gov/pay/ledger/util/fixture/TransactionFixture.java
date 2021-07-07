@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import io.dropwizard.jackson.Jackson;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.hamcrest.Matcher;
 import org.jdbi.v3.core.Jdbi;
 import org.jetbrains.annotations.NotNull;
 import uk.gov.service.payments.commons.model.Source;
@@ -34,6 +35,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     private Long id = RandomUtils.nextLong(1, 99999);
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
+    private String credentialExternalId = "credential-external-id";
     private String externalId = RandomStringUtils.randomAlphanumeric(20);
     private Long amount = RandomUtils.nextLong(1, 99999);
     private String reference = RandomStringUtils.randomAlphanumeric(10);
@@ -411,6 +413,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         String defaultCardType = String.valueOf(CREDIT);
         String defaultWalletType = "APPLE_PAY";
 
+        transactionDetails.addProperty("credential_external_id", credentialExternalId);
         transactionDetails.addProperty("language", language);
         transactionDetails.addProperty("return_url", returnUrl);
         transactionDetails.addProperty("payment_provider", paymentProvider);
@@ -569,6 +572,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public String getGatewayPayoutId() {
         return gatewayPayoutId;
+    }
+
+    public String getCredentialExternalId() {
+        return credentialExternalId;
     }
 
     public TransactionFixture withDefaultCardDetails(boolean includeCardDetails) {

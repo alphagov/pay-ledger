@@ -61,6 +61,7 @@ public class TransactionResourceIT {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("transaction_id", is(transactionFixture.getExternalId()))
+                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
                 .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
                 .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
                 .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
