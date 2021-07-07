@@ -18,6 +18,7 @@ import java.util.Map;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Payment extends Transaction {
 
+    private String credentialExternalId;
     private Boolean moto;
     private String reference;
     private String description;
@@ -51,6 +52,7 @@ public class Payment extends Transaction {
 
     public Payment(Builder builder) {
         super(builder.id, builder.gatewayAccountId, builder.amount, builder.externalId, builder.gatewayPayoutId);
+        this.credentialExternalId = builder.credentialExternalId;
         this.corporateCardSurcharge = builder.corporateCardSurcharge;
         this.fee = builder.fee;
         this.netAmount = builder.netAmount;
@@ -114,6 +116,10 @@ public class Payment extends Transaction {
 
     public String getPaymentProvider() {
         return paymentProvider;
+    }
+
+    public String getCredentialExternalId() {
+        return credentialExternalId;
     }
 
     public ZonedDateTime getCreatedDate() {
@@ -209,6 +215,7 @@ public class Payment extends Transaction {
         private String gatewayAccountId;
         private String externalId;
         private String gatewayPayoutId;
+        private String credentialExternalId;
 
         public Builder() {
 
@@ -355,6 +362,11 @@ public class Payment extends Transaction {
 
         public Builder withEventCount(Integer eventCount) {
             this.eventCount = eventCount;
+            return this;
+        }
+
+        public Builder withCredentialExternalId(String credentialExternalId) {
+            this.credentialExternalId = credentialExternalId;
             return this;
         }
     }

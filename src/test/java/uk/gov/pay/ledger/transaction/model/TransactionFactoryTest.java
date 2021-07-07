@@ -55,6 +55,7 @@ public class TransactionFactoryTest {
         metadata.addProperty("ledger_code", 123);
         metadata.addProperty("some_key", "key");
 
+        fullTransactionDetails.addProperty("credential_external_id", "credential-external-id");
         fullTransactionDetails.addProperty("language", "en");
         fullTransactionDetails.addProperty("return_url", "https://test.url.com");
         fullTransactionDetails.addProperty("payment_provider", "sandbox");
@@ -270,6 +271,7 @@ public class TransactionFactoryTest {
 
     private void assertCorrectPaymentTransactionWithFullData(Payment payment) {
         assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(payment.getCredentialExternalId(), is("credential-external-id"));
         assertThat(payment.getAmount(), is(amount));
         assertThat(payment.getExternalId(), is(externalId));
         assertThat(payment.getReference(), is(reference));

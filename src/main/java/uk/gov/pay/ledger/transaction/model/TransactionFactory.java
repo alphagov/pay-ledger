@@ -71,8 +71,11 @@ public class TransactionFactory {
                     entity.getPayoutEntity().map(payoutEntity -> payoutEntity.getPaidOutDate()).orElse(null)
             );
 
+            String credentialExternalId = safeGetAsString(transactionDetails, "credential_external_id");
+
             return new Payment.Builder()
                     .withGatewayAccountId(entity.getGatewayAccountId())
+                    .withCredentialExternalId(credentialExternalId)
                     .withAmount(entity.getAmount())
                     .withReference(entity.getReference())
                     .withDescription(entity.getDescription())
