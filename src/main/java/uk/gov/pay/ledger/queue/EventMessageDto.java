@@ -12,6 +12,12 @@ import java.time.ZonedDateTime;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EventMessageDto {
 
+    @JsonProperty("service_id")
+    private String serviceId;
+
+    @JsonProperty("live")
+    private boolean live;
+
     @JsonDeserialize(using = MicrosecondPrecisionDateTimeDeserializer.class)
     @JsonProperty("timestamp")
     private ZonedDateTime timestamp;
@@ -33,6 +39,14 @@ public class EventMessageDto {
 
     @JsonProperty("reproject_domain_object")
     private boolean reprojectDomainObject;
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public boolean isLive() {
+        return live;
+    }
 
     public ResourceType getResourceType() {
         return resourceType;

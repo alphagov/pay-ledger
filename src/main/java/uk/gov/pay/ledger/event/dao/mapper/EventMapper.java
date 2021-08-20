@@ -16,6 +16,8 @@ public class EventMapper implements RowMapper<Event> {
     public Event map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         return new Event(resultSet.getLong("id"),
                 resultSet.getString("sqs_message_id"),
+                resultSet.getString("service_id"),
+                resultSet.getBoolean("live"),
                 ResourceType.valueOf(resultSet.getString("resource_type_name").toUpperCase()),
                 resultSet.getString("resource_external_id"),
                 resultSet.getString("parent_resource_external_id"),

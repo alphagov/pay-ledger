@@ -19,6 +19,8 @@ import static uk.gov.service.payments.commons.model.Source.CARD_API;
 
 public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventFixture, Event> {
     private String sqsMessageId;
+    private String serviceId;
+    private boolean live;
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private String parentResourceExternalId = StringUtils.EMPTY;
@@ -38,6 +40,16 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
 
     public static QueuePaymentEventFixture aQueuePaymentEventFixture() {
         return new QueuePaymentEventFixture();
+    }
+
+    public QueuePaymentEventFixture withServiceId(String serviceId) {
+        this.serviceId = serviceId;
+        return this;
+    }
+
+    public QueuePaymentEventFixture withResourceType(boolean live) {
+        this.live = live;
+        return this;
     }
 
     public QueuePaymentEventFixture withResourceType(ResourceType resourceType) {
@@ -204,7 +216,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
 
     @Override
     public Event toEntity() {
-        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
+        return new Event(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
     }
 
     public String getSqsMessageId() {
