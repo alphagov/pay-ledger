@@ -25,21 +25,21 @@ public interface EventDao {
     @CreateSqlObject
     ResourceTypeDao getResourceTypeDao();
 
-    @SqlQuery("SELECT e.id, e.sqs_message_id, rt.name AS resource_type_name, e.resource_external_id, e.parent_resource_external_id," +
+    @SqlQuery("SELECT e.id, e.sqs_message_id, e.service_id, e.live, rt.name AS resource_type_name, e.resource_external_id, e.parent_resource_external_id," +
             " e.event_date, e.event_type, e.event_data" +
             " FROM event e, resource_type rt WHERE e.id = :eventId AND e.resource_type_id = rt.id")
     Optional<Event> getById(@Bind("eventId") Long eventId);
 
-    @SqlUpdate("INSERT INTO event(sqs_message_id, resource_type_id, resource_external_id, parent_resource_external_id, " +
+    @SqlUpdate("INSERT INTO event(sqs_message_id, service_id, live, resource_type_id, resource_external_id, parent_resource_external_id, " +
                 "event_date, event_type, event_data) " +
-            "VALUES (:sqsMessageId, :resourceTypeId, :resourceExternalId, :parentResourceExternalId, " +
+            "VALUES (:sqsMessageId, :serviceId, :live, :resourceTypeId, :resourceExternalId, :parentResourceExternalId, " +
                 ":eventDate, :eventType, CAST(:eventData as jsonb))")
     @GetGeneratedKeys
     Long insert(@BindBean Event event, @Bind("resourceTypeId") int resourceTypeId);
 
-    @SqlUpdate("INSERT INTO event(sqs_message_id, resource_type_id, resource_external_id, parent_resource_external_id, " +
+    @SqlUpdate("INSERT INTO event(sqs_message_id, service_id, live, resource_type_id, resource_external_id, parent_resource_external_id, " +
             "event_date, event_type, event_data) " +
-            "SELECT :sqsMessageId, :resourceTypeId, :resourceExternalId, :parentResourceExternalId, " +
+            "SELECT :sqsMessageId, :serviceId, :live, :resourceTypeId, :resourceExternalId, :parentResourceExternalId, " +
             "       :eventDate, :eventType, CAST(:eventData as jsonb) " +
             "WHERE NOT EXISTS ( " +
             "    SELECT 1 " +
@@ -63,14 +63,14 @@ public interface EventDao {
         return insertIfDoesNotExist(event, resourceTypeId);
     }
 
-    @SqlQuery("SELECT  e.id, e.sqs_message_id, rt.name AS resource_type_name, e.resource_external_id, " +
+    @SqlQuery("SELECT  e.id, e.sqs_message_id, e.service_id, e.live, rt.name AS resource_type_name, e.resource_external_id, " +
             "e.parent_resource_external_id, e.event_date," +
             "e.event_type, e.event_data FROM event e, resource_type rt WHERE e.resource_external_id = :resourceExternalId" +
             " AND e.resource_type_id = rt.id ORDER BY e.event_date DESC")
     List<Event> getEventsByResourceExternalId(@Bind("resourceExternalId") String resourceExternalId);
 
 
-    @SqlQuery("SELECT  e.id, e.sqs_message_id, rt.name AS resource_type_name, e.resource_external_id, " +
+    @SqlQuery("SELECT  e.id, e.sqs_message_id, e.service_id, e.live, rt.name AS resource_type_name, e.resource_external_id, " +
             "          e.parent_resource_external_id, e.event_date," +
             "          e.event_type, e.event_data FROM event e, resource_type rt" +
             " WHERE e.resource_external_id in (<externalIds>)" +
