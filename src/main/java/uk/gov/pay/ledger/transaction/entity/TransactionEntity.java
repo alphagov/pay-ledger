@@ -2,21 +2,23 @@ package uk.gov.pay.ledger.transaction.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TransactionEntity {
 
     @JsonIgnore
     private Long id;
+    private String serviceId;
+    private boolean live;
     private String gatewayAccountId;
     @JsonIgnore
     private String externalId;
@@ -44,7 +46,6 @@ public class TransactionEntity {
     private String refundStatus;
     private Long refundAmountRefunded;
     private Long refundAmountAvailable;
-    private boolean live;
     private boolean moto;
     private String gatewayTransactionId;
     private Source source;
@@ -56,6 +57,8 @@ public class TransactionEntity {
 
     public TransactionEntity(Builder builder) {
         this.id = builder.id;
+        this.serviceId = builder.serviceId;
+        this.live = builder.live;
         this.gatewayAccountId = builder.gatewayAccountId;
         this.externalId = builder.externalId;
         this.parentExternalId = builder.parentExternalId;
@@ -78,7 +81,6 @@ public class TransactionEntity {
         this.refundAmountAvailable = builder.refundAmountAvailable;
         this.fee = builder.fee;
         this.transactionType = builder.transactionType;
-        this.live = builder.live;
         this.moto = builder.moto;
         this.gatewayTransactionId = builder.gatewayTransactionId;
         this.source = builder.source;
@@ -92,6 +94,10 @@ public class TransactionEntity {
 
     public String getGatewayAccountId() {
         return gatewayAccountId;
+    }
+
+    public String getServiceId() {
+        return serviceId;
     }
 
     public String getExternalId() {
@@ -178,6 +184,10 @@ public class TransactionEntity {
         this.transactionType = transactionType;
     }
 
+    public void setLive(boolean live) {
+        this.live = live;
+    }
+
     public Long getNetAmount() {
         return netAmount;
     }
@@ -240,9 +250,14 @@ public class TransactionEntity {
         this.email = paymentTransaction.email;
     }
 
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
     public static class Builder {
         private Long fee;
         private Long id;
+        private String serviceId;
         private String gatewayAccountId;
         private String externalId;
         private String parentExternalId;
@@ -280,6 +295,11 @@ public class TransactionEntity {
 
         public Builder withId(Long id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder withServiceId(String serviceId) {
+            this.serviceId = serviceId;
             return this;
         }
 

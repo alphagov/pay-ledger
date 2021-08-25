@@ -140,7 +140,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
 
     @Override
     public QueueRefundEventFixture insert(AmazonSQS sqsClient) {
-        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, resourceExternalId,
+        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, null, true, resourceExternalId,
                 parentResourceExternalId, resourceType, eventData);
         return this;
     }

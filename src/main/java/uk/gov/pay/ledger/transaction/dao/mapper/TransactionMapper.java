@@ -21,6 +21,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
     public TransactionEntity map(ResultSet rs, StatementContext ctx) throws SQLException {
         var transactionBuilder = new TransactionEntity.Builder()
                 .withId(rs.getLong("id"))
+                .withServiceId(rs.getString("service_id"))
                 .withGatewayAccountId(rs.getString("gateway_account_id"))
                 .withExternalId(rs.getString("external_id"))
                 .withParentExternalId(rs.getString("parent_external_id"))
