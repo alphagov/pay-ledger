@@ -19,6 +19,8 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
 
     private Long id;
     private String gatewayPayoutId;
+    private String serviceId;
+    private boolean live;
     private Long amount;
     private ZonedDateTime createdDate = now(UTC);
     private ZonedDateTime paidOutDate;
@@ -35,6 +37,8 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                                 " payout(\n" +
                                 "   id,\n" +
                                 "   gateway_payout_id,\n" +
+                                "   service_id,\n" +
+                                "   live,\n" +
                                 "   amount,\n" +
                                 "   created_date,\n" +
                                 "   paid_out_date,\n" +
@@ -43,8 +47,8 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                                 "   payout_details,\n" +
                                 "   gateway_account_id\n" +
                                 " )\n" +
-                                " VALUES (?,?,?,?,?,?,?,CAST(? as jsonb),?)",
-                        id, gatewayPayoutId, amount, createdDate, paidOutDate,
+                                " VALUES (?,?,?,?,?,?,?,?,?,CAST(? as jsonb),?)",
+                        id, gatewayPayoutId, serviceId, live, amount, createdDate, paidOutDate,
                         state, eventCount, payoutDetails, gatewayAccountId
                 ));
         return this;
@@ -56,6 +60,8 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
                 .withAmount(amount)
                 .withCreatedDate(createdDate)
                 .withGatewayPayoutId(gatewayPayoutId)
+                .withServiceId(serviceId)
+                .withLive(live)
                 .withId(id)
                 .withPaidOutDate(paidOutDate)
                 .withState(state)
@@ -101,6 +107,8 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
         private Integer eventCount = 1;
         private String payoutDetails = "{}";
         private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
+        private String serviceId;
+        private boolean live;
 
         private PayoutFixtureBuilder() {
         }
@@ -144,6 +152,16 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             return this;
         }
 
+        public PayoutFixtureBuilder withServiceId(String serviceId) {
+            this.serviceId = serviceId;
+            return this;
+        }
+
+        public PayoutFixtureBuilder withLive(boolean live) {
+            this.live = live;
+            return this;
+        }
+
         public PayoutFixtureBuilder withPayoutDetails(String payoutDetails) {
             this.payoutDetails = payoutDetails;
             return this;
@@ -153,10 +171,13 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
             this.gatewayAccountId = gatewayAccountId;
             return this;
         }
+
         public PayoutFixture build() {
             PayoutFixture payoutFixture = new PayoutFixture();
             payoutFixture.amount = this.amount;
             payoutFixture.gatewayPayoutId = this.gatewayPayoutId;
+            payoutFixture.serviceId = this.serviceId;
+            payoutFixture.live = this.live;
             payoutFixture.id = this.id;
             payoutFixture.state = this.state;
             payoutFixture.createdDate = this.createdDate;
