@@ -19,8 +19,8 @@ import static uk.gov.service.payments.commons.model.Source.CARD_API;
 
 public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventFixture, Event> {
     private String sqsMessageId;
-    private String serviceId;
-    private boolean live;
+    private String serviceId = RandomStringUtils.randomAlphanumeric(20);;
+    private boolean live = true;
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private String parentResourceExternalId = StringUtils.EMPTY;
@@ -130,7 +130,6 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("payment_provider", "sandbox")
                                 .put("delayed_capture", false)
                                 .put("moto", false)
-                                .put("live", true)
                                 .put("external_metadata", metadata)
                                 .put("email", "j.doe@example.org")
                                 .put("cardholder_name", "J citizen")
@@ -249,7 +248,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
 
     @Override
     public QueuePaymentEventFixture insert(AmazonSQS sqsClient) {
-        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, resourceExternalId,
+        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, serviceId, live, resourceExternalId,
                 parentResourceExternalId, resourceType, eventData);
         return this;
     }

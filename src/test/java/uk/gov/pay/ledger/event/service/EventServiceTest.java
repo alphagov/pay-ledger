@@ -73,8 +73,8 @@ public class EventServiceTest {
     public void laterEventsShouldOverrideEarlierEventsInEventDetailsDigest() {
         EventDigest eventDigest = eventService.getEventDigestForResource(event1);
 
-        assertThat(eventDigest.getEventPayload().get("description"), is("a payment"));
-        assertThat(eventDigest.getEventPayload().get("amount"), is(1000));
+        assertThat(eventDigest.getEventAggregate().get("description"), is("a payment"));
+        assertThat(eventDigest.getEventAggregate().get("amount"), is(1000));
     }
 
     @Test

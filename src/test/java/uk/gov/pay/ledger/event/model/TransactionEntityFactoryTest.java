@@ -58,21 +58,23 @@ public class TransactionEntityFactoryTest {
         TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
 
         assertThat(transactionEntity.getExternalId(), is(eventDigest.getResourceExternalId()));
+        assertThat(transactionEntity.getServiceId(), is(paymentCreatedEvent.getServiceId()));
+        assertThat(transactionEntity.isLive(), is(paymentCreatedEvent.isLive()));
         assertThat(transactionEntity.getState().toString(), is("CREATED"));
         assertThat(transactionEntity.getCreatedDate(), is(paymentCreatedEvent.getEventDate()));
         assertThat(transactionEntity.getEventCount(), is(eventDigest.getEventCount()));
-        assertThat(transactionEntity.getReference(), is(eventDigest.getEventPayload().get("reference")));
-        assertThat(transactionEntity.getGatewayAccountId(), is(eventDigest.getEventPayload().get("gateway_account_id")));
-        assertThat(transactionEntity.getCardholderName(), is(eventDigest.getEventPayload().get("cardholder_name")));
-        assertThat(transactionEntity.getEmail(), is(eventDigest.getEventPayload().get("email")));
-        assertThat(transactionEntity.getCardBrand(), is(eventDigest.getEventPayload().get("card_brand")));
-        assertThat(transactionEntity.getDescription(), is(eventDigest.getEventPayload().get("description")));
-        assertThat(transactionEntity.getFirstDigitsCardNumber(), is(eventDigest.getEventPayload().get("first_digits_card_number")));
-        assertThat(transactionEntity.getLastDigitsCardNumber(), is(eventDigest.getEventPayload().get("last_digits_card_number")));
-        assertThat(transactionEntity.getAmount(), is(((Integer)eventDigest.getEventPayload().get("amount")).longValue()));
-        assertThat(transactionEntity.getNetAmount(), is(((Integer)eventDigest.getEventPayload().get("net_amount")).longValue()));
-        assertThat(transactionEntity.getTotalAmount(), is(((Integer)eventDigest.getEventPayload().get("total_amount")).longValue()));
-        assertThat(transactionEntity.getFee(), is(((Integer)eventDigest.getEventPayload().get("fee")).longValue()));
+        assertThat(transactionEntity.getReference(), is(eventDigest.getEventAggregate().get("reference")));
+        assertThat(transactionEntity.getGatewayAccountId(), is(eventDigest.getEventAggregate().get("gateway_account_id")));
+        assertThat(transactionEntity.getCardholderName(), is(eventDigest.getEventAggregate().get("cardholder_name")));
+        assertThat(transactionEntity.getEmail(), is(eventDigest.getEventAggregate().get("email")));
+        assertThat(transactionEntity.getCardBrand(), is(eventDigest.getEventAggregate().get("card_brand")));
+        assertThat(transactionEntity.getDescription(), is(eventDigest.getEventAggregate().get("description")));
+        assertThat(transactionEntity.getFirstDigitsCardNumber(), is(eventDigest.getEventAggregate().get("first_digits_card_number")));
+        assertThat(transactionEntity.getLastDigitsCardNumber(), is(eventDigest.getEventAggregate().get("last_digits_card_number")));
+        assertThat(transactionEntity.getAmount(), is(((Integer)eventDigest.getEventAggregate().get("amount")).longValue()));
+        assertThat(transactionEntity.getNetAmount(), is(((Integer)eventDigest.getEventAggregate().get("net_amount")).longValue()));
+        assertThat(transactionEntity.getTotalAmount(), is(((Integer)eventDigest.getEventAggregate().get("total_amount")).longValue()));
+        assertThat(transactionEntity.getFee(), is(((Integer)eventDigest.getEventAggregate().get("fee")).longValue()));
         assertThat(transactionEntity.getTransactionType(), is("PAYMENT"));
         assertThat(transactionEntity.getSource(), is(notNullValue()));
         assertThat(transactionEntity.isLive(), is(true));
@@ -88,7 +90,7 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionDetails.get("delayed_capture").getAsBoolean(), is(false));
         assertThat(transactionDetails.get("return_url").getAsString(), is("https://example.org"));
         assertThat(transactionDetails.get("corporate_surcharge").getAsInt(), is(5));
-        assertThat(transactionDetails.get("gateway_transaction_id").getAsString(), is(eventDigest.getEventPayload().get("gateway_transaction_id")));
+        assertThat(transactionDetails.get("gateway_transaction_id").getAsString(), is(eventDigest.getEventAggregate().get("gateway_transaction_id")));
         assertThat(transactionDetails.get("external_metadata").getAsJsonObject().get("key").getAsString(), is("value"));
     }
 
