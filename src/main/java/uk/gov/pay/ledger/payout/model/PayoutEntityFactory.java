@@ -32,6 +32,8 @@ public class PayoutEntityFactory {
         entity.setState(digestPayoutState);
         entity.setCreatedDate(eventDigest.getEventCreatedDate());
         entity.setGatewayPayoutId(eventDigest.getResourceExternalId());
+        entity.setServiceId(eventDigest.getServiceId());
+        entity.setLive(eventDigest.isLive());
         entity.setEventCount(eventDigest.getEventCount());
         entity.setPayoutDetails(payoutDetails);
         return entity;

@@ -19,6 +19,8 @@ public class PayoutMapper implements RowMapper<PayoutEntity> {
        var builder = PayoutEntity.PayoutEntityBuilder.aPayoutEntity()
                .withId(rs.getLong("id"))
                .withGatewayPayoutId(rs.getString("gateway_payout_id"))
+               .withServiceId(rs.getString("service_id"))
+               .withLive(rs.getBoolean("live"))
                .withAmount(rs.getLong("amount"))
                .withState(PayoutState.from(rs.getString("state")))
                .withCreatedDate(getZonedDateTime(rs, "created_date").orElse(null))
