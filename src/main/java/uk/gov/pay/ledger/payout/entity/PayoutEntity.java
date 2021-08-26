@@ -20,7 +20,7 @@ public class PayoutEntity {
     private Long id;
     private String gatewayPayoutId;
     private String serviceId;
-    private boolean live;
+    private Boolean live;
     private Long amount;
     @JsonIgnore
     private ZonedDateTime createdDate;
@@ -130,7 +130,7 @@ public class PayoutEntity {
         this.serviceId = serviceId;
     }
 
-    public void setLive(boolean live) {
+    public void setLive(Boolean live) {
         this.live = live;
     }
 
@@ -138,7 +138,7 @@ public class PayoutEntity {
         private Long id;
         private String gatewayPayoutId;
         private String serviceId;
-        private boolean live;
+        private Boolean live;
         private Long amount;
         private ZonedDateTime createdDate;
         private ZonedDateTime paidOutDate;
@@ -169,7 +169,7 @@ public class PayoutEntity {
             return this;
         }
 
-        public PayoutEntityBuilder withLive(boolean live) {
+        public PayoutEntityBuilder withLive(Boolean live) {
             this.live = live;
             return this;
         }
