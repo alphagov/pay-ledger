@@ -29,7 +29,7 @@ public class QueueEventFixtureUtil {
                 eventDate.toString(),
                 resourceExternalId,
                 serviceId,
-                live.toString(),
+                live,
                 parentResourceExternalId == null ? "" : parentResourceExternalId,
                 eventType,
                 resourceType.toString().toLowerCase(),

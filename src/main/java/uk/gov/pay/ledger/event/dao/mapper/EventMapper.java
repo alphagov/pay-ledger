@@ -17,7 +17,7 @@ public class EventMapper implements RowMapper<Event> {
         return new Event(resultSet.getLong("id"),
                 resultSet.getString("sqs_message_id"),
                 resultSet.getString("service_id"),
-                resultSet.getBoolean("live"),
+                getBooleanWithNullCheck(resultSet, "live"),
                 ResourceType.valueOf(resultSet.getString("resource_type_name").toUpperCase()),
                 resultSet.getString("resource_external_id"),
                 resultSet.getString("parent_resource_external_id"),
@@ -26,5 +26,10 @@ public class EventMapper implements RowMapper<Event> {
                 resultSet.getString("event_data"),
                 false
         );
+    }
+
+    private Boolean getBooleanWithNullCheck(ResultSet rs, String columnName) throws SQLException {
+        var value = rs.getBoolean(columnName);
+        return rs.wasNull() ? null : value;
     }
 }

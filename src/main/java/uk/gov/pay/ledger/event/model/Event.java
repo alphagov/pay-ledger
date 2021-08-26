@@ -16,7 +16,7 @@ public class Event {
     private Long id;
     private String sqsMessageId;
     private String serviceId;
-    private boolean live;
+    private Boolean live;
     private ResourceType resourceType;
     private String resourceExternalId;
     private String parentResourceExternalId;
@@ -32,7 +32,7 @@ public class Event {
     public Event(Long id,
                  String sqsMessageId,
                  String serviceId,
-                 boolean live,
+                 Boolean live,
                  ResourceType resourceType,
                  String resourceExternalId,
                  String parentResourceExternalId,
@@ -55,7 +55,7 @@ public class Event {
 
     public Event(String sqsMessageId,
                  String serviceId,
-                 boolean live,
+                 Boolean live,
                  ResourceType resourceType,
                  String resourceExternalId,
                  String parentResourceExternalId,
@@ -79,7 +79,10 @@ public class Event {
         return serviceId;
     }
 
-    public boolean isLive() {
+    public Boolean isLive() {
+        return live;
+    }
+    public Boolean getLive() {
         return live;
     }
 

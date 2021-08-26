@@ -44,7 +44,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withRefundAmountAvailable(getLongWithNullCheck(rs, "refund_amount_available"))
                 .withFee(getLongWithNullCheck(rs, "fee"))
                 .withTransactionType(rs.getString("type"))
-                .withLive(rs.getBoolean("live"))
+                .withLive(getBooleanWithNullCheck(rs,"live"))
                 .withMoto(rs.getBoolean("moto"))
                 .withGatewayTransactionId(rs.getString("gateway_transaction_id"))
                 .withGatewayPayoutId(rs.getString("gateway_payout_id"));
@@ -60,6 +60,11 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
 
     private Long getLongWithNullCheck(ResultSet rs, String columnName) throws SQLException {
         long value = rs.getLong(columnName);
+        return rs.wasNull() ? null : value;
+    }
+
+    private Boolean getBooleanWithNullCheck(ResultSet rs, String columnName) throws SQLException {
+        Boolean value = rs.getBoolean(columnName);
         return rs.wasNull() ? null : value;
     }
 

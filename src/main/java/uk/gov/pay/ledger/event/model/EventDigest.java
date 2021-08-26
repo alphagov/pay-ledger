@@ -15,7 +15,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class EventDigest {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final String serviceId;
-    private final boolean live;
+    private final Boolean live;
     private final ZonedDateTime mostRecentEventTimestamp;
     private final ResourceType resourceType;
     private final String resourceExternalId;
@@ -27,7 +27,7 @@ public class EventDigest {
 
     private EventDigest(
             String serviceId,
-            boolean live,
+            Boolean live,
             ZonedDateTime mostRecentEventTimestamp,
             SalientEventType mostRecentSalientEventType,
             ResourceType resourceType,
@@ -104,7 +104,7 @@ public class EventDigest {
         return serviceId;
     }
 
-    public boolean isLive() {
+    public Boolean isLive() {
         return live;
     }
 
