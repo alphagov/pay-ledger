@@ -79,9 +79,6 @@ public class Event {
         return serviceId;
     }
 
-    public Boolean isLive() {
-        return live;
-    }
     public Boolean getLive() {
         return live;
     }

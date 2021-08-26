@@ -57,7 +57,7 @@ public class PayoutEntityFactoryTest {
 
         assertThat(payoutEntity.getGatewayPayoutId(), is(payoutCreatedEvent.getResourceExternalId()));
         assertThat(payoutEntity.getServiceId(), is(payoutCreatedEvent.getServiceId()));
-        assertThat(payoutEntity.isLive(), is(payoutCreatedEvent.isLive()));
+        assertThat(payoutEntity.isLive(), is(payoutCreatedEvent.getLive()));
         assertThat(payoutEntity.getAmount(), is(10000L));
         assertThat(payoutEntity.getCreatedDate(), is(payoutCreatedEvent.getEventDate()));
         assertThat(payoutEntity.getPaidOutDate(), is(paidOutDate));

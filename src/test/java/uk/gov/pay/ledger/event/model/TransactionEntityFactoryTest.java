@@ -59,7 +59,7 @@ public class TransactionEntityFactoryTest {
 
         assertThat(transactionEntity.getExternalId(), is(eventDigest.getResourceExternalId()));
         assertThat(transactionEntity.getServiceId(), is(paymentCreatedEvent.getServiceId()));
-        assertThat(transactionEntity.isLive(), is(paymentCreatedEvent.isLive()));
+        assertThat(transactionEntity.isLive(), is(paymentCreatedEvent.getLive()));
         assertThat(transactionEntity.getState().toString(), is("CREATED"));
         assertThat(transactionEntity.getCreatedDate(), is(paymentCreatedEvent.getEventDate()));
         assertThat(transactionEntity.getEventCount(), is(eventDigest.getEventCount()));

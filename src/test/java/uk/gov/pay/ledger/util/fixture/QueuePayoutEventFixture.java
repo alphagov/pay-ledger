@@ -93,7 +93,7 @@ public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFix
 
     @Override
     public QueuePayoutEventFixture insert(AmazonSQS sqsClient) {
-        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, null, true, resourceExternalId,
+        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, serviceId, live, resourceExternalId,
                 EMPTY, resourceType, eventData);
         return this;
     }

@@ -37,7 +37,7 @@ public class EventDigest {
             Map<String, Object> eventAggregate,
             ZonedDateTime eventCreatedDate
     ) {
-        this.serviceId =serviceId;
+        this.serviceId = serviceId;
         this.live = live;
         this.mostRecentEventTimestamp = mostRecentEventTimestamp;
         this.mostRecentSalientEventType = mostRecentSalientEventType;
@@ -72,7 +72,7 @@ public class EventDigest {
 
         return new EventDigest(
                 latestEvent.getServiceId(),
-                latestEvent.isLive(),
+                latestEvent.getLive(),
                 latestEvent.getEventDate(),
                 latestSalientEventType,
                 latestEvent.getResourceType(),

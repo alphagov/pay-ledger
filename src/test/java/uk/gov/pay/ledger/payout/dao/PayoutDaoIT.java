@@ -39,7 +39,7 @@ public class PayoutDaoIT {
         var paidOutDate = createdDate.minusDays(1);
         var id = RandomStringUtils.randomNumeric(4);
         var gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
-        var serviceId = RandomStringUtils.randomAlphanumeric(10);
+        var serviceId = RandomStringUtils.randomAlphanumeric(26);
         var live = true;
 
         aPayoutFixture()

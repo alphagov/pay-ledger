@@ -50,6 +50,8 @@ public class PayoutResourceSearchIT {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("results[0].gateway_account_id", is(payoutToVerify.getGatewayAccountId()))
+                .body("results[0].service_id", is(payoutToVerify.getServiceId()))
+                .body("results[0].live", is(payoutToVerify.isLive()))
                 .body("results[0].gateway_payout_id", is(payoutToVerify.getGatewayPayoutId()))
                 .body("results[0].created_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(payoutToVerify.getCreatedDate())))
                 .body("results[0].paid_out_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(payoutToVerify.getPaidOutDate())))
