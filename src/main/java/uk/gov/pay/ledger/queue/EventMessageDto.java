@@ -3,23 +3,23 @@ package uk.gov.pay.ledger.queue;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import uk.gov.pay.ledger.event.model.ResourceType;
+import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
 
 import java.time.ZonedDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class EventMessageDto {
 
-    @JsonProperty("service_id")
     private String serviceId;
 
-    @JsonProperty("live")
-    private boolean live;
+    private Boolean live;
 
     @JsonDeserialize(using = MicrosecondPrecisionDateTimeDeserializer.class)
-    @JsonProperty("timestamp")
     private ZonedDateTime timestamp;
 
     @JsonProperty("resource_external_id")
@@ -28,23 +28,20 @@ public class EventMessageDto {
     @JsonProperty("parent_resource_external_id")
     private String parentExternalId;
 
-    @JsonProperty("event_type")
     public String eventType;
 
-    @JsonProperty("resource_type")
     public ResourceType resourceType;
 
     @JsonProperty("event_details")
     private JsonNode eventData;
 
-    @JsonProperty("reproject_domain_object")
     private boolean reprojectDomainObject;
 
     public String getServiceId() {
         return serviceId;
     }
 
-    public boolean isLive() {
+    public Boolean isLive() {
         return live;
     }
 

@@ -20,7 +20,7 @@ import static uk.gov.service.payments.commons.model.Source.CARD_API;
 public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventFixture, Event> {
     private String sqsMessageId;
     private String serviceId = RandomStringUtils.randomAlphanumeric(20);;
-    private boolean live = true;
+    private Boolean live = true;
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private String parentResourceExternalId = StringUtils.EMPTY;
@@ -104,6 +104,11 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
 
     public QueuePaymentEventFixture includeMetadata(boolean includeMetada) {
         this.includeMetada = includeMetada;
+        return this;
+    }
+
+    public QueuePaymentEventFixture withLive(Boolean live) {
+        this.live = live;
         return this;
     }
 

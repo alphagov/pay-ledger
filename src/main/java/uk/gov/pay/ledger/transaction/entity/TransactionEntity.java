@@ -18,7 +18,7 @@ public class TransactionEntity {
     @JsonIgnore
     private Long id;
     private String serviceId;
-    private boolean live;
+    private Boolean live;
     private String gatewayAccountId;
     @JsonIgnore
     private String externalId;
@@ -184,7 +184,7 @@ public class TransactionEntity {
         this.transactionType = transactionType;
     }
 
-    public void setLive(boolean live) {
+    public void setLive(Boolean live) {
         this.live = live;
     }
 
@@ -216,7 +216,11 @@ public class TransactionEntity {
         return transactionType;
     }
 
-    public boolean isLive() {
+    public Boolean isLive() {
+        return live;
+    }
+
+    public Boolean getLive() {
         return live;
     }
 
@@ -279,7 +283,7 @@ public class TransactionEntity {
         private Long refundAmountRefunded;
         private Long refundAmountAvailable;
         private String transactionType;
-        private boolean live;
+        private Boolean live;
         private Source source;
         private String gatewayTransactionId;
         private boolean moto;
@@ -413,7 +417,7 @@ public class TransactionEntity {
             return this;
         }
 
-        public Builder withLive(boolean live) {
+        public Builder withLive(Boolean live) {
             this.live = live;
             return this;
         }
