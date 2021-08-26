@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static uk.gov.pay.ledger.payout.entity.PayoutEntity.PayoutEntityBuilder.aPayoutEntity;
+import static uk.gov.pay.ledger.util.dao.MapperUtils.getBooleanWithNullCheck;
 
 public class TransactionMapper implements RowMapper<TransactionEntity> {
 
@@ -60,11 +61,6 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
 
     private Long getLongWithNullCheck(ResultSet rs, String columnName) throws SQLException {
         long value = rs.getLong(columnName);
-        return rs.wasNull() ? null : value;
-    }
-
-    private Boolean getBooleanWithNullCheck(ResultSet rs, String columnName) throws SQLException {
-        Boolean value = rs.getBoolean(columnName);
         return rs.wasNull() ? null : value;
     }
 

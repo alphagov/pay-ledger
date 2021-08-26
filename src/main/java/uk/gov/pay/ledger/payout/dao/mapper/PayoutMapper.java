@@ -12,6 +12,8 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import static uk.gov.pay.ledger.util.dao.MapperUtils.getBooleanWithNullCheck;
+
 public class PayoutMapper implements RowMapper<PayoutEntity> {
 
     @Override
@@ -20,7 +22,7 @@ public class PayoutMapper implements RowMapper<PayoutEntity> {
                .withId(rs.getLong("id"))
                .withGatewayPayoutId(rs.getString("gateway_payout_id"))
                .withServiceId(rs.getString("service_id"))
-               .withLive(rs.getBoolean("live"))
+               .withLive(getBooleanWithNullCheck(rs,"live"))
                .withAmount(rs.getLong("amount"))
                .withState(PayoutState.from(rs.getString("state")))
                .withCreatedDate(getZonedDateTime(rs, "created_date").orElse(null))

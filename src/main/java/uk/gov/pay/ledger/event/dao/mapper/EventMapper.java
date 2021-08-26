@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
+import static uk.gov.pay.ledger.util.dao.MapperUtils.getBooleanWithNullCheck;
+
 public class EventMapper implements RowMapper<Event> {
 
     @Override
@@ -26,10 +28,5 @@ public class EventMapper implements RowMapper<Event> {
                 resultSet.getString("event_data"),
                 false
         );
-    }
-
-    private Boolean getBooleanWithNullCheck(ResultSet rs, String columnName) throws SQLException {
-        var value = rs.getBoolean(columnName);
-        return rs.wasNull() ? null : value;
     }
 }
