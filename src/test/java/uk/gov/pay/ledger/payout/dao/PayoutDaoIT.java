@@ -1,9 +1,7 @@
 package uk.gov.pay.ledger.payout.dao;
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
@@ -61,7 +59,7 @@ public class PayoutDaoIT {
         assertThat(payout.getAmount(), is(100L));
         assertThat(payout.getGatewayPayoutId(), is(gatewayPayoutId));
         assertThat(payout.getServiceId(), is(serviceId));
-        assertThat(payout.isLive(), is(live));
+        assertThat(payout.getLive(), is(live));
         assertThat(payout.getState(), is(PayoutState.PAID_OUT));
         assertThat(payout.getCreatedDate(), is(createdDate));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));

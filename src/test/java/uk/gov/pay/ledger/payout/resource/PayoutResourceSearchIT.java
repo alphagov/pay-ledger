@@ -1,10 +1,8 @@
 package uk.gov.pay.ledger.payout.resource;
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
@@ -16,9 +14,9 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
-import static uk.gov.service.payments.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.aPersistedPayoutList;
+import static uk.gov.service.payments.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 
 public class PayoutResourceSearchIT {
 
@@ -51,7 +49,7 @@ public class PayoutResourceSearchIT {
                 .contentType(JSON)
                 .body("results[0].gateway_account_id", is(payoutToVerify.getGatewayAccountId()))
                 .body("results[0].service_id", is(payoutToVerify.getServiceId()))
-                .body("results[0].live", is(payoutToVerify.isLive()))
+                .body("results[0].live", is(payoutToVerify.getLive()))
                 .body("results[0].gateway_payout_id", is(payoutToVerify.getGatewayPayoutId()))
                 .body("results[0].created_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(payoutToVerify.getCreatedDate())))
                 .body("results[0].paid_out_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(payoutToVerify.getPaidOutDate())))

@@ -107,7 +107,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
         private Integer eventCount = 1;
         private String payoutDetails = "{}";
         private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
-        private String serviceId = RandomStringUtils.randomAlphanumeric(10);
+        private String serviceId = RandomStringUtils.randomAlphanumeric(26);
         private boolean live = true;
 
         private PayoutFixtureBuilder() {

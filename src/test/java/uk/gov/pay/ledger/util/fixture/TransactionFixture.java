@@ -7,10 +7,8 @@ import com.google.gson.JsonParser;
 import io.dropwizard.jackson.Jackson;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.hamcrest.Matcher;
 import org.jdbi.v3.core.Jdbi;
 import org.jetbrains.annotations.NotNull;
-import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
@@ -19,6 +17,7 @@ import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -34,7 +33,7 @@ import static uk.gov.pay.ledger.util.fixture.TransactionMetadataFixture.aTransac
 public class TransactionFixture implements DbFixture<TransactionFixture, TransactionEntity> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
-    private String serviceId = RandomStringUtils.randomAlphanumeric(10);
+    private String serviceId = RandomStringUtils.randomAlphanumeric(26);
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private String credentialExternalId = "credential-external-id";
     private String externalId = RandomStringUtils.randomAlphanumeric(20);

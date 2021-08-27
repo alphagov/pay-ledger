@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import uk.gov.pay.ledger.payout.state.PayoutState;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
-import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.time.ZonedDateTime;
 
@@ -61,7 +61,7 @@ public class PayoutEntity {
         return serviceId;
     }
 
-    public boolean isLive() {
+    public Boolean getLive() {
         return live;
     }
 
