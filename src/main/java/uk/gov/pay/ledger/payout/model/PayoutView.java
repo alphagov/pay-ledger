@@ -3,9 +3,9 @@ package uk.gov.pay.ledger.payout.model;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.payout.state.PayoutState;
+import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
 
 import java.time.ZonedDateTime;
 
@@ -38,7 +38,7 @@ public class PayoutView {
     public static PayoutView from(PayoutEntity payoutEntity) {
 
         return new PayoutView(payoutEntity.getAmount(), payoutEntity.getCreatedDate(), payoutEntity.getGatewayPayoutId(),
-                payoutEntity.getGatewayAccountId(), payoutEntity.getServiceId(), payoutEntity.isLive(), payoutEntity.getPaidOutDate(), payoutEntity.getState());
+                payoutEntity.getGatewayAccountId(), payoutEntity.getServiceId(), payoutEntity.getLive(), payoutEntity.getPaidOutDate(), payoutEntity.getState());
     }
 
     public Long getAmount() {
