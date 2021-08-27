@@ -12,8 +12,6 @@ import java.time.ZonedDateTime;
 public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFixture, Event> {
     private String sqsMessageId;
     private ResourceType resourceType = ResourceType.REFUND;
-    private String serviceId;
-    private boolean live;
     private Long amount = 50L;
     private String gatewayAccountId = "123456";
     private String resourceExternalId = "resource_external_id";
@@ -103,7 +101,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
 
     @Override
     public Event toEntity() {
-        return new Event(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, false);
+        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, false);
     }
 
     public String getSqsMessageId() {
@@ -140,7 +138,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
 
     @Override
     public QueueRefundEventFixture insert(AmazonSQS sqsClient) {
-        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, null, true, resourceExternalId,
+        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, resourceExternalId,
                 parentResourceExternalId, resourceType, eventData);
         return this;
     }

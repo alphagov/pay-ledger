@@ -10,16 +10,12 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-import static uk.gov.pay.ledger.util.dao.MapperUtils.getBooleanWithNullCheck;
-
 public class EventMapper implements RowMapper<Event> {
 
     @Override
     public Event map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         return new Event(resultSet.getLong("id"),
                 resultSet.getString("sqs_message_id"),
-                resultSet.getString("service_id"),
-                getBooleanWithNullCheck(resultSet, "live"),
                 ResourceType.valueOf(resultSet.getString("resource_type_name").toUpperCase()),
                 resultSet.getString("resource_external_id"),
                 resultSet.getString("parent_resource_external_id"),

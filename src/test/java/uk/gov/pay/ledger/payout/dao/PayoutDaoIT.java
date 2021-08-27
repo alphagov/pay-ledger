@@ -1,7 +1,9 @@
 package uk.gov.pay.ledger.payout.dao;
 
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
@@ -37,16 +39,11 @@ public class PayoutDaoIT {
         var paidOutDate = createdDate.minusDays(1);
         var id = RandomStringUtils.randomNumeric(4);
         var gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
-        var serviceId = RandomStringUtils.randomAlphanumeric(26);
-        var live = true;
-
         aPayoutFixture()
                 .withId(Long.valueOf(id))
                 .withAmount(100L)
                 .withCreatedDate(createdDate)
                 .withGatewayPayoutId(gatewayPayoutId)
-                .withServiceId(serviceId)
-                .withLive(live)
                 .withPaidOutDate(paidOutDate)
                 .withState(PayoutState.PAID_OUT)
                 .withEventCount(1)
@@ -54,12 +51,9 @@ public class PayoutDaoIT {
                 .withGatewayAccountId(gatewayAccountId)
                 .build().insert(rule.getJdbi());
         var payout = payoutDao.findByGatewayPayoutId(gatewayPayoutId).get();
-
         assertThat(payout.getId(), is(Long.valueOf(id)));
         assertThat(payout.getAmount(), is(100L));
         assertThat(payout.getGatewayPayoutId(), is(gatewayPayoutId));
-        assertThat(payout.getServiceId(), is(serviceId));
-        assertThat(payout.getLive(), is(live));
         assertThat(payout.getState(), is(PayoutState.PAID_OUT));
         assertThat(payout.getCreatedDate(), is(createdDate));
         assertThat(payout.getPaidOutDate(), is(paidOutDate));

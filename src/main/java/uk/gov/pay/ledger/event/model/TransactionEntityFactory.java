@@ -21,18 +21,17 @@ public class TransactionEntityFactory {
     }
 
     public TransactionEntity create(EventDigest eventDigest) {
+        return create(eventDigest, eventDigest.getEventPayload());
+    }
 
+    public TransactionEntity create(EventDigest eventDigest, Map<String, Object> eventPayload) {
         TransactionState digestTransactionState = eventDigest
                 .getMostRecentSalientEventType()
                 .map(TransactionState::fromEventType)
                 .orElse(TransactionState.UNDEFINED);
 
-        var eventAggregate = eventDigest.getEventAggregate();
-        String transactionDetail = convertToTransactionDetails(eventAggregate);
-
-        TransactionEntity entity = objectMapper.convertValue(eventAggregate, TransactionEntity.class);
-        entity.setServiceId(eventDigest.getServiceId());
-        entity.setLive(eventDigest.isLive());
+        String transactionDetail = convertToTransactionDetails(eventPayload);
+        TransactionEntity entity = objectMapper.convertValue(eventPayload, TransactionEntity.class);
         entity.setTransactionDetails(transactionDetail);
         entity.setEventCount(eventDigest.getEventCount());
         entity.setState(digestTransactionState);

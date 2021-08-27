@@ -27,13 +27,11 @@ public class PayoutEntityFactory {
                 .map(PayoutState::fromEventType)
                 .orElse(PayoutState.UNDEFINED);
 
-        String payoutDetails = convertToPayoutDetails(eventDigest.getEventAggregate());
-        PayoutEntity entity = objectMapper.convertValue(eventDigest.getEventAggregate(), PayoutEntity.class);
+        String payoutDetails = convertToPayoutDetails(eventDigest.getEventPayload());
+        PayoutEntity entity = objectMapper.convertValue(eventDigest.getEventPayload(), PayoutEntity.class);
         entity.setState(digestPayoutState);
         entity.setCreatedDate(eventDigest.getEventCreatedDate());
         entity.setGatewayPayoutId(eventDigest.getResourceExternalId());
-        entity.setServiceId(eventDigest.getServiceId());
-        entity.setLive(eventDigest.isLive());
         entity.setEventCount(eventDigest.getEventCount());
         entity.setPayoutDetails(payoutDetails);
         return entity;

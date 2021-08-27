@@ -17,7 +17,7 @@ public class Refund extends Transaction {
     private final SettlementSummary settlementSummary;
 
     public Refund(Builder builder) {
-        super(builder.id, builder.gatewayAccountId, builder.serviceId, builder.live, builder.amount, builder.externalId, builder.gatewayPayoutId);
+        super(builder.id, builder.gatewayAccountId, builder.amount, builder.externalId, builder.gatewayPayoutId);
         this.state = builder.state;
         this.createdDate = builder.createdDate;
         this.eventCount = builder.eventCount;
@@ -71,8 +71,6 @@ public class Refund extends Transaction {
     }
 
     public static class Builder {
-        public String serviceId;
-        public Boolean live;
         private TransactionState state;
         private ZonedDateTime createdDate;
         private Integer eventCount;
@@ -162,16 +160,6 @@ public class Refund extends Transaction {
 
         public Builder withSettlementSummary(SettlementSummary refundSettlementSummary) {
             this.settlementSummary = refundSettlementSummary;
-            return this;
-        }
-
-        public Builder withLive(Boolean live) {
-            this.live = live;
-            return this;
-        }
-
-        public Builder withServiceId(String serviceId) {
-            this.serviceId = serviceId;
             return this;
         }
     }

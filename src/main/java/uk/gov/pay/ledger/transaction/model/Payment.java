@@ -51,7 +51,7 @@ public class Payment extends Transaction {
     }
 
     public Payment(Builder builder) {
-        super(builder.id, builder.gatewayAccountId, builder.serviceId, builder.live, builder.amount, builder.externalId, builder.gatewayPayoutId);
+        super(builder.id, builder.gatewayAccountId, builder.amount, builder.externalId, builder.gatewayPayoutId);
         this.credentialExternalId = builder.credentialExternalId;
         this.corporateCardSurcharge = builder.corporateCardSurcharge;
         this.fee = builder.fee;
@@ -187,7 +187,6 @@ public class Payment extends Transaction {
     }
 
     public static class Builder {
-        public String serviceId;
         private Long id;
         private Boolean moto;
         private String reference;
@@ -368,11 +367,6 @@ public class Payment extends Transaction {
 
         public Builder withCredentialExternalId(String credentialExternalId) {
             this.credentialExternalId = credentialExternalId;
-            return this;
-        }
-
-        public Builder withServiceId(String serviceId) {
-            this.serviceId = serviceId;
             return this;
         }
     }
