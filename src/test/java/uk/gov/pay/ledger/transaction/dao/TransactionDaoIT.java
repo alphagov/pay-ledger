@@ -131,6 +131,8 @@ class TransactionDaoIT {
 
     private void assertTransactionEntity(TransactionEntity transaction, TransactionFixture fixture) {
         assertThat(transaction.getId(), notNullValue());
+        assertThat(transaction.getServiceId(), is(fixture.getServiceId()));
+        assertThat(transaction.isLive(), is(fixture.isLive()));
         assertThat(transaction.getGatewayAccountId(), is(fixture.getGatewayAccountId()));
         assertThat(transaction.getExternalId(), is(fixture.getExternalId()));
         assertThat(transaction.getAmount(), is(fixture.getAmount()));
@@ -215,6 +217,8 @@ class TransactionDaoIT {
                 .get();
 
         assertThat(transaction.getId(), notNullValue());
+        assertThat(transaction.getServiceId(), is(transactionEntity.getServiceId()));
+        assertThat(transaction.isLive(), is(transactionEntity.isLive()));
         assertThat(transaction.getGatewayAccountId(), is(transactionEntity.getGatewayAccountId()));
         assertThat(transaction.getExternalId(), is(transactionEntity.getExternalId()));
         assertThat(transaction.getAmount(), is(transactionEntity.getAmount()));

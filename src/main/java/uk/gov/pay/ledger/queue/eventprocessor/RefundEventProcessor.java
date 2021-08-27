@@ -59,7 +59,7 @@ public class RefundEventProcessor extends EventProcessor {
          * for the digest can be removed.
          */
         Map<String, Object> fieldsFromPayment = getPaymentFieldsToProjectOnToRefund(paymentEventDigest);
-        refundEventDigest.getEventPayload().put("payment_details", fieldsFromPayment);
+        refundEventDigest.getEventAggregate().put("payment_details", fieldsFromPayment);
 
         TransactionEntity refundTransactionEntity = transactionEntityFactory.create(refundEventDigest);
         TransactionEntity paymentTransactionEntity = transactionEntityFactory.create(paymentEventDigest);
@@ -81,11 +81,11 @@ public class RefundEventProcessor extends EventProcessor {
     private Map<String, Object> getPaymentFieldsToProjectOnToRefund(EventDigest paymentEventDigest) {
         List<String> paymentsFieldsToCopyToRefunds = List.of("card_brand_label", "expiry_date", "card_type", "wallet_type");
 
-        var paymentPayloadIsEmpty = paymentEventDigest == null || paymentEventDigest.getEventPayload() == null;
+        var paymentPayloadIsEmpty = paymentEventDigest == null || paymentEventDigest.getEventAggregate() == null;
 
         return paymentPayloadIsEmpty
                 ? Map.of()
-                : paymentEventDigest.getEventPayload()
+                : paymentEventDigest.getEventAggregate()
                 .entrySet()
                 .stream().filter(entry -> paymentsFieldsToCopyToRefunds.contains(entry.getKey()))
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));

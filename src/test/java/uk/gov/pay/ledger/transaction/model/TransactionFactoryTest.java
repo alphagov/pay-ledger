@@ -26,6 +26,8 @@ public class TransactionFactoryTest {
 
     private Long id = 1L;
     private String gatewayAccountId = "ruwe2424";
+    private String serviceId = "test_service_id";
+    private Boolean live = true;
     private String externalId = "ch_q72347235";
     private Long amount = 100L;
     private String reference = "ref_237156782465";
@@ -84,6 +86,8 @@ public class TransactionFactoryTest {
         fullDataObject = new TransactionEntity.Builder()
                 .withId(id)
                 .withGatewayAccountId(gatewayAccountId)
+                .withServiceId(serviceId)
+                .withLive(live)
                 .withExternalId(externalId)
                 .withAmount(amount)
                 .withReference(reference)
@@ -109,6 +113,8 @@ public class TransactionFactoryTest {
         minimalDataObject = new TransactionEntity.Builder()
                 .withId(id)
                 .withGatewayAccountId(gatewayAccountId)
+                .withServiceId(serviceId)
+                .withLive(live)
                 .withExternalId(externalId)
                 .withAmount(amount)
                 .withReference(reference)
@@ -143,6 +149,8 @@ public class TransactionFactoryTest {
         Payment payment = (Payment) transactionFactory.createTransactionEntity(minimalDataObject);
 
         assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(payment.getServiceId(), is(serviceId));
+        assertThat(payment.getLive(), is(live));
         assertThat(payment.getAmount(), is(amount));
         assertThat(payment.getExternalId(), is(externalId));
         assertThat(payment.getReference(), is(reference));
@@ -183,6 +191,8 @@ public class TransactionFactoryTest {
                 .withTransactionType("REFUND")
                 .withId(id)
                 .withGatewayAccountId(gatewayAccountId)
+                .withServiceId(serviceId)
+                .withLive(live)
                 .withExternalId(externalId)
                 .withParentExternalId("parent-ext-id")
                 .withAmount(amount)
@@ -195,6 +205,8 @@ public class TransactionFactoryTest {
         Refund refundEntity = (Refund) transactionFactory.createTransactionEntity(refund);
 
         assertThat(refundEntity.getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(refundEntity.getServiceId(), is(serviceId));
+        assertThat(refundEntity.getLive(), is(live));
         assertThat(refundEntity.getAmount(), is(amount));
         assertThat(refundEntity.getExternalId(), is(externalId));
         assertThat(refundEntity.getParentExternalId(), is("parent-ext-id"));
@@ -271,6 +283,8 @@ public class TransactionFactoryTest {
 
     private void assertCorrectPaymentTransactionWithFullData(Payment payment) {
         assertThat(payment.getGatewayAccountId(), is(gatewayAccountId));
+        assertThat(payment.getServiceId(), is(serviceId));
+        assertThat(payment.getLive(), is(live));
         assertThat(payment.getCredentialExternalId(), is("credential-external-id"));
         assertThat(payment.getAmount(), is(amount));
         assertThat(payment.getExternalId(), is(externalId));

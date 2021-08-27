@@ -66,7 +66,7 @@ public class TransactionMetadataService {
     }
 
     public void reprojectFromEventDigest(EventDigest eventDigest) {
-        var eventData = eventDigest.getEventPayload();
+        var eventData = eventDigest.getEventAggregate();
 
         transactionDao.findTransactionByExternalId(eventDigest.getResourceExternalId())
                 .ifPresent(transactionEntity -> {

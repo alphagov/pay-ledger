@@ -10,6 +10,8 @@ public abstract class Transaction {
     @JsonIgnore
     protected Long id;
     protected String gatewayAccountId;
+    protected String serviceId;
+    protected Boolean live;
     protected Long amount;
     protected String externalId;
     private String gatewayPayoutId;
@@ -17,9 +19,11 @@ public abstract class Transaction {
     public Transaction() {
     }
 
-    public Transaction(Long id, String gatewayAccountId, Long amount, String externalId, String gatewayPayoutId) {
+    public Transaction(Long id, String gatewayAccountId, String serviceId, Boolean live, Long amount, String externalId, String gatewayPayoutId) {
         this.id = id;
         this.gatewayAccountId = gatewayAccountId;
+        this.serviceId = serviceId;
+        this.live = live;
         this.amount = amount;
         this.externalId = externalId;
         this.gatewayPayoutId = gatewayPayoutId;
@@ -31,6 +35,14 @@ public abstract class Transaction {
 
     public String getGatewayAccountId() {
         return gatewayAccountId;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public Boolean getLive() {
+        return live;
     }
 
     public Long getAmount() {

@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static uk.gov.pay.ledger.payout.entity.PayoutEntity.PayoutEntityBuilder.aPayoutEntity;
+import static uk.gov.pay.ledger.util.dao.MapperUtils.getBooleanWithNullCheck;
 
 public class TransactionMapper implements RowMapper<TransactionEntity> {
 
@@ -21,6 +22,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
     public TransactionEntity map(ResultSet rs, StatementContext ctx) throws SQLException {
         var transactionBuilder = new TransactionEntity.Builder()
                 .withId(rs.getLong("id"))
+                .withServiceId(rs.getString("service_id"))
                 .withGatewayAccountId(rs.getString("gateway_account_id"))
                 .withExternalId(rs.getString("external_id"))
                 .withParentExternalId(rs.getString("parent_external_id"))
@@ -43,7 +45,7 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withRefundAmountAvailable(getLongWithNullCheck(rs, "refund_amount_available"))
                 .withFee(getLongWithNullCheck(rs, "fee"))
                 .withTransactionType(rs.getString("type"))
-                .withLive(rs.getBoolean("live"))
+                .withLive(getBooleanWithNullCheck(rs,"live"))
                 .withMoto(rs.getBoolean("moto"))
                 .withGatewayTransactionId(rs.getString("gateway_transaction_id"))
                 .withGatewayPayoutId(rs.getString("gateway_payout_id"));
