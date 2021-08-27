@@ -13,8 +13,6 @@ import java.time.ZonedDateTime;
 public class EventFixture implements DbFixture<EventFixture, Event> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private String sqsMessageId = RandomStringUtils.randomAlphanumeric(50);
-    private String serviceId;
-    private boolean live;
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private String parentResourceExternalId = StringUtils.EMPTY;
@@ -83,8 +81,6 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
                                 "    event(\n" +
                                 "        id,\n" +
                                 "        sqs_message_id, \n" +
-                                "        service_id, \n" +
-                                "        live, \n" +
                                 "        resource_type_id, \n" +
                                 "        resource_external_id,\n" +
                                 "        parent_resource_external_id,\n" +
@@ -92,11 +88,9 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
                                 "        event_type,\n" +
                                 "        event_data\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?,(SELECT rt.id FROM resource_type rt WHERE upper(rt.name) = ?), ?, ?, ?, ?, CAST(? as jsonb))\n",
+                                "   VALUES(?, ?, (SELECT rt.id FROM resource_type rt WHERE upper(rt.name) = ?), ?, ?, ?, ?, CAST(? as jsonb))\n",
                         id,
                         sqsMessageId,
-                        serviceId,
-                        live,
                         resourceType,
                         resourceExternalId,
                         parentResourceExternalId,
@@ -110,7 +104,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
 
     @Override
     public Event toEntity() {
-        return new Event(id, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
+        return new Event(id, sqsMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
     }
 
     public Long getId() {

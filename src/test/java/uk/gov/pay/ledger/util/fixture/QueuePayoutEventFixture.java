@@ -14,8 +14,6 @@ import static uk.gov.pay.ledger.event.model.ResourceType.PAYOUT;
 
 public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFixture, Event> {
     private String sqsMessageId;
-    private String serviceId;
-    private boolean live;
     private ResourceType resourceType = PAYOUT;
     private String resourceExternalId = "resource_external_id";
     private ZonedDateTime eventDate = ZonedDateTime.parse("2020-05-13T18:45:00.000000Z");
@@ -88,12 +86,12 @@ public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFix
 
     @Override
     public Event toEntity() {
-        return new Event(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, EMPTY, eventDate, eventType, eventData, false);
+        return new Event(0L, sqsMessageId, resourceType, resourceExternalId, EMPTY, eventDate, eventType, eventData, false);
     }
 
     @Override
     public QueuePayoutEventFixture insert(AmazonSQS sqsClient) {
-        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, serviceId, live, resourceExternalId,
+        this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, resourceExternalId,
                 EMPTY, resourceType, eventData);
         return this;
     }

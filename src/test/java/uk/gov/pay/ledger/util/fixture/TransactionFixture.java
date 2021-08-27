@@ -7,8 +7,10 @@ import com.google.gson.JsonParser;
 import io.dropwizard.jackson.Jackson;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.hamcrest.Matcher;
 import org.jdbi.v3.core.Jdbi;
 import org.jetbrains.annotations.NotNull;
+import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
@@ -17,7 +19,6 @@ import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
-import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -33,7 +34,6 @@ import static uk.gov.pay.ledger.util.fixture.TransactionMetadataFixture.aTransac
 public class TransactionFixture implements DbFixture<TransactionFixture, TransactionEntity> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
-    private String serviceId = RandomStringUtils.randomAlphanumeric(26);
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private String credentialExternalId = "credential-external-id";
     private String externalId = RandomStringUtils.randomAlphanumeric(20);
@@ -329,7 +329,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        id,\n" +
                                 "        external_id,\n" +
                                 "        parent_external_id,\n" +
-                                "        service_id,\n" +
                                 "        gateway_account_id,\n" +
                                 "        amount,\n" +
                                 "        description,\n" +
@@ -356,11 +355,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        source,\n" +
                                 "        gateway_payout_id\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?, ?, ?::source, ?)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?, ?, ?::source, ?)\n",
                         id,
                         externalId,
                         parentExternalId,
-                        serviceId,
                         gatewayAccountId,
                         amount,
                         description,
@@ -466,7 +464,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     public TransactionEntity toEntity() {
         var builder = new TransactionEntity.Builder()
                 .withId(id)
-                .withServiceId(serviceId)
                 .withGatewayAccountId(gatewayAccountId)
                 .withExternalId(externalId)
                 .withParentExternalId(parentExternalId)
@@ -499,14 +496,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public String getExternalId() {
         return externalId;
-    }
-
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    public boolean isLive() {
-        return live;
     }
 
     public Long getAmount() {

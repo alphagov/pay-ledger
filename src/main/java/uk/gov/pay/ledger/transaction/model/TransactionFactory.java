@@ -75,7 +75,6 @@ public class TransactionFactory {
 
             return new Payment.Builder()
                     .withGatewayAccountId(entity.getGatewayAccountId())
-                    .withServiceId(entity.getServiceId())
                     .withCredentialExternalId(credentialExternalId)
                     .withAmount(entity.getAmount())
                     .withReference(entity.getReference())
@@ -136,8 +135,6 @@ public class TransactionFactory {
 
             return new Refund.Builder()
                     .withGatewayAccountId(entity.getGatewayAccountId())
-                    .withServiceId(entity.getServiceId())
-                    .withLive(entity.isLive())
                     .withAmount(entity.getAmount())
                     .withGatewayTransactionId(entity.getGatewayTransactionId())
                     .withState(entity.getState())
