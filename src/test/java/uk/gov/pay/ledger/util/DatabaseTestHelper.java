@@ -104,4 +104,12 @@ public class DatabaseTestHelper {
                         .mapToMap()
                         .list());
     }
+
+    public List<Map<String, Object>> getTransactionSummary(String gatewayAccountId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT * FROM transaction_summary where gateway_account_id = :gatewayAccountId")
+                        .bind("gatewayAccountId", gatewayAccountId)
+                        .mapToMap()
+                        .list());
+    }
 }

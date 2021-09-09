@@ -9,6 +9,7 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class TransactionEntityFactory {
 
@@ -32,7 +33,7 @@ public class TransactionEntityFactory {
 
         TransactionEntity entity = objectMapper.convertValue(eventAggregate, TransactionEntity.class);
         entity.setServiceId(eventDigest.getServiceId());
-        entity.setLive(eventDigest.isLive());
+        entity.setLive(Optional.ofNullable(eventDigest.isLive()).orElse(entity.isLive()));
         entity.setTransactionDetails(transactionDetail);
         entity.setEventCount(eventDigest.getEventCount());
         entity.setState(digestTransactionState);

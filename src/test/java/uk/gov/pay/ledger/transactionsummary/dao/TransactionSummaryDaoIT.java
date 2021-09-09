@@ -22,6 +22,7 @@ import static java.time.LocalDate.parse;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.number.BigDecimalCloseTo.closeTo;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.REFUND;
@@ -73,6 +74,15 @@ public class TransactionSummaryDaoIT {
         assertThat(transactionSummary.get(0).get("moto"), is(true));
         assertThat(transactionSummary.get(0).get("total_amount_in_pence"), is(200L));
         assertThat(transactionSummary.get(0).get("no_of_transactions"), is(1L));
+    }
+
+    @Test
+    public void upsertWithLiveNullShouldNotCauseException(){
+        String gatewayAccountId = "account-" + randomAlphanumeric(10);
+        transactionSummaryDao.upsert(gatewayAccountId, "PAYMENT",
+                parse("2018-09-22"), SUCCESS, null, false, 100L);
+        List<Map<String, Object>> transactionSummary = dbHelper.getTransactionSummary(gatewayAccountId);
+        assertThat(transactionSummary.get(0).get("live"), is(nullValue()));
     }
 
     @Test
