@@ -50,6 +50,7 @@ public class QueueMessageReceiverIT {
         final String resourceExternalId = "rexid";
         String gatewayAccountId = "test_gateway_account_id";
         aQueuePaymentEventFixture()
+                .withLive(null)
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(CREATED_AT)
                 .withEventType("AUTHORISATION_SUCCEEDED")
@@ -74,6 +75,60 @@ public class QueueMessageReceiverIT {
                 .statusCode(200)
                 .body("transaction_id", is(resourceExternalId))
                 .body("state.status", is("submitted"));
+    }
+
+    @Test
+    public void shouldSetLiveFromEventDetailsIfNotSetAtTopLevel() throws InterruptedException {
+        final String resourceExternalId = "rexid";
+        String gatewayAccountId = "test_gateway_account_id";
+
+        aQueuePaymentEventFixture()
+                .withLive(null)
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType(SalientEventType.CAPTURE_CONFIRMED_BY_GATEWAY_NOTIFICATION.name())
+                .withEventData(format("{\"gateway_account_id\":\"%s\", \"live\": true}", gatewayAccountId))
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
+
+        given().port(rule.getAppRule().getLocalPort())
+                .contentType(JSON)
+                .get("/v1/transaction/" + resourceExternalId + "?account_id=" + gatewayAccountId)
+                .then()
+                .statusCode(200)
+                .body("live", is(true));
+    }
+
+    @Test
+    public void shouldSetLiveFromEventDetailsIfNotSetAtTopLevel2() throws InterruptedException {
+        final String resourceExternalId = "rexid";
+        String gatewayAccountId = "test_gateway_account_id";
+
+        aQueuePaymentEventFixture()
+                .withLive(null)
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT.minusMinutes(1))
+                .withGatewayAccountId(gatewayAccountId)
+                .withEventType(SalientEventType.PAYMENT_CREATED.name())
+                .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
+                .insert(rule.getSqsClient());
+
+        aQueuePaymentEventFixture()
+                .withLive(null)
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType(SalientEventType.CAPTURE_CONFIRMED_BY_GATEWAY_NOTIFICATION.name())
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
+
+        given().port(rule.getAppRule().getLocalPort())
+                .contentType(JSON)
+                .get("/v1/transaction-summary/" + resourceExternalId + "?account_id=" + gatewayAccountId)
+                .then()
+                .statusCode(200)
+                .body("transaction_id", is(resourceExternalId));
     }
 
     @Test
