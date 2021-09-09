@@ -77,4 +77,8 @@ public class GatewayRequires3dsAuthorisationEventQueueContractTest {
         assertThat(transaction.get().getTransactionDetails(), containsString("\"version_3ds\": \"1.2.1\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"requires_3ds\": true"));
     }
+
+    public void setMessage(byte[] messageContents) {
+        currentMessage = messageContents;
+    }
 }
