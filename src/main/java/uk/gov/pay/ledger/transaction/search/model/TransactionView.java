@@ -28,6 +28,7 @@ public class TransactionView {
     @JsonIgnore
     private Long id;
     private String gatewayAccountId;
+    private String serviceId;
     private String credentialExternalId;
     private Long amount;
     private Long totalAmount;
@@ -64,6 +65,7 @@ public class TransactionView {
     public TransactionView(Builder builder) {
         this.id = builder.id;
         this.gatewayAccountId = builder.gatewayAccountId;
+        this.serviceId = builder.serviceId;
         this.credentialExternalId = builder.credentialExternalId;
         this.amount = builder.amount;
         this.totalAmount = builder.totalAmount;
@@ -107,6 +109,7 @@ public class TransactionView {
             Builder paymentBuilder = new Builder()
                     .withId(payment.getId())
                     .withGatewayAccountId(payment.getGatewayAccountId())
+                    .withServiceId(payment.getServiceId())
                     .withCredentialExternalId(payment.getCredentialExternalId())
                     .withAmount(payment.getAmount())
                     .withTotalAmount(payment.getTotalAmount())
@@ -169,6 +172,10 @@ public class TransactionView {
 
     public String getGatewayAccountId() {
         return gatewayAccountId;
+    }
+
+    public String getServiceId() {
+        return serviceId;
     }
 
     public String getCredentialExternalId() {
@@ -345,6 +352,7 @@ public class TransactionView {
         private String gatewayPayoutId;
         private TransactionView paymentDetails;
         private String credentialExternalId;
+        private String serviceId;
 
         public Builder() {
         }
@@ -515,6 +523,11 @@ public class TransactionView {
 
         public Builder withCredentialExternalId(String credentialExternalId) {
             this.credentialExternalId = credentialExternalId;
+            return this;
+        }
+
+        public Builder withServiceId(String serviceId) {
+            this.serviceId = serviceId;
             return this;
         }
     }

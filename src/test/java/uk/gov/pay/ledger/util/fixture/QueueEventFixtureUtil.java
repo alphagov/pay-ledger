@@ -14,11 +14,13 @@ import java.time.format.DateTimeFormatter;
 
 public class QueueEventFixtureUtil {
 
-    public static String insert(AmazonSQS sqsClient, String eventType, ZonedDateTime eventDate, String resourceExternalId,
+    public static String insert(AmazonSQS sqsClient, String eventType, ZonedDateTime eventDate, String serviceId, Boolean live, String resourceExternalId,
                                            String parentResourceExternalId, ResourceType resourceType, String eventData) {
         String messageBody = String.format("{" +
                         "\"timestamp\": \"%s\"," +
                         "\"resource_external_id\": \"%s\"," +
+                        "\"service_id\": \"%s\"," +
+                        "\"live\": \"%s\"," +
                         (parentResourceExternalId == null || parentResourceExternalId.isEmpty() ? "%s" : "\"parent_resource_external_id\": \"%s\",") +
                         "\"event_type\":\"%s\"," +
                         "\"resource_type\": \"%s\"," +
@@ -26,6 +28,8 @@ public class QueueEventFixtureUtil {
                         "}",
                 eventDate.toString(),
                 resourceExternalId,
+                serviceId,
+                live,
                 parentResourceExternalId == null ? "" : parentResourceExternalId,
                 eventType,
                 resourceType.toString().toLowerCase(),

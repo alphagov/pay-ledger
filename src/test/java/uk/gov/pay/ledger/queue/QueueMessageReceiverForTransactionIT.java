@@ -17,8 +17,8 @@ import static io.dropwizard.testing.ConfigOverride.config;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
-import static uk.gov.service.payments.commons.model.Source.CARD_API;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
+import static uk.gov.service.payments.commons.model.Source.CARD_API;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 class QueueMessageReceiverForTransactionIT {
@@ -28,6 +28,7 @@ class QueueMessageReceiverForTransactionIT {
             config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true"));
 
     private final String gatewayAccountId = "test_gateway_account_id";
+    private final String serviceId = "test_service_id";
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -37,23 +38,31 @@ class QueueMessageReceiverForTransactionIT {
     })
     void paymentCreatedMessageIsPersistedCorrectly(Boolean moto) throws InterruptedException {
         String resourceExternalId = RandomStringUtils.random(10, true, true);
+        boolean live = true;
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(ZonedDateTime.parse("2020-01-30T08:46:01.123456Z"))
                 .withGatewayAccountId(gatewayAccountId)
+                .withServiceId(serviceId)
+                .withLive(live)
                 .withEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withEventData(createEventData(moto))
                 .insert(rule.getSqsClient());
 
         Thread.sleep(500);
 
-        given().port(rule.getAppRule().getLocalPort())
+        var body = given().port(rule.getAppRule().getLocalPort())
                 .contentType(JSON)
                 .get("/v1/transaction/" + resourceExternalId + "?account_id=" + gatewayAccountId)
                 .then()
-                .statusCode(200)
+                .statusCode(200);
+
+        body
                 .body("transaction_id", is(resourceExternalId))
+                .body("service_id", is(serviceId))
+                .body("live", is(live))
                 .body("moto", is(moto == null ? false : moto));
+
     }
 
     private String createEventData(Boolean moto) {

@@ -82,7 +82,7 @@ public class TransactionSummaryDao {
     }
 
     public void upsert(String gatewayAccountId, String transactionType, LocalDate transactionDate,
-                       TransactionState state, boolean live, boolean moto, Long amount) {
+                       TransactionState state, Boolean live, boolean moto, Long amount) {
         jdbi.withHandle(handle ->
                 handle.createUpdate(UPSERT_STRING)
                         .bind("gatewayAccountId", gatewayAccountId)

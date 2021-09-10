@@ -116,6 +116,8 @@ public class TransactionDao {
             "INSERT INTO transaction(" +
                     "external_id," +
                     "parent_external_id," +
+                    "service_id," +
+                    "live," +
                     "gateway_account_id," +
                     "amount," +
                     "description," +
@@ -134,7 +136,6 @@ public class TransactionDao {
                     "refund_amount_available," +
                     "refund_amount_refunded, " +
                     "refund_status, " +
-                    "live, " +
                     "moto, " +
                     "gateway_transaction_id, " +
                     "source, " +
@@ -143,6 +144,8 @@ public class TransactionDao {
                     "VALUES (" +
                     ":externalId," +
                     ":parentExternalId," +
+                    ":serviceId," +
+                    ":live," +
                     ":gatewayAccountId," +
                     ":amount," +
                     ":description," +
@@ -163,7 +166,6 @@ public class TransactionDao {
                     ":refundAmountAvailable," +
                     ":refundAmountRefunded," +
                     ":refundStatus," +
-                    ":live, " +
                     ":moto, " +
                     ":gatewayTransactionId, " +
                     ":source::source, " +
@@ -173,6 +175,8 @@ public class TransactionDao {
                     "DO UPDATE SET " +
                     "external_id = EXCLUDED.external_id," +
                     "parent_external_id = EXCLUDED.parent_external_id," +
+                    "service_id = EXCLUDED.service_id," +
+                    "live = EXCLUDED.live," +
                     "gateway_account_id = EXCLUDED.gateway_account_id," +
                     "amount = EXCLUDED.amount," +
                     "description = EXCLUDED.description," +
@@ -193,7 +197,6 @@ public class TransactionDao {
                     "refund_amount_available = EXCLUDED.refund_amount_available, " +
                     "refund_amount_refunded = EXCLUDED.refund_amount_refunded, " +
                     "refund_status = EXCLUDED.refund_status, " +
-                    "live = EXCLUDED.live, " +
                     "moto = EXCLUDED.moto, " +
                     "gateway_transaction_id = EXCLUDED.gateway_transaction_id, " +
                     "source = EXCLUDED.source, " +

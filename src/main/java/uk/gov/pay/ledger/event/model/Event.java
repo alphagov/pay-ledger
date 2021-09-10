@@ -1,7 +1,7 @@
 package uk.gov.pay.ledger.event.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
@@ -9,12 +9,14 @@ import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSeri
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class Event {
 
     @JsonIgnore
     private Long id;
     private String sqsMessageId;
+    private String serviceId;
+    private Boolean live;
     private ResourceType resourceType;
     private String resourceExternalId;
     private String parentResourceExternalId;
@@ -29,6 +31,8 @@ public class Event {
 
     public Event(Long id,
                  String sqsMessageId,
+                 String serviceId,
+                 Boolean live,
                  ResourceType resourceType,
                  String resourceExternalId,
                  String parentResourceExternalId,
@@ -38,6 +42,8 @@ public class Event {
                  boolean reprojectDomainObject) {
         this.id = id;
         this.sqsMessageId = sqsMessageId;
+        this.serviceId = serviceId;
+        this.live = live;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
         this.parentResourceExternalId = parentResourceExternalId;
@@ -47,7 +53,9 @@ public class Event {
         this.reprojectDomainObject = reprojectDomainObject;
     }
 
-    public Event(String queueMessageId,
+    public Event(String sqsMessageId,
+                 String serviceId,
+                 Boolean live,
                  ResourceType resourceType,
                  String resourceExternalId,
                  String parentResourceExternalId,
@@ -55,7 +63,7 @@ public class Event {
                  String eventType,
                  String eventData,
                  boolean reprojectDomainObject) {
-        this(null, queueMessageId, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType,
+        this(null, sqsMessageId, serviceId, live,  resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType,
                 eventData, reprojectDomainObject);
     }
 
@@ -65,6 +73,14 @@ public class Event {
 
     public String getSqsMessageId() {
         return sqsMessageId;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public Boolean getLive() {
+        return live;
     }
 
     public ResourceType getResourceType() {
@@ -100,6 +116,8 @@ public class Event {
         return "Event{" +
                 "id=" + id +
                 ", sqsMessageId='" + sqsMessageId + '\'' +
+                ", serviceId='" + serviceId + '\'' +
+                ", isLive=" + live +
                 ", resourceType=" + resourceType +
                 ", resourceExternalId='" + resourceExternalId + '\'' +
                 ", parentResourceExternalId='" + parentResourceExternalId + '\'' +
@@ -114,10 +132,14 @@ public class Event {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Event event = (Event) o;
-        return Objects.equals(id, event.id) &&
+        return live == event.live &&
+                reprojectDomainObject == event.reprojectDomainObject &&
+                Objects.equals(id, event.id) &&
                 Objects.equals(sqsMessageId, event.sqsMessageId) &&
+                Objects.equals(serviceId, event.serviceId) &&
                 resourceType == event.resourceType &&
                 Objects.equals(resourceExternalId, event.resourceExternalId) &&
+                Objects.equals(parentResourceExternalId, event.parentResourceExternalId) &&
                 Objects.equals(eventDate, event.eventDate) &&
                 Objects.equals(eventType, event.eventType) &&
                 Objects.equals(eventData, event.eventData);
@@ -125,6 +147,6 @@ public class Event {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, sqsMessageId, resourceType, resourceExternalId, eventDate, eventType, eventData);
+        return Objects.hash(id, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
     }
 }

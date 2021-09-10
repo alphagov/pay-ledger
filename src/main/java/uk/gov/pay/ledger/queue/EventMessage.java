@@ -22,6 +22,8 @@ public class EventMessage {
     public Event getEvent() {
         return new Event(
                 getQueueMessageId(),
+                eventDto.getServiceId(),
+                eventDto.isLive(),
                 eventDto.getResourceType(),
                 eventDto.getExternalId(),
                 eventDto.getParentExternalId(),

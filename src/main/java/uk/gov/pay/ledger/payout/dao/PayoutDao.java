@@ -28,6 +28,8 @@ public class PayoutDao {
     private final String UPSERT_PAYOUT = "INSERT INTO payout " +
             "(" +
             "gateway_payout_id," +
+            "service_id," +
+            "live," +
             "amount," +
             "paid_out_date," +
             "state," +
@@ -38,6 +40,8 @@ public class PayoutDao {
             ") " +
             "VALUES (" +
             ":gatewayPayoutId, " +
+            ":serviceId, " +
+            ":live, " +
             ":amount, " +
             ":paidOutDate, " +
             ":state, " +
@@ -48,6 +52,8 @@ public class PayoutDao {
             ") " +
             "ON CONFLICT (gateway_payout_id) DO UPDATE SET " +
             "gateway_payout_id = EXCLUDED.gateway_payout_id, " +
+            "service_id = EXCLUDED.service_id, " +
+            "live = EXCLUDED.live, " +
             "amount = EXCLUDED.amount, " +
             "paid_out_date = EXCLUDED.paid_out_date, " +
             "state = EXCLUDED.state, " +

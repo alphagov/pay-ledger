@@ -9,6 +9,7 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class TransactionEntityFactory {
 
@@ -21,17 +22,18 @@ public class TransactionEntityFactory {
     }
 
     public TransactionEntity create(EventDigest eventDigest) {
-        return create(eventDigest, eventDigest.getEventPayload());
-    }
 
-    public TransactionEntity create(EventDigest eventDigest, Map<String, Object> eventPayload) {
         TransactionState digestTransactionState = eventDigest
                 .getMostRecentSalientEventType()
                 .map(TransactionState::fromEventType)
                 .orElse(TransactionState.UNDEFINED);
 
-        String transactionDetail = convertToTransactionDetails(eventPayload);
-        TransactionEntity entity = objectMapper.convertValue(eventPayload, TransactionEntity.class);
+        var eventAggregate = eventDigest.getEventAggregate();
+        String transactionDetail = convertToTransactionDetails(eventAggregate);
+
+        TransactionEntity entity = objectMapper.convertValue(eventAggregate, TransactionEntity.class);
+        entity.setServiceId(eventDigest.getServiceId());
+        entity.setLive(Optional.ofNullable(eventDigest.isLive()).orElse(entity.isLive()));
         entity.setTransactionDetails(transactionDetail);
         entity.setEventCount(eventDigest.getEventCount());
         entity.setState(digestTransactionState);

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import uk.gov.pay.ledger.payout.state.PayoutState;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
-import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.time.ZonedDateTime;
 
@@ -19,6 +19,8 @@ public class PayoutEntity {
     @JsonIgnore
     private Long id;
     private String gatewayPayoutId;
+    private String serviceId;
+    private Boolean live;
     private Long amount;
     @JsonIgnore
     private ZonedDateTime createdDate;
@@ -36,6 +38,8 @@ public class PayoutEntity {
     public PayoutEntity(PayoutEntityBuilder builder) {
         this.id = builder.id;
         this.gatewayPayoutId = builder.gatewayPayoutId;
+        this.serviceId = builder.serviceId;
+        this.live = builder.live;
         this.amount = builder.amount;
         this.createdDate = builder.createdDate;
         this.paidOutDate = builder.paidOutDate;
@@ -51,6 +55,14 @@ public class PayoutEntity {
 
     public String getGatewayPayoutId() {
         return gatewayPayoutId;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public Boolean getLive() {
+        return live;
     }
 
     public Long getAmount() {
@@ -114,9 +126,19 @@ public class PayoutEntity {
         return this;
     }
 
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public void setLive(Boolean live) {
+        this.live = live;
+    }
+
     public static final class PayoutEntityBuilder {
         private Long id;
         private String gatewayPayoutId;
+        private String serviceId;
+        private Boolean live;
         private Long amount;
         private ZonedDateTime createdDate;
         private ZonedDateTime paidOutDate;
@@ -139,6 +161,16 @@ public class PayoutEntity {
 
         public PayoutEntityBuilder withGatewayPayoutId(String gatewayPayoutId) {
             this.gatewayPayoutId = gatewayPayoutId;
+            return this;
+        }
+
+        public PayoutEntityBuilder withServiceId(String serviceId) {
+            this.serviceId = serviceId;
+            return this;
+        }
+
+        public PayoutEntityBuilder withLive(Boolean live) {
+            this.live = live;
             return this;
         }
 

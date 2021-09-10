@@ -14,37 +14,43 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public class EventDigest {
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final String serviceId;
+    private final Boolean live;
     private final ZonedDateTime mostRecentEventTimestamp;
     private final ResourceType resourceType;
     private final String resourceExternalId;
     private final String parentResourceExternalId;
     private final SalientEventType mostRecentSalientEventType;
     private Integer eventCount;
-    private Map<String, Object> eventPayload;
+    private Map<String, Object> eventAggregate;
     private final ZonedDateTime eventCreatedDate;
 
     private EventDigest(
+            String serviceId,
+            Boolean live,
             ZonedDateTime mostRecentEventTimestamp,
             SalientEventType mostRecentSalientEventType,
             ResourceType resourceType,
             String resourceExternalId,
             String parentResourceExternalId,
             Integer eventCount,
-            Map<String, Object> eventPayload,
+            Map<String, Object> eventAggregate,
             ZonedDateTime eventCreatedDate
     ) {
+        this.serviceId = serviceId;
+        this.live = live;
         this.mostRecentEventTimestamp = mostRecentEventTimestamp;
         this.mostRecentSalientEventType = mostRecentSalientEventType;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
         this.parentResourceExternalId = parentResourceExternalId;
         this.eventCount = eventCount;
-        this.eventPayload = eventPayload;
+        this.eventAggregate = eventAggregate;
         this.eventCreatedDate = eventCreatedDate;
     }
 
     public static EventDigest fromEventList(List<Event> events) {
-        var eventPayload = buildEventPayload(events);
+        var eventPayload = buildEventAggregate(events);
 
         var latestEvent = events.stream()
                 .findFirst()
@@ -65,6 +71,8 @@ public class EventDigest {
         String parentResourceExternalId = deriveParentResourceExternalId(events);
 
         return new EventDigest(
+                latestEvent.getServiceId(),
+                latestEvent.getLive(),
                 latestEvent.getEventDate(),
                 latestSalientEventType,
                 latestEvent.getResourceType(),
@@ -84,12 +92,20 @@ public class EventDigest {
                 .orElse(null);
     }
 
-    private static Map<String, Object> buildEventPayload(List<Event> events) {
+    private static Map<String, Object> buildEventAggregate(List<Event> events) {
         return events.stream()
                 .map(Event::getEventData)
                 .map(JsonParser::jsonStringToMap)
                 .flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (later, earlier) -> later));
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public Boolean isLive() {
+        return live;
     }
 
     public ZonedDateTime getMostRecentEventTimestamp() {
@@ -112,8 +128,8 @@ public class EventDigest {
         return Optional.ofNullable(mostRecentSalientEventType);
     }
 
-    public Map<String, Object> getEventPayload() {
-        return eventPayload;
+    public Map<String, Object> getEventAggregate() {
+        return eventAggregate;
     }
 
     public Integer getEventCount() {
