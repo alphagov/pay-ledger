@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import uk.gov.pay.ledger.transaction.model.AuthorisationSummary;
 import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
@@ -51,6 +52,7 @@ public class TransactionView {
     private String gatewayTransactionId;
     private RefundSummary refundSummary;
     private SettlementSummary settlementSummary;
+    private AuthorisationSummary authorisationSummary;
     private Map<String, Object> metadata;
     private String refundedBy;
     private String refundedByUserEmail;
@@ -87,6 +89,7 @@ public class TransactionView {
         this.gatewayTransactionId = builder.gatewayTransactionId;
         this.refundSummary = builder.refundSummary;
         this.settlementSummary = builder.settlementSummary;
+        this.authorisationSummary = builder.authorisationSummary;
         this.metadata = builder.metadata;
         this.refundedBy = builder.refundedBy;
         this.refundedByUserEmail = builder.refundedByUserEmail;
@@ -129,6 +132,7 @@ public class TransactionView {
                     .withGatewayTransactionId(payment.getGatewayTransactionId())
                     .withRefundSummary(payment.getRefundSummary())
                     .withSettlementSummary(payment.getSettlementSummary())
+                    .withAuthorisationSummary(payment.getAuthorisationSummary())
                     .withMetadata(payment.getExternalMetadata())
                     .withTransactionType(payment.getTransactionType())
                     .withGatewayTransactionId(payment.getGatewayTransactionId())
@@ -269,6 +273,10 @@ public class TransactionView {
         return settlementSummary;
     }
 
+    public AuthorisationSummary getAuthorisationSummary() {
+        return authorisationSummary;
+    }
+
     public Map<String, Object> getMetadata() {
         return metadata;
     }
@@ -340,6 +348,7 @@ public class TransactionView {
         private String gatewayTransactionId;
         private RefundSummary refundSummary;
         private SettlementSummary settlementSummary;
+        private AuthorisationSummary authorisationSummary;
         private Map<String, Object> metadata;
         private String refundedBy;
         private String refundedByUserEmail;
@@ -468,6 +477,11 @@ public class TransactionView {
 
         public Builder withSettlementSummary(SettlementSummary settlementSummary) {
             this.settlementSummary = settlementSummary;
+            return this;
+        }
+
+        public Builder withAuthorisationSummary(AuthorisationSummary authorisationSummary) {
+            this.authorisationSummary = authorisationSummary;
             return this;
         }
 

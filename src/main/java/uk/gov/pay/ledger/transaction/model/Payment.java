@@ -42,6 +42,7 @@ public class Payment extends Transaction {
     private Long totalAmount;
     private RefundSummary refundSummary;
     private PaymentSettlementSummary settlementSummary;
+    private AuthorisationSummary authorisationSummary;
     private Boolean live;
     private Source source;
     private String walletType;
@@ -59,6 +60,7 @@ public class Payment extends Transaction {
         this.totalAmount = builder.totalAmount;
         this.refundSummary = builder.refundSummary;
         this.settlementSummary = builder.settlementSummary;
+        this.authorisationSummary = builder.authorisationSummary;
         this.reference = builder.reference;
         this.description = builder.description;
         this.state = builder.state;
@@ -174,6 +176,10 @@ public class Payment extends Transaction {
         return settlementSummary;
     }
 
+    public AuthorisationSummary getAuthorisationSummary() {
+        return authorisationSummary;
+    }
+
     public Boolean isLive() {
         return live;
     }
@@ -210,6 +216,7 @@ public class Payment extends Transaction {
         private Long amount;
         private RefundSummary refundSummary;
         private PaymentSettlementSummary settlementSummary;
+        private AuthorisationSummary authorisationSummary;
         private Boolean live;
         private Source source;
         private String walletType;
@@ -219,7 +226,6 @@ public class Payment extends Transaction {
         private String credentialExternalId;
 
         public Builder() {
-
         }
 
         public Payment build() {
@@ -328,6 +334,11 @@ public class Payment extends Transaction {
 
         public Builder withSettlementSummary(PaymentSettlementSummary paymentSettlementSummary) {
             this.settlementSummary = paymentSettlementSummary;
+            return this;
+        }
+
+        public Builder withAuthorisationSummary(AuthorisationSummary authorisationSummary) {
+            this.authorisationSummary = authorisationSummary;
             return this;
         }
 
