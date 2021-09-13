@@ -1,7 +1,9 @@
 package uk.gov.pay.ledger.transaction.resource;
 
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.Is;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -70,6 +72,28 @@ public class TransactionResourceIT {
                 .body("wallet_type", is("APPLE_PAY"))
                 .body("source", is(String.valueOf(Source.CARD_API)))
                 .body("gateway_payout_id", is(gatewayPayoutId));
+    }
+
+    @Test
+    public void shouldGetTransactionWith3ds() {
+        JsonObject transactionDetails = new JsonObject();
+        transactionDetails.addProperty("requires_3ds", true);
+        transactionDetails.addProperty("version_3ds", "2.1.0");
+
+        transactionFixture = aTransactionFixture()
+                .withDefaultTransactionDetails()
+                .withTransactionDetails(transactionDetails.toString());
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("transaction_id", is(transactionFixture.getExternalId()))
+                .body("authorisation_summary.three_d_secure.required", is(true))
+                .body("authorisation_summary.three_d_secure.version", is("2.1.0"));
     }
 
     @Test

@@ -7,9 +7,9 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
-import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.PaymentSettlementSummary;
+import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
+import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
 
 import java.io.IOException;
 import java.util.Map;
@@ -71,6 +71,15 @@ public class TransactionFactory {
                     entity.getPayoutEntity().map(payoutEntity -> payoutEntity.getPaidOutDate()).orElse(null)
             );
 
+            AuthorisationSummary authorisationSummary = null;
+            if (transactionDetails.has("requires_3ds") || transactionDetails.has("version_3ds")) {
+                ThreeDSecure threeDSecure = new ThreeDSecure(
+                        safeGetAsBoolean(transactionDetails, "requires_3ds", false),
+                        safeGetAsString(transactionDetails, "version_3ds")
+                );
+                authorisationSummary = new AuthorisationSummary(threeDSecure);
+            }
+
             String credentialExternalId = safeGetAsString(transactionDetails, "credential_external_id");
 
             return new Payment.Builder()
@@ -98,6 +107,7 @@ public class TransactionFactory {
                     .withRefundSummary(refundSummary)
                     .withTotalAmount(entity.getTotalAmount())
                     .withSettlementSummary(paymentSettlementSummary)
+                    .withAuthorisationSummary(authorisationSummary)
                     .withMoto(entity.isMoto())
                     .withLive(entity.isLive())
                     .withSource(entity.getSource())
