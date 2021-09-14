@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.transaction.resource;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -25,11 +26,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static uk.gov.service.payments.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aPersistedTransactionList;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
+import static uk.gov.service.payments.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 
 public class TransactionResourceSearchIT {
 
@@ -451,6 +452,34 @@ public class TransactionResourceSearchIT {
                 .contentType(JSON)
                 .body("count", is(1))
                 .body("results[0].settlement_summary.settled_date", is(notNullValue()));
+    }
+
+    @Test
+    public void shouldReturnAuthorisationSummaryIfPaymentIs3dsForSearch() {
+        JsonObject transactionDetails = new JsonObject();
+        transactionDetails.addProperty("requires_3ds", true);
+        transactionDetails.addProperty("version_3ds", "2.1.0");
+
+        TransactionFixture transactionFixture = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withDefaultTransactionDetails()
+                .withTransactionDetails(transactionDetails.toString())
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + transactionFixture.getGatewayAccountId() +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].authorisation_summary.three_d_secure.required", is(true))
+                .body("results[0].authorisation_summary.three_d_secure.version", is("2.1.0"));
     }
 
     @Test
