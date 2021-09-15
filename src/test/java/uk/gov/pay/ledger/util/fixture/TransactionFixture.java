@@ -75,6 +75,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String refundedByUserEmail;
     private String source;
     private String gatewayPayoutId;
+    private String version3ds;
 
     private TransactionFixture() {
     }
@@ -320,6 +321,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withVersion3ds(String version3ds) {
+        this.version3ds = version3ds;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -457,6 +463,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 transactionDetails.addProperty("address_county", ba.getAddressCounty());
                                 transactionDetails.addProperty("address_country", ba.getAddressCountry());
                             });
+                });
+        Optional.ofNullable(version3ds).ifPresent(
+                version -> {
+                    transactionDetails.addProperty("version_3ds", version);
+                    transactionDetails.addProperty("requires_3ds", true);
                 });
 
         return transactionDetails;
