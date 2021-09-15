@@ -40,7 +40,7 @@ public class QueueEventFixtureUtil {
         return result.getMessageId();
     }
 
-    public static PactDslJsonBody getAsPact(String eventType, ZonedDateTime eventDate, String resourceExternalId,
+    public static PactDslJsonBody getAsPact(String serviceId, boolean live, String eventType, ZonedDateTime eventDate, String resourceExternalId,
                                      String parentResourceExternalId, ResourceType resourceType, String eventData) {
         PactDslJsonBody eventDetails = new PactDslJsonBody();
 
@@ -49,6 +49,8 @@ public class QueueEventFixtureUtil {
         eventDetails.stringType("event_type", eventType);
         eventDetails.stringType("timestamp", eventDate.format(formatToMicroseconds));
         eventDetails.stringType("resource_external_id", resourceExternalId);
+        eventDetails.stringType("service_id", serviceId);
+        eventDetails.booleanType("live", live);
         eventDetails.stringType("resource_type", resourceType.toString().toLowerCase());
         if (parentResourceExternalId != null && !parentResourceExternalId.isEmpty()) {
             eventDetails.stringType("parent_resource_external_id", parentResourceExternalId);

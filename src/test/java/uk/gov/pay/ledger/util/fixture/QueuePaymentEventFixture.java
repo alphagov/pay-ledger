@@ -262,7 +262,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     }
 
     public PactDslJsonBody getAsPact() {
-        return QueueEventFixtureUtil.getAsPact(eventType, eventDate, resourceExternalId,
+        return QueueEventFixtureUtil.getAsPact(serviceId, live, eventType, eventDate, resourceExternalId,
                 parentResourceExternalId, resourceType, eventData);
     }
 }
