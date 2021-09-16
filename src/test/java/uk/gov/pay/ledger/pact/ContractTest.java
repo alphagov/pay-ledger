@@ -67,9 +67,9 @@ public abstract class ContractTest {
                 .withCardBrand(null)
                 .withCardholderName(cardholderName)
                 .withDefaultCardDetails()
+                .withVersion3ds("2.1.0")
                 .withDefaultTransactionDetails()
                 .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:13:16.067Z"))
-                .withVersion3ds("2.1.0")
                 .insert(app.getJdbi());
     }
 
@@ -266,6 +266,7 @@ public abstract class ContractTest {
                 .withGatewayAccountId(gatewayAccountId)
                 .withState(TransactionState.CREATED)
                 .withAmount(100L)
+                .withRefundSummary(RefundSummary.ofValue("pending", 100L, 0L))
                 .withVersion3ds("2.1.0")
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
