@@ -151,6 +151,8 @@ public class TransactionView {
         Refund refund = (Refund) transaction;
         Builder refundBuilder = new Builder()
                 .withId(refund.getId())
+                .withServiceId(refund.getServiceId())
+                .withLive(refund.getLive())
                 .withGatewayAccountId(refund.getGatewayAccountId())
                 .withAmount(refund.getAmount())
                 .withState(ExternalTransactionState.from(refund.getState(), statusVersion))

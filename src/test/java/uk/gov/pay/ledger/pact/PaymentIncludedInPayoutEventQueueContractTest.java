@@ -47,6 +47,7 @@ public class PaymentIncludedInPayoutEventQueueContractTest {
         QueuePaymentEventFixture eventFixture = QueuePaymentEventFixture.aQueuePaymentEventFixture()
                 .withResourceExternalId(paymentExternalId)
                 .withEventDate(eventDate)
+                .withServiceId(null)
                 .withEventData(String.format("{\"gateway_payout_id\": \"%s\"}", payoutId))
                 .withEventType("PAYMENT_INCLUDED_IN_PAYOUT");
 
