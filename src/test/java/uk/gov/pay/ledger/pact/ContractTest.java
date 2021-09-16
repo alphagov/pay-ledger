@@ -69,6 +69,7 @@ public abstract class ContractTest {
                 .withDefaultCardDetails()
                 .withDefaultTransactionDetails()
                 .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:13:16.067Z"))
+                .withVersion3ds("2.1.0")
                 .insert(app.getJdbi());
     }
 
@@ -244,6 +245,28 @@ public abstract class ContractTest {
                 .withDelayedCapture(true)
                 .withRefundSummary(RefundSummary.ofValue("pending", 100L, 0L))
                 .withAmount(100L)
+                .withDefaultTransactionDetails()
+                .insert(app.getJdbi());
+    }
+
+    @State("a transaction with 3ds version exists")
+    public void createTransactionWithVersion3ds(Map<String, String> params) {
+        String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
+
+        if (isBlank(transactionExternalId)) {
+            transactionExternalId = "ch_123abc456xyz";
+        }
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
+
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withState(TransactionState.CREATED)
+                .withAmount(100L)
+                .withVersion3ds("2.1.0")
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
