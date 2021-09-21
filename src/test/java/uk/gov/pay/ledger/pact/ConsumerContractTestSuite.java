@@ -26,6 +26,7 @@ public class ConsumerContractTestSuite {
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(CancelledByUserEventQueueContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(UserEmailCollectedEventQueueContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(Gateway3dsExemptionResultObtainedEventQueueContractTest.class));
+        consumerToJUnitTest.put("connector", new JUnit4TestAdapter(StatusCorrectedToCapturedToMatchGatewayStatusEventQueueContractTest.class));
         return CreateTestSuite.create(consumerToJUnitTest.build());
     }
 

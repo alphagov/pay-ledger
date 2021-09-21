@@ -165,6 +165,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .build());
                 break;
             case "CAPTURE_CONFIRMED":
+            case "STATUS_CORRECTED_TO_CAPTURED_TO_MATCH_GATEWAY_STATUS":
                 eventData = gsonBuilder.create()
                         .toJson(Map.of("gateway_event_date", eventDate.toString(),
                                 "captured_date", eventDate.toString(),
