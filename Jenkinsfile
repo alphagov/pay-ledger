@@ -185,14 +185,6 @@ pipeline {
         checkPactCompatibility("ledger", gitCommit(), "test")
       }
     }
-    stage('Deploy') {
-      when {
-        branch 'master'
-      }
-      steps {
-        deployEcs("ledger")
-      }
-    }
     stage('Pact Tag') {
       when {
         branch 'master'
