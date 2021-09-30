@@ -14,7 +14,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private String sqsMessageId = RandomStringUtils.randomAlphanumeric(50);
     private String serviceId;
-    private boolean live;
+    private Boolean live;
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private String parentResourceExternalId = StringUtils.EMPTY;
@@ -32,6 +32,11 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
 
     public EventFixture withId(Long id) {
         this.id = id;
+        return this;
+    }
+
+    public EventFixture withLive(Boolean live) {
+        this.live = live;
         return this;
     }
 

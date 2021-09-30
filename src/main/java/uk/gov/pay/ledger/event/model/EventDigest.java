@@ -70,9 +70,15 @@ public class EventDigest {
 
         String parentResourceExternalId = deriveParentResourceExternalId(events);
 
+        Boolean isLive = events.stream()
+                .filter(event -> event.getLive() != null)
+                .map(Event::getLive)
+                .findFirst()
+                .orElse(null);
+
         return new EventDigest(
                 latestEvent.getServiceId(),
-                latestEvent.getLive(),
+                isLive,
                 latestEvent.getEventDate(),
                 latestSalientEventType,
                 latestEvent.getResourceType(),
