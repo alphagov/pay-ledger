@@ -19,16 +19,16 @@ import static uk.gov.service.payments.commons.model.Source.CARD_API;
 
 public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventFixture, Event> {
     private String sqsMessageId;
-    private String serviceId = RandomStringUtils.randomAlphanumeric(20);;
+    private String serviceId = "a-service-id";
     private Boolean live = true;
     private ResourceType resourceType = ResourceType.PAYMENT;
-    private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
+    private String resourceExternalId = "a-resource-external-id";
     private String parentResourceExternalId = StringUtils.EMPTY;
     private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
     private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
-    private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(5);
-    private String credentialExternalId = RandomStringUtils.randomAlphanumeric(32);
+    private String gatewayAccountId = "a-gateway-account-id";
+    private String credentialExternalId = "a-credentials-external-id";
     private Source source;
     private Map<String, Object> metadata = new HashMap<>();
     private boolean includeMetada = true;
