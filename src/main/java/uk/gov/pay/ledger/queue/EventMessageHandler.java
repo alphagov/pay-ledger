@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import io.sentry.Sentry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.emitter.Emitter;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
@@ -68,6 +69,7 @@ public class EventMessageHandler {
         } else {
             response = eventService.createIfDoesNotExist(event);
         }
+        Emitter.pubTopic(message.toString());
 
         final long ingestLag = event.getEventDate().until(ZonedDateTime.now(), ChronoUnit.MICROS);
 
