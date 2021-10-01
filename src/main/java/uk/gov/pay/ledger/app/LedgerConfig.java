@@ -5,6 +5,7 @@ import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.app.config.ReportingConfig;
+import uk.gov.pay.ledger.app.config.SnsConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
 
 import javax.validation.Valid;
@@ -30,6 +31,10 @@ public class LedgerConfig extends Configuration {
     private SqsConfig sqsConfig;
 
     @NotNull
+    @JsonProperty("snsConfig")
+    private SnsConfig snsConfig;
+
+    @NotNull
     @JsonProperty("queueMessageReceiverConfig")
     private QueueMessageReceiverConfig queueMessageReceiverConfig;
 
@@ -39,6 +44,10 @@ public class LedgerConfig extends Configuration {
 
     public SqsConfig getSqsConfig() {
         return sqsConfig;
+    }
+
+    public SnsConfig getSnsConfig() {
+        return snsConfig;
     }
 
     public QueueMessageReceiverConfig getQueueMessageReceiverConfig() {

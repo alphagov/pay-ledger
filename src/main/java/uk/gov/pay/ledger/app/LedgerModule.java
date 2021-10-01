@@ -11,6 +11,8 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
@@ -129,5 +131,13 @@ public class LedgerModule extends AbstractModule {
         }
 
         return clientBuilder.build();
+    }
+
+    @Provides
+    public SnsClient snsClient(LedgerConfig ledgerConfig) {
+        return SnsClient
+                .builder()
+                .region(Region.of(ledgerConfig.getSnsConfig().getRegion()))
+                .build();
     }
 }

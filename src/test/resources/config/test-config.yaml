@@ -61,6 +61,11 @@ queueMessageReceiverConfig:
   numberOfThreads: ${QUEUE_MESSAGE_RECEIVER_NUMBER_OF_THREADS:-1}
   messageRetryDelayInSeconds: ${QUEUE_MESSAGE_RETRY_DELAY_IN_SECONDS:-1}
 
+snsConfig:
+  snsEnabled: ${SNS_ENABLED:-false}
+  region: ${AWS_SNS_REGION:-eu-west-1}
+  cardPaymentEventsTopicArn: ${SNS_TOPIC_CARD_PAYMENT_EVENTS_ARN}
+
 reportingConfig:
   streamingCsvPageSize: ${STREAMING_CSV_PAGE_SIZE:-5000}
   searchQueryTimeoutInSeconds: ${REPORTING_SEARCH_QUERY_TIMEOUT_IN_SECONDS:-55}
