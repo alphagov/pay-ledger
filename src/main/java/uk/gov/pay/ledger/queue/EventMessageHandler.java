@@ -69,7 +69,7 @@ public class EventMessageHandler {
         } else {
             response = eventService.createIfDoesNotExist(event);
         }
-        Emitter.pubTopic(message.toString());
+        Emitter.pubTopic(message.getEvent().getEventType());
 
         final long ingestLag = event.getEventDate().until(ZonedDateTime.now(), ChronoUnit.MICROS);
 
