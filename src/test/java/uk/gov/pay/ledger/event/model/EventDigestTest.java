@@ -54,4 +54,37 @@ public class EventDigestTest {
 
         assertThat(eventDigest.getParentResourceExternalId(), is(nullValue()));
     }
+
+    @Test
+    public void shouldBeLiveTrueIfContainsTrueEvent() {
+        Event eventWithNullLiveValue = anEventFixture().withLive(null).toEntity();
+        Event eventWithTrueLiveValue = anEventFixture().withLive(true).toEntity();
+
+        EventDigest eventDigest = EventDigest.fromEventList(
+                List.of(eventWithTrueLiveValue, eventWithNullLiveValue));
+
+        assertThat(eventDigest.isLive(), is(Boolean.TRUE));
+    }
+
+    @Test
+    public void shouldBeLiveFalseIfContainsFalseEvent() {
+        Event eventWithNullLiveValue = anEventFixture().withLive(null).toEntity();
+        Event eventWithFalseLiveValue = anEventFixture().withLive(false).toEntity();
+
+        EventDigest eventDigest = EventDigest.fromEventList(
+                List.of(eventWithFalseLiveValue, eventWithNullLiveValue));
+
+        assertThat(eventDigest.isLive(), is(Boolean.FALSE));
+    }
+    
+    @Test
+    public void shouldBeLiveNullIfContainsOnlyNullEvents() {
+        Event eventWithNullLiveValue = anEventFixture().withLive(null).toEntity();
+
+        EventDigest eventDigest = EventDigest.fromEventList(
+                List.of(eventWithNullLiveValue));
+
+        assertThat(eventDigest.isLive(), is(nullValue()));
+    }
+
 }
