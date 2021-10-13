@@ -26,6 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.replaceChars;
 import static org.apache.commons.text.WordUtils.capitalizeFully;
+import static uk.gov.pay.ledger.util.JsonParser.safeGetAsBoolean;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
 
@@ -57,6 +58,7 @@ public class CsvTransactionFactory {
     private static final String FIELD_NET = "Net";
     private static final String FIELD_MOTO = "MOTO";
     private static final String FIELD_PAYMENT_PROVIDER = "Payment Provider";
+    private static final String FIELD_3D_SECURE_REQUIRED = "3-D Secure Required";
     private ObjectMapper objectMapper;
 
     @Inject
@@ -119,6 +121,8 @@ public class CsvTransactionFactory {
                 result.put(FIELD_ERROR_CODE, state.getCode());
                 result.put(FIELD_ERROR_MESSAGE, state.getMessage());
             }
+
+            result.put(FIELD_3D_SECURE_REQUIRED, safeGetAsBoolean(transactionDetails, "requires_3ds", null));
 
             Optional<Map<String, Object>> externalMetadata = getExternalMetadata(transactionEntity.getTransactionDetails());
 
@@ -193,6 +197,8 @@ public class CsvTransactionFactory {
         }
 
         headers.put(FIELD_PAYMENT_PROVIDER, FIELD_PAYMENT_PROVIDER);
+
+        headers.put(FIELD_3D_SECURE_REQUIRED, FIELD_3D_SECURE_REQUIRED);
 
         if (metadataKeys != null) {
             metadataKeys.stream().sorted()

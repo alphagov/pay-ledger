@@ -65,6 +65,7 @@ public class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Total Amount"), is("1.23"));
         assertThat(csvDataMap.get("MOTO"), is(true));
         assertThat(csvDataMap.get("Payment Provider"), is("sandbox"));
+        assertThat(csvDataMap.get("3-D Secure Required"), is(nullValue()));
     }
 
     @Test
@@ -156,6 +157,7 @@ public class CsvTransactionFactoryTest {
         assertThat(csvHeaders.get("Wallet Type"), is(notNullValue()));
         assertThat(csvHeaders.get("Card Type"), is(notNullValue()));
         assertThat(csvHeaders.get("Payment Provider"), is(notNullValue()));
+        assertThat(csvHeaders.get("3-D Secure Required"), is(notNullValue()));
 
         assertThat(csvHeaders.get("test-key-1 (metadata)"), is(notNullValue()));
         assertThat(csvHeaders.get("test-key-2 (metadata)"), is(notNullValue()));
@@ -200,6 +202,43 @@ public class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Description"), is("'+desc-1"));
         assertThat(csvDataMap.get("Email"), is("'@email.com"));
         assertThat(csvDataMap.get("Cardholder Name"), is("'-J Doe"));
+    }
+
+    @Test
+    public void toMapShouldIncludeShouldInclude3DSecureRequired() {
+        transactionFixture = aTransactionFixture()
+                .withState(TransactionState.FAILED_REJECTED)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withAmount(100L)
+                .withGatewayTransactionId("gateway-transaction-id")
+                .withCreatedDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
+                .withTotalAmount(123L)
+                .withMoto(true)
+                .withCorporateCardSurcharge(23)
+                .withCardBrandLabel("Visa")
+                .withVersion3ds("2.0.1")
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails();
+        TransactionEntity transactionEntity = transactionFixture.toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+
+        assertThat(csvDataMap.get("Amount"), is("1.00"));
+        assertThat(csvDataMap.get("GOV.UK Payment ID"), is(transactionEntity.getExternalId()));
+        assertThat(csvDataMap.get("Provider ID"), is(transactionEntity.getGatewayTransactionId()));
+        assertThat(csvDataMap.get("State"), is("Declined"));
+        assertThat(csvDataMap.get("Finished"), is(true));
+        assertThat(csvDataMap.get("Error Code"), is("P0010"));
+        assertThat(csvDataMap.get("Error Message"), is("Payment method rejected"));
+        assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
+        assertThat(csvDataMap.get("Time Created"), is("16:25:01"));
+        assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.23"));
+        assertThat(csvDataMap.get("Total Amount"), is("1.23"));
+        assertThat(csvDataMap.get("MOTO"), is(true));
+        assertThat(csvDataMap.get("Payment Provider"), is("sandbox"));
+        assertThat(csvDataMap.get("3-D Secure Required"), is(true));
     }
 
     private void assertPaymentDetails(Map<String, Object> csvDataMap, TransactionEntity transactionEntity) {
