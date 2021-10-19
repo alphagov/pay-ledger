@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
+import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.transaction.dao.mapper.TransactionMapper;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
@@ -214,10 +215,12 @@ public class TransactionDao {
 
 
     private final Jdbi jdbi;
+    private final LedgerConfig configuration;
 
     @Inject
-    public TransactionDao(Jdbi jdbi) {
+    public TransactionDao(Jdbi jdbi, LedgerConfig configuration) {
         this.jdbi = jdbi;
+        this.configuration = configuration;
     }
 
     public Optional<TransactionEntity> findTransaction(String externalId, String gatewayAccountId, TransactionType transactionType, String parentTransactionExternalId) {
@@ -288,6 +291,7 @@ public class TransactionDao {
             query.bind("offset", searchParams.getOffset());
             query.bind("limit", searchParams.getDisplaySize());
             return query
+                    .setQueryTimeout(configuration.getReportingConfig().getSearchQueryTimeoutInSeconds())
                     .map(new TransactionMapper())
                     .list();
         });
@@ -300,6 +304,7 @@ public class TransactionDao {
                             COUNT_TRANSACTIONS_WITH_PAIDOUT_DATE : COUNT_TRANSACTIONS));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             return query
+                    .setQueryTimeout(configuration.getReportingConfig().getSearchQueryTimeoutInSeconds())
                     .mapTo(Long.class)
                     .one();
         });
@@ -314,6 +319,7 @@ public class TransactionDao {
             query.bind("limit", searchParams.getLimitTotalSize());
 
             return query
+                    .setQueryTimeout(configuration.getReportingConfig().getSearchQueryTimeoutInSeconds())
                     .mapTo(Long.class)
                     .one();
         });
@@ -339,7 +345,10 @@ public class TransactionDao {
             query.bind("startingAfterId", startingAfterId);
             query.bind("limit", cursorPageSize);
 
-            return query.map(new TransactionMapper()).list();
+            return query
+                    .setQueryTimeout(configuration.getReportingConfig().getSearchQueryTimeoutInSeconds())
+                    .map(new TransactionMapper())
+                    .list();
         });
     }
 

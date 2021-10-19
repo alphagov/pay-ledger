@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.inject.Inject;
 import jersey.repackaged.com.google.common.base.Stopwatch;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.app.LedgerConfig;
@@ -34,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
+import java.sql.SQLException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +95,19 @@ public class TransactionResource {
                                             @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
                                             @QueryParam("account_id") CommaDelimitedSetParameter gatewayAccountIds,
                                             @Context UriInfo uriInfo) {
-        return searchForTransactions(searchParams, overrideAccountRestriction, gatewayAccountIds, uriInfo);
+        try {
+            return searchForTransactions(searchParams, overrideAccountRestriction, gatewayAccountIds, uriInfo);
+        } catch (UnableToExecuteStatementException e) {
+            var PROCESSING_WAS_INTERRUPTED_BY_A_CANCEL_REQUEST_FROM_A_CLIENT_PROGRAM_STATE_CODE = "57014";
+            if (e.getCause() instanceof SQLException) {
+                if (((SQLException) e.getCause()).getSQLState().equals(PROCESSING_WAS_INTERRUPTED_BY_A_CANCEL_REQUEST_FROM_A_CLIENT_PROGRAM_STATE_CODE)) {
+                    // a query specified timeout was reached
+                    LOGGER.warn("Search query cancelled by client query timeout");
+                    throw new WebApplicationException("could not get the requested page", Response.Status.GATEWAY_TIMEOUT);
+                }
+            }
+            throw new WebApplicationException();
+        }
     }
 
     @Path("/")
