@@ -8,6 +8,7 @@ import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.google.gson.Gson;
 import org.junit.Rule;
 import org.junit.Test;
+import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
@@ -25,6 +26,7 @@ import static io.dropwizard.testing.ConfigOverride.config;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class CancelledByUserEventQueueContractTest {
     Gson gson = new Gson();
@@ -66,7 +68,7 @@ public class CancelledByUserEventQueueContractTest {
     public void test() {
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
 
-        TransactionDao transactionDao = new TransactionDao(appRule.getJdbi());
+        TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
 
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
