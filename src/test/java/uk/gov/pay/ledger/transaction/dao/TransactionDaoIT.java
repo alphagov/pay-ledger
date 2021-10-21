@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.dao;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -21,6 +22,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -29,7 +31,7 @@ class TransactionDaoIT {
     @RegisterExtension
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
-    private TransactionDao transactionDao = new TransactionDao(rule.getJdbi());
+    private TransactionDao transactionDao = new TransactionDao(rule.getJdbi(), mock(LedgerConfig.class));
 
     @Test
     void shouldInsertTransaction() {

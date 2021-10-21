@@ -6,7 +6,12 @@ import com.google.gson.JsonParser;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.pay.ledger.app.LedgerConfig;
+import uk.gov.pay.ledger.app.config.ReportingConfig;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Transaction;
@@ -32,7 +37,9 @@ import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aPersistedTransactionList;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class TransactionDaoSearchIT {
 
     @RegisterExtension
@@ -44,10 +51,17 @@ public class TransactionDaoSearchIT {
 
     private DatabaseTestHelper databaseTestHelper = aDatabaseTestHelper(rule.getJdbi());
 
+    @Mock
+    private LedgerConfig ledgerConfig;
+    @Mock
+    private ReportingConfig reportingConfig;
+
     @BeforeEach
     public void setUp() {
+        when(reportingConfig.getSearchQueryTimeoutInSeconds()).thenReturn(50);
+        when(ledgerConfig.getReportingConfig()).thenReturn(reportingConfig);
         databaseTestHelper.truncateAllData();
-        transactionDao = new TransactionDao(rule.getJdbi());
+        transactionDao = new TransactionDao(rule.getJdbi(), ledgerConfig);
         searchParams = new TransactionSearchParams();
     }
 

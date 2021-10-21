@@ -3,14 +3,22 @@ package uk.gov.pay.ledger.queue;
 import com.google.gson.Gson;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import uk.gov.pay.ledger.app.LedgerConfig;
+import uk.gov.pay.ledger.app.config.ReportingConfig;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture;
 
@@ -27,23 +35,38 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.SUCCESS;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class QueueMessageReceiverIT {
+
+    @Mock
+    LedgerConfig ledgerConfig;
+    @Mock
+    ReportingConfig reportingConfig;
 
     @RegisterExtension
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension(
             config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true")
     );
 
-    TransactionDao transactionDao = new TransactionDao(rule.getJdbi());
+    TransactionDao transactionDao = new TransactionDao(rule.getJdbi(), ledgerConfig);
     private DatabaseTestHelper dbHelper = aDatabaseTestHelper(rule.getJdbi());
 
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
+
+    @BeforeEach
+    public void setUp() {
+        when(reportingConfig.getSearchQueryTimeoutInSeconds()).thenReturn(50);
+        when(ledgerConfig.getReportingConfig()).thenReturn(reportingConfig);
+    }
 
     @Test
     public void shouldHandleOutOfOrderEvents() throws InterruptedException {

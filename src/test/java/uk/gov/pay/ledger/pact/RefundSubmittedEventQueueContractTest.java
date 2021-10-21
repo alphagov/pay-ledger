@@ -8,6 +8,7 @@ import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
@@ -25,6 +26,7 @@ import static io.dropwizard.testing.ConfigOverride.config;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 import static uk.gov.pay.ledger.util.fixture.QueueRefundEventFixture.aQueueRefundEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -68,7 +70,7 @@ public class RefundSubmittedEventQueueContractTest {
                 .insert(appRule.getJdbi());
 
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
-        TransactionDao transactionDao = new TransactionDao(appRule.getJdbi());
+        TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
 
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> transactionDao.findTransactionByExternalId(refundFixture.getResourceExternalId()).isPresent()

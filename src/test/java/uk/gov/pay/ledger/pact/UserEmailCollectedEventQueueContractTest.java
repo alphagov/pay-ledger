@@ -7,6 +7,7 @@ import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
+import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
@@ -23,6 +24,7 @@ import static io.dropwizard.testing.ConfigOverride.config;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 public class UserEmailCollectedEventQueueContractTest {
@@ -60,7 +62,7 @@ public class UserEmailCollectedEventQueueContractTest {
     @Test
     @PactVerification({"connector"})
     public void test() {
-        TransactionDao transactionDao = new TransactionDao(appRule.getJdbi());
+        TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
 
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
 

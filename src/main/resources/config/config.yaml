@@ -77,3 +77,4 @@ queueMessageReceiverConfig:
 
 reportingConfig:
   streamingCsvPageSize: ${STREAMING_CSV_PAGE_SIZE:-5000}
+  searchQueryTimeoutInSeconds: ${REPORTING_SEARCH_QUERY_TIMEOUT_IN_SECONDS:-55}
