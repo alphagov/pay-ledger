@@ -52,6 +52,7 @@ public class TransactionResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
     private static final String ACCOUNT_MANAGER_FIELD_NAME = "account_id";
+    private static final String SQL_PROCESSING_WAS_INTERRUPTED_BY_A_CANCEL_REQUEST_FROM_A_CLIENT_PROGRAM_STATE_CODE = "57014";
     private final TransactionService transactionService;
     private final CsvService csvService;
     private final LedgerConfig configuration;
@@ -98,9 +99,8 @@ public class TransactionResource {
         try {
             return searchForTransactions(searchParams, overrideAccountRestriction, gatewayAccountIds, uriInfo);
         } catch (UnableToExecuteStatementException e) {
-            var PROCESSING_WAS_INTERRUPTED_BY_A_CANCEL_REQUEST_FROM_A_CLIENT_PROGRAM_STATE_CODE = "57014";
             if (e.getCause() instanceof SQLException) {
-                if (((SQLException) e.getCause()).getSQLState().equals(PROCESSING_WAS_INTERRUPTED_BY_A_CANCEL_REQUEST_FROM_A_CLIENT_PROGRAM_STATE_CODE)) {
+                if (((SQLException) e.getCause()).getSQLState().equals(SQL_PROCESSING_WAS_INTERRUPTED_BY_A_CANCEL_REQUEST_FROM_A_CLIENT_PROGRAM_STATE_CODE)) {
                     // a query specified timeout was reached
                     LOGGER.warn("Search query cancelled by client query timeout");
                     throw new WebApplicationException("could not get the requested page", Response.Status.GATEWAY_TIMEOUT);
