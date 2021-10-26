@@ -32,6 +32,7 @@ public class TransactionEntityFactoryTest {
     @Test
     public void fromShouldConvertEventDigestToTransactionEntity() {
         Event paymentCreatedEvent = aQueuePaymentEventFixture()
+                .withLive(true)
                 .withEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withResourceType(ResourceType.PAYMENT)

@@ -50,7 +50,8 @@ public class PaymentCreatedEventQueueContractTest {
                 .withEventDate(eventDate)
                 .withGatewayAccountId(gatewayAccountId)
                 .withCredentialExternalId(credentialExternalId)
-                .withDefaultEventDataForEventType("PAYMENT_CREATED");
+                .withDefaultEventDataForEventType("PAYMENT_CREATED")
+                .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");

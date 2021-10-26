@@ -13,7 +13,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
     private String sqsMessageId;
     private ResourceType resourceType = ResourceType.REFUND;
     private String serviceId;
-    private boolean live;
+    private Boolean live;
     private Long amount = 50L;
     private String gatewayAccountId = "123456";
     private String resourceExternalId = "resource_external_id";

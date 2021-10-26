@@ -48,7 +48,8 @@ public class Gateway3dsExemptionResultObtainedEventQueueContractTest {
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
                 .withEventType(gateway3dsExemptionResultObtainedEvent)
-                .withDefaultEventDataForEventType(gateway3dsExemptionResultObtainedEvent);
+                .withDefaultEventDataForEventType(gateway3dsExemptionResultObtainedEvent)
+                .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");

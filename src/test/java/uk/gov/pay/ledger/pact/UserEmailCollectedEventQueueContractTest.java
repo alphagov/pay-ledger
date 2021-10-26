@@ -47,7 +47,8 @@ public class UserEmailCollectedEventQueueContractTest {
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
                 .withEventType(userEmailCollectedEvent)
-                .withDefaultEventDataForEventType(userEmailCollectedEvent);
+                .withDefaultEventDataForEventType(userEmailCollectedEvent)
+                .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");

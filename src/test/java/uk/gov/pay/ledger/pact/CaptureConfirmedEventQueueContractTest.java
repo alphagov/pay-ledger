@@ -53,7 +53,8 @@ public class CaptureConfirmedEventQueueContractTest {
                 .withEventDate(eventDate)
                 .withGatewayAccountId(gatewayAccountId)
                 .withEventType(eventType)
-                .withDefaultEventDataForEventType(eventType);
+                .withDefaultEventDataForEventType(eventType)
+                .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");

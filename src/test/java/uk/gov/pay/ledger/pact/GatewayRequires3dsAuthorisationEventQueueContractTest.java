@@ -49,7 +49,8 @@ public class GatewayRequires3dsAuthorisationEventQueueContractTest {
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
                 .withEventType(gatewayRequires3dsAuthorisationEvent)
-                .withDefaultEventDataForEventType(gatewayRequires3dsAuthorisationEvent);
+                .withDefaultEventDataForEventType(gatewayRequires3dsAuthorisationEvent)
+                .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");

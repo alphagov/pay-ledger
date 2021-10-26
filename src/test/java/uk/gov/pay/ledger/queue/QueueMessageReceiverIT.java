@@ -307,6 +307,7 @@ public class QueueMessageReceiverIT {
                 .withEventType("CAPTURE_SUBMITTED")
                 .withEventData("{}")
                 .withDefaultEventDataForEventType("DEFAULT")
+                .withLive(true)
                 .insert(rule.getSqsClient());
 
         aQueuePaymentEventFixture()
