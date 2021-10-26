@@ -52,7 +52,8 @@ public class PaymentNotificationCreatedEventQueueContractTest {
                 .withGatewayAccountId(gatewayAccountId)
                 .withCredentialExternalId(credentialExternalId)
                 .withEventType(paymentDetailsEnteredEventName)
-                .withDefaultEventDataForEventType(paymentDetailsEnteredEventName);
+                .withDefaultEventDataForEventType(paymentDetailsEnteredEventName)
+                .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");

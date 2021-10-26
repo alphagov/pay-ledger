@@ -52,7 +52,8 @@ public class CancelledByUserEventQueueContractTest {
                 .withEventDate(eventDate)
                 .withGatewayAccountId(gatewayAccountId)
                 .withEventType(SalientEventType.CANCELLED_BY_USER.toString())
-                .withDefaultEventDataForEventType(SalientEventType.CANCELLED_BY_USER.toString());
+                .withDefaultEventDataForEventType(SalientEventType.CANCELLED_BY_USER.toString())
+                .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");

@@ -49,7 +49,8 @@ public class PaymentDetailsEnteredEventQueueContractTest {
                 .withEventDate(eventDate)
                 .withEventType(paymentDetailsEnteredEventName)
                 .withGatewayAccountId("I0YI1")
-                .withDefaultEventDataForEventType(paymentDetailsEnteredEventName);
+                .withDefaultEventDataForEventType(paymentDetailsEnteredEventName)
+                .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");

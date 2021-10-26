@@ -51,7 +51,8 @@ public class CaptureSubmittedEventQueueContractTest {
                 .withEventDate(eventDate)
                 .withGatewayAccountId(gatewayAccountId)
                 .withEventType(SalientEventType.CAPTURE_SUBMITTED.toString())
-                .withDefaultEventDataForEventType(SalientEventType.CAPTURE_SUBMITTED.toString());
+                .withDefaultEventDataForEventType(SalientEventType.CAPTURE_SUBMITTED.toString())
+                .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
