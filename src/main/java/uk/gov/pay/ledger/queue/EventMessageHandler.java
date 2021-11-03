@@ -45,7 +45,7 @@ public class EventMessageHandler {
             try {
                 processSingleMessage(message);
             } catch (Exception e) {
-                Sentry.capture(e);
+                Sentry.captureException(e);
                 LOGGER.warn("Error during handling the event message",
                         kv("sqs_message_id", message.getQueueMessageId()),
                         kv("resource_external_id", message.getEvent().getResourceExternalId()),
