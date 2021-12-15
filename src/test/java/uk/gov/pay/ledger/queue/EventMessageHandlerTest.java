@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,9 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.app.LedgerConfig;
+import uk.gov.pay.ledger.app.config.SnsConfig;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
+import uk.gov.pay.ledger.eventpublisher.EventPublisher;
+import uk.gov.pay.ledger.eventpublisher.TopicName;
 
 import java.util.List;
 
@@ -29,6 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
@@ -59,6 +65,18 @@ class EventMessageHandlerTest {
     @Mock
     private Appender<ILoggingEvent> mockAppender;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private SnsConfig snsConfig;
+
+    @Mock
+    private LedgerConfig ledgerConfig;
+
+    @Mock
+    private EventPublisher eventPublisher;
+
     @Captor
     private ArgumentCaptor<LoggingEvent> loggingEventArgumentCaptor;
 
@@ -68,6 +86,8 @@ class EventMessageHandlerTest {
     @BeforeEach
     void setUp() throws QueueException {
         when(eventQueue.retrieveEvents()).thenReturn(List.of(eventMessage));
+        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+        when(snsConfig.isSnsEnabled()).thenReturn(false);
     }
 
     @Test
@@ -118,5 +138,29 @@ class EventMessageHandlerTest {
         eventMessageHandler.handle();
 
         verify(eventQueue).scheduleMessageForRetry(any());
+    }
+
+    @Test
+    void shouldPublishMessageWhenSnsEnabled() throws Exception {
+        var deserializedEvent = "deserialized event";
+        Event event = aQueuePaymentEventFixture().toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+        when(snsConfig.isSnsEnabled()).thenReturn(true);
+        when(objectMapper.writeValueAsString(event)).thenReturn(deserializedEvent);
+
+        eventMessageHandler.handle();
+
+        verify(eventPublisher).publishMessageToTopic(deserializedEvent, TopicName.CARD_PAYMENT_EVENTS);
+    }
+
+    @Test
+    void shouldNotTryToPublishToMessageWhenSnsNotEnabled() throws QueueException {
+        Event event = aQueuePaymentEventFixture().toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+
+        eventMessageHandler.handle();
+
+        verifyNoInteractions(eventPublisher);
     }
 }

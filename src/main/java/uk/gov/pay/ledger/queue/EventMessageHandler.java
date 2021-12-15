@@ -1,13 +1,17 @@
 package uk.gov.pay.ledger.queue;
 
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import io.sentry.Sentry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
+import uk.gov.pay.ledger.eventpublisher.EventPublisher;
+import uk.gov.pay.ledger.eventpublisher.TopicName;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -25,17 +29,26 @@ public class EventMessageHandler {
     private final EventQueue eventQueue;
     private final EventService eventService;
     private final EventDigestHandler eventDigestHandler;
+    private final EventPublisher eventPublisher;
     private final MetricRegistry metricRegistry;
+    private final LedgerConfig ledgerConfig;
+    private final ObjectMapper objectMapper;
 
     @Inject
     public EventMessageHandler(EventQueue eventQueue,
                                EventService eventService,
                                EventDigestHandler eventDigestHandler,
-                               MetricRegistry metricRegistry) {
+                               EventPublisher eventPublisher,
+                               MetricRegistry metricRegistry,
+                               LedgerConfig ledgerConfig,
+                               ObjectMapper objectMapper) {
         this.eventQueue = eventQueue;
         this.eventService = eventService;
         this.eventDigestHandler = eventDigestHandler;
+        this.eventPublisher = eventPublisher;
         this.metricRegistry = metricRegistry;
+        this.ledgerConfig = ledgerConfig;
+        this.objectMapper = objectMapper;
     }
 
     public void handle() throws QueueException {
@@ -67,6 +80,22 @@ public class EventMessageHandler {
             response = ignoredEventResponse();
         } else {
             response = eventService.createIfDoesNotExist(event);
+        }
+
+
+        if (ledgerConfig.getSnsConfig().isSnsEnabled()) {
+            try {
+                eventPublisher.publishMessageToTopic(
+                        objectMapper.writeValueAsString(message.getEvent()),
+                        TopicName.CARD_PAYMENT_EVENTS
+                );
+            } catch (Exception e) {
+                LOGGER.error("Failed to publish event for message",
+                        kv("sqs_message_id", message.getQueueMessageId()),
+                        kv("resource_external_id", event.getResourceExternalId()),
+                        kv("event_type", event.getEventType()),
+                        kv("error", e.getMessage()));
+            }
         }
 
         final long ingestLag = event.getEventDate().until(ZonedDateTime.now(), ChronoUnit.MICROS);
