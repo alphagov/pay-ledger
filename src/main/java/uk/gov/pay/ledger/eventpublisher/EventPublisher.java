@@ -1,15 +1,11 @@
 package uk.gov.pay.ledger.eventpublisher;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
 
 import javax.inject.Inject;
 
 public class EventPublisher {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventPublisher.class);
-
     private final SnsClient snsClient;
     private final TopicNameArnMapper topicNameArnMapper;
 
@@ -28,7 +24,8 @@ public class EventPublisher {
                     .build();
             snsClient.publish(request);
         } catch (Exception e) {
-            throw new EventPublisherException("Failed to publish message to SNS", e);
+            var errorMessage = String.format("Failed to publish message to SNS: %s", e.getMessage());
+            throw new EventPublisherException(errorMessage, e);
         }
     }
 }
