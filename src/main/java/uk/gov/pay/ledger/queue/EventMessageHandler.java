@@ -90,7 +90,7 @@ public class EventMessageHandler {
                         TopicName.CARD_PAYMENT_EVENTS
                 );
             } catch (Exception e) {
-                LOGGER.error("Failed to publish event for message",
+                LOGGER.warn("Failed to publish event for message",
                         kv("sqs_message_id", message.getQueueMessageId()),
                         kv("resource_external_id", event.getResourceExternalId()),
                         kv("event_type", event.getEventType()),
