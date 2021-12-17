@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.eventpublisher;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -10,6 +9,8 @@ import software.amazon.awssdk.services.sns.model.PublishRequest;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.SnsConfig;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,17 +31,12 @@ public class EventPublisherTest {
 
     private EventPublisher eventPublisher;
 
-    @BeforeEach
-    void setUp() {
+    @Test
+    public void shouldPublishMessageToSpecifiedTopic() throws Exception {
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
         when(snsConfig.getCardPaymentEventsTopicArn()).thenReturn(cardPaymentEventTopicArn);
         topicNameArnMapper = new TopicNameArnMapper(ledgerConfig);
-
         eventPublisher = new EventPublisher(snsClient, topicNameArnMapper);
-    }
-
-    @Test
-    public void shouldPublishMessageToSpecifiedTopic() throws Exception {
         var message = "Hooray, I've been published";
         var expectedPublishRequest = PublishRequest
                 .builder()
@@ -51,5 +47,14 @@ public class EventPublisherTest {
         eventPublisher.publishMessageToTopic(message, TopicName.CARD_PAYMENT_EVENTS);
 
         verify(snsClient).publish(expectedPublishRequest);
+    }
+
+    @Test
+    public void shouldNotErrorWhenTopicArnNotSet() {
+        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+        lenient().when(snsConfig.getCardPaymentEventsTopicArn()).thenReturn(null);
+        topicNameArnMapper = new TopicNameArnMapper(ledgerConfig);
+
+        assertDoesNotThrow(() -> new EventPublisher(snsClient, topicNameArnMapper));
     }
 }
