@@ -2,20 +2,19 @@ package uk.gov.pay.ledger.eventpublisher;
 
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.app.LedgerConfig;
+import uk.gov.pay.ledger.app.config.SnsConfig;
 
 import java.util.Map;
 
 class TopicNameArnMapper {
-    private final Map<TopicName, String> nameToArnMap;
+    private final SnsConfig snsConfig;
 
     @Inject
     TopicNameArnMapper(LedgerConfig ledgerConfig) {
-        this.nameToArnMap  = Map.of(
-                TopicName.CARD_PAYMENT_EVENTS,
-                ledgerConfig.getSnsConfig().getCardPaymentEventsTopicArn()
-        );
+        this.snsConfig  = ledgerConfig.getSnsConfig();
     }
     public String getArnForTopicName(TopicName topicName) {
-        return nameToArnMap.get(topicName);
+        return Map.of(TopicName.CARD_PAYMENT_EVENTS, snsConfig.getCardPaymentEventsTopicArn())
+                .get(topicName);
     }
 }
