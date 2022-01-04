@@ -177,31 +177,6 @@ pipeline {
         }
       }
     }
-    stage('Check pact compatibility') {
-      when {
-        branch 'master'
-      }
-      steps {
-        checkPactCompatibility("ledger", gitCommit(), "test")
-      }
-    }
-    stage('Pact Tag') {
-      when {
-        branch 'master'
-      }
-      steps {
-        echo 'Tagging provider pact with "test"'
-        tagPact("ledger", gitCommit(), "test")
-      }
-    }
-    stage('Smoke Tests') {
-      when {
-        branch 'master'
-      }
-      steps {
-        runCardSmokeTest()
-      }
-    }
     stage('Complete') {
       failFast true
       parallel {
@@ -211,14 +186,6 @@ pipeline {
           }
           steps {
             tagDeployment("ledger")
-          }
-        }
-        stage('Trigger Deploy Notification') {
-          when {
-            branch 'master'
-          }
-          steps {
-            triggerGraphiteDeployEvent("ledger")
           }
         }
       }
