@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.math.BigDecimal.valueOf;
+import static net.logstash.logback.argument.StructuredArguments.kv;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.replaceChars;
@@ -29,6 +30,7 @@ import static org.apache.commons.text.WordUtils.capitalizeFully;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsBoolean;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
+import static uk.gov.service.payments.logging.LoggingKeys.PAYMENT_EXTERNAL_ID;
 
 public class CsvTransactionFactory {
 
@@ -55,6 +57,9 @@ public class CsvTransactionFactory {
     private static final String FIELD_WALLET_TYPE = "Wallet Type";
     private static final String FIELD_CARD_TYPE = "Card Type";
     private static final String FIELD_FEE = "Fee";
+    private static final String FIELD_FEE_BREAKDOWN_TRANSACTION = "Fee (transaction)";
+    private static final String FIELD_FEE_BREAKDOWN_3DS = "Fee (3DS)";
+    private static final String FIELD_FEE_BREAKDOWN_RADAR = "Fee (fraud protection)";
     private static final String FIELD_NET = "Net";
     private static final String FIELD_MOTO = "MOTO";
     private static final String FIELD_PAYMENT_PROVIDER = "Payment Provider";
@@ -95,6 +100,11 @@ public class CsvTransactionFactory {
                 result.put(FIELD_STATE, PaymentState.getDisplayName(transactionEntity.getState()));
                 result.put(FIELD_MOTO, transactionEntity.isMoto());
                 result.put(FIELD_PAYMENT_PROVIDER, safeGetAsString(transactionDetails, "payment_provider"));
+
+                JsonNode feeBreakdownNode = transactionDetails.get("fee_breakdown");
+                if (feeBreakdownNode != null && feeBreakdownNode.isArray()) {
+                    result.putAll(getFeeBreakdown(transactionEntity, feeBreakdownNode));
+                }
             }
             if (TransactionType.REFUND.toString().equals(transactionEntity.getTransactionType())) {
                 result.putAll(
@@ -137,6 +147,34 @@ public class CsvTransactionFactory {
         return result;
     }
 
+    private Map<String, Object> getFeeBreakdown(TransactionEntity transactionEntity, JsonNode feeBreakdown) {
+        Map<String, Object> result = new HashMap<>();
+
+        feeBreakdown.forEach((JsonNode jsonNode) -> {
+            String feeType = safeGetAsString(jsonNode, "fee_type");
+
+            if (feeType != null) {
+                String amount = penceToCurrency(safeGetAsLong(jsonNode, "amount"));
+                switch (feeType) {
+                    case "transaction":
+                        result.put(FIELD_FEE_BREAKDOWN_TRANSACTION, amount);
+                        break;
+                    case "radar":
+                        result.put(FIELD_FEE_BREAKDOWN_RADAR, amount);
+                        break;
+                    case "three_ds":
+                        result.put(FIELD_FEE_BREAKDOWN_3DS, amount);
+                        break;
+                    default:
+                        LOGGER.warn("Unknown fee type for transaction",
+                                kv(PAYMENT_EXTERNAL_ID, transactionEntity.getExternalId()),
+                                kv("fee_type", feeType));
+                }
+            }
+        });
+        return result;
+    }
+
     private Map<String, Object> getPaymentTransactionAttributes(TransactionEntity transactionEntity, JsonNode details) {
 
         Map<String, Object> result = new HashMap<>();
@@ -161,7 +199,8 @@ public class CsvTransactionFactory {
 
     public Map<String, Object> getCsvHeadersWithMedataKeys(List<String> metadataKeys,
                                                            boolean includeFeeHeaders,
-                                                           boolean includeMotoHeader) {
+                                                           boolean includeMotoHeader,
+                                                           boolean includeFeeBreakdownHeaders) {
         LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 
         headers.put(FIELD_REFERENCE, FIELD_REFERENCE);
@@ -188,6 +227,12 @@ public class CsvTransactionFactory {
         if (includeFeeHeaders) {
             headers.put(FIELD_FEE, FIELD_FEE);
             headers.put(FIELD_NET, FIELD_NET);
+        }
+
+        if (includeFeeBreakdownHeaders) {
+            headers.put(FIELD_FEE_BREAKDOWN_TRANSACTION, FIELD_FEE_BREAKDOWN_TRANSACTION);
+            headers.put(FIELD_FEE_BREAKDOWN_3DS, FIELD_FEE_BREAKDOWN_3DS);
+            headers.put(FIELD_FEE_BREAKDOWN_RADAR, FIELD_FEE_BREAKDOWN_RADAR);
         }
 
         headers.put(FIELD_CARD_TYPE, FIELD_CARD_TYPE);

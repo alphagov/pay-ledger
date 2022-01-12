@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.transaction.model;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -131,10 +133,32 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
+    public void toMapShouldIncludeFeeBreakdownForAvailableFeeType() {
+        JSONObject feeRadar = new JSONObject()
+                .put("fee_type", "radar")
+                .put("amount", 3);
+
+        JSONObject feeBreadownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+                .put(feeRadar));
+
+        TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
+                .withPaymentProvider("stripe")
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withTransactionDetails(feeBreadownJsonObject.toString())
+                .withFee(6L).toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertThat(csvDataMap.get("Fee (fraud protection)"), is("0.03"));
+        assertThat(csvDataMap.get("Fee (transaction)"), is(nullValue()));
+        assertThat(csvDataMap.get("Fee (3DS)"), is(nullValue()));
+    }
+
+    @Test
     public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithoutOptionalColumns() {
         var keys = List.of("test-key-1", "test-key-2");
 
-        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, false);
+        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, false, false);
 
         assertThat(csvHeaders.get("Reference"), is(notNullValue()));
         assertThat(csvHeaders.get("Description"), is(notNullValue()));
@@ -171,23 +195,34 @@ public class CsvTransactionFactoryTest {
     public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithFeeColumns() {
         var keys = List.of("test-key-1", "test-key-2");
 
-        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, true, false);
+        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, true, false, false);
 
         assertThat(csvHeaders.get("Net"), is(notNullValue()));
         assertThat(csvHeaders.get("Fee"), is(notNullValue()));
     }
 
     @Test
+    public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithFeeBreakdownColumns() {
+        var keys = List.of("test-key-1", "test-key-2");
+
+        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, false, true);
+
+        assertThat(csvHeaders.get("Fee (transaction)"), is(notNullValue()));
+        assertThat(csvHeaders.get("Fee (fraud protection)"), is(notNullValue()));
+        assertThat(csvHeaders.get("Fee (3DS)"), is(notNullValue()));
+    }
+
+    @Test
     public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithMotoColumn() {
         var keys = List.of("test-key-1", "test-key-2");
 
-        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, true);
+        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, true, false);
 
         assertThat(csvHeaders.get("MOTO"), is(notNullValue()));
     }
 
     @Test
-    public void shouldSanitiseValuesCorrectlyAgainstSpreadsheetFormulaInjection(){
+    public void shouldSanitiseValuesCorrectlyAgainstSpreadsheetFormulaInjection() {
         TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
                 .withReference("=ref-1")
                 .withDescription("+desc-1")

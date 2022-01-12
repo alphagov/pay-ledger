@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.transaction.resource;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -182,6 +184,56 @@ public class TransactionResourceCsvIT {
         assertThat(paymentRecord.size(), is(25));
         assertThat(paymentRecord.get("Net"), is("11.00"));
         assertThat(paymentRecord.get("Fee"), is("1.00"));
+    }
+
+    @Test
+    public void shouldIncludeFeeBreakdownHeaders() throws IOException {
+        String gatewayAccountId = "123";
+        JSONObject feeTransaction = new JSONObject()
+                .put("fee_type", "transaction")
+                .put("amount", 10);
+        JSONObject feeRadar = new JSONObject()
+                .put("fee_type", "radar")
+                .put("amount", 3);
+        JSONObject fee3ds = new JSONObject()
+                .put("fee_type", "three_ds")
+                .put("amount", 5);
+
+        JSONObject feeBreadownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+                .put(feeTransaction)
+                .put(feeRadar)
+                .put(fee3ds));
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType("PAYMENT")
+                .withFee(100L)
+                .withNetAmount(1100)
+                .withTransactionDetails(feeBreadownJsonObject.toString())
+                .insert(rule.getJdbi());
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction/?" +
+                        "account_id=" + gatewayAccountId +
+                        "&fee_breakdown_headers=true" +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(1));
+
+        CSVRecord paymentRecord = csvRecords.get(0);
+        assertThat(paymentRecord.get("Fee (transaction)"), is("0.10"));
+        assertThat(paymentRecord.get("Fee (fraud protection)"), is("0.03"));
+        assertThat(paymentRecord.get("Fee (3DS)"), is("0.05"));
     }
 
     @Test

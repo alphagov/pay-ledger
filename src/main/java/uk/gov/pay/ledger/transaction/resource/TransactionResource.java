@@ -117,6 +117,7 @@ public class TransactionResource {
     public Response streamCsv(@Valid @BeanParam TransactionSearchParams searchParams,
                               @QueryParam("account_id") CommaDelimitedSetParameter gatewayAccountIds,
                               @QueryParam("fee_headers") boolean includeFeeHeaders,
+                              @QueryParam("fee_breakdown_headers") boolean includeFeeBreakdownHeaders,
                               @QueryParam("moto_header") boolean includeMotoHeader,
                               @Context UriInfo uriInfo) {
         StreamingOutput stream = outputStream -> {
@@ -132,7 +133,8 @@ public class TransactionResource {
             Long startingAfterId = null;
             int count = 0;
 
-            Map<String, Object> headers = csvService.csvHeaderFrom(csvSearchParams, includeFeeHeaders, includeMotoHeader);
+            Map<String, Object> headers = csvService.csvHeaderFrom(csvSearchParams, includeFeeHeaders, includeMotoHeader,
+                    includeFeeBreakdownHeaders);
             ObjectWriter writer = csvService.writerFrom(headers);
             Stopwatch stopwatch = Stopwatch.createStarted();
             outputStream.write(csvService.csvStringFrom(headers, writer).getBytes());
