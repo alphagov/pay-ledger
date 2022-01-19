@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.ExternalTransactionState;
 import uk.gov.pay.ledger.transaction.state.PaymentState;
 import uk.gov.pay.ledger.transaction.state.RefundState;
+import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -64,7 +65,7 @@ public class CsvTransactionFactory {
     private static final String FIELD_MOTO = "MOTO";
     private static final String FIELD_PAYMENT_PROVIDER = "Payment Provider";
     private static final String FIELD_3D_SECURE_REQUIRED = "3-D Secure Required";
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     @Inject
     public CsvTransactionFactory(ObjectMapper objectMapper) {
@@ -79,24 +80,30 @@ public class CsvTransactionFactory {
                     "dd MMM yyyy");
             String timeCreated = parseDateForPattern(transactionEntity.getCreatedDate(),
                     "HH:mm:ss");
-            Long totalAmount = transactionEntity.getTotalAmount() == null ? transactionEntity.getAmount() :
-                    transactionEntity.getTotalAmount();
-            Long netAmount = transactionEntity.getNetAmount() == null ? totalAmount :
-                    transactionEntity.getNetAmount();
+
+            Long totalOrAmount = Optional.ofNullable(transactionEntity.getTotalAmount()).orElse(transactionEntity.getAmount());
+
+            Long netOrTotalOrAmount = Optional.ofNullable(transactionEntity.getNetAmount()).orElse(totalOrAmount);
 
             JsonNode transactionDetails = objectMapper.readTree(
                     Optional.ofNullable(transactionEntity.getTransactionDetails()).orElse("{}"));
 
-            if (TransactionType.PAYMENT.toString().equals(transactionEntity.getTransactionType())) {
+            if (TransactionType.PAYMENT.name().equals(transactionEntity.getTransactionType())) {
+
                 result.putAll(
                         getPaymentTransactionAttributes(transactionEntity, transactionDetails)
                 );
 
                 result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getExternalId());
                 result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount()));
-                result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalAmount));
-                result.put(FIELD_NET, penceToCurrency(netAmount));
+                result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalOrAmount));
                 result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
+                if (transactionEntity.getState() == TransactionState.SUCCESS) {
+                    result.put(FIELD_NET, penceToCurrency(netOrTotalOrAmount));
+                } else {
+                    // use net_amount if available else set net to 0.00
+                    result.put(FIELD_NET, Optional.ofNullable(penceToCurrency(transactionEntity.getNetAmount())).orElse(penceToCurrency(0L)));
+                }
                 result.put(FIELD_STATE, PaymentState.getDisplayName(transactionEntity.getState()));
                 result.put(FIELD_MOTO, transactionEntity.isMoto());
                 result.put(FIELD_PAYMENT_PROVIDER, safeGetAsString(transactionDetails, "payment_provider"));
@@ -106,14 +113,14 @@ public class CsvTransactionFactory {
                     result.putAll(getFeeBreakdown(transactionEntity, feeBreakdownNode));
                 }
             }
-            if (TransactionType.REFUND.toString().equals(transactionEntity.getTransactionType())) {
+            if (TransactionType.REFUND.name().equals(transactionEntity.getTransactionType())) {
                 result.putAll(
                         getPaymentTransactionAttributes(transactionEntity, transactionDetails.get("payment_details"))
                 );
                 result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getParentExternalId());
                 result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount() * -1));
-                result.put(FIELD_NET, penceToCurrency(netAmount * -1));
-                result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalAmount * -1));
+                result.put(FIELD_NET, penceToCurrency(netOrTotalOrAmount * -1));
+                result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalOrAmount * -1));
                 result.put(FIELD_ISSUED_BY, safeGetAsString(transactionDetails, "user_email"));
                 result.put(FIELD_STATE, RefundState.getDisplayName(transactionEntity.getState()));
             }

@@ -33,22 +33,22 @@ import static uk.gov.pay.ledger.util.fixture.TransactionMetadataFixture.aTransac
 public class TransactionFixture implements DbFixture<TransactionFixture, TransactionEntity> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
-    private String serviceId = RandomStringUtils.randomAlphanumeric(26);
+    private final String serviceId = RandomStringUtils.randomAlphanumeric(26);
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
-    private String credentialExternalId = "credential-external-id";
+    private final String credentialExternalId = "credential-external-id";
     private String externalId = RandomStringUtils.randomAlphanumeric(20);
     private Long amount = RandomUtils.nextLong(1, 99999);
     private String reference = RandomStringUtils.randomAlphanumeric(10);
     private String description = RandomStringUtils.randomAlphanumeric(20);
     private TransactionState state = TransactionState.SUBMITTED;
-    private String email = "someone@example.org";
-    private String cardholderName = "j.doe@example.org";
+    private String email = "j.doe@example.org";
+    private String cardholderName = "J Doe";
     private JsonElement externalMetadata = null;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
     private String transactionDetails = "{}";
     private Integer eventCount = 1;
     private String cardBrand = "visa";
-    private String cardExpiryDate = "10/21";
+    private final String cardExpiryDate = "10/21";
     private String language = "en";
     private String lastDigitsCardNumber;
     private String firstDigitsCardNumber;

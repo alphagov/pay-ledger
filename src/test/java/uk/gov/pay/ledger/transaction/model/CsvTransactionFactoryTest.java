@@ -21,7 +21,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
-public class CsvTransactionFactoryTest {
+class CsvTransactionFactoryTest {
 
     private CsvTransactionFactory csvTransactionFactory;
     private TransactionFixture transactionFixture;
@@ -37,7 +37,6 @@ public class CsvTransactionFactoryTest {
                 .withAmount(100L)
                 .withGatewayTransactionId("gateway-transaction-id")
                 .withCreatedDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
-                .withTotalAmount(123L)
                 .withMoto(true)
                 .withCorporateCardSurcharge(23)
                 .withCardBrandLabel("Visa")
@@ -46,9 +45,12 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void toMapShouldReturnMapWithCorrectCsvDataForPaymentTransaction() {
+    void toMapShouldReturnMapWithCorrectCsvDataForPaymentTransaction() {
 
-        TransactionEntity transactionEntity = transactionFixture.toEntity();
+        TransactionEntity transactionEntity = transactionFixture
+                .withFee(5L)
+                .withTotalAmount(123L)
+                .toEntity();
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
 
@@ -59,6 +61,8 @@ public class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Provider ID"), is(transactionEntity.getGatewayTransactionId()));
         assertThat(csvDataMap.get("State"), is("Declined"));
         assertThat(csvDataMap.get("Finished"), is(true));
+        assertThat(csvDataMap.get("Fee"), is("0.05"));
+        assertThat(csvDataMap.get("Net"), is("0.00"));
         assertThat(csvDataMap.get("Error Code"), is("P0010"));
         assertThat(csvDataMap.get("Error Message"), is("Payment method rejected"));
         assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
@@ -71,26 +75,28 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void toMapShouldReturnMapWithCorrectCsvDataForRefundTransaction() {
+    void toMapShouldReturnMapWithCorrectCsvDataForRefundTransaction() {
 
-        TransactionFixture refundTransactionFixture = aTransactionFixture()
-                .withCreatedDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
-                .withTransactionType("REFUND")
-                .withAmount(99L)
-                .withTotalAmount(99L)
+        var transactionEntity = transactionFixture
+                .withTransactionType(TransactionType.REFUND.name())
                 .withState(TransactionState.ERROR)
+                .withAmount(123L)
+                .withTotalAmount(123L)
+                .withRefundedByUserEmail("refundedbyuser@example.org")
                 .withGatewayTransactionId("refund-gateway-transaction-id")
                 .withRefundedByUserEmail("refundedbyuser@example.org")
                 .withParentExternalId("parent-external-id")
+                .withCorporateCardSurcharge(0)
                 .withDefaultPaymentDetails()
-                .withDefaultTransactionDetails();
+                .withDefaultTransactionDetails()
+                .toEntity();
 
-        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(refundTransactionFixture.toEntity());
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
 
-        assertPaymentDetails(csvDataMap, refundTransactionFixture.toEntity());
-        assertThat(csvDataMap.get("Amount"), is("-0.99"));
-        assertThat(csvDataMap.get("Provider ID"), is(refundTransactionFixture.getGatewayTransactionId()));
-        assertThat(csvDataMap.get("GOV.UK Payment ID"), is(refundTransactionFixture.getParentExternalId()));
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Amount"), is("-1.23"));
+        assertThat(csvDataMap.get("Provider ID"), is(transactionFixture.getGatewayTransactionId()));
+        assertThat(csvDataMap.get("GOV.UK Payment ID"), is(transactionFixture.getParentExternalId()));
         assertThat(csvDataMap.get("State"), is("Refund error"));
         assertThat(csvDataMap.get("Finished"), is(true));
         assertThat(csvDataMap.get("Error Code"), is("P0050"));
@@ -98,13 +104,76 @@ public class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
         assertThat(csvDataMap.get("Time Created"), is("16:25:01"));
         assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.00"));
-        assertThat(csvDataMap.get("Total Amount"), is("-0.99"));
-        assertThat(csvDataMap.get("Net"), is("-0.99"));
+        assertThat(csvDataMap.get("Total Amount"), is("-1.23"));
+        assertThat(csvDataMap.get("Net"), is("-1.23"));
         assertThat(csvDataMap.get("MOTO"), is(nullValue()));
     }
 
     @Test
-    public void toMapShouldIncludeExternalMetadataFields() {
+    void toMapShouldUseZeroForNetForFailedTransactionWhenNetUnavailable() {
+        TransactionEntity transactionEntity = transactionFixture.withState(TransactionState.FAILED_CANCELLED).toEntity();
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Net"), is("0.00"));
+    }
+
+    @Test
+    void toMapShouldUseNetAmountForNetForFailedTransactionWhenAvailable() {
+
+        TransactionEntity transactionEntity = transactionFixture.withNetAmount(-5L).toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Net"), is("-0.05"));
+    }
+
+    @Test
+    void toMapShouldUseNetAmountForNetForSuccessfulTransactionWhenAvailable() {
+        TransactionEntity transactionEntity = transactionFixture
+                .withState(TransactionState.SUCCESS)
+                .withAmount(950L)
+                .withTotalAmount(1000L)
+                .withNetAmount(1150L)
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Net"), is("11.50"));
+    }
+
+    @Test
+    void toMapShouldUseTotalAmountForNetForSuccessfulTransactionWhenNetUnavailable() {
+
+        TransactionEntity transactionEntity = transactionFixture
+                .withState(TransactionState.SUCCESS)
+                .withAmount(950L)
+                .withTotalAmount(1000L)
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Net"), is("10.00"));
+    }
+
+    @Test
+    void toMapShouldUseAmountForNetForSuccessfulTransactionWhenNetAndTotalUnavailable() {
+        TransactionEntity transactionEntity = transactionFixture
+                .withState(TransactionState.SUCCESS)
+                .withAmount(950L)
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Net"), is("9.50"));
+    }
+
+    @Test
+    void toMapShouldIncludeExternalMetadataFields() {
         TransactionEntity transactionEntity = transactionFixture.withTransactionDetails(
                 new GsonBuilder().create().toJson(ImmutableMap.builder()
                         .put("external_metadata",
@@ -120,7 +189,7 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void toMapShouldIncludeFeeAndNetAmountForStripePayments() {
+    void toMapShouldIncludeFeeAndNetAmountForStripePayments() {
         TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
                 .withPaymentProvider("stripe")
                 .withTransactionType(TransactionType.PAYMENT.name())
@@ -133,7 +202,7 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void toMapShouldIncludeFeeBreakdownForAvailableFeeType() {
+    void toMapShouldIncludeFeeBreakdownForAvailableFeeType() {
         JSONObject feeRadar = new JSONObject()
                 .put("fee_type", "radar")
                 .put("amount", 3);
@@ -155,7 +224,7 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithoutOptionalColumns() {
+    void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithoutOptionalColumns() {
         var keys = List.of("test-key-1", "test-key-2");
 
         Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, false, false);
@@ -192,7 +261,7 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithFeeColumns() {
+    void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithFeeColumns() {
         var keys = List.of("test-key-1", "test-key-2");
 
         Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, true, false, false);
@@ -202,7 +271,7 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithFeeBreakdownColumns() {
+    void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithFeeBreakdownColumns() {
         var keys = List.of("test-key-1", "test-key-2");
 
         Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, false, true);
@@ -213,7 +282,7 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithMotoColumn() {
+    void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithMotoColumn() {
         var keys = List.of("test-key-1", "test-key-2");
 
         Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, true, false);
@@ -222,7 +291,7 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void shouldSanitiseValuesCorrectlyAgainstSpreadsheetFormulaInjection() {
+    void shouldSanitiseValuesCorrectlyAgainstSpreadsheetFormulaInjection() {
         TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
                 .withReference("=ref-1")
                 .withDescription("+desc-1")
@@ -240,21 +309,12 @@ public class CsvTransactionFactoryTest {
     }
 
     @Test
-    public void toMapShouldIncludeShouldInclude3DSecureRequired() {
-        transactionFixture = aTransactionFixture()
-                .withState(TransactionState.FAILED_REJECTED)
-                .withTransactionType(TransactionType.PAYMENT.name())
-                .withAmount(100L)
-                .withGatewayTransactionId("gateway-transaction-id")
-                .withCreatedDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
+    void toMapShouldIncludeShouldInclude3DSecureRequired() {
+        var transactionEntity = transactionFixture
                 .withTotalAmount(123L)
-                .withMoto(true)
-                .withCorporateCardSurcharge(23)
-                .withCardBrandLabel("Visa")
                 .withVersion3ds("2.0.1")
-                .withDefaultCardDetails()
-                .withDefaultTransactionDetails();
-        TransactionEntity transactionEntity = transactionFixture.toEntity();
+                .withDefaultTransactionDetails()
+                .toEntity();
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
 

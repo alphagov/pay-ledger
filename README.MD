@@ -7,32 +7,32 @@ This is a bare bones Dropwizard App for the Pay Ledger microservice.
 There are several environment variables used for the app configuration. They're grouped in categories: database, SQS
 and background processing.
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `PORT` | - | Port on which application listens |
+| Variable | Default | Purpose                           |
+|----------|---------|-----------------------------------|
+| `PORT`   | -       | Port on which application listens |
 
 ### Database configuration
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `DB_USER` | - | Name of the user used to connect to the database |
-| `DB_PASSWORD` | - | Password of the user used to connect to the database |
-| `DB_HOST` | - | Database host name |
-| `DB_NAME` | `ledger` | Name of the database |
-| `DB_SSL_OPTION`| - | Indicates whether the connection to the database should be secured with SSL (eg. `ssl=true`) |
+| Variable        | Default  | Purpose                                                                                      |
+|-----------------|----------|----------------------------------------------------------------------------------------------|
+| `DB_USER`       | -        | Name of the user used to connect to the database                                             |
+| `DB_PASSWORD`   | -        | Password of the user used to connect to the database                                         |
+| `DB_HOST`       | -        | Database host name                                                                           |
+| `DB_NAME`       | `ledger` | Name of the database                                                                         |
+| `DB_SSL_OPTION` | -        | Indicates whether the connection to the database should be secured with SSL (eg. `ssl=true`) |
 
 ### SQS configuration
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `AWS_SQS_REGION` | - | SQS region |
-| `AWS_SQS_PAYMENT_EVENT_QUEUE_URL` | - | SQS payment event queue URL |
-| `AWS_SQS_MESSAGE_MAXIMUM_WAIT_TIME_IN_SECONDS` | `20` | Maximum wait time for long poll message requests to queue |
-| `AWS_SQS_MESSAGE_MAXIMUM_BATCH_SIZE` | `10` | Maximum number of messages that should be received in an individual message batch |
-| `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` | `false` | Set to true to use a non standard (eg: `http://my-own-sqs-endpoint`) SQS endpoint |
-| `AWS_SQS_ENDPOINT` | - | URL that is the entry point for SQS. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
-| `AWS_SECRET_KEY` | - | Secret key. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true`
-| `AWS_ACCESS_KEY` | - | Access key. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
+| Variable                                       | Default | Purpose                                                                                                   |
+|------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------|
+| `AWS_SQS_REGION`                               | -       | SQS region                                                                                                |
+| `AWS_SQS_PAYMENT_EVENT_QUEUE_URL`              | -       | SQS payment event queue URL                                                                               |
+| `AWS_SQS_MESSAGE_MAXIMUM_WAIT_TIME_IN_SECONDS` | `20`    | Maximum wait time for long poll message requests to queue                                                 |
+| `AWS_SQS_MESSAGE_MAXIMUM_BATCH_SIZE`           | `10`    | Maximum number of messages that should be received in an individual message batch                         |
+| `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT`        | `false` | Set to true to use a non standard (eg: `http://my-own-sqs-endpoint`) SQS endpoint                         |
+| `AWS_SQS_ENDPOINT`                             | -       | URL that is the entry point for SQS. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
+| `AWS_SECRET_KEY`                               | -       | Secret key. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true`                          |
+| `AWS_ACCESS_KEY`                               | -       | Access key. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true`                          |
 
 ### Background processing configuration
 
@@ -51,11 +51,11 @@ More information of how the visibility timeout works can be found [here](https:/
 
 The following variables control the background process:
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `QUEUE_MESSAGE_RECEIVER_THREAD_DELAY_IN_MILLISECONDS` | `1` | Duration in seconds that the queue message receiver should wait between running threads|
-| `QUEUE_MESSAGE_RECEIVER_NUMBER_OF_THREADS` | `1` | The number of polling threads started by the queue message scheduler |
-| `QUEUE_MESSAGE_RETRY_DELAY_IN_SECONDS` | `900` | The duration in seconds that a message should be deferred before it should be retried |
+| Variable                                              | Default | Purpose                                                                                 |
+|-------------------------------------------------------|---------|-----------------------------------------------------------------------------------------|
+| `QUEUE_MESSAGE_RECEIVER_THREAD_DELAY_IN_MILLISECONDS` | `1`     | Duration in seconds that the queue message receiver should wait between running threads |
+| `QUEUE_MESSAGE_RECEIVER_NUMBER_OF_THREADS`            | `1`     | The number of polling threads started by the queue message scheduler                    |
+| `QUEUE_MESSAGE_RETRY_DELAY_IN_SECONDS`                | `900`   | The duration in seconds that a message should be deferred before it should be retried   |
 
 ## Licence
 

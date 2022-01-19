@@ -466,10 +466,10 @@ public class TransactionResourceCsvIT {
     private void assertCommonPaymentFields(CSVRecord csvRecord, TransactionFixture transactionFixture) {
         assertThat(csvRecord.get("Reference"), is(transactionFixture.getReference()));
         assertThat(csvRecord.get("Description"), is(transactionFixture.getDescription()));
-        assertThat(csvRecord.get("Email"), is("someone@example.org"));
+        assertThat(csvRecord.get("Email"), is(transactionFixture.getEmail()));
         assertThat(csvRecord.get("Card Brand"), is(transactionFixture.getCardBrandLabel()));
         assertThat(csvRecord.get("Cardholder Name"), is(transactionFixture.getCardholderName()));
-        assertThat(csvRecord.get("Card Expiry Date"), is("10/21"));
+        assertThat(csvRecord.get("Card Expiry Date"), is(transactionFixture.getCardExpiryDate()));
         assertThat(csvRecord.get("Card Number"), is("1234"));
         assertThat(csvRecord.get("Card Type"), is("credit"));
     }
