@@ -27,6 +27,13 @@ public class ConsumerContractTestSuite {
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(UserEmailCollectedEventQueueContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(Gateway3dsExemptionResultObtainedEventQueueContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(StatusCorrectedToCapturedToMatchGatewayStatusEventQueueContractTest.class));
+        consumerToJUnitTest.put("connector", new JUnit4TestAdapter(FeeIncurredEventQueueContractTest.class));
+        consumerToJUnitTest.put("connector", new JUnit4TestAdapter(Gateway3dsInfoObtainedEventQueueContractTest.class));
+        consumerToJUnitTest.put("connector", new JUnit4TestAdapter(GatewayRequires3dsAuthorisationEventQueueContractTest.class));
+        consumerToJUnitTest.put("connector", new JUnit4TestAdapter(PayoutFailedEventQueueContractTest.class));
+        consumerToJUnitTest.put("connector", new JUnit4TestAdapter(PayoutPaidEventQueueContractTest.class));
+        consumerToJUnitTest.put("connector", new JUnit4TestAdapter(PayoutUpdatedEventQueueContractTest.class));
+
         return CreateTestSuite.create(consumerToJUnitTest.build());
     }
 
