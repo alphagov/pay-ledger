@@ -3,9 +3,11 @@ package uk.gov.pay.ledger.util.fixture;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.SendMessageResult;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import org.apache.commons.lang3.NotImplementedException;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 
@@ -15,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 public class QueueEventFixtureUtil {
 
     public static String insert(AmazonSQS sqsClient, String eventType, ZonedDateTime eventDate, String serviceId, Boolean live, String resourceExternalId,
-                                           String parentResourceExternalId, ResourceType resourceType, String eventData) {
+                                String parentResourceExternalId, ResourceType resourceType, String eventData) {
         String messageBody = String.format("{" +
                         "\"timestamp\": \"%s\"," +
                         "\"resource_external_id\": \"%s\"," +
@@ -41,7 +43,7 @@ public class QueueEventFixtureUtil {
     }
 
     public static PactDslJsonBody getAsPact(String serviceId, Boolean live, String eventType, ZonedDateTime eventDate, String resourceExternalId,
-                                     String parentResourceExternalId, ResourceType resourceType, String eventData) {
+                                            String parentResourceExternalId, ResourceType resourceType, String eventData) {
         PactDslJsonBody eventDetails = new PactDslJsonBody();
 
         DateTimeFormatter formatToMicroseconds = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSSSSX");
@@ -57,7 +59,7 @@ public class QueueEventFixtureUtil {
         if (serviceId != null) {
             eventDetails.stringType("service_id", serviceId);
         }
-        if (live != null ) {
+        if (live != null) {
             eventDetails.booleanType("live", live);
         }
 
@@ -73,9 +75,8 @@ public class QueueEventFixtureUtil {
         eventData.entrySet()
                 .forEach(e -> {
                     try {
-                        if(e.getValue().isJsonPrimitive()) {
+                        if (e.getValue().isJsonPrimitive()) {
                             JsonPrimitive value = (JsonPrimitive) e.getValue();
-
                             if (value.isNumber()) {
                                 dslJsonBody.integerType(e.getKey(), value.getAsInt());
                             } else if (value.isBoolean()) {
@@ -83,6 +84,27 @@ public class QueueEventFixtureUtil {
                             } else {
                                 dslJsonBody.stringType(e.getKey(), value.getAsString());
                             }
+                        } else if (e.getValue().isJsonArray()) {
+                            // We're currently only adding a single example from an array to the pact, and then in the
+                            // matchers check that the array has at least one entry matching the example. For stricter
+                            // matching, this would need to be modified.
+                            JsonArray asJsonArray = e.getValue().getAsJsonArray();
+                            PactDslJsonBody arrayEntryExample = dslJsonBody.minArrayLike(e.getKey(), 1);
+                            if (asJsonArray.get(0).isJsonObject()) {
+                                asJsonArray.get(0).getAsJsonObject().entrySet().forEach(a -> {
+                                    JsonPrimitive value = (JsonPrimitive) a.getValue();
+                                    if (value.isNumber()) {
+                                        arrayEntryExample.integerType(a.getKey(), value.getAsInt());
+                                    } else if (value.isBoolean()) {
+                                        arrayEntryExample.booleanType(a.getKey(), value.getAsBoolean());
+                                    } else {
+                                        arrayEntryExample.stringType(a.getKey(), value.getAsString());
+                                    }
+                                });
+                            } else {
+                                throw new NotImplementedException();
+                            }
+                            arrayEntryExample.closeObject().closeArray();
                         } else {
                             dslJsonBody.object(e.getKey(), getNestedPact(e.getValue().getAsJsonObject()));
                         }
@@ -90,7 +112,6 @@ public class QueueEventFixtureUtil {
                         dslJsonBody.stringType(e.getKey(), e.getValue().getAsString());
                     }
                 });
-
         return dslJsonBody;
     }
 }
