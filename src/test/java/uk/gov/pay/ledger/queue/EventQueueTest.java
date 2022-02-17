@@ -11,7 +11,9 @@ import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
 import uk.gov.pay.ledger.event.model.ResourceType;
-import uk.gov.pay.ledger.queue.sqs.SqsQueueService;
+import uk.gov.service.payments.commons.queue.exception.QueueException;
+import uk.gov.service.payments.commons.queue.model.QueueMessage;
+import uk.gov.service.payments.commons.queue.sqs.SqsQueueService;
 
 import java.time.ZonedDateTime;
 import java.util.List;
