@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.queue;
 
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.service.payments.commons.queue.model.QueueMessage;
 
 public class EventMessage {
     private EventMessageDto eventDto;

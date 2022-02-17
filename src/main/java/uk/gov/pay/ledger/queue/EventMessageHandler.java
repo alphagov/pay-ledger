@@ -12,6 +12,7 @@ import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.eventpublisher.EventPublisher;
 import uk.gov.pay.ledger.eventpublisher.TopicName;
+import uk.gov.service.payments.commons.queue.exception.QueueException;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;

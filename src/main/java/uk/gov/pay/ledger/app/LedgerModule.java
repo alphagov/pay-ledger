@@ -22,6 +22,7 @@ import uk.gov.pay.ledger.report.dao.ReportDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transactionmetadata.dao.TransactionMetadataDao;
 import uk.gov.pay.ledger.transactionsummary.dao.TransactionSummaryDao;
+import uk.gov.service.payments.commons.queue.sqs.SqsQueueService;
 
 public class LedgerModule extends AbstractModule {
     private final LedgerConfig configuration;
@@ -139,5 +140,13 @@ public class LedgerModule extends AbstractModule {
                 .builder()
                 .region(Region.of(ledgerConfig.getSnsConfig().getRegion()))
                 .build();
+    }
+
+    @Provides
+    public SqsQueueService provideSqsQueueService(AmazonSQS amazonSQS, LedgerConfig ledgerConfig) {
+        return new SqsQueueService(
+                amazonSQS,
+                ledgerConfig.getSqsConfig().getMessageMaximumWaitTimeInSeconds(),
+                ledgerConfig.getSqsConfig().getMessageMaximumBatchSize());
     }
 }
