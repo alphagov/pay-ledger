@@ -67,10 +67,14 @@ class TransactionMetadataServiceTest {
         verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta1", "data1");
         verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta2", "2");
         verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta3", "true");
+
+        verify(mockGatewayAccountMetadataService).upsertMetadataKeyForGatewayAccount(transaction.getGatewayAccountId(), "meta1");
+        verify(mockGatewayAccountMetadataService).upsertMetadataKeyForGatewayAccount(transaction.getGatewayAccountId(), "meta2");
+        verify(mockGatewayAccountMetadataService).upsertMetadataKeyForGatewayAccount(transaction.getGatewayAccountId(), "meta3");
     }
 
     @Test
-    void shouldNotTryToInsertMetadata() {
+    void shouldNotTryToInsertMetadataIfIfNoExternalMetadataOnEvent() {
         String externalId = "transaction-id";
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.STARTED).toEntity();
         service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao, mockGatewayAccountMetadataService);
@@ -87,6 +91,7 @@ class TransactionMetadataServiceTest {
 
         verify(mockMetadataKeyDao, never()).insertIfNotExist(anyString());
         verify(mockTransactionMetadataDao, never()).upsert(anyLong(), anyString(), anyString());
+        verify(mockGatewayAccountMetadataService, never()).upsertMetadataKeyForGatewayAccount(anyString(), anyString());
     }
 
     @Test
@@ -94,7 +99,7 @@ class TransactionMetadataServiceTest {
         String externalId = "transaction-id";
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.STARTED).toEntity();
         service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao, mockGatewayAccountMetadataService);
-        
+
         Event event = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
                 .withEventType("ADMIN_TRIGGERED_REPROJECTION")
@@ -118,6 +123,10 @@ class TransactionMetadataServiceTest {
         verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta1", "data1");
         verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta2", "2");
         verify(mockTransactionMetadataDao).upsert(transaction.getId(), "meta3", "true");
+
+        verify(mockGatewayAccountMetadataService).upsertMetadataKeyForGatewayAccount(transaction.getGatewayAccountId(), "meta1");
+        verify(mockGatewayAccountMetadataService).upsertMetadataKeyForGatewayAccount(transaction.getGatewayAccountId(), "meta2");
+        verify(mockGatewayAccountMetadataService).upsertMetadataKeyForGatewayAccount(transaction.getGatewayAccountId(), "meta3");
     }
 
     @Test
@@ -136,5 +145,6 @@ class TransactionMetadataServiceTest {
 
         service.reprojectFromEventDigest(paymentEventDigest);
         verify(mockTransactionMetadataDao, never()).upsert(anyLong(), anyString(), anyString());
+        verify(mockGatewayAccountMetadataService, never()).upsertMetadataKeyForGatewayAccount(anyString(), anyString());
     }
 }
