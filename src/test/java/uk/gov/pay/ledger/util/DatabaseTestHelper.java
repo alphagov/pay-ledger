@@ -84,6 +84,16 @@ public class DatabaseTestHelper {
                         .list());
     }
 
+    public List<Map<String, Object>> getGatewayAccountMetadata(String gatewayAccountId, String key) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT * FROM gateway_account_metadata where gateway_account_id = :gatewayAccountId" +
+                        " and metadata_key_id = (select id from metadata_key where key = :key)")
+                        .bind("gatewayAccountId", gatewayAccountId)
+                        .bind("key", key)
+                        .mapToMap()
+                        .list());
+    }
+
     public List<Map<String, Object>> getTransactionSummary(String gatewayAccountId, TransactionType type,
                                                            TransactionState state, LocalDate transactionDate,
                                                            boolean live, boolean moto) {
