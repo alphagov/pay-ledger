@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.pay.ledger.gatewayaccountmetadata.service.GatewayAccountMetadataService;
 import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
@@ -35,6 +36,8 @@ class TransactionMetadataServiceTest {
     private TransactionMetadataDao mockTransactionMetadataDao;
     @Mock
     private MetadataKeyDao mockMetadataKeyDao;
+    @Mock
+    private GatewayAccountMetadataService mockGatewayAccountMetadataService;
 
     private TransactionMetadataService service;
 
@@ -42,7 +45,7 @@ class TransactionMetadataServiceTest {
     void shouldInsertMetadata() {
         String externalId = "transaction-id";
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.CREATED).toEntity();
-        service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao);
+        service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao, mockGatewayAccountMetadataService);
 
         when(mockTransactionDao.findTransactionByExternalId(externalId)).thenReturn(Optional.of(transaction));
 
@@ -70,7 +73,7 @@ class TransactionMetadataServiceTest {
     void shouldNotTryToInsertMetadata() {
         String externalId = "transaction-id";
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.STARTED).toEntity();
-        service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao);
+        service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao, mockGatewayAccountMetadataService);
 
         Event paymentCreatedEvent = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
@@ -90,7 +93,7 @@ class TransactionMetadataServiceTest {
     void shouldReprojectFromEventDigest() {
         String externalId = "transaction-id";
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.STARTED).toEntity();
-        service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao);
+        service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao, mockGatewayAccountMetadataService);
         
         Event event = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
@@ -121,7 +124,7 @@ class TransactionMetadataServiceTest {
     void shouldDoNothingIfNoExternalMetadataOnEventDigest() {
         String externalId = "transaction-id";
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.STARTED).toEntity();
-        service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao);
+        service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao, mockGatewayAccountMetadataService);
 
         Event event = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
