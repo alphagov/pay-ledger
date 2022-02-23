@@ -14,5 +14,7 @@ public enum ResourceType {
     @JsonProperty(value = "card_payment")
     CARD_PAYMENT,
     @JsonProperty(value = "payout")
-    PAYOUT
+    PAYOUT,
+    @JsonProperty(value = "dispute")
+    DISPUTE
 }
