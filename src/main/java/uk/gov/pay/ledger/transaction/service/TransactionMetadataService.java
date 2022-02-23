@@ -89,17 +89,4 @@ public class TransactionMetadataService {
                             });
                 });
     }
-
-    List<String> findMetadataKeysForTransactions(TransactionSearchParams searchParams) {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-
-        List<String> metadataKeysForTransactions = transactionMetadataDao.findMetadataKeysForTransactions(searchParams);
-
-        long elapsed = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-        LOGGER.info("CSV metadata headers calculated.",
-                kv("time_taken_in_milli_seconds", elapsed),
-                kv("number_of_metadata_keys", metadataKeysForTransactions.size()));
-
-        return metadataKeysForTransactions;
-    }
 }

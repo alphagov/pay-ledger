@@ -30,6 +30,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.util.fixture.GatewayAccountMetadataFixture.aGatewayAccountMetadataFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class TransactionResourceCsvIT {
@@ -91,7 +92,11 @@ public class TransactionResourceCsvIT {
                 .insert(rule.getJdbi());
 
         metadataKeyDao.insertIfNotExist("test-key-1");
-        metadataKeyDao.insertIfNotExist("test-key-2");
+
+        aGatewayAccountMetadataFixture()
+                .withGatewayAccountId(targetGatewayAccountId)
+                .withMetadataKey("test-key-1")
+                .insert(rule.getJdbi());
 
         transactionMetadataDao.upsert(transactionFixture.getId(), "test-key-1", "value1");
 
@@ -337,6 +342,11 @@ public class TransactionResourceCsvIT {
         metadataKeyDao.insertIfNotExist(metadataKey);
         transactionMetadataDao.upsert(transactionFixture.getId(), metadataKey, "value1");
 
+        aGatewayAccountMetadataFixture()
+                .withGatewayAccountId(targetGatewayAccountId)
+                .withMetadataKey("a-metadata-key")
+                .insert(rule.getJdbi());
+
         InputStream csvResponseStream = given().port(port)
                 .accept("text/csv")
                 .get("/v1/transaction?" +
@@ -444,6 +454,15 @@ public class TransactionResourceCsvIT {
                 .withGatewayAccountId(targetGatewayAccountId)
                 .withDefaultTransactionDetails()
                 .insertTransactionAndTransactionMetadata(rule.getJdbi());
+
+        aGatewayAccountMetadataFixture()
+                .withGatewayAccountId(targetGatewayAccountId)
+                .withMetadataKey("a-metadata-key")
+                .insert(rule.getJdbi());
+        aGatewayAccountMetadataFixture()
+                .withGatewayAccountId(targetGatewayAccountId)
+                .withMetadataKey("metadata-key-2")
+                .insert(rule.getJdbi());
 
         InputStream csvResponseStream = given().port(port)
                 .accept("text/csv")

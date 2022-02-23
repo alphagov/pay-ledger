@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.inject.Inject;
+import uk.gov.pay.ledger.gatewayaccountmetadata.service.GatewayAccountMetadataService;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.CsvTransactionFactory;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
@@ -18,13 +19,14 @@ import java.util.stream.Collectors;
 public class CsvService {
 
     private final CsvTransactionFactory csvTransactionFactory;
-    private final TransactionMetadataService transactionMetadataService;
+    private final GatewayAccountMetadataService gatewayAccountMetadataService;
+
 
     @Inject
     public CsvService(CsvTransactionFactory csvTransactionFactory,
-                      TransactionMetadataService transactionMetadataService) {
+                      GatewayAccountMetadataService gatewayAccountMetadataService) {
         this.csvTransactionFactory = csvTransactionFactory;
-        this.transactionMetadataService = transactionMetadataService;
+        this.gatewayAccountMetadataService = gatewayAccountMetadataService;
     }
 
     public ObjectWriter writerFrom(Map<String, Object> headers) {
@@ -43,7 +45,7 @@ public class CsvService {
                                              boolean includeFeeHeaders,
                                              boolean includeMotoHeader,
                                              boolean includeFeeBreakdownHeaders) {
-        List<String> metadataKeys = transactionMetadataService.findMetadataKeysForTransactions(searchParams);
+        List<String> metadataKeys = gatewayAccountMetadataService.getKeysForGatewayAccounts(searchParams.getAccountIds());
         return csvTransactionFactory.getCsvHeadersWithMedataKeys(metadataKeys, includeFeeHeaders, includeMotoHeader, includeFeeBreakdownHeaders);
     }
 

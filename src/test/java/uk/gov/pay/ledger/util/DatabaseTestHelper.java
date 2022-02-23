@@ -37,7 +37,8 @@ public class DatabaseTestHelper {
     public void truncateAllData() {
         jdbi.withHandle(h -> h.createScript(
                 "TRUNCATE TABLE event CASCADE; " +
-                        "TRUNCATE TABLE transaction CASCADE"
+                        "TRUNCATE TABLE transaction CASCADE;" +
+                        "TRUNCATE TABLE gateway_account_metadata CASCADE;"
         ).execute());
     }
 
@@ -77,7 +78,7 @@ public class DatabaseTestHelper {
     public List<Map<String, Object>> getTransactionMetadata(Long transactionId, String key) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("SELECT * FROM transaction_metadata where transaction_id = :transactionId" +
-                        " and metadata_key_id = (select id from metadata_key where key = :key)")
+                                " and metadata_key_id = (select id from metadata_key where key = :key)")
                         .bind("transactionId", transactionId)
                         .bind("key", key)
                         .mapToMap()
@@ -87,7 +88,7 @@ public class DatabaseTestHelper {
     public List<Map<String, Object>> getGatewayAccountMetadata(String gatewayAccountId, String key) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("SELECT * FROM gateway_account_metadata where gateway_account_id = :gatewayAccountId" +
-                        " and metadata_key_id = (select id from metadata_key where key = :key)")
+                                " and metadata_key_id = (select id from metadata_key where key = :key)")
                         .bind("gatewayAccountId", gatewayAccountId)
                         .bind("key", key)
                         .mapToMap()
@@ -99,12 +100,12 @@ public class DatabaseTestHelper {
                                                            boolean live, boolean moto) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("SELECT * FROM transaction_summary where gateway_account_id = :gatewayAccountId" +
-                        " and transaction_date = :transactionDate" +
-                        " and type = :type" +
-                        " and state = :state" +
-                        " and live = :live" +
-                        " and moto = :moto"
-                )
+                                " and transaction_date = :transactionDate" +
+                                " and type = :type" +
+                                " and state = :state" +
+                                " and live = :live" +
+                                " and moto = :moto"
+                        )
                         .bind("gatewayAccountId", gatewayAccountId)
                         .bind("transactionDate", transactionDate)
                         .bind("state", state.name())
