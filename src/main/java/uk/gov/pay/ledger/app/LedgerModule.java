@@ -15,6 +15,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sns.SnsClient;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
+import uk.gov.pay.ledger.gatewayaccountmetadata.dao.GatewayAccountMetadataDao;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
 import uk.gov.pay.ledger.payout.dao.PayoutDao;
 import uk.gov.pay.ledger.report.dao.PerformanceReportDao;
@@ -94,6 +95,12 @@ public class LedgerModule extends AbstractModule {
     @Singleton
     public MetadataKeyDao provideMetadataKeyDao() {
         return jdbi.onDemand(MetadataKeyDao.class);
+    }
+
+    @Provides
+    @Singleton
+    public GatewayAccountMetadataDao provideGatewayAccountMetadataDao() {
+        return new GatewayAccountMetadataDao(jdbi);
     }
 
     @Provides

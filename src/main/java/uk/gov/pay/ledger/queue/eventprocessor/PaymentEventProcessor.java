@@ -19,11 +19,11 @@ import static uk.gov.pay.ledger.transaction.state.TransactionState.fromEventType
 
 public class PaymentEventProcessor extends EventProcessor {
 
-    private EventService eventService;
-    private TransactionService transactionService;
-    private TransactionMetadataService transactionMetadataService;
-    private RefundEventProcessor refundEventProcessor;
-    private TransactionSummaryService transactionSummaryService;
+    private final EventService eventService;
+    private final TransactionService transactionService;
+    private final TransactionMetadataService transactionMetadataService;
+    private final RefundEventProcessor refundEventProcessor;
+    private final TransactionSummaryService transactionSummaryService;
 
     public PaymentEventProcessor(EventService eventService,
                                  TransactionService transactionService,
@@ -36,6 +36,7 @@ public class PaymentEventProcessor extends EventProcessor {
         this.refundEventProcessor = refundEventProcessor;
         this.transactionSummaryService = transactionSummaryService;
     }
+
 
     @Override
     public void process(Event event, boolean isANewEvent) {

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
+import uk.gov.pay.ledger.gatewayaccountmetadata.service.GatewayAccountMetadataService;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
@@ -28,14 +29,19 @@ public class TransactionMetadataService {
     private final TransactionDao transactionDao;
     private final MetadataKeyDao metadataKeyDao;
     private final TransactionMetadataDao transactionMetadataDao;
+    private final GatewayAccountMetadataService gatewayAccountMetadataService;
+
 
     @Inject
     public TransactionMetadataService(MetadataKeyDao metadataKeyDao,
                                       TransactionMetadataDao transactionMetadataDao,
-                                      TransactionDao transactionDao) {
+                                      TransactionDao transactionDao,
+                                      GatewayAccountMetadataService gatewayAccountMetadataService) {
         this.metadataKeyDao = metadataKeyDao;
         this.transactionMetadataDao = transactionMetadataDao;
         this.transactionDao = transactionDao;
+        this.gatewayAccountMetadataService = gatewayAccountMetadataService;
+
     }
 
     public void upsertMetadataFor(Event event) {
@@ -60,6 +66,7 @@ public class TransactionMetadataService {
                             String value = metadata.getValue().asText();
                             transactionMetadataDao
                                     .upsert(transactionEntity.getId(), metadata.getKey(), value);
+                            gatewayAccountMetadataService.upsertMetadataKeyForGatewayAccount(transactionEntity.getGatewayAccountId(), metadata.getKey());
                         });
                     });
         }
@@ -77,6 +84,7 @@ public class TransactionMetadataService {
                                 metadata.forEach((key, value) -> {
                                     metadataKeyDao.insertIfNotExist(key);
                                     transactionMetadataDao.upsert(transactionEntity.getId(), key, value.toString());
+                                    gatewayAccountMetadataService.upsertMetadataKeyForGatewayAccount(transactionEntity.getGatewayAccountId(), key);
                                 });
                             });
                 });
