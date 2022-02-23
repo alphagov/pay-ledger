@@ -7,6 +7,7 @@ import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.payout.service.PayoutService;
+import uk.gov.pay.ledger.queue.eventprocessor.DisputeEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.EventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PaymentEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PayoutEventProcessor;
@@ -22,6 +23,7 @@ public class EventDigestHandler {
     private PaymentEventProcessor paymentEventProcessor;
     private PayoutEventProcessor payoutEventProcessor;
     private RefundEventProcessor refundEventProcessor;
+    private DisputeEventProcessor disputeEventProcessor;
 
     @Inject
     public EventDigestHandler(EventService eventService,
@@ -32,6 +34,7 @@ public class EventDigestHandler {
         refundEventProcessor = new RefundEventProcessor(eventService, transactionService, transactionEntityFactory);
         paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, refundEventProcessor, transactionSummaryService);
         payoutEventProcessor = new PayoutEventProcessor(eventService, payoutService);
+        disputeEventProcessor = new DisputeEventProcessor();
     }
 
     public EventProcessor processorFor(Event event) {
@@ -42,6 +45,8 @@ public class EventDigestHandler {
                 return refundEventProcessor;
             case PAYOUT:
                 return payoutEventProcessor;
+            case DISPUTE:
+                return disputeEventProcessor;
             default:
                 String message = String.format("Event digest processing for resource type [%s] is not supported. Event type [%s] and resource external id [%s]",
                         event.getResourceType(),
