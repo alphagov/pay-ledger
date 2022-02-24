@@ -1,32 +1,9 @@
 package uk.gov.pay.ledger.transactionmetadata.dao;
 
 import com.google.inject.Inject;
-import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.core.statement.Query;
-import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
-
-import java.util.List;
-import java.util.function.BiConsumer;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionMetadataDao {
-
-    private static final String FIND_METADATA_KEYS = "SELECT distinct mk.key FROM transaction t, transaction_metadata tm, metadata_key mk " +
-            " WHERE tm.transaction_id = t.id" +
-            "  AND tm.metadata_key_id = mk.id" +
-            "  AND transaction_details??'external_metadata'" +
-            " :searchExtraFields ";
-
-    private static final String FIND_METADATA_KEYS_FOR_TX_SEARCH_INCLUDING_METADATA_VALUE = "SELECT distinct mk.key from metadata_key mk, transaction_metadata tm2 " +
-            " WHERE tm2.metadata_key_id = mk.id" +
-            "  AND tm2.transaction_id in " +
-            "        (SELECT tm.transaction_id " +
-            "           FROM transaction t, transaction_metadata tm " +
-            "          WHERE tm.transaction_id = t.id " +
-            "          AND lower(tm.value) = lower(:metadata_value)" +
-            "          :searchExtraFields)";
 
     private static final String UPSERT_STRING = "INSERT INTO transaction_metadata(transaction_id, metadata_key_id, value) " +
             "VALUES(:transactionId, (select id from metadata_key where key = :key ), :value) " +
@@ -50,38 +27,5 @@ public class TransactionMetadataDao {
                         .bind("value", value)
                         .execute()
         );
-    }
-
-    public List<String> findMetadataKeysForTransactions(TransactionSearchParams searchParams) {
-        return jdbi.withHandle(handle -> {
-
-            String searchClauseTemplate = String.join(" AND ", searchParams.getFilterTemplates());
-
-            if (StringUtils.isNotBlank(searchClauseTemplate)) {
-                searchClauseTemplate = "AND " + searchClauseTemplate;
-            }
-
-            String queryString = isNotBlank(searchParams.getMetadataValue()) ?
-                    FIND_METADATA_KEYS_FOR_TX_SEARCH_INCLUDING_METADATA_VALUE : FIND_METADATA_KEYS;
-
-            queryString = queryString.replace(":searchExtraFields", searchClauseTemplate);
-
-            Query query = handle.createQuery(queryString);
-            searchParams.getQueryMap().forEach(bindSearchParameter(query));
-
-            return query
-                    .mapTo(String.class)
-                    .list();
-        });
-    }
-
-    private BiConsumer<String, Object> bindSearchParameter(Query query) {
-        return (searchKey, searchValue) -> {
-            if (searchValue instanceof List<?>) {
-                query.bindList(searchKey, ((List<?>) searchValue));
-            } else {
-                query.bind(searchKey, searchValue);
-            }
-        };
     }
 }
