@@ -29,7 +29,7 @@ public class SqsTestDocker {
         if (sqsContainer == null) {
             logger.info("Creating SQS Container");
 
-            sqsContainer = new GenericContainer("roribio16/alpine-sqs")
+            sqsContainer = new GenericContainer("mvisonneau/alpine-sqs:1.2.0")
                     .withExposedPorts(9324)
                     .waitingFor(Wait.forHttp("/?Action=GetQueueUrl&QueueName=default"));
 
