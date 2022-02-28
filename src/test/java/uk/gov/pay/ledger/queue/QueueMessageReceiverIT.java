@@ -1,5 +1,7 @@
 package uk.gov.pay.ledger.queue;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hamcrest.Matchers;
@@ -13,12 +15,12 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.ReportingConfig;
+import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture;
 
@@ -35,11 +37,11 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.SUCCESS;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.util.fixture.QueueDisputeEventFixture.aQueueDisputeEventFixture;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
@@ -61,6 +63,7 @@ public class QueueMessageReceiverIT {
     private DatabaseTestHelper dbHelper = aDatabaseTestHelper(rule.getJdbi());
 
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     public void setUp() {
@@ -337,5 +340,23 @@ public class QueueMessageReceiverIT {
         assertThat(transactionSummary.get(0).get("total_amount_in_pence"), is(1000L));
         assertThat(transactionSummary.get(0).get("no_of_transactions"), is(1L));
         assertThat(transactionSummary.get(0).get("total_fee_in_pence"), is(5L));
+    }
+
+    @Test
+    public void shouldHandleDisputeTypeEvent() throws InterruptedException, JsonProcessingException {
+        Event event = aQueueDisputeEventFixture()
+                .withDefaultEventDataForEventType("DISPUTE_CREATED")
+                .insert(rule.getSqsClient())
+                .toEntity();
+
+        Thread.sleep(1500);
+
+        Map<String, Object> result = dbHelper.getEventByExternalId(event.getResourceExternalId());
+
+        assertThat(result.get("sqs_message_id"), is(event.getSqsMessageId()));
+        assertThat(result.get("live"), is(event.getLive()));
+        assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
+        assertThat(result.get("event_type").toString(), is(event.getEventType()));
+        assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
     }
 }
