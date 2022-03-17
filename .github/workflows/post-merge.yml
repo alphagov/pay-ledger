@@ -38,8 +38,10 @@ jobs:
       - name: Publish and tag ledger consumer pact
         run: |
           mvn pact:publish -DPACT_BROKER_URL=https://pact-broker-test.cloudapps.digital \
+          -DrunConsumerContractTests \
           -DPACT_BROKER_USERNAME=${{ secrets.pact_broker_username }} \
-          -DPACT_BROKER_PASSWORD=${{ secrets.pact_broker_password }} -DPACT_CONSUMER_TAG=master \
+          -DPACT_BROKER_PASSWORD=${{ secrets.pact_broker_password }} \
+          -DPACT_CONSUMER_TAG=master \
           -DPACT_CONSUMER_VERSION=${{ github.sha }}
 
   provider-contract-tests:
