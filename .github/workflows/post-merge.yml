@@ -55,6 +55,7 @@ jobs:
       pact_broker_password: ${{ secrets.pact_broker_password }}
 
   provider-contract-tests:
+    needs: tests
     uses: alphagov/pay-ci/.github/workflows/_run-provider-contract-tests.yml@master
     secrets:
       pact_broker_username: ${{ secrets.pact_broker_username }}
