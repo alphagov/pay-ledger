@@ -11,10 +11,13 @@ class TopicNameArnMapper {
 
     @Inject
     TopicNameArnMapper(LedgerConfig ledgerConfig) {
-        this.snsConfig  = ledgerConfig.getSnsConfig();
+        this.snsConfig = ledgerConfig.getSnsConfig();
     }
+
     public String getArnForTopicName(TopicName topicName) {
-        return Map.of(TopicName.CARD_PAYMENT_EVENTS, snsConfig.getCardPaymentEventsTopicArn())
+        return Map.of(
+                        TopicName.CARD_PAYMENT_EVENTS, snsConfig.getCardPaymentEventsTopicArn(),
+                        TopicName.CARD_PAYMENT_DISPUTE_EVENTS, snsConfig.getCardPaymentDisputeEventsTopicArn())
                 .get(topicName);
     }
 }
