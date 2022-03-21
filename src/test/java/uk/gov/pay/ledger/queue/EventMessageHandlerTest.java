@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.SnsConfig;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.eventpublisher.EventPublisher;
@@ -142,12 +143,13 @@ class EventMessageHandlerTest {
     }
 
     @Test
-    void shouldPublishMessageWhenSnsEnabled() throws Exception {
+    void shouldPublishCardPaymentMessageWhenSnsEnabled() throws Exception {
         var deserializedEvent = "deserialized event";
         Event event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
         when(snsConfig.isSnsEnabled()).thenReturn(true);
+        when(snsConfig.isPublishCardPaymentEventsToSns()).thenReturn(true);
         when(objectMapper.writeValueAsString(event)).thenReturn(deserializedEvent);
 
         eventMessageHandler.handle();
@@ -156,9 +158,52 @@ class EventMessageHandlerTest {
     }
 
     @Test
-    void shouldNotTryToPublishToMessageWhenSnsNotEnabled() throws QueueException {
+    void shouldPublishDisputeMessageWhenSnsEnabled() throws Exception {
+        var deserializedEvent = "deserialized event";
+        Event event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+        when(snsConfig.isSnsEnabled()).thenReturn(true);
+        when(snsConfig.isPublishCardPaymentDisputeEventsToSns()).thenReturn(true);
+        when(objectMapper.writeValueAsString(event)).thenReturn(deserializedEvent);
+
+        eventMessageHandler.handle();
+
+        verify(eventPublisher).publishMessageToTopic(deserializedEvent, TopicName.CARD_PAYMENT_DISPUTE_EVENTS);
+    }
+
+    @Test
+    void shouldNotTryToPublishMessagesWhenSnsNotEnabled() throws QueueException {
         Event event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
+        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+        when(snsConfig.isSnsEnabled()).thenReturn(false);
+
+        eventMessageHandler.handle();
+
+        verifyNoInteractions(eventPublisher);
+    }
+
+    @Test
+    void shouldNotTryToPublishWhenPublishCardPaymentEventsToSnsDisabled() throws QueueException {
+        Event event = aQueuePaymentEventFixture().toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+        when(snsConfig.isSnsEnabled()).thenReturn(true);
+        when(snsConfig.isPublishCardPaymentEventsToSns()).thenReturn(false);
+
+        eventMessageHandler.handle();
+
+        verifyNoInteractions(eventPublisher);
+    }
+
+    @Test
+    void shouldNotTryToPublishWhenPublishCardPaymentDisputeEventsToSnsDisabled() throws QueueException {
+        Event event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+        when(snsConfig.isSnsEnabled()).thenReturn(true);
+        when(snsConfig.isPublishCardPaymentDisputeEventsToSns()).thenReturn(false);
 
         eventMessageHandler.handle();
 

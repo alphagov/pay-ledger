@@ -73,6 +73,9 @@ snsConfig:
   snsEnabled: ${SNS_ENABLED:-false}
   region: ${AWS_SNS_REGION:-eu-west-1}
   cardPaymentEventsTopicArn: ${SNS_TOPIC_CARD_PAYMENT_EVENTS_ARN}
+  cardPaymentDisputeEventsTopicArn: ${SNS_TOPIC_CARD_PAYMENT_DISPUTE_EVENTS_ARN}
+  publishCardPaymentEventsToSns: ${PUBLISH_CARD_PAYMENT_EVENTS_TO_SNS:-false}
+  publishCardPaymentDisputeEventsToSns: ${PUBLISH_CARD_PAYMENT_DISPUTE_EVENTS_TO_SNS:-false}
 
 queueMessageReceiverConfig:
   backgroundProcessingEnabled: ${BACKGROUND_PROCESSING_ENABLED:-true}

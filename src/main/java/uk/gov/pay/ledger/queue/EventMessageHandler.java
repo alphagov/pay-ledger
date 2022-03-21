@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.eventpublisher.EventPublisher;
@@ -86,10 +87,21 @@ public class EventMessageHandler {
 
         if (ledgerConfig.getSnsConfig().isSnsEnabled()) {
             try {
-                eventPublisher.publishMessageToTopic(
-                        objectMapper.writeValueAsString(message.getEvent()),
-                        TopicName.CARD_PAYMENT_EVENTS
-                );
+                if (message.getEvent().getResourceType() == ResourceType.DISPUTE) {
+                    if (ledgerConfig.getSnsConfig().isPublishCardPaymentDisputeEventsToSns()) {
+                        eventPublisher.publishMessageToTopic(
+                                objectMapper.writeValueAsString(message.getEvent()),
+                                TopicName.CARD_PAYMENT_DISPUTE_EVENTS
+                        );
+                    }
+                } else {
+                    if (ledgerConfig.getSnsConfig().isPublishCardPaymentEventsToSns()) {
+                        eventPublisher.publishMessageToTopic(
+                                objectMapper.writeValueAsString(message.getEvent()),
+                                TopicName.CARD_PAYMENT_EVENTS
+                        );
+                    }
+                }
             } catch (Exception e) {
                 LOGGER.warn("Failed to publish event for message",
                         kv("sqs_message_id", message.getQueueMessageId()),

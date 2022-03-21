@@ -27,21 +27,24 @@ public class EventPublisherTest {
 
     private TopicNameArnMapper topicNameArnMapper;
 
-    private String cardPaymentEventTopicArn = "sns_arn";
+    private String cardPaymentEventsTopicArn = "card_payment_events_arn";
+
+    private String cardPaymentDisputeEventsTopicArn = "card_payment_dispute_events_arn";
 
     private EventPublisher eventPublisher;
 
     @Test
     public void shouldPublishMessageToSpecifiedTopic() throws Exception {
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-        when(snsConfig.getCardPaymentEventsTopicArn()).thenReturn(cardPaymentEventTopicArn);
+        when(snsConfig.getCardPaymentEventsTopicArn()).thenReturn(cardPaymentEventsTopicArn);
+        when(snsConfig.getCardPaymentDisputeEventsTopicArn()).thenReturn(cardPaymentDisputeEventsTopicArn);
         topicNameArnMapper = new TopicNameArnMapper(ledgerConfig);
         eventPublisher = new EventPublisher(snsClient, topicNameArnMapper);
         var message = "Hooray, I've been published";
         var expectedPublishRequest = PublishRequest
                 .builder()
                 .message(message)
-                .topicArn(cardPaymentEventTopicArn)
+                .topicArn(cardPaymentEventsTopicArn)
                 .build();
 
         eventPublisher.publishMessageToTopic(message, TopicName.CARD_PAYMENT_EVENTS);
@@ -53,6 +56,7 @@ public class EventPublisherTest {
     public void shouldNotErrorWhenTopicArnNotSet() {
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
         lenient().when(snsConfig.getCardPaymentEventsTopicArn()).thenReturn(null);
+        lenient().when(snsConfig.getCardPaymentDisputeEventsTopicArn()).thenReturn(null);
         topicNameArnMapper = new TopicNameArnMapper(ledgerConfig);
 
         assertDoesNotThrow(() -> new EventPublisher(snsClient, topicNameArnMapper));
