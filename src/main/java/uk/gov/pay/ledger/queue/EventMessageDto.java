@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
+import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
 
 import java.time.ZonedDateTime;
 
@@ -49,6 +51,7 @@ public class EventMessageDto {
         return resourceType;
     }
 
+    @JsonSerialize(using = MicrosecondPrecisionDateTimeSerializer.class)
     public ZonedDateTime getEventDate() {
         return timestamp;
     }
