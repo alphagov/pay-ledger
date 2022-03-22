@@ -147,10 +147,12 @@ class EventMessageHandlerTest {
         var deserializedEvent = "deserialized event";
         Event event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
+        var eventDto = new EventMessageDto();
+        when(eventMessage.getEventDto()).thenReturn(eventDto);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
         when(snsConfig.isSnsEnabled()).thenReturn(true);
         when(snsConfig.isPublishCardPaymentEventsToSns()).thenReturn(true);
-        when(objectMapper.writeValueAsString(event)).thenReturn(deserializedEvent);
+        when(objectMapper.writeValueAsString(eventDto)).thenReturn(deserializedEvent);
 
         eventMessageHandler.handle();
 
@@ -162,10 +164,12 @@ class EventMessageHandlerTest {
         var deserializedEvent = "deserialized event";
         Event event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
+        var eventDto = new EventMessageDto();
+        when(eventMessage.getEventDto()).thenReturn(eventDto);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
         when(snsConfig.isSnsEnabled()).thenReturn(true);
         when(snsConfig.isPublishCardPaymentDisputeEventsToSns()).thenReturn(true);
-        when(objectMapper.writeValueAsString(event)).thenReturn(deserializedEvent);
+        when(objectMapper.writeValueAsString(eventDto)).thenReturn(deserializedEvent);
 
         eventMessageHandler.handle();
 

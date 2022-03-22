@@ -38,4 +38,8 @@ public class EventMessage {
     public String getQueueMessageReceiptHandle() {
         return queueMessage.getReceiptHandle();
     }
+
+    public EventMessageDto getEventDto() {
+        return eventDto;
+    }
 }

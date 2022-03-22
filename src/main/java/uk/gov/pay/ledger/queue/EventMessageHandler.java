@@ -90,14 +90,14 @@ public class EventMessageHandler {
                 if (message.getEvent().getResourceType() == ResourceType.DISPUTE) {
                     if (ledgerConfig.getSnsConfig().isPublishCardPaymentDisputeEventsToSns()) {
                         eventPublisher.publishMessageToTopic(
-                                objectMapper.writeValueAsString(message.getEvent()),
+                                objectMapper.writeValueAsString(message.getEventDto()),
                                 TopicName.CARD_PAYMENT_DISPUTE_EVENTS
                         );
                     }
                 } else {
                     if (ledgerConfig.getSnsConfig().isPublishCardPaymentEventsToSns()) {
                         eventPublisher.publishMessageToTopic(
-                                objectMapper.writeValueAsString(message.getEvent()),
+                                objectMapper.writeValueAsString(message.getEventDto()),
                                 TopicName.CARD_PAYMENT_EVENTS
                         );
                     }
