@@ -28,7 +28,7 @@ public class EventMessage {
                 eventDto.getResourceType(),
                 eventDto.getExternalId(),
                 eventDto.getParentExternalId(),
-                eventDto.getEventDate(),
+                eventDto.getTimestamp(),
                 eventDto.getEventType(),
                 eventDto.getEventData(),
                 eventDto.isReprojectDomainObject()
