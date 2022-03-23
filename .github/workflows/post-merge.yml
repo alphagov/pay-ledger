@@ -8,7 +8,7 @@ on:
 permissions:
   contents: read
 
-concurrency: adminusers-post-merge
+concurrency: ledger-post-merge
 
 jobs:
   tests:
