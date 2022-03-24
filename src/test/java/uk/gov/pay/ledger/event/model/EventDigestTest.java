@@ -56,6 +56,48 @@ public class EventDigestTest {
     }
 
     @Test
+    public void shouldDeriveNonNullServiceIdCorrectlyFromEventDigest() {
+        Event eventWithServiceId = anEventFixture()
+                .withEventDate(ZonedDateTime.now().minusHours(2L))
+                .withServiceId("service-id")
+                .toEntity();
+
+        Event eventWithOutServiceId = anEventFixture()
+                .withEventDate(ZonedDateTime.now())
+                .toEntity();
+
+        Event latestEventWithOutServiceId = anEventFixture()
+                .withEventDate(ZonedDateTime.now().plusDays(2))
+                .withServiceId(null)
+                .toEntity();
+
+        EventDigest eventDigest = EventDigest.fromEventList(
+                List.of(eventWithServiceId, eventWithOutServiceId, latestEventWithOutServiceId));
+
+        assertThat(eventDigest.getServiceId(), is("service-id"));
+    }
+
+    @Test
+    public void shouldDeriveServiceIdToNullIfNoEventsHasServiceId() {
+        Event eventWithoutServiceId = anEventFixture()
+                .withParentResourceExternalId(null)
+                .toEntity();
+
+        Event event2WithoutServiceId = anEventFixture()
+                .withParentResourceExternalId(null)
+                .toEntity();
+
+        Event event3WithoutServiceId = anEventFixture()
+                .withParentResourceExternalId(null)
+                .toEntity();
+
+        EventDigest eventDigest = EventDigest.fromEventList(
+                List.of(eventWithoutServiceId, event2WithoutServiceId, event3WithoutServiceId));
+
+        assertThat(eventDigest.getParentResourceExternalId(), is(nullValue()));
+    }
+
+    @Test
     public void shouldBeLiveTrueIfContainsTrueEvent() {
         Event eventWithNullLiveValue = anEventFixture().withLive(null).toEntity();
         Event eventWithTrueLiveValue = anEventFixture().withLive(true).toEntity();

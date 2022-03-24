@@ -65,6 +65,11 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         return this;
     }
 
+    public EventFixture withServiceId(String serviceId) {
+        this.serviceId = serviceId;
+        return this;
+    }
+
     public EventFixture withEventType(String eventType) {
         this.eventType = eventType;
         return this;

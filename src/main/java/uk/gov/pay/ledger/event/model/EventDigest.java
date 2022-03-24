@@ -69,6 +69,7 @@ public class EventDigest {
                 .orElseThrow();
 
         String parentResourceExternalId = deriveParentResourceExternalId(events);
+        String serviceId = deriveServiceId(events);
 
         Boolean isLive = events.stream()
                 .filter(event -> event.getLive() != null)
@@ -77,7 +78,7 @@ public class EventDigest {
                 .orElse(null);
 
         return new EventDigest(
-                latestEvent.getServiceId(),
+                serviceId,
                 isLive,
                 latestEvent.getEventDate(),
                 latestSalientEventType,
@@ -88,6 +89,14 @@ public class EventDigest {
                 eventPayload,
                 earliestDate
         );
+    }
+
+    private static String deriveServiceId(List<Event> events) {
+        return events.stream()
+                .filter(event -> isNotEmpty(event.getServiceId()))
+                .map(Event::getServiceId)
+                .findFirst()
+                .orElse(null);
     }
 
     private static String deriveParentResourceExternalId(List<Event> events) {
