@@ -70,6 +70,71 @@ public class EventMessageHandler {
         }
     }
 
+    // just copies existing SQS consumer functionality (write, publish, project)
+    // actual resource should just write, publish should be separated out to an async task
+    // project should be a separate microservice
+    public Event handle(EventMessage message) {
+        Event event = message.getEvent();
+
+        CreateEventResponse response;
+
+        // We don't persist events created by internal admins for re-projecting domain objects so as to not pollute
+        // the event feed. This also means that any event data on the event will be ignored when processing, and only
+        // previous events will be used when re-projecting the domain object.
+        if (event.isReprojectDomainObject()) {
+            response = ignoredEventResponse();
+        } else {
+            response = eventService.createIfDoesNotExist(event);
+        }
+
+
+        if (ledgerConfig.getSnsConfig().isSnsEnabled()) {
+            try {
+                if (message.getEvent().getResourceType() == ResourceType.DISPUTE) {
+                    if (ledgerConfig.getSnsConfig().isPublishCardPaymentDisputeEventsToSns()) {
+                        eventPublisher.publishMessageToTopic(
+                                objectMapper.writeValueAsString(message.getEventDto()),
+                                TopicName.CARD_PAYMENT_DISPUTE_EVENTS
+                        );
+                    }
+                } else {
+                    if (ledgerConfig.getSnsConfig().isPublishCardPaymentEventsToSns()) {
+                        eventPublisher.publishMessageToTopic(
+                                objectMapper.writeValueAsString(message.getEventDto()),
+                                TopicName.CARD_PAYMENT_EVENTS
+                        );
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Failed to publish event for message",
+                        kv("sqs_message_id", message.getQueueMessageId()),
+                        kv("resource_external_id", event.getResourceExternalId()),
+                        kv("event_type", event.getEventType()),
+                        kv("error", e.getMessage()));
+            }
+        }
+
+        final long ingestLag = event.getEventDate().until(ZonedDateTime.now(), ChronoUnit.MICROS);
+
+        if (response.isSuccessful()) {
+            eventDigestHandler.processEvent(event, response.getState() == INSERTED);
+            metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
+            var loggingArgs = new ArrayList<>(List.of(
+                    kv("sqs_message_id", message.getQueueMessageId()),
+                    kv("resource_external_id", event.getResourceExternalId()),
+                    kv("state", response.getState()),
+                    kv("event_type", event.getEventType()),
+                    kv("ingest_lag_micro_seconds", ingestLag)));
+
+            if (event.isReprojectDomainObject()) {
+                loggingArgs.add(kv("reproject_domain_object_event", event.isReprojectDomainObject()));
+            }
+
+            LOGGER.info("The event message has been processed.", loggingArgs.toArray());
+        }
+        return event;
+    }
+
     private void processSingleMessage(EventMessage message) throws QueueException {
         Event event = message.getEvent();
 

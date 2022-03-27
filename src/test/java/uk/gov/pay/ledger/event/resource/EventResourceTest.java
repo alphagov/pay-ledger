@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.queue.EventMessageHandler;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 
 import javax.ws.rs.core.Response;
@@ -29,7 +30,7 @@ public class EventResourceTest {
             .toEntity();
 
     public static final ResourceExtension resources = ResourceExtension.builder()
-            .addResource(new EventResource(dao))
+            .addResource(new EventResource(dao, mock(EventMessageHandler.class)))
             .build();
 
     @BeforeEach
