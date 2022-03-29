@@ -38,4 +38,12 @@ public class EventService {
     public EventDigest getEventDigestForResource(Event event) {
         return getEventDigestForResource(event.getResourceExternalId());
     }
+
+    public EventDigest getEventDigestForResourceId(String resourceExternalId) {
+        return getEventDigestForResource(resourceExternalId);
+    }
+
+    public Integer countByResourceExternalId(String resourceExternalId) {
+        return eventDao.countById(resourceExternalId);
+    }
 }

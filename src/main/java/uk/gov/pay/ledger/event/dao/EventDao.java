@@ -69,6 +69,8 @@ public interface EventDao {
             " AND e.resource_type_id = rt.id ORDER BY e.event_date DESC")
     List<Event> getEventsByResourceExternalId(@Bind("resourceExternalId") String resourceExternalId);
 
+    @SqlQuery("SELECT COUNT(*) FROM event where event.resource_external_id = :resourceExternalId")
+    Integer countById(@Bind("resourceExternalId") String resourceExternalId);
 
     @SqlQuery("SELECT  e.id, e.sqs_message_id, e.service_id, e.live, rt.name AS resource_type_name, e.resource_external_id, " +
             "          e.parent_resource_external_id, e.event_date," +
