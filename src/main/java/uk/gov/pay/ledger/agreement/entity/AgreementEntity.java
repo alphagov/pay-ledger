@@ -11,7 +11,33 @@ import java.time.ZonedDateTime;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class AgreementEntity {
     private String externalId;
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
+    public void setGatewayAccountId(String gatewayAccountId) {
+        this.gatewayAccountId = gatewayAccountId;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setPaymentInstrument(PaymentInstrumentEntity paymentInstrument) {
+        this.paymentInstrument = paymentInstrument;
+    }
+
     private String gatewayAccountId;
+
     private String serviceId;
     private String reference;
     private String description;
@@ -20,6 +46,10 @@ public class AgreementEntity {
     private ZonedDateTime createdDate;
     private Integer eventCount;
     private PaymentInstrumentEntity paymentInstrument;
+
+    public AgreementEntity() {
+
+    }
 
     public AgreementEntity(String externalId, String gatewayAccountId, String serviceId, String reference, String description, String status, Boolean live, ZonedDateTime createdDate, Integer eventCount, PaymentInstrumentEntity paymentInstrument) {
         this.externalId = externalId;
@@ -72,5 +102,21 @@ public class AgreementEntity {
 
     public PaymentInstrumentEntity getPaymentInstrument() {
         return paymentInstrument;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public void setLive(Boolean live) {
+        this.live = live;
+    }
+
+    public void setCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public void setEventCount(Integer eventCount) {
+        this.eventCount = eventCount;
     }
 }

@@ -2,13 +2,12 @@ package uk.gov.pay.ledger.agreement.dao;
 
 import com.google.inject.Inject;
 import org.jdbi.v3.core.Jdbi;
-import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.entity.PaymentInstrumentEntity;
 
 public class PaymentInstrumentDao {
     private Jdbi jdbi;
 
-    private final String UPSERT_AGREEMENT = "INSERT INTO payment_instrument " +
+    private final String UPSERT_PAYMENT_INSTRUMENT = "INSERT INTO payment_instrument " +
             "(" +
             "external_id," +
             "agreement_external_id, " +
@@ -68,7 +67,7 @@ public class PaymentInstrumentDao {
 
     public void upsert(PaymentInstrumentEntity paymentInstrument) {
         jdbi.withHandle(handle ->
-                handle.createUpdate(UPSERT_AGREEMENT)
+                handle.createUpdate(UPSERT_PAYMENT_INSTRUMENT)
                         .bindBean(paymentInstrument)
                         .execute());
     }

@@ -15,6 +15,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.agreement.service.AgreementService;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
@@ -44,6 +45,7 @@ import static uk.gov.pay.ledger.event.model.ResourceType.DISPUTE;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYOUT;
 import static uk.gov.pay.ledger.event.model.ResourceType.REFUND;
+import static uk.gov.pay.ledger.event.model.ResourceType.SERVICE;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,6 +65,8 @@ class EventDigestHandlerTest {
     private Appender<ILoggingEvent> mockAppender;
     @Mock
     private TransactionSummaryService transactionSummaryService;
+    @Mock
+    private AgreementService agreementService;
 
     private EventDigestHandler eventDigestHandler;
     private EventDigest eventDigest;
@@ -71,7 +75,7 @@ class EventDigestHandlerTest {
     void setUp() {
         TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(new ObjectMapper());
         eventDigestHandler =  new EventDigestHandler(eventService, transactionService,
-                transactionMetadataService, payoutService, transactionEntityFactory, transactionSummaryService);
+                transactionMetadataService, payoutService, transactionEntityFactory, transactionSummaryService, agreementService);
         eventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));
         lenient().when(eventService.getEventDigestForResource(any(Event.class)))
                 .thenReturn(eventDigest);
@@ -126,7 +130,7 @@ class EventDigestHandlerTest {
         Logger root = (Logger) LoggerFactory.getLogger(EventDigestHandler.class);
         root.addAppender(mockAppender);
 
-        Event event = anEventFixture().withResourceType(AGREEMENT).toEntity();
+        Event event = anEventFixture().withResourceType(SERVICE).toEntity();
 
         assertThrows(RuntimeException.class, () -> eventDigestHandler.processEvent(event, true));
 

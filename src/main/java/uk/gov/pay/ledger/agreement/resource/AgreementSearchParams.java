@@ -49,7 +49,7 @@ public class AgreementSearchParams extends SearchParams {
         }
 
         if (isNotBlank(status)) {
-            filters.add(" p.status = :" + STATUS_FIELD);
+            filters.add(" a.status = :" + STATUS_FIELD);
         }
         return List.copyOf(filters);
     }
