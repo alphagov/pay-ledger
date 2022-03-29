@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import uk.gov.pay.ledger.agreement.dao.AgreementDao;
 import uk.gov.pay.ledger.agreement.dao.PaymentInstrumentDao;
 import uk.gov.pay.ledger.agreement.entity.AgreementEntityFactory;
+import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
 import uk.gov.pay.ledger.event.model.EventDigest;
@@ -12,6 +13,7 @@ import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AgreementService {
@@ -36,9 +38,15 @@ public class AgreementService {
         paymentInstrumentDao.upsert(entity);
     }
 
+    public Optional<Agreement> findAgreement(String externalId) {
+        return agreementDao.findByExternalId(externalId)
+                .map(Agreement::from);
+    }
+
     public AgreementSearchResponse searchAgreements(AgreementSearchParams searchParams, UriInfo uriInfo) {
         var agreements = agreementDao.searchAgreements(searchParams)
                 .stream()
+                .map(Agreement::from)
                 .collect(Collectors.toList());
         var total = agreementDao.getTotalForSearch(searchParams);
 

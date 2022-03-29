@@ -12,6 +12,7 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
+import uk.gov.pay.ledger.agreement.resource.AgreementResource;
 import uk.gov.pay.ledger.event.resource.EventResource;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.exception.JerseyViolationExceptionMapper;
@@ -85,6 +86,7 @@ public class LedgerApp extends Application<LedgerConfig> {
         }
 
         environment.jersey().register(injector.getInstance(PayoutResource.class));
+        environment.jersey().register(injector.getInstance(AgreementResource.class));
     }
 
 }

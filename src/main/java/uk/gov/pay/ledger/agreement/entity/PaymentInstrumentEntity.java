@@ -9,6 +9,55 @@ import java.time.ZonedDateTime;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class PaymentInstrumentEntity {
+    private String externalId;
+    private String agreementExternalId;
+    private String email;
+    private String cardholderName;
+    private String addressLine1;
+    private String addressLine2;
+    private String addressPostcode;
+    private String addressCity;
+
+    private String addressCounty;
+    private String addressCountry;
+
+    private String lastDigitsCardNumber;
+    private String expiryDate;
+    private String cardBrand;
+
+    private ZonedDateTime createdDate;
+    private Integer eventCount;
+
+    public PaymentInstrumentEntity() {
+
+    }
+
+    public PaymentInstrumentEntity(String externalId, String agreementExternalId, String email, String cardholderName, String addressLine1, String addressLine2, String addressPostcode, String addressCity, String addressCounty, String addressCountry, String lastDigitsCardNumber, String expiryDate, String cardBrand, ZonedDateTime createdDate, Integer eventCount) {
+        this.externalId = externalId;
+        this.agreementExternalId = agreementExternalId;
+        this.email = email;
+        this.cardholderName = cardholderName;
+        this.addressLine1 = addressLine1;
+        this.addressLine2 = addressLine2;
+        this.addressPostcode = addressPostcode;
+        this.addressCity = addressCity;
+        this.addressCounty = addressCounty;
+        this.addressCountry = addressCountry;
+        this.lastDigitsCardNumber = lastDigitsCardNumber;
+        this.expiryDate = expiryDate;
+        this.cardBrand = cardBrand;
+        this.createdDate = createdDate;
+        this.eventCount = eventCount;
+    }
+
+    public void setCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public void setEventCount(Integer eventCount) {
+        this.eventCount = eventCount;
+    }
+
     public void setExternalId(String externalId) {
         this.externalId = externalId;
     }
@@ -60,22 +109,6 @@ public class PaymentInstrumentEntity {
     public void setCardBrand(String cardBrand) {
         this.cardBrand = cardBrand;
     }
-
-    private String externalId;
-    private String agreementExternalId;
-    private String email;
-    private String cardholderName;
-    private String addressLine1;
-    private String addressLine2;
-    private String addressPostcode;
-    private String addressCity;
-
-    public String getAddressCounty() {
-        return addressCounty;
-    }
-
-    private String addressCounty;
-    private String addressCountry;
 
     public String getExternalId() {
         return externalId;
@@ -132,41 +165,7 @@ public class PaymentInstrumentEntity {
     public Integer getEventCount() {
         return eventCount;
     }
-
-    private String lastDigitsCardNumber;
-    private String expiryDate;
-    private String cardBrand;
-
-    private ZonedDateTime createdDate;
-    private Integer eventCount;
-
-    public PaymentInstrumentEntity() {
-
-    }
-
-    public PaymentInstrumentEntity(String externalId, String agreementExternalId, String email, String cardholderName, String addressLine1, String addressLine2, String addressPostcode, String addressCity, String addressCounty, String addressCountry, String lastDigitsCardNumber, String expiryDate, String cardBrand, ZonedDateTime createdDate, Integer eventCount) {
-        this.externalId = externalId;
-        this.agreementExternalId = agreementExternalId;
-        this.email = email;
-        this.cardholderName = cardholderName;
-        this.addressLine1 = addressLine1;
-        this.addressLine2 = addressLine2;
-        this.addressPostcode = addressPostcode;
-        this.addressCity = addressCity;
-        this.addressCounty = addressCounty;
-        this.addressCountry = addressCountry;
-        this.lastDigitsCardNumber = lastDigitsCardNumber;
-        this.expiryDate = expiryDate;
-        this.cardBrand = cardBrand;
-        this.createdDate = createdDate;
-        this.eventCount = eventCount;
-    }
-
-    public void setCreatedDate(ZonedDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public void setEventCount(Integer eventCount) {
-        this.eventCount = eventCount;
+    public String getAddressCounty() {
+        return addressCounty;
     }
 }

@@ -3,7 +3,6 @@ package uk.gov.pay.ledger.agreement.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import org.jdbi.v3.core.mapper.reflect.ColumnName;
 
 import java.time.ZonedDateTime;
 
@@ -11,33 +10,7 @@ import java.time.ZonedDateTime;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class AgreementEntity {
     private String externalId;
-
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
-    }
-
-    public void setGatewayAccountId(String gatewayAccountId) {
-        this.gatewayAccountId = gatewayAccountId;
-    }
-
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setPaymentInstrument(PaymentInstrumentEntity paymentInstrument) {
-        this.paymentInstrument = paymentInstrument;
-    }
-
     private String gatewayAccountId;
-
     private String serviceId;
     private String reference;
     private String description;
@@ -118,5 +91,29 @@ public class AgreementEntity {
 
     public void setEventCount(Integer eventCount) {
         this.eventCount = eventCount;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
+    public void setGatewayAccountId(String gatewayAccountId) {
+        this.gatewayAccountId = gatewayAccountId;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setPaymentInstrument(PaymentInstrumentEntity paymentInstrument) {
+        this.paymentInstrument = paymentInstrument;
     }
 }

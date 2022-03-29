@@ -16,12 +16,12 @@ public class AgreementSearchResponse {
     @JsonProperty("page")
     private long page;
     @JsonProperty("results")
-    List<AgreementEntity> results;
+    List<Agreement> results;
     @JsonProperty("_links")
     private PaginationBuilder paginationBuilder;
 
     public AgreementSearchResponse(Long total, long count, long page,
-                                   List<AgreementEntity> results) {
+                                   List<Agreement> results) {
         this.total = total;
         this.count = count;
         this.page = page;
@@ -45,7 +45,7 @@ public class AgreementSearchResponse {
         return page;
     }
 
-    public List<AgreementEntity> getResults() {
+    public List<Agreement> getResults() {
         return results;
     }
 
