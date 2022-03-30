@@ -1,28 +1,38 @@
 package uk.gov.pay.ledger.event.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class EventTicker {
 
     @JsonIgnore
     private Long id;
-    private ResourceType resourceType;
+    @Schema(example = "9np5pocnotgkpp029d5kdfau5f")
     private String resourceExternalId;
+    @Schema(example = "payment")
+    private ResourceType resourceType;
     @JsonSerialize(using = MicrosecondPrecisionDateTimeSerializer.class)
+    @Schema(implementation = ZonedDateTime.class, example = "\"2022-03-30T15:09:20.241Z\"")
     private ZonedDateTime eventDate;
+    @Schema(example = "PAYMENT_CREATED")
     private String eventType;
+    @Schema(example = "visa")
     private String cardBrand;
+    @Schema(example = "PAYMENT")
     private String transactionType;
+    @Schema(example = "sandbox")
     private String paymentProvider;
+    @Schema(example = "1")
     private String gatewayAccountId;
+    @Schema(example = "100")
     private Long amount;
 
     public EventTicker() { }

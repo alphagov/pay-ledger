@@ -1,8 +1,8 @@
 package uk.gov.pay.ledger.payout.search;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import uk.gov.pay.ledger.common.search.SearchParams;
 import uk.gov.pay.ledger.payout.state.PayoutState;
-import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
@@ -11,10 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static uk.gov.pay.ledger.payout.state.PayoutState.from;
 
 public class PayoutSearchParams extends SearchParams {
 
@@ -28,6 +26,7 @@ public class PayoutSearchParams extends SearchParams {
 
     private List<String> gatewayAccountIds;
     @QueryParam("state")
+    @Parameter(description = "State of payout. allowed values are intransit, paidout, failed")
     private String state;
     @DefaultValue("true")
     private Long pageNumber = 1L;
@@ -43,11 +42,13 @@ public class PayoutSearchParams extends SearchParams {
     }
 
     @QueryParam("page")
+    @Parameter(description = "Page number requested for the search, should be a positive integer (optional, defaults to 1)")
     public void setPageNumber(Long pageNumber) {
         this.pageNumber = Objects.requireNonNullElse(pageNumber, DEFAULT_PAGE_NUMBER);
     }
 
     @QueryParam("display_size")
+    @Parameter(description = "Number of results to be shown per page, should be a positive integer (optional, defaults to 500, max 500)")
     public PayoutSearchParams setDisplaySize(Long displaySize) {
         this.displaySize = Objects.requireNonNullElse(displaySize, DEFAULT_DISPLAY_SIZE);
         return this;
