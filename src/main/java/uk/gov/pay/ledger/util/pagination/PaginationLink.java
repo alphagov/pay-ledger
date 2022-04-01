@@ -1,12 +1,14 @@
 package uk.gov.pay.ledger.util.pagination;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaginationLink {
 
+    @Schema(example = "https://an.example.link")
     private String href;
 
     private PaginationLink(String href) {

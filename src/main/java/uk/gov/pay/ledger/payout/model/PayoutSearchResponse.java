@@ -1,6 +1,8 @@
 package uk.gov.pay.ledger.payout.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
 import java.util.List;
@@ -8,12 +10,16 @@ import java.util.List;
 public class PayoutSearchResponse {
 
     @JsonProperty("total")
+    @Schema(example = "1000")
     private Long total;
     @JsonProperty("count")
+    @Schema(example = "100")
     private long count;
     @JsonProperty("page")
+    @Schema(example = "1")
     private long page;
     @JsonProperty("results")
+    @ArraySchema(schema = @Schema(implementation = PayoutView.class))
     List<PayoutView> payoutViewList;
     @JsonProperty("_links")
     private PaginationBuilder paginationBuilder;

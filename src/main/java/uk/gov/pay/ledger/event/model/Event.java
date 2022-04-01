@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
 
 import java.time.ZonedDateTime;
@@ -14,16 +15,26 @@ public class Event {
 
     @JsonIgnore
     private Long id;
+    @Schema(example = "fe689579-63af-40bf-a783-23de97134b5f")
     private String sqsMessageId;
+    @Schema(example = "ea2d6673b23d4ff7ad88a1fd3c7ab0f6")
     private String serviceId;
+    @Schema(example = "true")
     private Boolean live;
+    @Schema(example = "payment")
     private ResourceType resourceType;
+    @Schema(example = "58na2dr7rv7h6h53bef1l0soep")
     private String resourceExternalId;
+    @Schema(example = "l40ajdf0923uojlkfjsldkjfl2", defaultValue = "null")
     private String parentResourceExternalId;
     @JsonSerialize(using = MicrosecondPrecisionDateTimeSerializer.class)
+    @Schema(implementation = ZonedDateTime.class, example = "\"2022-03-30T15:09:20.241Z\"")
     private ZonedDateTime eventDate;
+    @Schema(example = "PAYMENT_CREATED")
     private String eventType;
+    @Schema(example = "{\"live\": false, \"moto\": false, \"amount\": 1000, \"source\": \"CARD_API\", \"language\": \"en\", \"reference\": \"my payment reference\", \"return_url\": \"https://www.payments.service.gov.uk\", \"description\": \"my payment\", \"delayed_capture\": false, \"payment_provider\": \"sandbox\", \"gateway_account_id\": \"3\", \"credential_external_id\": \"ddb294481de146c09598c8cce0461af9\", \"save_payment_instrument_to_agreement\": false}\"")
     private String eventData;
+    @Schema(example = "true", defaultValue = "false")
     private boolean reprojectDomainObject;
 
     public Event() {
@@ -63,7 +74,7 @@ public class Event {
                  String eventType,
                  String eventData,
                  boolean reprojectDomainObject) {
-        this(null, sqsMessageId, serviceId, live,  resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType,
+        this(null, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType,
                 eventData, reprojectDomainObject);
     }
 
