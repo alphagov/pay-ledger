@@ -1,0 +1,301 @@
+openapi: 3.0.1
+info:
+  description: Ledger API
+  title: Ledger API
+  version: v1.0.0
+servers:
+- url: http://ledger_url
+paths:
+  /v1/event/ticker:
+    get:
+      operationId: listEvents
+      parameters:
+      - description: from date of events to be searched (this date is inclusive).
+        example: 2015-08-14T12:35:00Z
+        in: query
+        name: from_date
+        required: true
+        schema:
+          type: string
+      - description: to date of events to be searched (this date is exclusive)
+        example: 2015-08-14T12:35:00Z
+        in: query
+        name: to_date
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventTicker'
+          description: OK
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing query parameters
+        "500":
+          description: Invalid parameters or Downstream system error
+      summary: Get list of events between a date/time range
+      tags:
+      - Events
+  /v1/event/{eventId}:
+    get:
+      operationId: getEvent
+      parameters:
+      - in: path
+        name: eventId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: OK
+        "404":
+          description: Not found
+      summary: Find event by ID (id of event table)
+      tags:
+      - Events
+  /v1/payout:
+    get:
+      operationId: search
+      parameters:
+      - description: "State of payout. allowed values are intransit, paidout, failed"
+        in: query
+        name: state
+        schema:
+          type: string
+      - description: "Page number requested for the search, should be a positive integer\
+          \ (optional, defaults to 1)"
+        in: query
+        name: page
+        schema:
+          type: integer
+          format: int64
+      - description: "Number of results to be shown per page, should be a positive\
+          \ integer (optional, defaults to 500, max 500)"
+        in: query
+        name: display_size
+        schema:
+          type: integer
+          format: int64
+      - description: Set to true to list all payouts.
+        in: query
+        name: override_account_id_restriction
+        schema:
+          type: boolean
+      - description: Comma separate gateway account IDs. Required except when override_account_id_restriction=true
+        example: "1,2"
+        in: query
+        name: gateway_account_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayoutSearchResponse'
+          description: OK
+        "404":
+          description: Not found
+      summary: Search payouts by gateway_account_id and state
+      tags:
+      - Payouts
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error_identifier:
+          type: string
+          enum:
+          - GENERIC
+          - REFUND_NOT_AVAILABLE
+          - REFUND_AMOUNT_AVAILABLE_MISMATCH
+          - ZERO_AMOUNT_NOT_ALLOWED
+          - MOTO_NOT_ALLOWED
+          - CANCEL_CHARGE_FAILURE_DUE_TO_CONFLICTING_TERMINAL_STATE_AT_GATEWAY_CHARGE_STATE_FORCIBLY_TRANSITIONED
+          - CANCEL_CHARGE_FAILURE_DUE_TO_CONFLICTING_TERMINAL_STATE_AT_GATEWAY_INVALID_STATE_TRANSITION
+          - AUTH_TOKEN_INVALID
+          - AUTH_TOKEN_REVOKED
+          - ACCOUNT_NOT_LINKED_WITH_PSP
+          - TELEPHONE_PAYMENT_NOTIFICATIONS_NOT_ALLOWED
+          - AGREEMENT_NOT_FOUND
+        message:
+          type: array
+          items:
+            type: string
+    Event:
+      type: object
+      properties:
+        event_data:
+          type: string
+          example: "{\"live\": false, \"moto\": false, \"amount\": 1000, \"source\"\
+            : \"CARD_API\", \"language\": \"en\", \"reference\": \"my payment reference\"\
+            , \"return_url\": \"https://www.payments.service.gov.uk\", \"description\"\
+            : \"my payment\", \"delayed_capture\": false, \"payment_provider\": \"\
+            sandbox\", \"gateway_account_id\": \"3\", \"credential_external_id\":\
+            \ \"ddb294481de146c09598c8cce0461af9\", \"save_payment_instrument_to_agreement\"\
+            : false}\""
+        event_date:
+          type: string
+          format: date-time
+        event_type:
+          type: string
+          example: PAYMENT_CREATED
+        live:
+          type: boolean
+          example: true
+        parent_resource_external_id:
+          type: string
+          default: "null"
+          example: l40ajdf0923uojlkfjsldkjfl2
+        reproject_domain_object:
+          type: boolean
+          default: false
+          example: true
+        resource_external_id:
+          type: string
+          example: 58na2dr7rv7h6h53bef1l0soep
+        resource_type:
+          type: string
+          enum:
+          - agreement
+          - payment
+          - refund
+          - service
+          - card_payment
+          - payout
+          - dispute
+          example: payment
+        service_id:
+          type: string
+          example: ea2d6673b23d4ff7ad88a1fd3c7ab0f6
+        sqs_message_id:
+          type: string
+          example: fe689579-63af-40bf-a783-23de97134b5f
+    EventTicker:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 100
+        card_brand:
+          type: string
+          example: visa
+        event_date:
+          type: string
+          format: date-time
+        event_type:
+          type: string
+          example: PAYMENT_CREATED
+        gateway_account_id:
+          type: string
+          example: "1"
+        payment_provider:
+          type: string
+          example: sandbox
+        resource_external_id:
+          type: string
+          example: 9np5pocnotgkpp029d5kdfau5f
+        resource_type:
+          type: string
+          enum:
+          - agreement
+          - payment
+          - refund
+          - service
+          - card_payment
+          - payout
+          - dispute
+          example: payment
+        transaction_type:
+          type: string
+          example: PAYMENT
+    PaginationBuilder:
+      type: object
+      properties:
+        first_page:
+          $ref: '#/components/schemas/PaginationLink'
+        last_page:
+          $ref: '#/components/schemas/PaginationLink'
+        next_page:
+          $ref: '#/components/schemas/PaginationLink'
+        prev_page:
+          $ref: '#/components/schemas/PaginationLink'
+        self:
+          $ref: '#/components/schemas/PaginationLink'
+    PaginationLink:
+      type: object
+      properties:
+        href:
+          type: string
+          example: https://an.example.link
+    PayoutSearchResponse:
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/PaginationBuilder'
+        count:
+          type: integer
+          format: int64
+          example: 100
+        page:
+          type: integer
+          format: int64
+          example: 1
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PayoutView'
+        total:
+          type: integer
+          format: int64
+          example: 1000
+    PayoutView:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: amount in pence
+          example: 1000
+        created_date:
+          type: string
+          format: date-time
+        gateway_account_id:
+          type: string
+          example: "1"
+        gateway_payout_id:
+          type: string
+          example: po_sd0fkpam0dlwe10dmlsl3mf
+        live:
+          type: boolean
+          example: true
+        paid_out_date:
+          type: string
+          format: date-time
+        service_id:
+          type: string
+          example: dlsd0dkad20sk0adne9fjd
+        state:
+          type: string
+          enum:
+          - UNDEFINED
+          - IN_TRANSIT
+          - PAID_OUT
+          - FAILED
+          example: "{\"status\":\"paidout\",\"finished\":true}"
