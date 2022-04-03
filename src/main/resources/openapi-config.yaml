@@ -1,6 +1,9 @@
 resourceClasses:
   - uk.gov.pay.ledger.event.resource.EventResource
+  - uk.gov.pay.ledger.healthcheck.HealthCheckResource
   - uk.gov.pay.ledger.payout.resource.PayoutResource
+  - uk.gov.pay.ledger.report.resource.PerformanceReportResource
+  - uk.gov.pay.ledger.report.resource.ReportResource
 readAllResources: true
 sortOutput: true
 prettyPrint: true

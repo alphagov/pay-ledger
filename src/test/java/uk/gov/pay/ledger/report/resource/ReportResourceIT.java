@@ -41,6 +41,11 @@ public class ReportResourceIT {
                 .withGatewayAccountId(gatewayAccountId)
                 .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
                 .insert(rule.getJdbi());
+        aTransactionFixture()
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId("account-id-to-exclude")
+                .withCreatedDate(ZonedDateTime.parse("2019-10-01T10:00:00.000Z"))
+                .insert(rule.getJdbi());
 
         given().port(port)
                 .contentType(JSON)

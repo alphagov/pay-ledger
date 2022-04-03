@@ -4,6 +4,11 @@ import com.codahale.metrics.health.HealthCheck;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.dropwizard.setup.Environment;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -19,6 +24,7 @@ import static javax.ws.rs.core.Response.status;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @Path("/")
+@Tag(name = "Other")
 public class HealthCheckResource {
 
     private Environment environment;
@@ -31,6 +37,26 @@ public class HealthCheckResource {
     @GET
     @Path("healthcheck")
     @Produces(APPLICATION_JSON)
+    @Operation(
+            summary = "Healthcheck endpoint the ledger (checks postgresql, sqs queue)",
+            responses = {@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(example = "{" +
+                    "    \"postgresql\": {" +
+                    "        \"healthy\": true," +
+                    "        \"message\": \"Healthy\"" +
+                    "    }," +
+                    "    \"sqsQueue\": {" +
+                    "        \"healthy\": true," +
+                    "        \"message\": \"Healthy\"" +
+                    "    }," +
+                    "    \"deadlocks\": {" +
+                    "        \"healthy\": true," +
+                    "        \"message\": \"Healthy\"" +
+                    "    }" +
+                    "}")
+            )),
+                    @ApiResponse(responseCode = "503", description = "Service Unavailable")
+            }
+    )
     public Response healthCheck() {
         SortedMap<String, HealthCheck.Result> results = environment.healthChecks().runHealthChecks();
 

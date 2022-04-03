@@ -1,16 +1,18 @@
 package uk.gov.pay.ledger.report.entity;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Objects;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TransactionSummaryResult {
 
     private TransactionsStatisticsResult payments;
     private TransactionsStatisticsResult motoPayments;
     private TransactionsStatisticsResult refunds;
+    @Schema(example = "6000")
     private Long netIncome;
 
     public TransactionSummaryResult(TransactionsStatisticsResult payments,

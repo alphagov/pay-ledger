@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.report.params;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import uk.gov.service.payments.commons.validation.ValidDate;
 
 import javax.ws.rs.QueryParam;
@@ -8,16 +9,20 @@ import java.util.Objects;
 public class TransactionSummaryParams {
 
     @QueryParam("account_id")
+    @Parameter(example = "1", description = "Gateway account ID. Required when override_account_id_restriction is 'false'")
     private String accountId;
 
     @QueryParam("include_moto_statistics")
+    @Parameter(example = "false", description = "Set to true to return statistics for moto transactions")
     private boolean includeMotoStatistics;
 
     @QueryParam("from_date")
+    @Parameter(description = "From date of transactions to be searched (this date is exclusive).", example = "2022-03-29T00:00:00Z")
     @ValidDate(message = "Invalid attribute value: from_date. Must be a valid date")
     private String fromDate;
 
     @QueryParam("to_date")
+    @Parameter(description = "To date of transactions to be searched (this date is exclusive).", example = "2022-03-29T00:00:00Z")
     @ValidDate(message = "Invalid attribute value: to_date. Must be a valid date")
     private String toDate;
 
