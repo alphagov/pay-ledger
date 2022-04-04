@@ -4,7 +4,7 @@ info:
   title: Ledger API
   version: v1.0.0
 servers:
-- url: http://ledger_url 
+- url: http://ledger_url
 paths:
   /healthcheck:
     get:
@@ -119,7 +119,7 @@ paths:
         name: override_account_id_restriction
         schema:
           type: boolean
-      - description: Comma separate gateway account IDs. Required except when override_account_id_restriction=true
+      - description: Comma delimited gateway account IDs. Required except when override_account_id_restriction=true
         example: "1,2"
         in: query
         name: gateway_account_id
@@ -451,8 +451,425 @@ paths:
       summary: Get transaction summary for query params
       tags:
       - Reports
+  /v1/transaction:
+    get:
+      operationId: search transactions
+      parameters:
+      - description: Set to '2' to return failed transaction states FAILED_REJECTED/FAILED_EXPIRED/FAILED_CANCELLED
+          mapped to declined/timedout/cancelled external status respectively.Otherwise
+          these transaction states will all be mapped to `failed` status
+        in: query
+        name: status_version
+        schema:
+          type: integer
+          format: int32
+          default: 2
+      - description: Set to 'true' to search for transactions by exact reference.
+          Otherwise reference is partially matched
+        in: query
+        name: exact_reference_match
+        schema:
+          type: boolean
+          default: false
+      - example: test@example.org
+        in: query
+        name: email
+        schema:
+          type: string
+      - example: my-payment-reference
+        in: query
+        name: reference
+        schema:
+          type: string
+      - example: J Doe
+        in: query
+        name: cardholder_name
+        schema:
+          type: string
+      - example: 7890
+        in: query
+        name: last_digits_card_number
+        schema:
+          type: string
+      - example: 123456
+        in: query
+        name: first_digits_card_number
+        schema:
+          type: string
+      - description: Comma delimited payment states.
+        example: "success,error"
+        in: query
+        name: payment_states
+        schema:
+          $ref: '#/components/schemas/CommaDelimitedSetParameter'
+      - example: success
+        in: query
+        name: state
+        schema:
+          type: string
+      - description: Comma delimited refund states.
+        example: "success,error"
+        in: query
+        name: refund_states
+        schema:
+          $ref: '#/components/schemas/CommaDelimitedSetParameter'
+      - description: Comma delimited card brands.
+        example: "visa,mastercard"
+        in: query
+        name: card_brands
+        schema:
+          $ref: '#/components/schemas/CommaDelimitedSetParameter'
+      - description: From date of transactions to be searched (this date is inclusive).
+        example: 2015-08-14T12:35:00Z
+        in: query
+        name: from_date
+        schema:
+          type: string
+      - description: To date of transactions to be searched (this date is inclusive).
+        example: 2015-08-14T12:35:00Z
+        in: query
+        name: to_date
+        schema:
+          type: string
+      - example: PAYMENT
+        in: query
+        name: transaction_type
+        schema:
+          type: string
+          enum:
+          - PAYMENT
+          - REFUND
+      - example: po_fj893joishj12lndk
+        in: query
+        name: gateway_payout_id
+        schema:
+          type: string
+      - description: From date of transactions settled date to be searched (this date
+          is inclusive).
+        example: 2015-08-14
+        in: query
+        name: from_settled_date
+        schema:
+          type: string
+      - description: To date of transactions settled date to be searched (this date
+          is inclusive).
+        example: 2015-08-14
+        in: query
+        name: to_settled_date
+        schema:
+          type: string
+      - example: metadata-value-1
+        in: query
+        name: metadata_value
+        schema:
+          type: string
+      - example: 1
+        in: query
+        name: page
+        schema:
+          type: integer
+          format: int64
+      - example: 100
+        in: query
+        name: display_size
+        schema:
+          type: integer
+          format: int64
+          default: 500
+      - description: Set to 'true' to limit the search counting the total number of
+          transactions to 'limit_total_size' param
+        example: true
+        in: query
+        name: limit_total
+        schema:
+          type: boolean
+          default: false
+      - example: 1000
+        in: query
+        name: limit_total_size
+        schema:
+          type: integer
+          format: int64
+          default: 10000
+      - example: a14f0926-b44d-4160-8184-1b1f66e576ab
+        in: query
+        name: gateway_transaction_id
+        schema:
+          type: string
+      - description: Set to true to list transactions for all accounts.
+        in: query
+        name: override_account_id_restriction
+        schema:
+          type: boolean
+      - description: Comma delimited gateway account IDs. Required except when override_account_id_restriction=true
+        example: "1,2"
+        in: query
+        name: account_id
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionSearchResponse'
+          description: OK
+        "400":
+          content:
+            application/json; qs=1:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing required query parameters
+        "504":
+          description: Search query cancelled due to query timeout
+      summary: Search transactions by query params. Same endpoint can be used to download
+        CSV (with  Accept header="text/csv"). Refer to code for details
+      tags:
+      - Transactions
+  /v1/transaction/gateway-transaction/{gatewayTransactionId}:
+    get:
+      operationId: findByGatewayTransactionId
+      parameters:
+      - description: Transaction ID from payment provider
+        example: a14f0926-b44d-4160-8184-1b1f66e576ab
+        in: path
+        name: gatewayTransactionId
+        required: true
+        schema:
+          type: string
+      - example: sandbox
+        in: query
+        name: payment_provider
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json; qs=1:
+              schema:
+                $ref: '#/components/schemas/TransactionView'
+          description: OK
+        "404":
+          description: Not found
+        "422":
+          content:
+            application/json; qs=1:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: If payment_provider query parameter is missing
+      summary: Get transaction for a gateway transaction ID
+      tags:
+      - Transactions
+  /v1/transaction/{parentTransactionExternalId}/transaction:
+    get:
+      operationId: getTransactionsForParentTransaction
+      parameters:
+      - description: Parent transaction external ID
+        example: d0sk01d9amdk3ks0dk2dj03kd
+        in: path
+        name: parentTransactionExternalId
+        required: true
+        schema:
+          type: string
+      - description: Gateway account ID
+        example: 1
+        in: query
+        name: gateway_account_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json; qs=1:
+              schema:
+                $ref: '#/components/schemas/TransactionsForTransactionResponse'
+          description: OK
+        "404":
+          description: Not found
+        "422":
+          content:
+            application/json; qs=1:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing required query parameter (gateway_account_id)
+      summary: "Get transactions (ex: refunds) related to parent transaction (payment)"
+      tags:
+      - Transactions
+  /v1/transaction/{transactionExternalId}:
+    get:
+      operationId: getById
+      parameters:
+      - in: path
+        name: transactionExternalId
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: account_id
+        schema:
+          type: string
+      - in: query
+        name: override_account_id_restriction
+        schema:
+          type: boolean
+      - in: query
+        name: transaction_type
+        schema:
+          type: string
+          enum:
+          - PAYMENT
+          - REFUND
+      - in: query
+        name: parent_external_id
+        schema:
+          type: string
+      - in: query
+        name: status_version
+        schema:
+          type: integer
+          format: int32
+          default: 2
+      responses:
+        "200":
+          content:
+            application/json; qs=1:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionView'
+          description: OK
+        "400":
+          content:
+            application/json; qs=1:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing required query parameters
+        "500":
+          description: Internal Server Error for invalid query parameter values
+      summary: Get transaction by external ID
+      tags:
+      - Transactions
+  /v1/transaction/{transactionExternalId}/event:
+    get:
+      operationId: events
+      parameters:
+      - description: Transaction external ID
+        example: 9np5pocnotgkpp029d5kdfau5f
+        in: path
+        name: transactionExternalId
+        required: true
+        schema:
+          type: string
+      - example: 1
+        in: query
+        name: gateway_account_id
+        required: true
+        schema:
+          type: string
+      - description: Set to 'true' to return all events. By default events that do
+          not map to an external state are removed and duplicate events mapping to
+          same external state are reduced to one event.
+        in: query
+        name: include_all_events
+        schema:
+          type: boolean
+          default: false
+      - description: Set to '2' to return failed transaction states FAILED_REJECTED/FAILED_EXPIRED/FAILED_CANCELLED
+          mapped to declined/timedout/cancelled status respectively.Otherwise these
+          transaction states will all be mapped to `failed` status
+        in: query
+        name: status_version
+        schema:
+          type: integer
+          format: int32
+          default: 2
+      responses:
+        "200":
+          content:
+            application/json; qs=1:
+              schema:
+                $ref: '#/components/schemas/TransactionEventResponse'
+          description: OK
+        "404":
+          description: Not found
+        "422":
+          content:
+            application/json; qs=1:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing required query parameters
+      summary: Get events for transaction external ID
+      tags:
+      - Transactions
 components:
   schemas:
+    Address:
+      type: object
+      properties:
+        city:
+          type: string
+          example: London
+        country:
+          type: string
+          example: GB
+        county:
+          type: string
+          example: county
+        line1:
+          type: string
+          example: address line 1
+        line2:
+          type: string
+          example: address line 2
+        postcode:
+          type: string
+          example: Ex 8RR
+    AuthorisationSummary:
+      type: object
+      properties:
+        three_d_secure:
+          $ref: '#/components/schemas/ThreeDSecure'
+    CardDetails:
+      type: object
+      properties:
+        billing_address:
+          $ref: '#/components/schemas/Address'
+        card_brand:
+          type: string
+          example: Visa
+        card_type:
+          type: string
+          enum:
+          - CREDIT
+          - DEBIT
+          example: credit
+        cardholder_name:
+          type: string
+          example: J Doe
+        expiry_date:
+          type: string
+          example: 11/43
+        first_digits_card_number:
+          type: string
+          example: "424242"
+        last_digits_card_number:
+          type: string
+          example: "4242"
+    CommaDelimitedSetParameter:
+      type: object
+      properties:
+        notEmpty:
+          type: boolean
+        parameters:
+          type: array
+          items:
+            type: string
+        rawString:
+          type: string
     ErrorResponse:
       type: object
       properties:
@@ -565,6 +982,21 @@ components:
         transaction_type:
           type: string
           example: PAYMENT
+    ExternalTransactionState:
+      type: object
+      properties:
+        code:
+          type: string
+          example: P0030
+        finished:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Payment was cancelled by the user
+        status:
+          type: string
+          example: cancelled
     GatewayAccountMonthlyPerformanceReportEntity:
       type: object
       properties:
@@ -677,6 +1109,39 @@ components:
           type: integer
           format: int64
           example: 1
+    RefundSummary:
+      type: object
+      properties:
+        amount_available:
+          type: integer
+          format: int64
+        amount_refunded:
+          type: integer
+          format: int64
+        amount_submitted:
+          type: integer
+          format: int64
+        status:
+          type: string
+          example: unavailable
+        user_external_id:
+          type: string
+    SettlementSummary:
+      type: object
+      properties:
+        settled_date:
+          type: string
+          example: 2022-01-26
+    ThreeDSecure:
+      type: object
+      properties:
+        required:
+          type: boolean
+          description: '`true` if payment requires 3D Secure authentication. '
+          example: true
+        version:
+          type: string
+          example: 2.1.0
     TimeseriesReportSlice:
       type: object
       properties:
@@ -708,6 +1173,56 @@ components:
         total_amount:
           type: integer
           format: int32
+    TransactionEvent:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 1000
+        data:
+          type: object
+          additionalProperties:
+            type: object
+        event_type:
+          type: string
+          example: CANCELLED_BY_USER
+        resource_type:
+          type: string
+          example: PAYMENT
+        state:
+          $ref: '#/components/schemas/ExternalTransactionState'
+        timestamp:
+          type: string
+          format: date-time
+    TransactionEventResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionEvent'
+        transaction_id:
+          type: string
+          example: 9np5pocnotgkpp029d5kdfau5f
+    TransactionSearchResponse:
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/PaginationBuilder'
+        count:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionView'
+        total:
+          type: integer
+          format: int64
     TransactionSummaryResult:
       type: object
       properties:
@@ -721,6 +1236,131 @@ components:
           $ref: '#/components/schemas/TransactionsStatisticsResult'
         refunds:
           $ref: '#/components/schemas/TransactionsStatisticsResult'
+    TransactionView:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 1000
+        authorisation_summary:
+          $ref: '#/components/schemas/AuthorisationSummary'
+        card_details:
+          $ref: '#/components/schemas/CardDetails'
+        corporate_card_surcharge:
+          type: integer
+          format: int64
+          example: 0
+        created_date:
+          type: string
+          format: date-time
+        credential_external_id:
+          type: string
+          example: 7a7a718cb8b0401f8b8f4cdda9804073
+        delayed_capture:
+          type: boolean
+        description:
+          type: string
+          example: New passport application
+        email:
+          type: string
+          example: citizen@example.org
+        fee:
+          type: integer
+          format: int64
+          example: 2
+        gateway_account_id:
+          type: string
+          example: "1"
+        gateway_payout_id:
+          type: string
+          example: po_mdoiu23jkdj1kj23sd
+        gateway_transaction_id:
+          type: string
+          example: fd21-1mdknkls1-2121-csdf
+        language:
+          type: string
+          example: en
+        live:
+          type: boolean
+        metadata:
+          type: object
+          additionalProperties:
+            type: object
+        moto:
+          type: boolean
+        net_amount:
+          type: integer
+          format: int64
+          example: -2
+        parent_transaction_id:
+          type: string
+          description: Parent transaction external ID. Available for refunds
+          example: 4dfdhapsdgftgkpp029d5kdfau5f
+        payment_details:
+          $ref: '#/components/schemas/TransactionView'
+        payment_provider:
+          type: string
+          example: sandbox
+        reference:
+          type: string
+          example: payment reference
+        refund_summary:
+          $ref: '#/components/schemas/RefundSummary'
+        refunded_by:
+          type: string
+          description: External ID of the service user that refunded payment. Only
+            available for refunds
+          example: dj8923eihsdih23hkjfe8d
+        refunded_by_user_email:
+          type: string
+          description: Service user email that refunded the payment. Only available
+            for refunds
+          example: test@example.org
+        return_url:
+          type: string
+          example: https://service-name.gov.uk/transactions/12345
+        service_id:
+          type: string
+          example: baea0585e30d4acbb438524fca82b51e
+        settlement_summary:
+          $ref: '#/components/schemas/SettlementSummary'
+        source:
+          type: string
+          enum:
+          - CARD_API
+          - CARD_PAYMENT_LINK
+          - CARD_AGENT_INITIATED_MOTO
+          - CARD_EXTERNAL_TELEPHONE
+          example: CARD_API
+        state:
+          $ref: '#/components/schemas/ExternalTransactionState'
+        total_amount:
+          type: integer
+          format: int64
+          example: 1000
+        transaction_id:
+          type: string
+          example: 9np5pocnotgkpp029d5kdfau5f
+        transaction_type:
+          type: string
+          enum:
+          - PAYMENT
+          - REFUND
+          example: PAYMENT
+        wallet_type:
+          type: string
+          example: APPLE_PAY
+    TransactionsForTransactionResponse:
+      type: object
+      properties:
+        parent_transaction_id:
+          type: string
+          example: 9np5pocnotgkpp029d5kdfau5f
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionView'
     TransactionsStatisticsResult:
       type: object
       properties:

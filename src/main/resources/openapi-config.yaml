@@ -4,6 +4,7 @@ resourceClasses:
   - uk.gov.pay.ledger.payout.resource.PayoutResource
   - uk.gov.pay.ledger.report.resource.PerformanceReportResource
   - uk.gov.pay.ledger.report.resource.ReportResource
+  - uk.gov.pay.ledger.transaction.resource.TransactionResource
 readAllResources: true
 sortOutput: true
 prettyPrint: true

@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.transaction.search.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,6 +17,7 @@ public class SettlementSummary {
         this.settledDate = settledDate;
     }
 
+    @Schema(example = "2022-01-26")
     @JsonProperty("settled_date")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public Optional<String> getSettledDate() {

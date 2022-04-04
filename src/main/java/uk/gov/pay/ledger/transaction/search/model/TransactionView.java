@@ -3,18 +3,19 @@ package uk.gov.pay.ledger.transaction.search.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.pay.ledger.transaction.model.AuthorisationSummary;
-import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
-import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Refund;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.ExternalTransactionState;
+import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -23,44 +24,66 @@ import java.util.Map;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TransactionView {
 
     @JsonIgnore
     private Long id;
+    @Schema(example = "1")
     private String gatewayAccountId;
+    @Schema(example = "baea0585e30d4acbb438524fca82b51e")
     private String serviceId;
+    @Schema(example = "7a7a718cb8b0401f8b8f4cdda9804073")
     private String credentialExternalId;
+    @Schema(example = "1000")
     private Long amount;
+    @Schema(example = "1000")
     private Long totalAmount;
+    @Schema(example = "0")
     private Long corporateCardSurcharge;
+    @Schema(example = "2")
     private Long fee;
+    @Schema(example = "-2")
     private Long netAmount;
     private ExternalTransactionState state;
+    @Schema(example = "New passport application")
     private String description;
+    @Schema(example = "payment reference")
     private String reference;
+    @Schema(example = "en")
     private String language;
     private String externalId;
     private String parentExternalId;
+    @Schema(example = "https://service-name.gov.uk/transactions/12345")
     private String returnUrl;
+    @Schema(example = "citizen@example.org")
     private String email;
+    @Schema(example = "sandbox")
     private String paymentProvider;
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
+    @Schema(example = "\"2016-01-21T17:15:00Z\"")
     private ZonedDateTime createdDate;
     private CardDetails cardDetails;
     private Boolean delayedCapture;
+    @Schema(example = "fd21-1mdknkls1-2121-csdf")
     private String gatewayTransactionId;
     private RefundSummary refundSummary;
     private SettlementSummary settlementSummary;
     private AuthorisationSummary authorisationSummary;
     private Map<String, Object> metadata;
+    @Schema(description = "External ID of the service user that refunded payment. Only available for refunds", example = "dj8923eihsdih23hkjfe8d")
     private String refundedBy;
+    @Schema(description = "Service user email that refunded the payment. Only available for refunds", example = "test@example.org")
     private String refundedByUserEmail;
+    @Schema(example = "PAYMENT")
     private TransactionType transactionType;
     private Boolean moto;
     private Boolean live;
+    @Schema(example = "CARD_API")
     private Source source;
+    @Schema(example = "APPLE_PAY")
     private String walletType;
+    @Schema(example = "po_mdoiu23jkdj1kj23sd")
     private String gatewayPayoutId;
     private TransactionView paymentDetails;
 
@@ -209,11 +232,13 @@ public class TransactionView {
     }
 
     @JsonProperty("transaction_id")
+    @Schema(example = "9np5pocnotgkpp029d5kdfau5f")
     public String getTransactionId() {
         return externalId;
     }
 
     @JsonProperty("parent_transaction_id")
+    @Schema(example = "4dfdhapsdgftgkpp029d5kdfau5f", description = "Parent transaction external ID. Available for refunds")
     public String getParentTransactionId() {
         return parentExternalId;
     }

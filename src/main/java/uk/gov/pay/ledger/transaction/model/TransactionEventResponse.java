@@ -1,13 +1,15 @@
 package uk.gov.pay.ledger.transaction.model;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TransactionEventResponse {
 
+    @Schema(example = "9np5pocnotgkpp029d5kdfau5f")
     private final String transactionId;
     private final List<TransactionEvent> events;
 

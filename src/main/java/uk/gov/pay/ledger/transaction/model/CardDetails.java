@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.pay.ledger.util.serialiser.ToLowerCaseStringSerializer;
 
 import javax.persistence.EnumType;
@@ -14,12 +15,18 @@ import java.util.Objects;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class CardDetails {
 
+    @Schema(example = "J Doe")
     private String cardHolderName;
     private Address billingAddress;
+    @Schema(example = "Visa")
     private String cardBrand;
+    @Schema(example = "4242")
     private String lastDigitsCardNumber;
+    @Schema(example = "424242")
     private String firstDigitsCardNumber;
+    @Schema(example = "11/43")
     private String expiryDate;
+    @Schema(example = "credit")
     private CardType cardType;
 
     public CardDetails(String cardHolderName, Address billingAddress, String cardBrand,

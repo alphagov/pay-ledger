@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Objects;
 
@@ -10,7 +11,9 @@ import java.util.Objects;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class ThreeDSecure {
 
+    @Schema(example = "true", description = "`true` if payment requires 3D Secure authentication. ")
     private boolean requires3ds;
+    @Schema(example = "2.1.0")
     private String version;
 
     public ThreeDSecure(boolean requires3ds, String version) {
