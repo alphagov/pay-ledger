@@ -1,17 +1,21 @@
 package uk.gov.pay.ledger.report.entity;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class PerformanceReportEntity {
 
+    @Schema(example = "1")
     private final long totalVolume;
 
+    @Schema(example = "1000")
     private final BigDecimal totalAmount;
 
+    @Schema(example = "1000.00")
     private final BigDecimal averageAmount;
 
     public PerformanceReportEntity(long totalVolume, BigDecimal totalAmount, BigDecimal averageAmount) {

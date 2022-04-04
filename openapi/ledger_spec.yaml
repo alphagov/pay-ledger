@@ -4,8 +4,33 @@ info:
   title: Ledger API
   version: v1.0.0
 servers:
-- url: http://ledger_url
+- url: http://ledger_url 
 paths:
+  /healthcheck:
+    get:
+      operationId: healthCheck
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+                example:
+                  postgresql:
+                    healthy: true
+                    message: Healthy
+                  sqsQueue:
+                    healthy: true
+                    message: Healthy
+                  deadlocks:
+                    healthy: true
+                    message: Healthy
+          description: OK
+        "503":
+          description: Service Unavailable
+      summary: "Healthcheck endpoint the ledger (checks postgresql, sqs queue)"
+      tags:
+      - Other
   /v1/event/ticker:
     get:
       operationId: listEvents
@@ -113,6 +138,319 @@ paths:
       summary: Search payouts by gateway_account_id and state
       tags:
       - Payouts
+  /v1/report/gateway-performance-report:
+    get:
+      operationId: getGatewayMonthlyPerformanceReport
+      parameters:
+      - description: From date of transaction summary to be searched (this date is
+          inclusive).
+        example: 2022-03-29
+        in: query
+        name: from_date
+        required: true
+        schema:
+          type: string
+      - description: To date of transaction summary to be searched (this date is inclusive).
+        example: 2022-03-29
+        in: query
+        name: to_date
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GatewayAccountMonthlyPerformanceReportEntity'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing required query parameters (from_date or to_date)
+        "500":
+          description: Internal Server Error for invalid query parameter values
+      summary: Get monthly performance report by gateway account. Queries transaction_summary
+        table
+      tags:
+      - Reports
+  /v1/report/payments_by_state:
+    get:
+      operationId: getPaymentCountsByState
+      parameters:
+      - description: Gateway account ID. Required when override_account_id_restriction
+          is 'false'
+        example: 1
+        in: query
+        name: account_id
+        schema:
+          type: string
+      - description: Set to true to return statistics for moto transactions
+        example: false
+        in: query
+        name: include_moto_statistics
+        schema:
+          type: boolean
+      - description: From date of transactions to be searched (this date is exclusive).
+        example: 2022-03-29T00:00:00Z
+        in: query
+        name: from_date
+        schema:
+          type: string
+      - description: To date of transactions to be searched (this date is exclusive).
+        example: 2022-03-29T00:00:00Z
+        in: query
+        name: to_date
+        schema:
+          type: string
+      - description: Set to true to get counts for all gateway accounts.
+        in: query
+        name: override_account_id_restriction
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  timedout: 0
+                  submitted: 0
+                  declined: 0
+                  created: 0
+                  success: 1
+                  cancelled: 0
+                  started: 0
+                  error: 0
+                  undefined: 0
+                  capturable: 0
+          description: OK
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing required or invalid query parameters (from_date or
+            to_date)
+      summary: Get number of payments by transaction (payment) state
+      tags:
+      - Reports
+  /v1/report/performance-report:
+    get:
+      operationId: getPerformanceReport
+      parameters:
+      - description: From date of the transaction summary to be searched (this date
+          is inclusive). Required when to_date is provided
+        example: 2022-03-29
+        in: query
+        name: from_date
+        schema:
+          type: string
+      - description: To date of the transaction summary to be searched (this date
+          is inclusive). Required when from_date is provided
+        example: 2022-03-29
+        in: query
+        name: to_date
+        schema:
+          type: string
+      - description: Transaction state
+        in: query
+        name: state
+        schema:
+          type: string
+          enum:
+          - UNDEFINED
+          - CREATED
+          - STARTED
+          - SUBMITTED
+          - CAPTURABLE
+          - SUCCESS
+          - FAILED_REJECTED
+          - FAILED_EXPIRED
+          - FAILED_CANCELLED
+          - CANCELLED
+          - ERROR
+          - ERROR_GATEWAY
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformanceReportEntity'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: For missing query params or invalid state).
+        "500":
+          description: Internal Server Error for invalid query params (from_date/to_date)
+            values
+      summary: Get platform performance report (total volume and total_amount) for
+        the date range and transaction state. Queries transaction_summary table for
+        stats
+      tags:
+      - Reports
+  /v1/report/performance-report-legacy:
+    get:
+      operationId: getLegacyPerformanceReport
+      parameters:
+      - description: From date of transactions to be searched (this date is inclusive).
+        example: 2022-03-29T01:00:00Z
+        in: query
+        name: from_date
+        schema:
+          type: string
+      - description: To date of transactions to be searched (this date is exclusive).
+        example: 2022-03-29T01:00:00Z
+        in: query
+        name: to_date
+        schema:
+          type: string
+      - description: Transaction state
+        in: query
+        name: state
+        schema:
+          type: string
+          enum:
+          - UNDEFINED
+          - CREATED
+          - STARTED
+          - SUBMITTED
+          - CAPTURABLE
+          - SUCCESS
+          - FAILED_REJECTED
+          - FAILED_EXPIRED
+          - FAILED_CANCELLED
+          - CANCELLED
+          - ERROR
+          - ERROR_GATEWAY
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformanceReportEntity'
+          description: OK
+        "500":
+          description: Internal Server Error for invalid query parameter values
+      summary: "Get platform performance report (total volume and total_amount) for\
+        \ the date range and transaction state. Queries transaction table for stats,\
+        \ so could be slow for large date ranges"
+      tags:
+      - Reports
+  /v1/report/transactions-by-hour:
+    get:
+      operationId: getTransactionsByHour
+      parameters:
+      - description: From date of transaction summary to be searched (this date is
+          inclusive).
+        example: 2022-03-29T00:00:00Z
+        in: query
+        name: from_date
+        required: true
+        schema:
+          type: string
+      - description: To date of transaction summary to be searched (this date is inclusive).
+        example: 2022-03-29T00:00:00Z
+        in: query
+        name: to_date
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeseriesReportSlice'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing required query parameters
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid query parameters (from_date or to_date)
+      summary: Get transaction summary by hour
+      tags:
+      - Reports
+  /v1/report/transactions-summary:
+    get:
+      operationId: getTransactionSummaryResult
+      parameters:
+      - description: Gateway account ID. Required when override_account_id_restriction
+          is 'false'
+        example: 1
+        in: query
+        name: account_id
+        schema:
+          type: string
+      - description: Set to true to return statistics for moto transactions
+        example: false
+        in: query
+        name: include_moto_statistics
+        schema:
+          type: boolean
+      - description: From date of transactions to be searched (this date is exclusive).
+        example: 2022-03-29T00:00:00Z
+        in: query
+        name: from_date
+        schema:
+          type: string
+      - description: To date of transactions to be searched (this date is exclusive).
+        example: 2022-03-29T00:00:00Z
+        in: query
+        name: to_date
+        schema:
+          type: string
+      - description: Set to true to return summary for all accounts.
+        in: query
+        name: override_account_id_restriction
+        schema:
+          type: boolean
+      - description: Set to true to make from_date non-mandatory.
+        in: query
+        name: override_from_date_validation
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSummaryResult'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing required query parameter (from_date)
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing required or invalid query parameters (from_date or
+            to_date)
+      summary: Get transaction summary for query params
+      tags:
+      - Reports
 components:
   schemas:
     ErrorResponse:
@@ -133,10 +471,12 @@ components:
           - ACCOUNT_NOT_LINKED_WITH_PSP
           - TELEPHONE_PAYMENT_NOTIFICATIONS_NOT_ALLOWED
           - AGREEMENT_NOT_FOUND
+          example: GENERIC
         message:
           type: array
           items:
             type: string
+            example: example error message
     Event:
       type: object
       properties:
@@ -225,6 +565,31 @@ components:
         transaction_type:
           type: string
           example: PAYMENT
+    GatewayAccountMonthlyPerformanceReportEntity:
+      type: object
+      properties:
+        average_amount:
+          type: number
+          example: 1000.0
+        gateway_account_id:
+          type: integer
+          format: int64
+          example: 1
+        month:
+          type: integer
+          format: int64
+          example: 3
+        total_amount:
+          type: number
+          example: 1000
+        total_volume:
+          type: integer
+          format: int64
+          example: 1
+        year:
+          type: integer
+          format: int64
+          example: 2022
     PaginationBuilder:
       type: object
       properties:
@@ -299,3 +664,71 @@ components:
           - PAID_OUT
           - FAILED
           example: "{\"status\":\"paidout\",\"finished\":true}"
+    PerformanceReportEntity:
+      type: object
+      properties:
+        average_amount:
+          type: number
+          example: 1000.0
+        total_amount:
+          type: number
+          example: 1000
+        total_volume:
+          type: integer
+          format: int64
+          example: 1
+    TimeseriesReportSlice:
+      type: object
+      properties:
+        all_payments:
+          type: integer
+          format: int32
+          example: 10
+        amount:
+          type: integer
+          format: int32
+          example: 70
+        completed_payments:
+          type: integer
+          format: int32
+          example: 7
+        errored_payments:
+          type: integer
+          format: int32
+          example: 3
+        fee:
+          type: integer
+          format: int32
+        net_amount:
+          type: integer
+          format: int32
+        timestamp:
+          type: string
+          format: date-time
+        total_amount:
+          type: integer
+          format: int32
+    TransactionSummaryResult:
+      type: object
+      properties:
+        moto_payments:
+          $ref: '#/components/schemas/TransactionsStatisticsResult'
+        net_income:
+          type: integer
+          format: int64
+          example: 6000
+        payments:
+          $ref: '#/components/schemas/TransactionsStatisticsResult'
+        refunds:
+          $ref: '#/components/schemas/TransactionsStatisticsResult'
+    TransactionsStatisticsResult:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int64
+          example: 1
+        gross_amount:
+          type: integer
+          format: int64
+          example: 2000

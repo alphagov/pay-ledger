@@ -1,6 +1,14 @@
 package uk.gov.pay.ledger.report.resource;
 
 import com.codahale.metrics.annotation.Timed;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import uk.gov.pay.ledger.exception.ErrorResponse;
 import uk.gov.pay.ledger.exception.ValidationException;
 import uk.gov.pay.ledger.report.dao.PerformanceReportDao;
 import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
@@ -24,6 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Path("/v1/report")
 @Produces(APPLICATION_JSON)
+@Tag(name = "Reports")
 public class PerformanceReportResource {
 
     private final TransactionSummaryDao transactionSummaryDao;
@@ -38,8 +47,19 @@ public class PerformanceReportResource {
     @Path("/performance-report")
     @GET
     @Timed
-    public PerformanceReportEntity getPerformanceReport(@QueryParam("from_date") String fromDate,
+    @Operation(
+            summary = "Get platform performance report (total volume and total_amount) for the date range and transaction state. Queries transaction_summary table for stats",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PerformanceReportEntity.class))),
+                    @ApiResponse(responseCode = "400", description = "For missing query params or invalid state).", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error for invalid query params (from_date/to_date) values")
+            }
+    )
+    public PerformanceReportEntity getPerformanceReport(@Parameter(description = "From date of the transaction summary to be searched (this date is inclusive). Required when to_date is provided", example = "2022-03-29")
+                                                        @QueryParam("from_date") String fromDate,
+                                                        @Parameter(description = "To date of the transaction summary to be searched (this date is inclusive). Required when from_date is provided", example = "2022-03-29")
                                                         @QueryParam("to_date") String toDate,
+                                                        @Parameter(description = "Transaction state", schema = @Schema(implementation = TransactionState.class))
                                                         @QueryParam("state") String state) {
 
         var paramsBuilder = PerformanceReportParamsBuilder.builder();
@@ -53,9 +73,19 @@ public class PerformanceReportResource {
     @Path("/performance-report-legacy")
     @GET
     @Timed
-    public PerformanceReportEntity getLegacyPerformanceReport(@QueryParam("from_date") String fromDate,
-                                                        @QueryParam("to_date") String toDate,
-                                                        @QueryParam("state") String state) {
+    @Operation(
+            summary = "Get platform performance report (total volume and total_amount) for the date range and transaction state. Queries transaction table for stats, so could be slow for large date ranges",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PerformanceReportEntity.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error for invalid query parameter values")
+            }
+    )
+    public PerformanceReportEntity getLegacyPerformanceReport(@Parameter(description = "From date of transactions to be searched (this date is inclusive).", example = "2022-03-29T01:00:00Z")
+                                                              @QueryParam("from_date") String fromDate,
+                                                              @Parameter(description = "To date of transactions to be searched (this date is exclusive).", example = "2022-03-29T01:00:00Z")
+                                                              @QueryParam("to_date") String toDate,
+                                                              @Parameter(description = "Transaction state", schema = @Schema(implementation = TransactionState.class))
+                                                              @QueryParam("state") String state) {
 
         return performanceReportDao.performanceReportForPaymentTransactions(fromDate, toDate, state);
     }
@@ -84,8 +114,19 @@ public class PerformanceReportResource {
     @Path("/gateway-performance-report")
     @GET
     @Timed
-    public List<GatewayAccountMonthlyPerformanceReportEntity> getGatewayMonthlyPerformanceReport(@QueryParam("from_date") String fromDate,
-                                                                                                 @QueryParam("to_date") String toDate) {
+    @Operation(
+            summary = "Get monthly performance report by gateway account. Queries transaction_summary table",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GatewayAccountMonthlyPerformanceReportEntity.class)))),
+                    @ApiResponse(responseCode = "400", description = "Missing required query parameters (from_date or to_date)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error for invalid query parameter values")
+            }
+    )
+    public List<GatewayAccountMonthlyPerformanceReportEntity> getGatewayMonthlyPerformanceReport(
+            @Parameter(description = "From date of transaction summary to be searched (this date is inclusive).", example = "2022-03-29", required = true)
+            @QueryParam("from_date") String fromDate,
+            @Parameter(description = "To date of transaction summary to be searched (this date is inclusive).", example = "2022-03-29", required = true)
+            @QueryParam("to_date") String toDate) {
         if (isBlank(fromDate) || isBlank(toDate)) {
             throw new ValidationException("Both from_date and to_date must be provided");
         } else if (LocalDate.parse(fromDate).isAfter(LocalDate.parse(toDate))) {

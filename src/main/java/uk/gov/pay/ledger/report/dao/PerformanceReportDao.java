@@ -2,16 +2,12 @@ package uk.gov.pay.ledger.report.dao;
 
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
-import uk.gov.pay.ledger.report.entity.GatewayAccountMonthlyPerformanceReportEntity;
 import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
-import uk.gov.pay.ledger.report.mapper.GatewayAccountMonthlyPerformanceReportEntityMapper;
 import uk.gov.pay.ledger.report.mapper.PerformanceReportEntityMapper;
-import uk.gov.pay.ledger.report.params.PerformanceReportParams;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
-import java.util.List;
 
 public class PerformanceReportDao {
 
