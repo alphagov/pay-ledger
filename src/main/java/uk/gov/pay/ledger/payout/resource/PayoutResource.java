@@ -52,7 +52,7 @@ public class PayoutResource {
     public PayoutSearchResponse search(@BeanParam PayoutSearchParams searchParams,
                                        @QueryParam("override_account_id_restriction") @Parameter(description = "Set to true to list all payouts.")
                                                Boolean overrideAccountRestriction,
-                                       @QueryParam("gateway_account_id") @Parameter(description = "Comma separate gateway account IDs. Required except when override_account_id_restriction=true", required = true, example = "1,2", schema = @Schema(type = "string", implementation = String.class))
+                                       @QueryParam("gateway_account_id") @Parameter(description = "Comma delimited gateway account IDs. Required except when override_account_id_restriction=true", required = true, example = "1,2", schema = @Schema(type = "string", implementation = String.class))
                                                CommaDelimitedSetParameter gatewayAccountIds,
                                        @Context UriInfo uriInfo) {
 

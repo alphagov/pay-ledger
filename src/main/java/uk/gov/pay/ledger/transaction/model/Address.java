@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.transaction.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Objects;
 
@@ -10,11 +11,17 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Address {
 
+    @Schema(example = "address line 1")
     private String addressLine1;
+    @Schema(example = "address line 2")
     private String addressLine2;
+    @Schema(example = "Ex 8RR")
     private String addressPostCode;
+    @Schema(example = "London")
     private String addressCity;
+    @Schema(example = "county")
     private String addressCounty;
+    @Schema(example = "GB")
     private String addressCountry;
 
     public Address(String addressLine1, String addressLine2, String addressPostCode,

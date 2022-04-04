@@ -1,5 +1,7 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.pay.ledger.common.search.SearchParams;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -45,147 +47,166 @@ public class TransactionSearchParams extends SearchParams {
 
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
-    @DefaultValue("2")
-    @QueryParam("status_version")
     int statusVersion;
-    @DefaultValue("false")
-    @QueryParam("exact_reference_match")
     private boolean exactReferenceMatch;
     private List<String> accountIds;
-    @QueryParam("email")
     private String email;
-    @QueryParam("reference")
     private String reference;
-    @QueryParam("cardholder_name")
     private String cardHolderName;
-    @QueryParam("last_digits_card_number")
     private String lastDigitsCardNumber;
-    @QueryParam("first_digits_card_number")
     private String firstDigitsCardNumber;
-    @QueryParam("payment_states")
     private CommaDelimitedSetParameter paymentStates;
-    @QueryParam("state")
     private String state;
-    @QueryParam("refund_states")
     private CommaDelimitedSetParameter refundStates;
-    @QueryParam("card_brands")
     private CommaDelimitedSetParameter cardBrands;
-    @QueryParam("from_date")
     private String fromDate;
-    @QueryParam("to_date")
     private String toDate;
-    @QueryParam(TRANSACTION_TYPE_FIELD)
     private TransactionType transactionType;
-    @QueryParam("gateway_payout_id")
     private String gatewayPayoutId;
-    @QueryParam("from_settled_date")
     private String fromSettledDate;
-    @QueryParam("to_settled_date")
     private String toSettledDate;
-    @QueryParam("metadata_value")
     private String metadataValue;
     private Long pageNumber = 1L;
 
-    @DefaultValue("500")
-    @QueryParam("display_size")
     private Long displaySize = DEFAULT_MAX_DISPLAY_SIZE;
-
-    @DefaultValue("false")
-    @QueryParam("limit_total")
     private boolean limitTotal;
-    @DefaultValue("10000")
-    @QueryParam("limit_total_size")
     private Long limitTotalSize = DEFAULT_LIMIT_TOTAL_SIZE;
 
     private Map<String, Object> queryMap;
-    @QueryParam("gateway_transaction_id")
     private String gatewayTransactionId;
 
     public void setAccountIds(List<String> accountIds) {
         this.accountIds = List.copyOf(accountIds);
     }
 
+    @QueryParam("email")
+    @Parameter(example = "test@example.org")
     public void setEmail(String email) {
         this.email = email;
     }
 
+    @Parameter(example = "my-payment-reference")
+    @QueryParam("reference")
     public void setReference(String reference) {
         this.reference = reference;
     }
 
+    @Parameter(example = "J Doe")
+    @QueryParam("cardholder_name")
     public void setCardHolderName(String cardHolderName) {
         this.cardHolderName = cardHolderName;
     }
 
+    @Parameter(example = "7890")
+    @QueryParam("last_digits_card_number")
     public void setLastDigitsCardNumber(String lastDigitsCardNumber) {
         this.lastDigitsCardNumber = lastDigitsCardNumber;
     }
 
+    @Parameter(example = "123456")
+    @QueryParam("first_digits_card_number")
     public void setFirstDigitsCardNumber(String firstDigitsCardNumber) {
         this.firstDigitsCardNumber = firstDigitsCardNumber;
     }
 
+    @Parameter(description = "Comma delimited payment states.", example = "success,error", schema = @Schema(type = "string", implementation = String.class))
+    @QueryParam("payment_states")
     public void setPaymentStates(CommaDelimitedSetParameter paymentStates) {
         this.paymentStates = paymentStates;
     }
 
+    @Parameter(description = "Comma delimited refund states.", example = "success,error", schema = @Schema(type = "string", implementation = String.class))
+    @QueryParam("refund_states")
     public void setRefundStates(CommaDelimitedSetParameter refundStates) {
         this.refundStates = refundStates;
     }
 
+    @Parameter(description = "Comma delimited card brands.", example = "visa,mastercard", schema = @Schema(type = "string", implementation = String.class))
+    @QueryParam("card_brands")
     public void setCardBrands(CommaDelimitedSetParameter cardBrands) {
         this.cardBrands = cardBrands;
     }
 
+    @Parameter(description = "From date of transactions to be searched (this date is inclusive).", example = "\"2015-08-14T12:35:00Z\"")
+    @QueryParam("from_date")
     public void setFromDate(String fromDate) {
         this.fromDate = fromDate;
     }
 
+    @Parameter(description = "To date of transactions to be searched (this date is inclusive).", example = "\"2015-08-14T12:35:00Z\"")
+    @QueryParam("to_date")
     public void setToDate(String toDate) {
         this.toDate = toDate;
     }
 
+    @Parameter(example = "success")
+    @QueryParam("state")
     public void setState(String state) {
         this.state = state;
     }
 
+    @QueryParam(TRANSACTION_TYPE_FIELD)
+    @Parameter(example = "PAYMENT")
     public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
     }
 
+    @DefaultValue("2")
+    @Parameter(description = "Set to '2' to return failed transaction states FAILED_REJECTED/FAILED_EXPIRED/FAILED_CANCELLED" +
+            " mapped to declined/timedout/cancelled external status respectively." +
+            "Otherwise these transaction states will all be mapped to `failed` status", schema = @Schema(defaultValue = "2"))
+    @QueryParam("status_version")
     public void setStatusVersion(int statusVersion) {
         this.statusVersion = statusVersion;
     }
 
+    @Parameter(example = "po_fj893joishj12lndk")
+    @QueryParam("gateway_payout_id")
     public void setGatewayPayoutId(String gatewayPayoutId) {
         this.gatewayPayoutId = gatewayPayoutId;
     }
 
+    @Parameter(description = "From date of transactions settled date to be searched (this date is inclusive).", example = "\"2015-08-14\"")
+    @QueryParam("from_settled_date")
     public void setFromSettledDate(String fromSettledDate) {
         this.fromSettledDate = fromSettledDate;
     }
 
+    @Parameter(description = "To date of transactions settled date to be searched (this date is inclusive).", example = "\"2015-08-14\"")
+    @QueryParam("to_settled_date")
     public void setToSettledDate(String toSettledDate) {
         this.toSettledDate = toSettledDate;
     }
 
+    @QueryParam("metadata_value")
+    @Parameter(example = "metadata-value-1")
     public void setMetadataValue(String metadataValue) {
         this.metadataValue = metadataValue;
     }
 
     @QueryParam("page")
+    @Parameter(example = "1")
     public void setPageNumber(Long pageNumber) {
         this.pageNumber = Objects.requireNonNullElse(pageNumber, DEFAULT_PAGE_NUMBER);
     }
 
+    @Parameter(example = "100", schema = @Schema(defaultValue = "500"))
+    @DefaultValue("500")
+    @QueryParam("display_size")
     public void setDisplaySize(Long displaySize) {
         this.displaySize = displaySize;
     }
 
+    @Parameter(example = "1000", schema = @Schema(defaultValue = "10000"))
+    @DefaultValue("10000")
+    @QueryParam("limit_total_size")
     public void setLimitTotalSize(Long limitTotalSize) {
         this.limitTotalSize = limitTotalSize;
     }
 
+    @Parameter(example = "true", description = "Set to 'true' to limit the search counting the total number of transactions to 'limit_total_size' param")
+    @DefaultValue("false")
+    @QueryParam("limit_total")
     public void setLimitTotal(boolean limitTotal) {
         this.limitTotal = limitTotal;
     }
@@ -490,8 +511,8 @@ public class TransactionSearchParams extends SearchParams {
         }
 
         return "(" + List.of(
-                Optional.ofNullable(paymentStateFilter), Optional.ofNullable(refundStateFilter)
-        ).stream()
+                        Optional.ofNullable(paymentStateFilter), Optional.ofNullable(refundStateFilter)
+                ).stream()
                 .flatMap(Optional::stream)
                 .collect(Collectors.joining(" OR ")) + ")";
     }
@@ -500,10 +521,16 @@ public class TransactionSearchParams extends SearchParams {
         return "%" + rawUserInputText + "%";
     }
 
-    public void setExactReferenceMatch(boolean exactReferenceMatch) {
+    @DefaultValue("false")
+    @Schema(name = "exact_reference_match")
+    @Parameter(name = "exact_reference_match", description = "Set to 'true' to search for transactions by exact reference. Otherwise reference is partially matched")
+    @QueryParam("exact_reference_match")
+    public void setExactReferenceMatch(Boolean exactReferenceMatch) {
         this.exactReferenceMatch = exactReferenceMatch;
     }
 
+    @Parameter(example = "a14f0926-b44d-4160-8184-1b1f66e576ab")
+    @QueryParam("gateway_transaction_id")
     public void setGatewayTransactionId(String gatewayTransactionId) {
         this.gatewayTransactionId = gatewayTransactionId;
     }

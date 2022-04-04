@@ -1,14 +1,16 @@
 package uk.gov.pay.ledger.transaction.search.model;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
 import java.util.Objects;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class RefundSummary {
 
+    @Schema(example = "unavailable")
     private String status;
 
     private String userExternalId;

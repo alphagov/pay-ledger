@@ -3,11 +3,20 @@ package uk.gov.pay.ledger.transaction.resource;
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.inject.Inject;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jersey.repackaged.com.google.common.base.Stopwatch;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.app.LedgerConfig;
+import uk.gov.pay.ledger.exception.ErrorResponse;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionEventResponse;
 import uk.gov.pay.ledger.transaction.model.TransactionSearchResponse;
@@ -48,6 +57,7 @@ import static uk.gov.pay.ledger.transaction.search.common.TransactionSearchParam
 
 @Path("/v1/transaction")
 @Produces("application/json; qs=1")
+@Tag(name = "Transactions")
 public class TransactionResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
@@ -67,6 +77,14 @@ public class TransactionResource {
     @Path("/{transactionExternalId}")
     @GET
     @Timed
+    @Operation(
+            summary = "Get transaction by external ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TransactionView.class)))),
+                    @ApiResponse(responseCode = "400", description = "Missing required query parameters", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error for invalid query parameter values")
+            }
+    )
     public TransactionView getById(@PathParam("transactionExternalId") String transactionExternalId,
                                    @QueryParam("account_id") String gatewayAccountId,
                                    @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
@@ -91,9 +109,21 @@ public class TransactionResource {
     @Path("/")
     @GET
     @Timed
+    @Operation(
+            summary = "Search transactions by query params. Same endpoint can be used to download CSV (with  Accept header=\"text/csv\"). Refer to code for details",
+            operationId = "search transactions",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TransactionSearchResponse.class)),  mediaType = "application/json")),
+                    @ApiResponse(responseCode = "400", description = "Missing required query parameters", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "504", description = "Search query cancelled due to query timeout")
+            }
+    )
     public TransactionSearchResponse search(@Valid
+                                            @Parameter(schema = @Schema(implementation = TransactionSearchParams.class))
                                             @BeanParam TransactionSearchParams searchParams,
+                                            @Parameter(description = "Set to true to list transactions for all accounts.")
                                             @QueryParam("override_account_id_restriction") Boolean overrideAccountRestriction,
+                                            @Parameter(description = "Comma delimited gateway account IDs. Required except when override_account_id_restriction=true", example = "1,2", schema = @Schema(type = "string", implementation = String.class))
                                             @QueryParam("account_id") CommaDelimitedSetParameter gatewayAccountIds,
                                             @Context UriInfo uriInfo) {
         try {
@@ -114,6 +144,7 @@ public class TransactionResource {
     @GET
     @Produces("text/csv; qs=.5")
     @Timed
+    @Hidden
     public Response streamCsv(@Valid @BeanParam TransactionSearchParams searchParams,
                               @QueryParam("account_id") CommaDelimitedSetParameter gatewayAccountIds,
                               @QueryParam("fee_headers") boolean includeFeeHeaders,
@@ -178,9 +209,23 @@ public class TransactionResource {
     @Path("{transactionExternalId}/event")
     @GET
     @Timed
-    public TransactionEventResponse events(@PathParam("transactionExternalId") String transactionExternalId,
-                                           @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId,
+    @Operation(
+            summary = "Get events for transaction external ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TransactionEventResponse.class))),
+                    @ApiResponse(responseCode = "422", description = "Missing required query parameters", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
+    public TransactionEventResponse events(@Parameter(example = "9np5pocnotgkpp029d5kdfau5f", description = "Transaction external ID")
+                                           @PathParam("transactionExternalId") String transactionExternalId,
+                                           @Parameter(example = "1") @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId,
+                                           @Parameter(description = "Set to 'true' to return all events. By default events that do not map to an external state are removed" +
+                                                   " and duplicate events mapping to same external state are reduced to one event.", schema = @Schema(defaultValue = "false"))
                                            @QueryParam("include_all_events") boolean includeAllEvents,
+                                           @Parameter(description = "Set to '2' to return failed transaction states FAILED_REJECTED/FAILED_EXPIRED/FAILED_CANCELLED" +
+                                                   " mapped to declined/timedout/cancelled status respectively." +
+                                                   "Otherwise these transaction states will all be mapped to `failed` status", schema = @Schema(defaultValue = "2"))
                                            @DefaultValue("2") @QueryParam("status_version") int statusVersion,
                                            @Context UriInfo uriInfo) {
 
@@ -192,8 +237,19 @@ public class TransactionResource {
     @Path("/{parentTransactionExternalId}/transaction")
     @GET
     @Timed
-    public TransactionsForTransactionResponse getTransactionsForParentTransaction(@PathParam("parentTransactionExternalId") String parentTransactionExternalId,
-                                                                                  @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId
+    @Operation(
+            summary = "Get transactions (ex: refunds) related to parent transaction (payment)",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TransactionsForTransactionResponse.class))),
+                    @ApiResponse(responseCode = "422", description = "Missing required query parameter (gateway_account_id)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
+    public TransactionsForTransactionResponse getTransactionsForParentTransaction(
+            @Parameter(example = "d0sk01d9amdk3ks0dk2dj03kd", description = "Parent transaction external ID", required = true)
+            @PathParam("parentTransactionExternalId") String parentTransactionExternalId,
+            @Parameter(example = "1", description = "Gateway account ID")
+            @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId
     ) {
         LOGGER.info("Get transactions for parent transaction: [{}], gateway_account_id [{}]",
                 parentTransactionExternalId, gatewayAccountId);
@@ -204,8 +260,17 @@ public class TransactionResource {
     @Path("/gateway-transaction/{gatewayTransactionId}")
     @GET
     @Timed
-    public TransactionView findByGatewayTransactionId(@PathParam("gatewayTransactionId") String gatewayTransactionId,
-                                                      @QueryParam("payment_provider") @NotEmpty String paymentProvider
+    @Operation(
+            summary = "Get transaction for a gateway transaction ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TransactionView.class))),
+                    @ApiResponse(responseCode = "422", description = "If payment_provider query parameter is missing", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
+    public TransactionView findByGatewayTransactionId(@Parameter(example = "a14f0926-b44d-4160-8184-1b1f66e576ab", description = "Transaction ID from payment provider")
+                                                      @PathParam("gatewayTransactionId") String gatewayTransactionId,
+                                                      @Parameter(example = "sandbox", required = true) @QueryParam("payment_provider") @NotEmpty String paymentProvider
     ) {
         return transactionService.findByGatewayTransactionId(gatewayTransactionId, paymentProvider)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));

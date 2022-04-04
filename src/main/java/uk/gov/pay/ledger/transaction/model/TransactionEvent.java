@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
@@ -27,11 +28,15 @@ public class TransactionEvent {
 
     @JsonIgnore
     private final String externalId;
+    @Schema(example = "1000")
     private final Long amount;
     private final ExternalTransactionState state;
+    @Schema(example = "PAYMENT")
     private final ResourceType resourceType;
+    @Schema(example = "CANCELLED_BY_USER")
     private final String eventType;
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
+    @Schema(example = "\"2022-03-29T16:58:49.298Z\"")
     private final ZonedDateTime timestamp;
     private final Map<String, Object> data;
 
