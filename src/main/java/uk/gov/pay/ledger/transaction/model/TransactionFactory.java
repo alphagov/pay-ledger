@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.search.model.PaymentSettlementSummary;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
+import uk.gov.service.payments.commons.model.AuthorisationMode;
 
 import java.io.IOException;
 import java.util.Map;
@@ -82,6 +83,10 @@ public class TransactionFactory {
 
             String credentialExternalId = safeGetAsString(transactionDetails, "credential_external_id");
 
+            AuthorisationMode authorisationMode = transactionDetails.has("authorisation_mode") ?
+                    AuthorisationMode.of(safeGetAsString(transactionDetails, "authorisation_mode")) :
+                    AuthorisationMode.WEB;
+
             return new Payment.Builder()
                     .withGatewayAccountId(entity.getGatewayAccountId())
                     .withServiceId(entity.getServiceId())
@@ -113,6 +118,7 @@ public class TransactionFactory {
                     .withSource(entity.getSource())
                     .withWalletType(safeGetAsString(transactionDetails, "wallet"))
                     .withGatewayPayoutId(entity.getGatewayPayoutId())
+                    .withAuthorisationMode(authorisationMode)
                     .build();
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());

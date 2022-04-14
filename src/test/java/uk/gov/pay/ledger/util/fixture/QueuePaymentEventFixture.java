@@ -139,6 +139,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("address_city", "London")
                                 .put("source", CARD_API)
                                 .put("address_country", "GB")
+                                .put("authorisation_mode", "web")
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":

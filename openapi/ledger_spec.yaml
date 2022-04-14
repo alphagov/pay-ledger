@@ -888,6 +888,8 @@ components:
           - ACCOUNT_NOT_LINKED_WITH_PSP
           - TELEPHONE_PAYMENT_NOTIFICATIONS_NOT_ALLOWED
           - AGREEMENT_NOT_FOUND
+          - ONE_TIME_TOKEN_INVALID
+          - ONE_TIME_TOKEN_ALREADY_USED
           example: GENERIC
         message:
           type: array
@@ -1243,6 +1245,13 @@ components:
           type: integer
           format: int64
           example: 1000
+        authorisation_mode:
+          type: string
+          enum:
+          - web
+          - moto_api
+          - external
+          example: web
         authorisation_summary:
           $ref: '#/components/schemas/AuthorisationSummary'
         card_details:
