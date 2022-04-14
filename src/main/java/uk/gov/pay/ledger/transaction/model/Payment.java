@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.service.payments.commons.model.AuthorisationMode;
 import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.transaction.search.model.PaymentSettlementSummary;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
@@ -46,6 +47,7 @@ public class Payment extends Transaction {
     private Boolean live;
     private Source source;
     private String walletType;
+    private AuthorisationMode authorisationMode;
 
     public Payment() {
 
@@ -79,6 +81,7 @@ public class Payment extends Transaction {
         this.source = builder.source;
         this.walletType = builder.walletType;
         this.eventCount = builder.eventCount;
+        this.authorisationMode = builder.authorisationMode;
     }
 
     @Override
@@ -192,6 +195,10 @@ public class Payment extends Transaction {
         return walletType;
     }
 
+    public AuthorisationMode getAuthorisationMode() {
+        return authorisationMode;
+    }
+
     public static class Builder {
         public String serviceId;
         private Long id;
@@ -224,6 +231,7 @@ public class Payment extends Transaction {
         private String externalId;
         private String gatewayPayoutId;
         private String credentialExternalId;
+        private AuthorisationMode authorisationMode;
 
         public Builder() {
         }
@@ -384,6 +392,11 @@ public class Payment extends Transaction {
 
         public Builder withServiceId(String serviceId) {
             this.serviceId = serviceId;
+            return this;
+        }
+
+        public Builder withAuthorisationMode(AuthorisationMode authorisationMode) {
+            this.authorisationMode = authorisationMode;
             return this;
         }
     }

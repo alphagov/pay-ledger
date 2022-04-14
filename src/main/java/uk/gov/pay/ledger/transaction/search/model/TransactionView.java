@@ -15,6 +15,7 @@ import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.ExternalTransactionState;
 import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.service.payments.commons.model.AuthorisationMode;
 import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZonedDateTime;
@@ -85,6 +86,8 @@ public class TransactionView {
     private String walletType;
     @Schema(example = "po_mdoiu23jkdj1kj23sd")
     private String gatewayPayoutId;
+    @Schema(example = "web")
+    private AuthorisationMode authorisationMode;
     private TransactionView paymentDetails;
 
     public TransactionView(Builder builder) {
@@ -122,6 +125,7 @@ public class TransactionView {
         this.source = builder.source;
         this.walletType = builder.walletType;
         this.gatewayPayoutId = builder.gatewayPayoutId;
+        this.authorisationMode = builder.authorisationMode;
         this.paymentDetails = builder.paymentDetails;
     }
 
@@ -163,7 +167,8 @@ public class TransactionView {
                     .withLive(payment.isLive())
                     .withSource(payment.getSource())
                     .withWalletType(payment.getWalletType())
-                    .withGatewayPayoutId(payment.getGatewayPayoutId());
+                    .withGatewayPayoutId(payment.getGatewayPayoutId())
+                    .withAuthorisationMode(payment.getAuthorisationMode());
             if (payment.getState() != null) {
                 paymentBuilder = paymentBuilder
                         .withState(ExternalTransactionState.from(payment.getState(), statusVersion));
@@ -279,6 +284,10 @@ public class TransactionView {
         return refundedByUserEmail;
     }
 
+    public AuthorisationMode getAuthorisationMode() {
+        return authorisationMode;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -389,6 +398,7 @@ public class TransactionView {
         private TransactionView paymentDetails;
         private String credentialExternalId;
         private String serviceId;
+        private AuthorisationMode authorisationMode;
 
         public Builder() {
         }
@@ -569,6 +579,11 @@ public class TransactionView {
 
         public Builder withServiceId(String serviceId) {
             this.serviceId = serviceId;
+            return this;
+        }
+
+        public Builder withAuthorisationMode(AuthorisationMode authorisationMode) {
+            this.authorisationMode = authorisationMode;
             return this;
         }
     }

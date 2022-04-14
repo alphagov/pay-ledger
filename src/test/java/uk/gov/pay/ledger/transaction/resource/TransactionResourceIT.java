@@ -71,7 +71,8 @@ public class TransactionResourceIT {
                 .body("live", is(Boolean.TRUE))
                 .body("wallet_type", is("APPLE_PAY"))
                 .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId));
+                .body("gateway_payout_id", is(gatewayPayoutId))
+                .body("authorisation_mode", is("web"));
     }
 
     @Test

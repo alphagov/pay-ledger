@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.service.payments.commons.model.AuthorisationMode;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -78,6 +79,7 @@ public class TransactionFactoryTest {
         fullTransactionDetails.add("external_metadata", metadata);
         fullTransactionDetails.addProperty("expiry_date", cardExpiryDate);
         fullTransactionDetails.addProperty("wallet", walletType);
+        fullTransactionDetails.addProperty("authorisation_mode", "moto_api");
 
         var payoutObject = aPayoutEntity()
                 .withPaidOutDate(paidOutDate)
@@ -183,6 +185,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getSettlementSummary().getCapturedDate(), is(Optional.empty()));
         assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.empty()));
         assertThat(payment.getSettlementSummary().getSettledDate(), is(Optional.empty()));
+        assertThat(payment.getAuthorisationMode(), is(AuthorisationMode.WEB));
     }
 
     @Test
@@ -326,5 +329,6 @@ public class TransactionFactoryTest {
         assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.of("2017-09-09T08:35:45.695Z")));
         assertThat(payment.getSettlementSummary().getSettledDate(), is(Optional.of("2017-09-19")));
         assertThat(payment.getWalletType(), is(walletType));
+        assertThat(payment.getAuthorisationMode(), is(AuthorisationMode.MOTO_API));
     }
 }
