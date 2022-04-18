@@ -12,17 +12,26 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class AgreementSearchParams extends SearchParams {
 
     private static final String SERCVICE_ID_FIELD = "service_id";
+    private static final String GATEWAY_ACCOUNT_ID_FIELD = "gateway_account_id";
     private static final String LIVE_FIELD = "live";
     private static final String STATUS_FIELD = "status";
+    private static final String REFERENCE_FIELD = "reference";
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 20L;
     private static final long DEFAULT_DISPLAY_SIZE = 20L;
 
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
+    @QueryParam("service_id")
     private List<String> serviceIds;
+    @QueryParam("gateway_account_id")
+    private List<String> gatewayAccountIds;
     @QueryParam("status")
     private String status;
+    @QueryParam("exact_reference_match")
+    private Boolean exactReferenceMatch;
+    @QueryParam("reference")
+    private String reference;
     @DefaultValue("true")
     private Long pageNumber = 1L;
     private Long displaySize = DEFAULT_DISPLAY_SIZE;
@@ -30,6 +39,10 @@ public class AgreementSearchParams extends SearchParams {
 
     public void setServiceIds(List<String> serviceIds) {
         this.serviceIds = List.copyOf(serviceIds);
+    }
+
+    public void setGatewayAccountIds(List<String> gatewayAccountIds) {
+        this.gatewayAccountIds = List.copyOf(gatewayAccountIds);
     }
 
     public void setStatus(String status) {
@@ -41,6 +54,14 @@ public class AgreementSearchParams extends SearchParams {
         this.pageNumber = Objects.requireNonNullElse(pageNumber, DEFAULT_PAGE_NUMBER);
     }
 
+    public void setExactReferenceMatch(Boolean exactReferenceMatch) {
+        this.exactReferenceMatch = exactReferenceMatch;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
     public List<String> getFilterTemplates() {
         List<String> filters = new ArrayList<>();
 
@@ -48,8 +69,20 @@ public class AgreementSearchParams extends SearchParams {
             filters.add(" a.service_id IN (<" + SERCVICE_ID_FIELD + ">)");
         }
 
+        if (gatewayAccountIds != null && !gatewayAccountIds.isEmpty()) {
+            filters.add(" a.gateway_account_id IN (<" + GATEWAY_ACCOUNT_ID_FIELD + ">)");
+        }
+
         if (isNotBlank(status)) {
             filters.add(" a.status = :" + STATUS_FIELD);
+        }
+
+        if (isNotBlank(reference)) {
+            if (exactReferenceMatch != null && exactReferenceMatch) {
+                filters.add(" lower(a.reference) = lower(:" + REFERENCE_FIELD + ")");
+            } else {
+                filters.add(" lower(a.reference) LIKE lower(:" + REFERENCE_FIELD + ")");
+            }
         }
         return List.copyOf(filters);
     }
@@ -62,15 +95,30 @@ public class AgreementSearchParams extends SearchParams {
                 queryMap.put(SERCVICE_ID_FIELD, serviceIds);
             }
 
+            if (gatewayAccountIds != null && !gatewayAccountIds.isEmpty()) {
+                queryMap.put(GATEWAY_ACCOUNT_ID_FIELD, gatewayAccountIds);
+            }
+
             if (isNotBlank(status)) {
-                queryMap.put(STATUS_FIELD,
-                        PayoutState.fromState(status).name());
+                queryMap.put(STATUS_FIELD, status);
+            }
+
+            if (isNotBlank(reference)) {
+                if (exactReferenceMatch != null && exactReferenceMatch) {
+                    queryMap.put(REFERENCE_FIELD, reference);
+                } else {
+                    queryMap.put(REFERENCE_FIELD, likeClause(reference));
+                }
             }
         }
         return queryMap;
     }
 
     public List<String> getGatewayAccountIds() {
+        return gatewayAccountIds;
+    }
+
+    public List<String> getServiceIds() {
         return serviceIds;
     }
 
@@ -110,13 +158,25 @@ public class AgreementSearchParams extends SearchParams {
             queries.add(SERCVICE_ID_FIELD + "=" + String.join(",", serviceIds));
         }
 
+        if (gatewayAccountIds != null && !gatewayAccountIds.isEmpty()) {
+            queries.add(GATEWAY_ACCOUNT_ID_FIELD + "=" + String.join(",", gatewayAccountIds));
+        }
+
         if (isNotBlank(status)) {
             queries.add(STATUS_FIELD + "=" + status);
+        }
+
+        if (isNotBlank(reference)) {
+            queries.add(REFERENCE_FIELD + "=" + reference);
         }
 
         queries.add("page=" + forPage);
         queries.add("display_size=" + getDisplaySize());
 
         return String.join("&", queries);
+    }
+
+    private String likeClause(String rawUserInputText) {
+        return "%" + rawUserInputText + "%";
     }
 }

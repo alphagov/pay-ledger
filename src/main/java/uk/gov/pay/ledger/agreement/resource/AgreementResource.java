@@ -26,6 +26,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.Objects;
@@ -56,6 +57,18 @@ public class AgreementResource {
         return agreementService.searchAgreements(searchParams, uriInfo);
     }
 
+    @Path("/")
+    @GET
+    @Produces("text/csv; qs=.5")
+    @Timed
+    public Response searchCSV(@BeanParam AgreementSearchParams querySearchParams,
+                                          @Context UriInfo uriInfo) {
+        StreamingOutput stream = outputStream -> {
+
+        };
+        return Response.ok(stream).build();
+    }
+
     @Path("/{agreementExternalId}")
     @GET
     @Timed
@@ -78,6 +91,8 @@ public class AgreementResource {
 
                             // for now this doesn't actually upsert the projection -- it would be fine to call the same code that upserts
                             // but would need to think through what would happen if two things are competing to do that (with EXCLUDED rules it should be fine)
+
+                            // note the dependant payment instrument projection would need to be streamed and projected too, omitted that for now
                             var entity = agreementService.inMemoryCalculateAgreementFor(stream);
                             LOGGER.info("X-Consistent set, projection out of date and was projected");
                             return Agreement.from(entity);

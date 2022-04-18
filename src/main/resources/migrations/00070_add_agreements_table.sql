@@ -6,13 +6,13 @@ CREATE TABLE agreement (
     external_id VARCHAR(26),
 
     -- needs this for now as public api currently only talks in this language
-    gateway_account_id VARCHAR(255) NOT NULL,
+    gateway_account_id VARCHAR(255),
     service_id VARCHAR(32),
-    reference VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL,
-    status text NOT NULL,
+    reference VARCHAR(255),
+    description VARCHAR(255),
+    status text,
     live BOOLEAN,
-    created_date TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'utc') NOT NULL,
+    created_date TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'utc'),
     event_count INTEGER
 );
 --rollback drop table agreement;
@@ -42,7 +42,7 @@ CREATE TABLE payment_instrument (
     expiry_date VARCHAR(6),
     card_brand TEXT,
     event_count INTEGER,
-    created_date TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'utc') NOT NULL
+    created_date TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'utc')
 );
 --rollback drop table payment_instrument;
 
