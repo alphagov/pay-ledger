@@ -96,6 +96,7 @@ public enum TransactionState {
                     Map.entry(SalientEventType.CAPTURE_CONFIRMED_BY_GATEWAY_NOTIFICATION, SUCCESS),
                     Map.entry(SalientEventType.CAPTURE_ERRORED, ERROR_GATEWAY),
                     Map.entry(SalientEventType.CAPTURE_ABANDONED_AFTER_TOO_MANY_RETRIES, ERROR_GATEWAY),
+                    Map.entry(SalientEventType.QUEUED_FOR_CAPTURE, SUCCESS),
                     Map.entry(SalientEventType.USER_APPROVED_FOR_CAPTURE, SUCCESS),
                     Map.entry(SalientEventType.USER_APPROVED_FOR_CAPTURE_AWAITING_SERVICE_APPROVAL, CAPTURABLE),
                     Map.entry(SalientEventType.SERVICE_APPROVED_FOR_CAPTURE, SUCCESS),
