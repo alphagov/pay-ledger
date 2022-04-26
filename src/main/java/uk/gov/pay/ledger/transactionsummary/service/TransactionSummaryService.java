@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import static java.time.ZoneOffset.UTC;
 import static uk.gov.pay.ledger.event.model.SalientEventType.CAPTURE_CONFIRMED;
 import static uk.gov.pay.ledger.event.model.SalientEventType.PAYMENT_CREATED;
+import static uk.gov.pay.ledger.event.model.SalientEventType.QUEUED_FOR_CAPTURE;
 import static uk.gov.pay.ledger.event.model.SalientEventType.SERVICE_APPROVED_FOR_CAPTURE;
 import static uk.gov.pay.ledger.event.model.SalientEventType.USER_APPROVED_FOR_CAPTURE;
 import static uk.gov.pay.ledger.event.model.SalientEventType.from;
@@ -30,6 +31,7 @@ public class TransactionSummaryService {
     // considered to project transaction summary for success state. Ignore the following events that result into the
     // same success state and to avoid counting the transaction multiple times
     private final List<String> ignoreEventsForTransactionAmount = List.of(CAPTURE_CONFIRMED.name(),
+            QUEUED_FOR_CAPTURE.name(),
             USER_APPROVED_FOR_CAPTURE.name(),
             SERVICE_APPROVED_FOR_CAPTURE.name());
 
