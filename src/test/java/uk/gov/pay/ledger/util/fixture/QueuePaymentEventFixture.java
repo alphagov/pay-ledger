@@ -161,6 +161,19 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("total_amount", 1005)
                                 .build());
                 break;
+            case "PAYMENT_DETAILS_SUBMITTED_BY_API":
+                eventData = gsonBuilder.create()
+                        .toJson(ImmutableMap.builder()
+                                .put("last_digits_card_number", "4242")
+                                .put("first_digits_card_number", "424242")
+                                .put("cardholder_name", "J citizen")
+                                .put("expiry_date", "11/21")
+                                .put("card_type", "DEBIT")
+                                .put("card_brand", "visa")
+                                .put("card_brand_label", "Visa")
+                                .put("gateway_transaction_id", "gateway_transaction_id")
+                                .build());
+                break;
             case "CAPTURE_CONFIRMED":
             case "STATUS_CORRECTED_TO_CAPTURED_TO_MATCH_GATEWAY_STATUS":
                 eventData = gsonBuilder.create()
