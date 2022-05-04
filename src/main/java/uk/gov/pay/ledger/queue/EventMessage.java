@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.queue;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.service.payments.commons.queue.model.QueueMessage;
 
+import java.util.Optional;
+
 public class EventMessage {
     private EventMessageDto eventDto;
     private QueueMessage queueMessage;
@@ -17,7 +19,9 @@ public class EventMessage {
     }
 
     public String getQueueMessageId() {
-        return queueMessage.getMessageId();
+        return Optional.ofNullable(queueMessage)
+                .map(QueueMessage::getMessageId)
+                .orElse(null);
     }
 
     public Event getEvent() {
@@ -36,7 +40,9 @@ public class EventMessage {
     }
 
     public String getQueueMessageReceiptHandle() {
-        return queueMessage.getReceiptHandle();
+        return Optional.of(queueMessage)
+                .map(QueueMessage::getReceiptHandle)
+                .orElse(null);
     }
 
     public EventMessageDto getEventDto() {

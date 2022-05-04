@@ -37,6 +37,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
@@ -134,12 +135,26 @@ class EventMessageHandlerTest {
     void shouldScheduleMessageForRetry_WhenEventIsNotProcessedSuccessfully() throws QueueException {
         Event event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
+        when(eventMessage.getQueueMessageId()).thenReturn("a-valid-queue-message-id");
         when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
         when(createEventResponse.isSuccessful()).thenReturn(false);
 
         eventMessageHandler.handle();
 
         verify(eventQueue).scheduleMessageForRetry(any());
+    }
+
+    @Test
+    void shouldNotScheduleMessageForRetryGivenNoSQSQueueMessage_WhenEventIsNotProcessedSuccessfully() throws QueueException {
+        Event event = aQueuePaymentEventFixture().toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+        when(eventMessage.getQueueMessageId()).thenReturn(null);
+        when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
+        when(createEventResponse.isSuccessful()).thenReturn(false);
+
+        eventMessageHandler.handle();
+
+        verifyNoMoreInteractions(eventQueue);
     }
 
     @Test

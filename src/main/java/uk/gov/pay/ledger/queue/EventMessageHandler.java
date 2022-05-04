@@ -130,12 +130,19 @@ public class EventMessageHandler {
 
             LOGGER.info("The event message has been processed.", loggingArgs.toArray());
         } else {
-            eventQueue.scheduleMessageForRetry(message);
-            LOGGER.warn("The event message has been scheduled for retry.",
-                    kv("sqs_message_id", message.getQueueMessageId()),
-                    kv("resource_external_id", message.getEvent().getResourceExternalId()),
-                    kv("state", response.getState()),
-                    kv("error", response.getErrorMessage()));
+            if (message.getQueueMessageId() != null) {
+                eventQueue.scheduleMessageForRetry(message);
+                LOGGER.warn("The event message has been scheduled for retry.",
+                        kv("sqs_message_id", message.getQueueMessageId()),
+                        kv("resource_external_id", message.getEvent().getResourceExternalId()),
+                        kv("state", response.getState()),
+                        kv("error", response.getErrorMessage()));
+            } else {
+                LOGGER.warn("Create event response was unsuccessful.",
+                        kv("resource_external_id", message.getEvent().getResourceExternalId()),
+                        kv("state", response.getState()),
+                        kv("error", response.getErrorMessage()));
+            }
         }
     }
 }
