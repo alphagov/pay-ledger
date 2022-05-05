@@ -19,6 +19,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
 import static uk.gov.pay.ledger.event.model.response.CreateEventResponse.CreateEventState.INSERTED;
@@ -70,6 +71,12 @@ public class EventMessageHandler {
         }
     }
 
+    public void processEventBatch(List<EventMessage> messages) throws QueueException {
+        for (EventMessage message : messages) {
+            processSingleMessage(message);
+        }
+    }
+
     private void processSingleMessage(EventMessage message) throws QueueException {
         Event event = message.getEvent();
 
@@ -115,7 +122,9 @@ public class EventMessageHandler {
 
         if (response.isSuccessful()) {
             eventDigestHandler.processEvent(event, response.getState() == INSERTED);
-            eventQueue.markMessageAsProcessed(message);
+            if (message.getQueueMessageReceiptHandle() != null) {
+                eventQueue.markMessageAsProcessed(message);
+            }
             metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
             var loggingArgs = new ArrayList<>(List.of(
                     kv("sqs_message_id", message.getQueueMessageId()),

@@ -40,7 +40,7 @@ public class EventMessage {
     }
 
     public String getQueueMessageReceiptHandle() {
-        return Optional.of(queueMessage)
+        return Optional.ofNullable(queueMessage)
                 .map(QueueMessage::getReceiptHandle)
                 .orElse(null);
     }
