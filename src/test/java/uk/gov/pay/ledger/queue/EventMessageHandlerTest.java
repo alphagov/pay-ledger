@@ -27,6 +27,7 @@ import uk.gov.pay.ledger.eventpublisher.TopicName;
 import uk.gov.service.payments.commons.queue.exception.QueueException;
 
 import java.util.List;
+import java.util.Optional;
 
 import static ch.qos.logback.classic.Level.INFO;
 import static net.logstash.logback.argument.StructuredArguments.kv;
@@ -97,6 +98,7 @@ class EventMessageHandlerTest {
     void shouldMarkMessageAsProcessed_WhenEventIsProcessedSuccessfully() throws QueueException {
         Event event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
+        when(eventMessage.getQueueMessageReceiptHandle()).thenReturn(Optional.of("a-valid-recipient-handle"));
         when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
         when(createEventResponse.isSuccessful()).thenReturn(true);
         when(metricRegistry.histogram((any()))).thenReturn(histogram);
@@ -119,6 +121,7 @@ class EventMessageHandlerTest {
                 .withEventType(eventType)
                 .toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
+        when(eventMessage.getQueueMessageReceiptHandle()).thenReturn(Optional.of("a-valid-recipient-handle"));
         when(metricRegistry.histogram((any()))).thenReturn(histogram);
 
         eventMessageHandler.handle();
@@ -135,7 +138,7 @@ class EventMessageHandlerTest {
     void shouldScheduleMessageForRetry_WhenEventIsNotProcessedSuccessfully() throws QueueException {
         Event event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
-        when(eventMessage.getQueueMessageId()).thenReturn("a-valid-queue-message-id");
+        when(eventMessage.getQueueMessageId()).thenReturn(Optional.of("a-valid-queue-message-id"));
         when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
         when(createEventResponse.isSuccessful()).thenReturn(false);
 

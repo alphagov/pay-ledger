@@ -18,15 +18,13 @@ public class EventMessage {
         return new EventMessage(eventDto, queueMessage);
     }
 
-    public String getQueueMessageId() {
-        return Optional.ofNullable(queueMessage)
-                .map(QueueMessage::getMessageId)
-                .orElse(null);
+    public Optional<String> getQueueMessageId() {
+        return Optional.ofNullable(queueMessage).map(QueueMessage::getMessageId);
     }
 
     public Event getEvent() {
         return new Event(
-                getQueueMessageId(),
+                getQueueMessageId().orElse(null),
                 eventDto.getServiceId(),
                 eventDto.isLive(),
                 eventDto.getResourceType(),
@@ -39,10 +37,8 @@ public class EventMessage {
         );
     }
 
-    public String getQueueMessageReceiptHandle() {
-        return Optional.ofNullable(queueMessage)
-                .map(QueueMessage::getReceiptHandle)
-                .orElse(null);
+    public Optional<String> getQueueMessageReceiptHandle() {
+        return Optional.ofNullable(queueMessage).map(QueueMessage::getReceiptHandle);
     }
 
     public EventMessageDto getEventDto() {

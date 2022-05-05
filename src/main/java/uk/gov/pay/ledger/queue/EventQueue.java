@@ -44,11 +44,11 @@ public class EventQueue {
     }
 
     public void markMessageAsProcessed(EventMessage message) throws QueueException {
-        sqsQueueService.deleteMessage(this.eventQueueUrl, message.getQueueMessageReceiptHandle());
+        sqsQueueService.deleteMessage(this.eventQueueUrl, message.getQueueMessageReceiptHandle().orElse(null));
     }
 
     public void scheduleMessageForRetry(EventMessage message) throws QueueException {
-        sqsQueueService.deferMessage(this.eventQueueUrl, message.getQueueMessageReceiptHandle(), retryDelayInSeconds);
+        sqsQueueService.deferMessage(this.eventQueueUrl, message.getQueueMessageReceiptHandle().orElse(null), retryDelayInSeconds);
     }
 
     private EventMessage getMessage(QueueMessage queueMessage) {

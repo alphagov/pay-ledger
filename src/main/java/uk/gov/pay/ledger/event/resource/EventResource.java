@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static net.logstash.logback.argument.StructuredArguments.kv;
 
 @Path("/v1/event")
 @Produces(APPLICATION_JSON)
@@ -73,11 +74,17 @@ public class EventResource {
             eventMessageHandler.processEventBatch(events
                     .stream()
                     .map(eventMessageDto -> EventMessage.of(eventMessageDto, null))
-                    .collect(Collectors.toList())
+                    .collect(Collectors.toUnmodifiableList())
             );
-        } catch (Exception ignored) {
-            LOGGER.warn("Failed to process batch of events");
-            throw ignored;
+        } catch (Exception exception) {
+            var ids = events.stream()
+                    .map(EventMessageDto::getExternalId)
+                    .collect(Collectors.toUnmodifiableList());
+            LOGGER.warn(String.format("Failed to process batch of events"),
+                    kv("resource_external_ids", ids),
+                    kv("message", exception.getMessage())
+            );
+            throw exception;
         }
         return Response.accepted().build();
     }

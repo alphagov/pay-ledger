@@ -78,6 +78,43 @@ public class EventResourceIT {
     }
 
     @Test
+    public void shouldWriteNoEventsIfAnyFail() {
+        var params = new JSONArray();
+
+        var aValidEvent = new JSONObject()
+                .put("event_type", "PAYMENT_CREATED")
+                .put("service_id", "a-service-id")
+                .put("resource_type", "payment")
+                .put("live", false)
+                .put("timestamp", "2022-03-23T22:08:02.123456Z")
+                .put("event_details", new JSONObject())
+                .put("resource_external_id", "a-valid-external-id");
+        var anInvalidEventMissingResourceId = new JSONObject()
+                .put("event_type", "PAYMENT_UPDATED")
+                .put("service_id", "a-service-id")
+                .put("resource_type", "payment")
+                .put("live", false)
+                .put("timestamp", "2022-03-23T23:08:02.123456Z")
+                .put("event_details", new JSONObject());
+        params.put(aValidEvent);
+        params.put(anInvalidEventMissingResourceId);
+
+        given().port(port)
+                .contentType(JSON)
+                .body(params.toString())
+                .post("/v1/event")
+                .then();
+
+        // assert no events are persisted
+        var eventsResult = databaseTestHelper.getEventsByExternalId("a-valid-external-id");
+        assertThat(eventsResult.size(), is(0));
+
+        // assert no projections persisted
+        var transactionsResult = databaseTestHelper.getAllTransactions();
+        assertThat(transactionsResult.size(), is(0));
+    }
+
+    @Test
     public void shouldGetEvenTicker() {
         aTransactionFixture()
                 .withExternalId("an-external-id")
