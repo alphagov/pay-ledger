@@ -38,7 +38,9 @@ public class DatabaseTestHelper {
         jdbi.withHandle(h -> h.createScript(
                 "TRUNCATE TABLE event CASCADE; " +
                         "TRUNCATE TABLE transaction CASCADE;" +
-                        "TRUNCATE TABLE gateway_account_metadata CASCADE;"
+                        "TRUNCATE TABLE gateway_account_metadata CASCADE;" +
+                        "TRUNCATE TABLE agreement CASCADE;" +
+                        "TRUNCATE TABLE payment_instrument CASCADE;"
         ).execute());
     }
 

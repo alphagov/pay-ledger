@@ -48,7 +48,7 @@ public class PaymentInstrumentFixture implements DbFixture<PaymentInstrumentFixt
         var sql = "INSERT INTO payment_instrument" +
                 "(id, external_id, agreement_external_id, email, cardholder_name, address_line1, address_line2, address_postcode, address_city, address_county, address_country, last_digits_card_number, expiry_date, card_brand, event_count, created_date) " +
                 "VALUES " +
-                "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         jdbi.withHandle(h ->
                 h.execute(

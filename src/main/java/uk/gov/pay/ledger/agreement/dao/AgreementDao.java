@@ -81,7 +81,7 @@ public class AgreementDao {
             "FROM agreement a " +
             ":searchExtraFields";
 
-    private Jdbi jdbi;
+    private final Jdbi jdbi;
 
     @Inject
     public AgreementDao(Jdbi jdbi) {
