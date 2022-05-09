@@ -24,7 +24,7 @@ public class AgreementSearchParams extends SearchParams {
     private static final String REFERENCE_FIELD = "reference";
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 20L;
-    private static final long DEFAULT_DISPLAY_SIZE = 20L;
+    public static final long DEFAULT_DISPLAY_SIZE = 20L;
 
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
@@ -133,7 +133,7 @@ public class AgreementSearchParams extends SearchParams {
                 queryMap.put(LIVE_FIELD, live);
             }
         }
-        return queryMap;
+        return Map.copyOf(queryMap);
     }
 
     public List<String> getGatewayAccountIds() {

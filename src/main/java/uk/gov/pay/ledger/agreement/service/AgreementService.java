@@ -2,7 +2,6 @@ package uk.gov.pay.ledger.agreement.service;
 
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.agreement.dao.AgreementDao;
-import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
@@ -31,7 +30,7 @@ public class AgreementService {
         var agreements = agreementDao.searchAgreements(searchParams)
                 .stream()
                 .map(Agreement::from)
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
         var total = agreementDao.getTotalForSearch(searchParams);
 
         long size = searchParams.getDisplaySize();

@@ -15,6 +15,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.agreement.resource.AgreementSearchParams.DEFAULT_DISPLAY_SIZE;
 
 public class AgreementResourceIT {
     @RegisterExtension
@@ -75,8 +76,8 @@ public class AgreementResourceIT {
 
     @Test
     public void shouldSearchWithPaginationForAgreements() {
-        AgreementFixture.anAgreementFixture("a-valid-agreement-id", "a-valid-service-id")
-                .insert(rule.getJdbi());
+        int numberOfAgreements = (int) Math.ceil(DEFAULT_DISPLAY_SIZE + (DEFAULT_DISPLAY_SIZE / 2));
+        prepareAgreementsForService("a-valid-service-id", numberOfAgreements);
         given().port(port)
                 .contentType(JSON)
                 .queryParam("service_id", "a-valid-service-id")
@@ -84,11 +85,23 @@ public class AgreementResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("total", is(1))
-                .body("count", is(1))
+                .body("total", is(numberOfAgreements))
+                .body("count", is((int)DEFAULT_DISPLAY_SIZE))
                 .body("page", is(1))
-                .body("results.size()", is(1))
-                .body("results[0].external_id", is("a-valid-agreement-id"));
+                .body("results.size()", is((int)DEFAULT_DISPLAY_SIZE));
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("service_id", "a-valid-service-id")
+                .queryParam("page", 2)
+                .get("/v1/agreement")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("total", is(numberOfAgreements))
+                .body("count", is((int)(numberOfAgreements - DEFAULT_DISPLAY_SIZE)))
+                .body("page", is(2))
+                .body("results.size()", is((int)(numberOfAgreements - DEFAULT_DISPLAY_SIZE)));
     }
 
     @Test
@@ -113,5 +126,12 @@ public class AgreementResourceIT {
                 .body("results.size()", is(2))
                 .body("results[0].external_id", is("a-five-agreement-id"))
                 .body("results[1].external_id", is("a-one-agreement-id"));
+    }
+
+    private void prepareAgreementsForService(String serviceId, int numberOfAgreements) {
+        for (int i = 0; i < numberOfAgreements; i++) {
+            AgreementFixture.anAgreementFixture("a-valid-external-id-" + i, serviceId)
+                    .insert(rule.getJdbi());
+        }
     }
 }
