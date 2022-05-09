@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import io.sentry.Sentry;
+import org.jdbi.v3.core.Jdbi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.app.LedgerConfig;
@@ -35,6 +36,7 @@ public class EventMessageHandler {
     private final MetricRegistry metricRegistry;
     private final LedgerConfig ledgerConfig;
     private final ObjectMapper objectMapper;
+    private final Jdbi jdbi;
 
     @Inject
     public EventMessageHandler(EventQueue eventQueue,
@@ -43,7 +45,8 @@ public class EventMessageHandler {
                                EventPublisher eventPublisher,
                                MetricRegistry metricRegistry,
                                LedgerConfig ledgerConfig,
-                               ObjectMapper objectMapper) {
+                               ObjectMapper objectMapper,
+                               Jdbi jdbi) {
         this.eventQueue = eventQueue;
         this.eventService = eventService;
         this.eventDigestHandler = eventDigestHandler;
@@ -51,6 +54,7 @@ public class EventMessageHandler {
         this.metricRegistry = metricRegistry;
         this.ledgerConfig = ledgerConfig;
         this.objectMapper = objectMapper;
+        this.jdbi = jdbi;
     }
 
     public void handle() throws QueueException {
@@ -68,6 +72,15 @@ public class EventMessageHandler {
                 );
             }
         }
+    }
+
+    // provides a transactional guarantee, if any of the events fail to process, none of the events will be persisted
+    public void processEventBatch(List<EventMessage> messages) throws QueueException {
+       jdbi.useTransaction(handle -> {
+            for (EventMessage message : messages) {
+                processSingleMessage(message);
+            }
+        });
     }
 
     private void processSingleMessage(EventMessage message) throws QueueException {
@@ -115,7 +128,9 @@ public class EventMessageHandler {
 
         if (response.isSuccessful()) {
             eventDigestHandler.processEvent(event, response.getState() == INSERTED);
-            eventQueue.markMessageAsProcessed(message);
+            if (message.getQueueMessageReceiptHandle().isPresent()) {
+                eventQueue.markMessageAsProcessed(message);
+            }
             metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
             var loggingArgs = new ArrayList<>(List.of(
                     kv("sqs_message_id", message.getQueueMessageId()),
@@ -130,12 +145,19 @@ public class EventMessageHandler {
 
             LOGGER.info("The event message has been processed.", loggingArgs.toArray());
         } else {
-            eventQueue.scheduleMessageForRetry(message);
-            LOGGER.warn("The event message has been scheduled for retry.",
-                    kv("sqs_message_id", message.getQueueMessageId()),
-                    kv("resource_external_id", message.getEvent().getResourceExternalId()),
-                    kv("state", response.getState()),
-                    kv("error", response.getErrorMessage()));
+            if (message.getQueueMessageId().isPresent()) {
+                eventQueue.scheduleMessageForRetry(message);
+                LOGGER.warn("The event message has been scheduled for retry.",
+                        kv("sqs_message_id", message.getQueueMessageId()),
+                        kv("resource_external_id", message.getEvent().getResourceExternalId()),
+                        kv("state", response.getState()),
+                        kv("error", response.getErrorMessage()));
+            } else {
+                LOGGER.warn("Create event response was unsuccessful.",
+                        kv("resource_external_id", message.getEvent().getResourceExternalId()),
+                        kv("state", response.getState()),
+                        kv("error", response.getErrorMessage()));
+            }
         }
     }
 }

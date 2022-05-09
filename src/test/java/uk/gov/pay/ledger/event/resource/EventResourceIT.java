@@ -1,9 +1,13 @@
 package uk.gov.pay.ledger.event.resource;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
+import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import javax.ws.rs.core.Response;
 
@@ -12,6 +16,7 @@ import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class EventResourceIT {
 
@@ -19,6 +24,14 @@ public class EventResourceIT {
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private Integer port = rule.getAppRule().getLocalPort();
+
+    private DatabaseTestHelper databaseTestHelper;
+
+    @BeforeEach
+    public void setUp() {
+        databaseTestHelper = DatabaseTestHelper.aDatabaseTestHelper(rule.getJdbi());
+        databaseTestHelper.truncateAllData();
+    }
 
     @Test
     public void shouldGetEventFromDB() {
@@ -37,6 +50,68 @@ public class EventResourceIT {
                 .body("sqs_message_id", is(event.getSqsMessageId()))
                 .body("event_type", is(event.getEventType()))
                 .body("event_data", is(event.getEventData()));
+    }
+
+    @Test
+    public void shouldWriteEvent() {
+        var params = new JSONArray();
+
+        var event = new JSONObject()
+                .put("event_type", "PAYMENT_CREATED")
+                .put("service_id", "a-service-id")
+                .put("resource_type", "payment")
+                .put("live", false)
+                .put("timestamp", "2022-03-23T22:08:02.123456Z")
+                .put("event_details", new JSONObject())
+                .put("resource_external_id", "a-valid-external-id");
+        params.put(event);
+
+        given().port(port)
+                .contentType(JSON)
+                .body(params.toString())
+                .post("/v1/event")
+                .then()
+                .statusCode(Response.Status.ACCEPTED.getStatusCode());
+
+        var results = databaseTestHelper.getEventsByExternalId("a-valid-external-id");
+        assertThat(results.size(), is(1));
+    }
+
+    @Test
+    public void shouldWriteNoEventsIfAnyFail() {
+        var params = new JSONArray();
+
+        var aValidEvent = new JSONObject()
+                .put("event_type", "PAYMENT_CREATED")
+                .put("service_id", "a-service-id")
+                .put("resource_type", "payment")
+                .put("live", false)
+                .put("timestamp", "2022-03-23T22:08:02.123456Z")
+                .put("event_details", new JSONObject())
+                .put("resource_external_id", "a-valid-external-id");
+        var anInvalidEventMissingResourceId = new JSONObject()
+                .put("event_type", "PAYMENT_UPDATED")
+                .put("service_id", "a-service-id")
+                .put("resource_type", "payment")
+                .put("live", false)
+                .put("timestamp", "2022-03-23T23:08:02.123456Z")
+                .put("event_details", new JSONObject());
+        params.put(aValidEvent);
+        params.put(anInvalidEventMissingResourceId);
+
+        given().port(port)
+                .contentType(JSON)
+                .body(params.toString())
+                .post("/v1/event")
+                .then();
+
+        // assert no events are persisted
+        var eventsResult = databaseTestHelper.getEventsByExternalId("a-valid-external-id");
+        assertThat(eventsResult.size(), is(0));
+
+        // assert no projections persisted
+        var transactionsResult = databaseTestHelper.getAllTransactions();
+        assertThat(transactionsResult.size(), is(0));
     }
 
     @Test

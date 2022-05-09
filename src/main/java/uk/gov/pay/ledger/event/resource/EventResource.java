@@ -15,9 +15,14 @@ import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventTicker;
 import uk.gov.pay.ledger.exception.ErrorResponse;
+import uk.gov.pay.ledger.queue.EventMessage;
+import uk.gov.pay.ledger.queue.EventMessageDto;
+import uk.gov.pay.ledger.queue.EventMessageHandler;
+import uk.gov.service.payments.commons.queue.exception.QueueException;
 
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -26,8 +31,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static net.logstash.logback.argument.StructuredArguments.kv;
 
 @Path("/v1/event")
 @Produces(APPLICATION_JSON)
@@ -36,10 +43,12 @@ public class EventResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventResource.class);
     private final EventDao eventDao;
+    private final EventMessageHandler eventMessageHandler;
 
     @Inject
-    public EventResource(EventDao eventDao) {
+    public EventResource(EventDao eventDao, EventMessageHandler eventMessageHandler) {
         this.eventDao = eventDao;
+        this.eventMessageHandler = eventMessageHandler;
     }
 
     @Path("/{eventId}")
@@ -56,6 +65,28 @@ public class EventResource {
         LOGGER.info("Get event request: {}", eventId);
         return eventDao.getById(eventId)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
+    }
+
+    @POST
+    @Timed
+    public Response writeEvent(List<EventMessageDto> events) throws QueueException {
+        try {
+            eventMessageHandler.processEventBatch(events
+                    .stream()
+                    .map(eventMessageDto -> EventMessage.of(eventMessageDto, null))
+                    .collect(Collectors.toUnmodifiableList())
+            );
+        } catch (Exception exception) {
+            var ids = events.stream()
+                    .map(EventMessageDto::getExternalId)
+                    .collect(Collectors.toUnmodifiableList());
+            LOGGER.warn(String.format("Failed to process batch of events"),
+                    kv("resource_external_ids", ids),
+                    kv("message", exception.getMessage())
+            );
+            throw exception;
+        }
+        return Response.accepted().build();
     }
 
     @Path("/ticker")

@@ -44,6 +44,7 @@ public class LedgerModule extends AbstractModule {
     protected void configure() {
         bind(LedgerConfig.class).toInstance(configuration);
         bind(Environment.class).toInstance(environment);
+        bind(Jdbi.class).toInstance(jdbi);
     }
 
     @Provides

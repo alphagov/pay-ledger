@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.queue.EventMessageHandler;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 
 import javax.ws.rs.core.Response;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class EventResourceTest {
     private static final EventDao dao = mock(EventDao.class);
+    private static final EventMessageHandler eventMessageHandler = mock(EventMessageHandler.class);
     private static final Long eventId = 1L;
     private static final String nonExistentId = "I'm not really here";
     private final Event event = EventFixture.anEventFixture()
@@ -29,7 +31,7 @@ public class EventResourceTest {
             .toEntity();
 
     public static final ResourceExtension resources = ResourceExtension.builder()
-            .addResource(new EventResource(dao))
+            .addResource(new EventResource(dao, eventMessageHandler))
             .build();
 
     @BeforeEach
