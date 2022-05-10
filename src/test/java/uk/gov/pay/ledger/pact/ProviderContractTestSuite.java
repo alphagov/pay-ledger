@@ -15,6 +15,7 @@ public class ProviderContractTestSuite {
         consumerToJUnitTest.put("publicapi", new JUnit4TestAdapter(PublicApiContractTest.class));
         consumerToJUnitTest.put("selfservice", new JUnit4TestAdapter(SelfServiceContractTest.class));
         consumerToJUnitTest.put("connector", new JUnit4TestAdapter(ConnectorContractTest.class));
+        consumerToJUnitTest.put("adminusers", new JUnit4TestAdapter(AdminusersContractTest.class));
         return CreateTestSuite.create(consumerToJUnitTest.build());
     }
 }
