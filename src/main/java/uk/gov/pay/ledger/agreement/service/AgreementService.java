@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.agreement.service;
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.agreement.dao.AgreementDao;
 import uk.gov.pay.ledger.agreement.dao.PaymentInstrumentDao;
-import uk.gov.pay.ledger.agreement.entity.AgreementEntityFactory;
+import uk.gov.pay.ledger.agreement.entity.AgreementsFactory;
 import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 public class AgreementService {
     private final AgreementDao agreementDao;
     private final PaymentInstrumentDao paymentInstrumentDao;
-    private final AgreementEntityFactory agreementEntityFactory;
+    private final AgreementsFactory agreementEntityFactory;
 
     @Inject
-    public AgreementService(AgreementDao agreementDao, PaymentInstrumentDao paymentInstrumentDao, AgreementEntityFactory agreementEntityFactory) {
+    public AgreementService(AgreementDao agreementDao, PaymentInstrumentDao paymentInstrumentDao, AgreementsFactory agreementsFactory) {
         this.agreementDao = agreementDao;
         this.paymentInstrumentDao = paymentInstrumentDao;
-        this.agreementEntityFactory = agreementEntityFactory;
+        this.agreementEntityFactory = agreementsFactory;
     }
 
     public Optional<Agreement> findAgreement(String externalId) {

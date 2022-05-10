@@ -434,8 +434,8 @@ public class QueueMessageReceiverIT {
                         gsonBuilder.create()
                                 .toJson(Map.of(
                                         "cardholder_name", "A paying user name",
-                                            "address_line_1", "10 some street",
-                                            "address_line_2", "Some town",
+                                            "address_line1", "10 some street",
+                                            "address_line2", "Some town",
                                             "address_postcode", "EC3R8BT",
                                             "address_city", "London",
                                             "address_country", "UK",
@@ -455,6 +455,11 @@ public class QueueMessageReceiverIT {
                 .statusCode(200)
                 .body("external_id", is(agreementId))
                 .body("payment_instrument.external_id", is("a-valid-instrument-id"))
+                .body("payment_instrument.agreement_external_id", is(agreementId))
+                .body("payment_instrument.card_details.billing_address.line1", is("10 some street"))
+                .body("payment_instrument.card_details.billing_address.postcode", is("EC3R8BT"))
+                .body("payment_instrument.card_details.card_brand", is("visa"))
+                .body("payment_instrument.card_details.last_digits_card_number", is("4242"))
                 .body("payment_instrument.card_details.cardholder_name", is("A paying user name"));
     }
 }

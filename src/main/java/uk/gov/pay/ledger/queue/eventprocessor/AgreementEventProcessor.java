@@ -5,8 +5,8 @@ import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.service.EventService;
 
 public class AgreementEventProcessor extends EventProcessor {
-    private EventService eventService;
-    private AgreementService agreementService;
+    private final EventService eventService;
+    private final AgreementService agreementService;
 
     public AgreementEventProcessor(EventService eventService, AgreementService agreementService) {
         this.eventService = eventService;
@@ -14,7 +14,7 @@ public class AgreementEventProcessor extends EventProcessor {
     }
 
     @Override
-    public void process(Event event, boolean isANewEvent) {
+    public void process(Event event, boolean isNewEvent) {
         agreementService.upsertAgreementFor(eventService.getEventDigestForResource(event));
     }
 }

@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.event.model.EventDigest;
 
-public class AgreementEntityFactory {
+public class AgreementsFactory {
 
     private final ObjectMapper objectMapper;
 
     @Inject
-    public AgreementEntityFactory(ObjectMapper objectMapper){
+    public AgreementsFactory(ObjectMapper objectMapper){
         this.objectMapper = objectMapper;
     }
 

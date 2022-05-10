@@ -2,7 +2,6 @@ package uk.gov.pay.ledger.agreement.entity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.GsonBuilder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.ResourceType;
@@ -14,17 +13,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
-class AgreementEntityFactoryTest {
-    private AgreementEntityFactory agreementEntityFactory;
-
-    private GsonBuilder gsonBuilder = new GsonBuilder();
-    private ObjectMapper objectMapper;
-
-    @BeforeEach
-    public void setUp() {
-        objectMapper = new ObjectMapper();
-        agreementEntityFactory = new AgreementEntityFactory(objectMapper);
-    }
+class AgreementsFactoryTest {
+    private final AgreementsFactory agreementEntityFactory = new AgreementsFactory(new ObjectMapper());
+    private final GsonBuilder gsonBuilder = new GsonBuilder();
 
     @Test
     public void shouldConvertEventDigestToAgreementEntity() {
