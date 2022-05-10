@@ -31,6 +31,15 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
         return fixture;
     }
 
+    public static AgreementFixture anAgreementFixture(String externalId, String serviceId, String status, String reference) {
+        var fixture = new AgreementFixture();
+        fixture.setExternalId(externalId);
+        fixture.setServiceId(serviceId);
+        fixture.setStatus(status);
+        fixture.setReference(reference);
+        return fixture;
+    }
+
     public static AgreementFixture anAgreementFixture() {
         return new AgreementFixture();
     }
@@ -90,6 +99,14 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
 
     public void setExternalId(String externalId) {
         this.externalId = externalId;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
     }
 
     public String getDescription() {

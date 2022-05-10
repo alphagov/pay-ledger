@@ -1,9 +1,15 @@
 package uk.gov.pay.ledger.agreement.dao;
 
 import com.google.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
+import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
+
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public class AgreementDao {
     private static final String SELECT_AGREEMENT_WITH_PAYMENT_INSTRUMENT =
@@ -66,7 +72,16 @@ public class AgreementDao {
             "event_count = EXCLUDED.event_count " +
             "WHERE EXCLUDED.event_count >= agreement.event_count";
 
-    private Jdbi jdbi;
+    private static final String SEARCH_AGREEMENT =
+            SELECT_AGREEMENT_WITH_PAYMENT_INSTRUMENT +
+                    ":searchExtraFields " +
+                    "ORDER BY a.created_date DESC OFFSET :offset LIMIT :limit";
+
+    private static final String COUNT_AGREEEMENT = "SELECT count(1) " +
+            "FROM agreement a " +
+            ":searchExtraFields";
+
+    private final Jdbi jdbi;
 
     @Inject
     public AgreementDao(Jdbi jdbi) {
@@ -85,5 +100,48 @@ public class AgreementDao {
                 handle.createUpdate(UPSERT_AGREEMENT)
                         .bindBean(agreement)
                         .execute());
+    }
+
+    public List<AgreementEntity> searchAgreements(AgreementSearchParams searchParams) {
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplates(), SEARCH_AGREEMENT));
+            searchParams.getQueryMap().forEach(bindSearchParameter(query));
+            query.bind("offset", searchParams.getOffset());
+            query.bind("limit", searchParams.getDisplaySize());
+            return query
+                    .map(new AgreementMapper())
+                    .list();
+        });
+    }
+
+    public Long getTotalForSearch(AgreementSearchParams searchParams) {
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplates(), COUNT_AGREEEMENT));
+            searchParams.getQueryMap().forEach(bindSearchParameter(query));
+            return query
+                    .mapTo(Long.class)
+                    .one();
+        });
+    }
+
+    private String createSearchTemplate(List<String> filterTemplates, String baseQueryString) {
+        String searchClauseTemplate = String.join(" AND ", filterTemplates);
+        searchClauseTemplate = StringUtils.isNotBlank(searchClauseTemplate) ?
+                "WHERE " + searchClauseTemplate :
+                "";
+
+        return baseQueryString.replace(
+                ":searchExtraFields",
+                searchClauseTemplate);
+    }
+
+    private BiConsumer<String, Object> bindSearchParameter(Query query) {
+        return (searchKey, searchValue) -> {
+            if (searchValue instanceof List<?>) {
+                query.bindList(searchKey, ((List<?>) searchValue));
+            } else {
+                query.bind(searchKey, searchValue);
+            }
+        };
     }
 }
