@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.queue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +54,8 @@ public class QueueMessageReceiverIT {
     LedgerConfig ledgerConfig;
     @Mock
     ReportingConfig reportingConfig;
+
+    private GsonBuilder gsonBuilder = new GsonBuilder();
 
     @RegisterExtension
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension(
@@ -358,5 +361,105 @@ public class QueueMessageReceiverIT {
         assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
         assertThat(result.get("event_type").toString(), is(event.getEventType()));
         assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
+    }
+
+    @Test
+    public void shouldHandleAgreementEvent() throws InterruptedException {
+        aQueuePaymentEventFixture()
+                .withResourceExternalId("a-valid-agreement-id")
+                .withResourceType(ResourceType.AGREEMENT)
+                .withEventDate(CREATED_AT)
+                .withEventType("AGREEMENT_CREATED")
+                .withEventData(
+                        gsonBuilder.create()
+                                .toJson(Map.of(
+                                        "reference", "agreement-reference",
+                                        "description", "agreement description text",
+                                        "status", "CREATED"
+                                ))
+                )
+                .insert(rule.getSqsClient());
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId("a-valid-agreement-id")
+                .withResourceType(ResourceType.AGREEMENT)
+                .withEventDate(CREATED_AT.plusMinutes(10))
+                .withEventType("AGREEMENT_SETUP")
+                .withEventData(
+                        gsonBuilder.create()
+                                .toJson(Map.of(
+                                        "status", "ACTIVE",
+                                        "payment_instrument_external_id", "a-valid-instrument-id"
+                                ))
+                )
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
+
+        given().port(rule.getAppRule().getLocalPort())
+                .contentType(JSON)
+                .get("/v1/agreement/a-valid-agreement-id")
+                .then()
+                .statusCode(200)
+                .body("external_id", is("a-valid-agreement-id"))
+                .body("status", is("ACTIVE"));
+    }
+
+    @Test
+    public void shouldHandlePaymentInstrumentEvent() throws InterruptedException {
+        var agreementId = "a-valid-agreement-id";
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(agreementId)
+                .withResourceType(ResourceType.AGREEMENT)
+                .withEventDate(CREATED_AT)
+                .withEventType("AGREEMENT_CREATED")
+                .withLive(false)
+                .withEventData(
+                        gsonBuilder.create()
+                                .toJson(Map.of(
+                                        "reference", "agreement-reference",
+                                        "description", "agreement description text",
+                                        "status", "ACTIVE"
+                                ))
+                )
+                .insert(rule.getSqsClient());
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId("a-valid-instrument-id")
+                .withResourceType(ResourceType.PAYMENT_INSTRUMENT)
+                .withLive(false)
+                .withEventDate(CREATED_AT)
+                .withEventType("PAYMENT_INSTRUMENT_CREATED")
+                .withEventData(
+                        gsonBuilder.create()
+                                .toJson(Map.of(
+                                        "cardholder_name", "A paying user name",
+                                            "address_line1", "10 some street",
+                                            "address_line2", "Some town",
+                                            "address_postcode", "EC3R8BT",
+                                            "address_city", "London",
+                                            "address_country", "UK",
+                                            "last_digits_card_number", "4242",
+                                            "card_brand", "visa",
+                                            "agreement_external_id", agreementId
+                                ))
+                )
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
+
+        given().port(rule.getAppRule().getLocalPort())
+                .contentType(JSON)
+                .get("/v1/agreement/" + agreementId)
+                .then()
+                .statusCode(200)
+                .body("external_id", is(agreementId))
+                .body("payment_instrument.external_id", is("a-valid-instrument-id"))
+                .body("payment_instrument.agreement_external_id", is(agreementId))
+                .body("payment_instrument.card_details.billing_address.line1", is("10 some street"))
+                .body("payment_instrument.card_details.billing_address.postcode", is("EC3R8BT"))
+                .body("payment_instrument.card_details.card_brand", is("visa"))
+                .body("payment_instrument.card_details.last_digits_card_number", is("4242"))
+                .body("payment_instrument.card_details.cardholder_name", is("A paying user name"));
     }
 }

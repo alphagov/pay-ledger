@@ -3,13 +3,16 @@ package uk.gov.pay.ledger.queue;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.agreement.service.AgreementService;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.payout.service.PayoutService;
+import uk.gov.pay.ledger.queue.eventprocessor.AgreementEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.DisputeEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.EventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PaymentEventProcessor;
+import uk.gov.pay.ledger.queue.eventprocessor.PaymentInstrumentEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PayoutEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.RefundEventProcessor;
 import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
@@ -24,17 +27,23 @@ public class EventDigestHandler {
     private PayoutEventProcessor payoutEventProcessor;
     private RefundEventProcessor refundEventProcessor;
     private DisputeEventProcessor disputeEventProcessor;
+    private AgreementEventProcessor agreementEventProcessor;
+    private PaymentInstrumentEventProcessor paymentInstrumentEventProcessor;
 
     @Inject
     public EventDigestHandler(EventService eventService,
                               TransactionService transactionService,
                               TransactionMetadataService transactionMetadataService,
                               PayoutService payoutService,
-                              TransactionEntityFactory transactionEntityFactory, TransactionSummaryService transactionSummaryService) {
+                              TransactionEntityFactory transactionEntityFactory,
+                              TransactionSummaryService transactionSummaryService,
+                              AgreementService agreementService) {
         refundEventProcessor = new RefundEventProcessor(eventService, transactionService, transactionEntityFactory);
         paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, refundEventProcessor, transactionSummaryService);
         payoutEventProcessor = new PayoutEventProcessor(eventService, payoutService);
         disputeEventProcessor = new DisputeEventProcessor();
+        agreementEventProcessor = new AgreementEventProcessor(eventService, agreementService);
+        paymentInstrumentEventProcessor = new PaymentInstrumentEventProcessor(eventService, agreementService);
     }
 
     public EventProcessor processorFor(Event event) {
@@ -47,6 +56,10 @@ public class EventDigestHandler {
                 return payoutEventProcessor;
             case DISPUTE:
                 return disputeEventProcessor;
+            case AGREEMENT:
+                return agreementEventProcessor;
+            case PAYMENT_INSTRUMENT:
+                return paymentInstrumentEventProcessor;
             default:
                 String message = String.format("Event digest processing for resource type [%s] is not supported. Event type [%s] and resource external id [%s]",
                         event.getResourceType(),

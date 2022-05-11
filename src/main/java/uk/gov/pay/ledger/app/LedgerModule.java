@@ -14,6 +14,7 @@ import org.jdbi.v3.core.Jdbi;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sns.SnsClient;
 import uk.gov.pay.ledger.agreement.dao.AgreementDao;
+import uk.gov.pay.ledger.agreement.dao.PaymentInstrumentDao;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.dao.ResourceTypeDao;
 import uk.gov.pay.ledger.gatewayaccountmetadata.dao.GatewayAccountMetadataDao;
@@ -121,6 +122,12 @@ public class LedgerModule extends AbstractModule {
     @Singleton
     public AgreementDao provideAgreementDao() {
         return new AgreementDao(jdbi);
+    }
+
+    @Provides
+    @Singleton
+    public PaymentInstrumentDao providePaymentInstrumentDao() {
+        return new PaymentInstrumentDao(jdbi);
     }
 
     @Provides

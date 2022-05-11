@@ -2,9 +2,12 @@ package uk.gov.pay.ledger.agreement.service;
 
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.agreement.dao.AgreementDao;
+import uk.gov.pay.ledger.agreement.dao.PaymentInstrumentDao;
+import uk.gov.pay.ledger.agreement.entity.AgreementsFactory;
 import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
+import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
 import javax.ws.rs.WebApplicationException;
@@ -15,15 +18,29 @@ import java.util.stream.Collectors;
 
 public class AgreementService {
     private final AgreementDao agreementDao;
+    private final PaymentInstrumentDao paymentInstrumentDao;
+    private final AgreementsFactory agreementEntityFactory;
 
     @Inject
-    public AgreementService(AgreementDao agreementDao) {
+    public AgreementService(AgreementDao agreementDao, PaymentInstrumentDao paymentInstrumentDao, AgreementsFactory agreementsFactory) {
         this.agreementDao = agreementDao;
+        this.paymentInstrumentDao = paymentInstrumentDao;
+        this.agreementEntityFactory = agreementsFactory;
     }
 
     public Optional<Agreement> findAgreement(String externalId) {
         return agreementDao.findByExternalId(externalId)
                 .map(Agreement::from);
+    }
+
+    public void upsertAgreementFor(EventDigest eventDigest) {
+        var entity = agreementEntityFactory.create(eventDigest);
+        agreementDao.upsert(entity);
+    }
+
+    public void upsertPaymentInstrumentFor(EventDigest eventDigest) {
+        var entity = agreementEntityFactory.createPaymentInstrument(eventDigest);
+        paymentInstrumentDao.upsert(entity);
     }
 
     public AgreementSearchResponse searchAgreements(AgreementSearchParams searchParams, UriInfo uriInfo) {
