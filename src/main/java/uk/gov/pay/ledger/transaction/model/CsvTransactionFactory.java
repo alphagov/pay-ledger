@@ -206,8 +206,7 @@ public class CsvTransactionFactory {
 
     public Map<String, Object> getCsvHeadersWithMedataKeys(List<String> metadataKeys,
                                                            boolean includeFeeHeaders,
-                                                           boolean includeMotoHeader,
-                                                           boolean includeFeeBreakdownHeaders) {
+                                                           boolean includeMotoHeader) {
         LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 
         headers.put(FIELD_REFERENCE, FIELD_REFERENCE);
@@ -234,9 +233,6 @@ public class CsvTransactionFactory {
         if (includeFeeHeaders) {
             headers.put(FIELD_FEE, FIELD_FEE);
             headers.put(FIELD_NET, FIELD_NET);
-        }
-
-        if (includeFeeBreakdownHeaders) {
             headers.put(FIELD_FEE_BREAKDOWN_TRANSACTION, FIELD_FEE_BREAKDOWN_TRANSACTION);
             headers.put(FIELD_FEE_BREAKDOWN_3DS, FIELD_FEE_BREAKDOWN_3DS);
             headers.put(FIELD_FEE_BREAKDOWN_RADAR, FIELD_FEE_BREAKDOWN_RADAR);

@@ -161,11 +161,28 @@ public class TransactionResourceCsvIT {
     public void shouldGetAllTransactionsAsCSVWithAcceptTypeWithFeeHeaders() throws IOException {
         String gatewayAccountId = "123";
 
+        JSONObject feeTransaction = new JSONObject()
+                .put("fee_type", "transaction")
+                .put("amount", 10);
+        JSONObject feeRadar = new JSONObject()
+                .put("fee_type", "radar")
+                .put("amount", 6);
+        JSONObject fee3ds = new JSONObject()
+                .put("fee_type", "three_ds")
+                .put("amount", 8);
+
+        JSONObject feeBreadownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+                .put(feeTransaction)
+                .put(feeRadar)
+                .put(fee3ds));
+
+
         aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId)
                 .withTransactionType("PAYMENT")
                 .withFee(100L)
                 .withNetAmount(1100)
+                .withTransactionDetails(feeBreadownJsonObject.toString())
                 .insert(rule.getJdbi());
 
         InputStream csvResponseStream = given().port(port)
@@ -186,59 +203,12 @@ public class TransactionResourceCsvIT {
         assertThat(csvRecords.size(), is(1));
 
         CSVRecord paymentRecord = csvRecords.get(0);
-        assertThat(paymentRecord.size(), is(25));
+        assertThat(paymentRecord.size(), is(28));
         assertThat(paymentRecord.get("Net"), is("11.00"));
         assertThat(paymentRecord.get("Fee"), is("1.00"));
-    }
-
-    @Test
-    public void shouldIncludeFeeBreakdownHeaders() throws IOException {
-        String gatewayAccountId = "123";
-        JSONObject feeTransaction = new JSONObject()
-                .put("fee_type", "transaction")
-                .put("amount", 10);
-        JSONObject feeRadar = new JSONObject()
-                .put("fee_type", "radar")
-                .put("amount", 3);
-        JSONObject fee3ds = new JSONObject()
-                .put("fee_type", "three_ds")
-                .put("amount", 5);
-
-        JSONObject feeBreadownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
-                .put(feeTransaction)
-                .put(feeRadar)
-                .put(fee3ds));
-
-        aTransactionFixture()
-                .withGatewayAccountId(gatewayAccountId)
-                .withTransactionType("PAYMENT")
-                .withFee(100L)
-                .withNetAmount(1100)
-                .withTransactionDetails(feeBreadownJsonObject.toString())
-                .insert(rule.getJdbi());
-
-        InputStream csvResponseStream = given().port(port)
-                .accept("text/csv")
-                .get("/v1/transaction/?" +
-                        "account_id=" + gatewayAccountId +
-                        "&fee_breakdown_headers=true" +
-                        "&page=1" +
-                        "&display_size=5"
-                )
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType("text/csv")
-                .extract().asInputStream();
-
-
-        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
-
-        assertThat(csvRecords.size(), is(1));
-
-        CSVRecord paymentRecord = csvRecords.get(0);
         assertThat(paymentRecord.get("Fee (transaction)"), is("0.10"));
-        assertThat(paymentRecord.get("Fee (fraud protection)"), is("0.03"));
-        assertThat(paymentRecord.get("Fee (3DS)"), is("0.05"));
+        assertThat(paymentRecord.get("Fee (fraud protection)"), is("0.06"));
+        assertThat(paymentRecord.get("Fee (3DS)"), is("0.08"));
     }
 
     @Test
@@ -316,11 +286,11 @@ public class TransactionResourceCsvIT {
         assertThat(csvRecords.size(), is(2));
 
         CSVRecord paymentRecord = csvRecords.get(0);
-        assertThat(paymentRecord.size(), is(25));
+        assertThat(paymentRecord.size(), is(28));
         assertThat(paymentRecord.get("Net"), is("10.00"));
         assertThat(paymentRecord.get("Fee"), is("2.00"));
         CSVRecord paymentRecord2 = csvRecords.get(1);
-        assertThat(paymentRecord2.size(), is(25));
+        assertThat(paymentRecord2.size(), is(28));
         assertThat(paymentRecord2.get("Net"), is("11.00"));
         assertThat(paymentRecord2.get("Fee"), is("1.00"));
     }
@@ -364,7 +334,7 @@ public class TransactionResourceCsvIT {
         List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, DEFAULT).getRecords();
 
         CSVRecord header = csvRecords.get(0);
-        assertThat(header.size(), is(27));
+        assertThat(header.size(), is(30));
         assertThat(header.get(0), is("Reference"));
         assertThat(header.get(1), is("Description"));
         assertThat(header.get(2), is("Email"));
@@ -387,11 +357,14 @@ public class TransactionResourceCsvIT {
         assertThat(header.get(19), is("Wallet Type"));
         assertThat(header.get(20), is("Fee"));
         assertThat(header.get(21), is("Net"));
-        assertThat(header.get(22), is("Card Type"));
-        assertThat(header.get(23), is("MOTO"));
-        assertThat(header.get(24), is("Payment Provider"));
-        assertThat(header.get(25), is("3-D Secure Required"));
-        assertThat(header.get(26), is("a-metadata-key (metadata)"));
+        assertThat(header.get(22), is("Fee (transaction)"));
+        assertThat(header.get(23), is("Fee (3DS)"));
+        assertThat(header.get(24), is("Fee (fraud protection)"));
+        assertThat(header.get(25), is("Card Type"));
+        assertThat(header.get(26), is("MOTO"));
+        assertThat(header.get(27), is("Payment Provider"));
+        assertThat(header.get(28), is("3-D Secure Required"));
+        assertThat(header.get(29), is("a-metadata-key (metadata)"));
     }
 
     @Test
