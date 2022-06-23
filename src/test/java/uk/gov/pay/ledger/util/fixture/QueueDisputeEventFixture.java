@@ -18,7 +18,8 @@ public class QueueDisputeEventFixture implements QueueFixture<QueueDisputeEventF
     private String serviceId = randomAlphanumeric(10);;
     private Boolean live = true;
     private ResourceType resourceType = DISPUTE;
-    private String resourceExternalId = randomAlphanumeric(20);;
+    private String resourceExternalId = randomAlphanumeric(20);
+    private String parentResourceExternalId = randomAlphanumeric(26);
     private ZonedDateTime eventDate = ZonedDateTime.parse("2022-02-07T08:46:01.123456Z");
     private String eventType = "DISPUTE_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
@@ -51,6 +52,26 @@ public class QueueDisputeEventFixture implements QueueFixture<QueueDisputeEventF
         return this;
     }
 
+    public QueueDisputeEventFixture withEventData(String eventData) {
+        this.eventData = eventData;
+        return this;
+    }
+
+    public QueueDisputeEventFixture withLive(Boolean live) {
+        this.live = live;
+        return this;
+    }
+
+    public QueueDisputeEventFixture withParentResourceExternalId(String parentResourceExternalId) {
+        this.parentResourceExternalId = parentResourceExternalId;
+        return this;
+    }
+
+    public QueueDisputeEventFixture withServiceId(String serviceId) {
+        this.serviceId = serviceId;
+        return this;
+    }
+
     public QueueDisputeEventFixture withDefaultEventDataForEventType(String eventType) {
         switch (eventType) {
             case "DISPUTE_CREATED":
@@ -60,7 +81,6 @@ public class QueueDisputeEventFixture implements QueueFixture<QueueDisputeEventF
                                 .put("evidence_due_date", 1644883199)
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("amount", 6500)
-                                .put("net_amount", 8000)
                                 .put("reason", "duplicate")
                                 .build());
                 break;
@@ -73,18 +93,18 @@ public class QueueDisputeEventFixture implements QueueFixture<QueueDisputeEventF
 
     @Override
     public Event toEntity() {
-        return new Event(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, EMPTY, eventDate, eventType, eventData, false);
+        return new Event(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, false);
     }
 
     @Override
     public QueueDisputeEventFixture insert(AmazonSQS sqsClient) {
         this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, serviceId, live, resourceExternalId,
-                EMPTY, resourceType, eventData);
+                parentResourceExternalId, resourceType, eventData);
         return this;
     }
 
     public PactDslJsonBody getAsPact() {
         return QueueEventFixtureUtil.getAsPact(serviceId, live, eventType, eventDate, resourceExternalId,
-                EMPTY, resourceType, eventData);
+                parentResourceExternalId, resourceType, eventData);
     }
 }
