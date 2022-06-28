@@ -84,6 +84,14 @@ public class QueueDisputeEventFixture implements QueueFixture<QueueDisputeEventF
                                 .put("reason", "duplicate")
                                 .build());
                 break;
+            case "DISPUTE_LOST":
+                eventData = new GsonBuilder().create()
+                        .toJson(ImmutableMap.builder()
+                                .put("fee", 1500)
+                                .put("amount", 6500)
+                                .put("net_amount", -8000)
+                                .put("gateway_account_id", gatewayAccountId)
+                                .build());
             default:
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.of("event_data", "event_data"));
