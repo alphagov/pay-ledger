@@ -69,6 +69,15 @@ public class DatabaseTestHelper {
                         .list());
     }
 
+    public Map<String, Object> getTransaction(String externalId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT * FROM transaction WHERE external_id = :externalId")
+                        .bind("externalId", externalId)
+                        .mapToMap()
+                        .findOne()
+                        .get());
+    }
+
     public List<Map<String, Object>> getMetadataKey(String key) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("SELECT * FROM metadata_key where key = :key")

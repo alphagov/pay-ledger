@@ -86,6 +86,7 @@ public class TransactionFactoryTest {
                 .build();
 
         fullDataObject = new TransactionEntity.Builder()
+                .withTransactionType("PAYMENT")
                 .withId(id)
                 .withGatewayAccountId(gatewayAccountId)
                 .withServiceId(serviceId)
@@ -113,6 +114,7 @@ public class TransactionFactoryTest {
                 .build();
 
         minimalDataObject = new TransactionEntity.Builder()
+                .withTransactionType("PAYMENT")
                 .withId(id)
                 .withGatewayAccountId(gatewayAccountId)
                 .withServiceId(serviceId)

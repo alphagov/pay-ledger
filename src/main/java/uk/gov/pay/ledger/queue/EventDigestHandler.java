@@ -9,12 +9,11 @@ import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.payout.service.PayoutService;
 import uk.gov.pay.ledger.queue.eventprocessor.AgreementEventProcessor;
-import uk.gov.pay.ledger.queue.eventprocessor.DisputeEventProcessor;
+import uk.gov.pay.ledger.queue.eventprocessor.ChildTransactionEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.EventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PaymentEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PaymentInstrumentEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PayoutEventProcessor;
-import uk.gov.pay.ledger.queue.eventprocessor.RefundEventProcessor;
 import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 import uk.gov.pay.ledger.transactionsummary.service.TransactionSummaryService;
@@ -25,8 +24,7 @@ public class EventDigestHandler {
 
     private PaymentEventProcessor paymentEventProcessor;
     private PayoutEventProcessor payoutEventProcessor;
-    private RefundEventProcessor refundEventProcessor;
-    private DisputeEventProcessor disputeEventProcessor;
+    private ChildTransactionEventProcessor childTransactionEventProcessor;
     private AgreementEventProcessor agreementEventProcessor;
     private PaymentInstrumentEventProcessor paymentInstrumentEventProcessor;
 
@@ -38,10 +36,9 @@ public class EventDigestHandler {
                               TransactionEntityFactory transactionEntityFactory,
                               TransactionSummaryService transactionSummaryService,
                               AgreementService agreementService) {
-        refundEventProcessor = new RefundEventProcessor(eventService, transactionService, transactionEntityFactory);
-        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, refundEventProcessor, transactionSummaryService);
+        childTransactionEventProcessor = new ChildTransactionEventProcessor(eventService, transactionService, transactionEntityFactory);
+        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, childTransactionEventProcessor, transactionSummaryService);
         payoutEventProcessor = new PayoutEventProcessor(eventService, payoutService);
-        disputeEventProcessor = new DisputeEventProcessor();
         agreementEventProcessor = new AgreementEventProcessor(eventService, agreementService);
         paymentInstrumentEventProcessor = new PaymentInstrumentEventProcessor(eventService, agreementService);
     }
@@ -51,11 +48,10 @@ public class EventDigestHandler {
             case PAYMENT:
                 return paymentEventProcessor;
             case REFUND:
-                return refundEventProcessor;
+            case DISPUTE:
+                return childTransactionEventProcessor;
             case PAYOUT:
                 return payoutEventProcessor;
-            case DISPUTE:
-                return disputeEventProcessor;
             case AGREEMENT:
                 return agreementEventProcessor;
             case PAYMENT_INSTRUMENT:

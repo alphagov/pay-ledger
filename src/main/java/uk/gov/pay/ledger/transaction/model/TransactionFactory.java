@@ -32,11 +32,14 @@ public class TransactionFactory {
     }
 
     public Transaction createTransactionEntity(TransactionEntity entity) {
-        if ("REFUND".equals(entity.getTransactionType())) {
-            return createRefund(entity);
+        switch (entity.getTransactionType()) {
+            case "PAYMENT":
+                return createPayment(entity);
+            case "REFUND":
+                return createRefund(entity);
+            default:
+                throw new RuntimeException(String.format("Unexpected transaction type %s", entity.getTransactionType()));
         }
-
-        return createPayment(entity);
     }
 
     private Transaction createPayment(TransactionEntity entity) {

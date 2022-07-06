@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 
 @ExtendWith(MockitoExtension.class)
-class RefundEventProcessorTest {
+class ChildTransactionEventProcessorTest {
 
     @Mock
     private EventService eventService;
@@ -39,12 +39,12 @@ class RefundEventProcessorTest {
     private ArgumentCaptor<TransactionEntity> transactionEntityArgumentCaptor;
 
     private TransactionEntityFactory transactionEntityFactory;
-    private RefundEventProcessor refundEventProcessor;
+    private ChildTransactionEventProcessor childTransactionEventProcessor;
 
     @BeforeEach
     void setUp() {
         transactionEntityFactory = new TransactionEntityFactory(new ObjectMapper());
-        refundEventProcessor = new RefundEventProcessor(eventService, transactionService, transactionEntityFactory);
+        childTransactionEventProcessor = new ChildTransactionEventProcessor(eventService, transactionService, transactionEntityFactory);
     }
 
     @Test
@@ -70,7 +70,7 @@ class RefundEventProcessorTest {
         String refundExternalId = "refund-external-id";
         when(eventService.getEventDigestForResource(refundExternalId)).thenReturn(refundEventDigest);
 
-        refundEventProcessor.reprojectRefundTransaction(refundExternalId, paymentEventDigest);
+        childTransactionEventProcessor.reprojectChildTransaction(refundExternalId, paymentEventDigest);
 
         verify(transactionService).upsertTransaction(transactionEntityArgumentCaptor.capture());
 

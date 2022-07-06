@@ -599,4 +599,35 @@ public class TransactionResourceSearchIT {
                 .body("results[0].transaction_id", is(transaction2.getExternalId()))
                 .body("results[1].transaction_id", is(transaction1.getExternalId()));
     }
+
+    @Test
+    public void shouldSuccessfullyReturnResultsWhenDisputesArePresent() {
+        String gatewayAccountId = "123";
+
+        TransactionFixture targetPayment = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUBMITTED)
+                .withGatewayAccountId(gatewayAccountId)
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("DISPUTE")
+                .withState(TransactionState.DISPUTE_NEEDS_RESPONSE)
+                .withGatewayAccountId(gatewayAccountId)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].transaction_id", is(targetPayment.getExternalId()));
+    }
 }
