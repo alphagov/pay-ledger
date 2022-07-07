@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.pay.ledger.transaction.model.AuthorisationSummary;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
+import uk.gov.pay.ledger.transaction.model.Dispute;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Refund;
 import uk.gov.pay.ledger.transaction.model.Transaction;
@@ -32,9 +33,9 @@ public class TransactionView {
     private Long id;
     @Schema(example = "1")
     private String gatewayAccountId;
-    @Schema(example = "baea0585e30d4acbb438524fca82b51e")
+    @Schema(example = "baea0585e30d4acbb438524fca82b51e") // pragma: allowlist secret
     private String serviceId;
-    @Schema(example = "7a7a718cb8b0401f8b8f4cdda9804073")
+    @Schema(example = "7a7a718cb8b0401f8b8f4cdda9804073") // pragma: allowlist secret
     private String credentialExternalId;
     @Schema(example = "1000")
     private Long amount;
@@ -89,6 +90,11 @@ public class TransactionView {
     @Schema(example = "web")
     private AuthorisationMode authorisationMode;
     private TransactionView paymentDetails;
+    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
+    @Schema(example = "\"2016-01-21T17:15:00Z\"")
+    private ZonedDateTime evidenceDueDate;
+    @Schema(example = "fraudulent")
+    private String reason;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -127,6 +133,8 @@ public class TransactionView {
         this.gatewayPayoutId = builder.gatewayPayoutId;
         this.authorisationMode = builder.authorisationMode;
         this.paymentDetails = builder.paymentDetails;
+        this.evidenceDueDate = builder.evidenceDueDate;
+        this.reason = builder.reason;
     }
 
     public TransactionView() {
@@ -174,6 +182,45 @@ public class TransactionView {
                         .withState(ExternalTransactionState.from(payment.getState(), statusVersion));
             }
             return paymentBuilder.build();
+        }
+
+        if (transaction instanceof Dispute) {
+            Dispute dispute = (Dispute) transaction;
+            Builder disputeBuilder = new Builder()
+                    .withGatewayAccountId(dispute.getGatewayAccountId())
+                    .withServiceId(dispute.getServiceId())
+                    .withAmount(dispute.getAmount())
+                    .withNetAmount(dispute.getNetAmount())
+                    .withFee(dispute.getFee())
+                    .withState(ExternalTransactionState.from(dispute.getState(), statusVersion))
+                    .withCreatedDate(dispute.getCreatedDate())
+                    .withGatewayTransactionId(dispute.getGatewayTransactionId())
+                    .withTransactionType(dispute.getTransactionType())
+                    .withLive(dispute.getLive())
+                    .withSettlementSummary(dispute.getSettlementSummary())
+                    .withParentExternalId(dispute.getParentTransactionId())
+                    .withGatewayAccountId(dispute.getGatewayAccountId())
+                    .withReason(dispute.getReason())
+                    .withEvidenceDueDate(dispute.getEvidenceDueDate())
+                    .withExternalId(dispute.getExternalId());
+
+            if (dispute.getPaymentDetails() != null) {
+                disputeBuilder = disputeBuilder
+                        .withPaymentDetails(from(dispute.getPaymentDetails(), statusVersion));
+            }
+
+            Payment payment = dispute.getPaymentDetails();
+
+            Builder paymentBuilder = new Builder()
+                    .withDescription(payment.getDescription())
+                    .withReference(payment.getReference())
+                    .withEmail(payment.getEmail())
+                    .withCardDetails(payment.getCardDetails())
+                    .withTransactionType(payment.getTransactionType());
+
+            disputeBuilder = disputeBuilder.withPaymentDetails(paymentBuilder.build());
+
+            return disputeBuilder.build();
         }
 
         Refund refund = (Refund) transaction;
@@ -361,6 +408,14 @@ public class TransactionView {
         return paymentDetails;
     }
 
+    public ZonedDateTime getEvidenceDueDate() {
+        return evidenceDueDate;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
     public static class Builder {
         private Long id;
         private String gatewayAccountId;
@@ -399,6 +454,8 @@ public class TransactionView {
         private String credentialExternalId;
         private String serviceId;
         private AuthorisationMode authorisationMode;
+        private ZonedDateTime evidenceDueDate;
+        private String reason;
 
         public Builder() {
         }
@@ -584,6 +641,16 @@ public class TransactionView {
 
         public Builder withAuthorisationMode(AuthorisationMode authorisationMode) {
             this.authorisationMode = authorisationMode;
+            return this;
+        }
+
+        public Builder withEvidenceDueDate(ZonedDateTime evidenceDueDate) {
+            this.evidenceDueDate = evidenceDueDate;
+            return this;
+        }
+
+        public Builder withReason(String reason) {
+            this.reason = reason;
             return this;
         }
     }

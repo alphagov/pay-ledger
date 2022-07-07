@@ -35,7 +35,6 @@ public enum TransactionState {
     DISPUTE_UNDER_REVIEW("under_review", false),
     DISPUTE_LOST("lost", true),
     DISPUTE_WON("won", true);
-
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionState.class);
 
     private final String oldStatus;

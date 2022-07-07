@@ -2,21 +2,21 @@ package uk.gov.pay.ledger.transaction.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
-import uk.gov.service.payments.commons.model.AuthorisationMode;
-import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.transaction.search.model.PaymentSettlementSummary;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.service.payments.commons.model.AuthorisationMode;
+import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class Payment extends Transaction {
 
     private String credentialExternalId;

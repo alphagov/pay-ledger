@@ -5,10 +5,13 @@ import io.dropwizard.jackson.Jackson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
+import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.service.payments.commons.model.AuthorisationMode;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -18,6 +21,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.pay.ledger.payout.entity.PayoutEntity.PayoutEntityBuilder.aPayoutEntity;
+import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
+import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class TransactionFactoryTest {
 
@@ -284,6 +289,62 @@ public class TransactionFactoryTest {
                 .build();
         assertThat(refund.getPayoutEntity().isPresent(), is(true));
         assertThat(refund.getPayoutEntity().get().getPaidOutDate(), is(notNullValue()));
+    }
+
+    @Test
+    public void createsDispute() {
+        var createdDate = ZonedDateTime.parse("2022-06-08T11:22:48.822408Z");
+        var paidOutDate = ZonedDateTime.parse("2022-07-08T12:20:07.073Z");
+        var evidenceDueDate = 1652223599L;
+        TransactionEntity parentTransactionEntity = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails()
+                .withGatewayAccountId("1")
+                .withExternalId("blabla")
+                .toEntity();
+
+        PayoutEntity payoutEntity = aPayoutEntity()
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withGatewayPayoutId("po_dl0e0sdlejskfklsele")
+                .withPaidOutDate(paidOutDate)
+                .build();
+
+        TransactionEntity.Builder transactionEntityBuilder = new TransactionEntity.Builder();
+        TransactionEntity disputeTransactionEntity = transactionEntityBuilder
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withParentExternalId(parentTransactionEntity.getExternalId())
+                .withReference(parentTransactionEntity.getReference())
+                .withDescription(parentTransactionEntity.getDescription())
+                .withEmail(parentTransactionEntity.getEmail())
+                .withCardholderName(parentTransactionEntity.getCardholderName())
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withTransactionType("DISPUTE")
+                .withState(TransactionState.DISPUTE_LOST)
+                .withAmount(1000L)
+                .withNetAmount(-2500L)
+                .withGatewayTransactionId("gateway-transaction-id")
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jns\", \"reason\": \"fraudulent\", \"evidence_due_date\": " + evidenceDueDate + "}")
+                .withEventCount(3)
+                .withCardBrand(parentTransactionEntity.getCardBrand())
+                .withFee(1500L)
+                .withGatewayTransactionId("du_dl20kdldj20ejs103jns")
+                .withServiceId(parentTransactionEntity.getServiceId())
+                .withGatewayPayoutId("po_dl0e0sdlejskfklsele")
+                .withCreatedDate(createdDate)
+                .withPayoutEntity(payoutEntity)
+                .withLive(true)
+                .build();
+
+        Dispute transaction = (Dispute) transactionFactory.createTransactionEntity(disputeTransactionEntity);
+
+        assertThat(transaction.getReason(), is("fraudulent"));
+        assertThat(transaction.getParentTransactionId(), is(parentTransactionEntity.getExternalId()));
+        assertThat(transaction.getEvidenceDueDate(), is(ZonedDateTime.ofInstant(Instant.ofEpochSecond(evidenceDueDate), ZoneOffset.UTC)));
+        assertThat(transaction.getNetAmount(), is(-2500L));
+        assertThat(transaction.getSettlementSummary().getSettledDate().isPresent(), is(true));
+        assertThat(transaction.getSettlementSummary().getSettledDate(), is(Optional.of("2022-07-08")));
+        assertThat(transaction.getPaymentDetails().getDescription(), is(parentTransactionEntity.getDescription()));
     }
 
     private void assertCorrectPaymentTransactionWithFullData(Payment payment) {
