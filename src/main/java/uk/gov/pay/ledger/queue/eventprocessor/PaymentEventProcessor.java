@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.queue.eventprocessor;
 
+import com.google.inject.Inject;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.SalientEventType;
@@ -25,6 +26,7 @@ public class PaymentEventProcessor extends EventProcessor {
     private final ChildTransactionEventProcessor childTransactionEventProcessor;
     private final TransactionSummaryService transactionSummaryService;
 
+    @Inject
     public PaymentEventProcessor(EventService eventService,
                                  TransactionService transactionService,
                                  TransactionMetadataService transactionMetadataService,

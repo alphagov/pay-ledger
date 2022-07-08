@@ -3,23 +3,13 @@ package uk.gov.pay.ledger.queue;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.agreement.service.AgreementService;
-import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
-import uk.gov.pay.ledger.event.service.EventService;
-import uk.gov.pay.ledger.payout.service.PayoutService;
 import uk.gov.pay.ledger.queue.eventprocessor.AgreementEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.ChildTransactionEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.EventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PaymentEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PaymentInstrumentEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PayoutEventProcessor;
-import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
-import uk.gov.pay.ledger.transaction.service.TransactionService;
-import uk.gov.pay.ledger.transactionsummary.service.TransactionSummaryService;
-
-import java.time.Clock;
 
 public class EventDigestHandler {
 
@@ -32,20 +22,17 @@ public class EventDigestHandler {
     private PaymentInstrumentEventProcessor paymentInstrumentEventProcessor;
 
     @Inject
-    public EventDigestHandler(EventService eventService,
-                              TransactionService transactionService,
-                              TransactionMetadataService transactionMetadataService,
-                              PayoutService payoutService,
-                              TransactionEntityFactory transactionEntityFactory,
-                              TransactionSummaryService transactionSummaryService,
-                              AgreementService agreementService,
-                              LedgerConfig ledgerConfig,
-                              Clock clock) {
-        childTransactionEventProcessor = new ChildTransactionEventProcessor(eventService, transactionService, transactionEntityFactory, ledgerConfig, clock);
-        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, childTransactionEventProcessor, transactionSummaryService);
-        payoutEventProcessor = new PayoutEventProcessor(eventService, payoutService);
-        agreementEventProcessor = new AgreementEventProcessor(eventService, agreementService);
-        paymentInstrumentEventProcessor = new PaymentInstrumentEventProcessor(eventService, agreementService);
+    public EventDigestHandler(PaymentEventProcessor paymentEventProcessor,
+                              PayoutEventProcessor payoutEventProcessor,
+                              ChildTransactionEventProcessor childTransactionEventProcessor,
+                              AgreementEventProcessor agreementEventProcessor,
+                              PaymentInstrumentEventProcessor paymentInstrumentEventProcessor) {
+
+        this.paymentEventProcessor = paymentEventProcessor;
+        this.payoutEventProcessor = payoutEventProcessor;
+        this.childTransactionEventProcessor = childTransactionEventProcessor;
+        this.agreementEventProcessor = agreementEventProcessor;
+        this.paymentInstrumentEventProcessor = paymentInstrumentEventProcessor;
     }
 
     public EventProcessor processorFor(Event event) {

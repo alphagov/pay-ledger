@@ -165,4 +165,19 @@ class PaymentEventProcessorTest {
         paymentEventProcessor.process(event, false);
         verifyNoInteractions(transactionSummaryService);
     }
+
+    @Test
+    void shouldReprojectTransactionMetadataIfReprojectEvent() {
+        Event event = anEventFixture()
+                .withResourceType(PAYMENT)
+                .withIsReprojectDomainObject(true)
+                .toEntity();
+
+        when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(anEventFixture().toEntity()));
+        paymentEventProcessor.process(event, true);
+
+        verify(transactionService).upsertTransactionFor(any(EventDigest.class));
+        verify(transactionMetadataService).reprojectFromEventDigest(any(EventDigest.class));
+        verify(transactionMetadataService, never()).upsertMetadataFor(event);
+    }
 }

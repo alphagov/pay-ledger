@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.queue.eventprocessor;
 
+import com.google.inject.Inject;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.payout.service.PayoutService;
@@ -8,6 +9,7 @@ public class PayoutEventProcessor extends EventProcessor {
     private EventService eventService;
     private PayoutService payoutService;
 
+    @Inject
     public PayoutEventProcessor(EventService eventService, PayoutService payoutService) {
         this.eventService = eventService;
         this.payoutService = payoutService;
