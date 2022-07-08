@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
+import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
@@ -24,6 +25,7 @@ import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 import uk.gov.pay.ledger.transactionsummary.service.TransactionSummaryService;
 
+import java.time.Clock;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -63,6 +65,10 @@ class EventDigestHandlerTest {
     private TransactionSummaryService transactionSummaryService;
     @Mock
     private AgreementService agreementService;
+    @Mock
+    private LedgerConfig ledgerConfig;
+    @Mock
+    private Clock clock;
 
     private EventDigestHandler eventDigestHandler;
     private EventDigest eventDigest;
@@ -71,7 +77,8 @@ class EventDigestHandlerTest {
     void setUp() {
         TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(new ObjectMapper());
         eventDigestHandler =  new EventDigestHandler(eventService, transactionService,
-                transactionMetadataService, payoutService, transactionEntityFactory, transactionSummaryService, agreementService);
+                transactionMetadataService, payoutService, transactionEntityFactory, transactionSummaryService,
+                agreementService, ledgerConfig, clock);
         eventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));
         lenient().when(eventService.getEventDigestForResource(any(Event.class)))
                 .thenReturn(eventDigest);

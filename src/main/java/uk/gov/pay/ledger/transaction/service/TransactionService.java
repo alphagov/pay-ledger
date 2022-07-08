@@ -95,7 +95,6 @@ public class TransactionService {
 
         List<Transaction> transactionList = transactionDao.searchTransactions(searchParams)
                 .stream()
-                .filter(transactionEntity -> !transactionEntity.getTransactionType().equals("DISPUTE"))  // TODO: Temporarily filtering out disputes until we've added mapping
                 .map(transactionFactory::createTransactionEntity)
                 .collect(Collectors.toList());
 
