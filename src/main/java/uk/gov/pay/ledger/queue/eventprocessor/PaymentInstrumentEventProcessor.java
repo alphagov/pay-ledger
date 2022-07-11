@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.queue.eventprocessor;
 
+import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
@@ -11,7 +12,7 @@ public class PaymentInstrumentEventProcessor extends EventProcessor {
     private AgreementService agreementService;
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentInstrumentEventProcessor.class);
 
-
+    @Inject
     public PaymentInstrumentEventProcessor(EventService eventService, AgreementService agreementService) {
         this.eventService = eventService;
         this.agreementService = agreementService;

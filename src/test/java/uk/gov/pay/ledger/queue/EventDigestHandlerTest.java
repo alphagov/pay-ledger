@@ -4,41 +4,31 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.agreement.service.AgreementService;
-import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.model.EventDigest;
-import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
-import uk.gov.pay.ledger.event.service.EventService;
-import uk.gov.pay.ledger.payout.service.PayoutService;
-import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
-import uk.gov.pay.ledger.transaction.service.TransactionService;
-import uk.gov.pay.ledger.transactionsummary.service.TransactionSummaryService;
+import uk.gov.pay.ledger.queue.eventprocessor.AgreementEventProcessor;
+import uk.gov.pay.ledger.queue.eventprocessor.ChildTransactionEventProcessor;
+import uk.gov.pay.ledger.queue.eventprocessor.PaymentEventProcessor;
+import uk.gov.pay.ledger.queue.eventprocessor.PaymentInstrumentEventProcessor;
+import uk.gov.pay.ledger.queue.eventprocessor.PayoutEventProcessor;
 
-import java.time.Clock;
 import java.util.List;
 
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
+import static uk.gov.pay.ledger.event.model.ResourceType.DISPUTE;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT_INSTRUMENT;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYOUT;
@@ -50,100 +40,63 @@ import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 class EventDigestHandlerTest {
 
     @Mock
-    private EventService eventService;
+    private PaymentEventProcessor mockPaymentEventProcessor;
     @Mock
-    private TransactionService transactionService;
+    private PayoutEventProcessor mockPayoutEventProcessor;
     @Mock
-    private TransactionMetadataService transactionMetadataService;
+    private ChildTransactionEventProcessor mockChildTransactionEventProcessor;
     @Mock
-    private PayoutService payoutService;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> loggingEventArgumentCaptor;
+    private AgreementEventProcessor mockAgreementEventProcessor;
+    @Mock
+    private PaymentInstrumentEventProcessor mockPaymentInstrumentEventProcessor;
     @Mock
     private Appender<ILoggingEvent> mockAppender;
-    @Mock
-    private TransactionSummaryService transactionSummaryService;
-    @Mock
-    private AgreementService agreementService;
-    @Mock
-    private LedgerConfig ledgerConfig;
-    @Mock
-    private Clock clock;
+    @Captor
+    private ArgumentCaptor<LoggingEvent> loggingEventArgumentCaptor;
 
+    @InjectMocks
     private EventDigestHandler eventDigestHandler;
-    private EventDigest eventDigest;
-
-    @BeforeEach
-    void setUp() {
-        TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(new ObjectMapper());
-        eventDigestHandler =  new EventDigestHandler(eventService, transactionService,
-                transactionMetadataService, payoutService, transactionEntityFactory, transactionSummaryService,
-                agreementService, ledgerConfig, clock);
-        eventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));
-        lenient().when(eventService.getEventDigestForResource(any(Event.class)))
-                .thenReturn(eventDigest);
-    }
 
     @Test
-    void shouldUpsertTransactionIfResourceTypeIsPayment() {
+    void shouldProcessPaymentEvent() {
         Event event = anEventFixture().withResourceType(PAYMENT).toEntity();
-        when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(anEventFixture().toEntity()));
-
         eventDigestHandler.processEvent(event, true);
-
-        verify(transactionService).upsertTransactionFor(any(EventDigest.class));
-        verify(transactionMetadataService).upsertMetadataFor(event);
+        verify(mockPaymentEventProcessor).process(event, true);
     }
 
     @Test
-    void shouldReprojectTransactionMetadataIfReprojectEvent() {
-        Event event = anEventFixture()
-                .withResourceType(PAYMENT)
-                .withIsReprojectDomainObject(true)
-                .toEntity();
-
-        when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(List.of(anEventFixture().toEntity()));
-        eventDigestHandler.processEvent(event, true);
-
-        verify(transactionService).upsertTransactionFor(any(EventDigest.class));
-        verify(transactionMetadataService).reprojectFromEventDigest(any(EventDigest.class));
-        verify(transactionMetadataService, never()).upsertMetadataFor(event);
-    }
-
-    @Test
-    void shouldUpsertTransactionIfResourceTypeIsRefund() {
+    void shouldProcessRefundEvent() {
         Event event = anEventFixture().withResourceType(REFUND).toEntity();
         eventDigestHandler.processEvent(event, true);
-
-        verify(eventService).getEventDigestForResource(event);
-        verify(transactionService).upsertTransactionFor(eventDigest);
+        verify(mockChildTransactionEventProcessor).process(event, true);
     }
 
     @Test
-    void shouldUpsertPayoutIfResourceTypeIsPayout() {
+    void shouldProcessDisputeEvent() {
+        Event event = anEventFixture().withResourceType(DISPUTE).toEntity();
+        eventDigestHandler.processEvent(event, true);
+        verify(mockChildTransactionEventProcessor).process(event, true);
+    }
+
+    @Test
+    void shouldProcessPayoutEvent() {
         Event event = anEventFixture().withResourceType(PAYOUT).toEntity();
         eventDigestHandler.processEvent(event, true);
-
-        verify(eventService).getEventDigestForResource(event);
-        verify(payoutService).upsertPayoutFor(eventDigest);
+        verify(mockPayoutEventProcessor).process(event, true);
     }
 
     @Test
-    void shouldUpsertAgreementIfResourceTypeIsAgreement() {
+    void shouldProcessAgreementEvent() {
         Event event = anEventFixture().withResourceType(AGREEMENT).toEntity();
         eventDigestHandler.processEvent(event, true);
-
-        verify(eventService).getEventDigestForResource(event);
-        verify(agreementService).upsertAgreementFor(eventDigest);
+        verify(mockAgreementEventProcessor).process(event, true);
     }
 
     @Test
-    void shouldUpsertPaymentInstrumentIfResourceTypeIsPaymentInstrument() {
+    void shouldProcessPaymentInstrumentEvent() {
         Event event = anEventFixture().withResourceType(PAYMENT_INSTRUMENT).toEntity();
         eventDigestHandler.processEvent(event, true);
-
-        verify(eventService).getEventDigestForResource(event);
-        verify(agreementService).upsertPaymentInstrumentFor(eventDigest);
+        verify(mockPaymentInstrumentEventProcessor).process(event, true);
     }
 
     @Test
@@ -155,37 +108,11 @@ class EventDigestHandlerTest {
 
         assertThrows(RuntimeException.class, () -> eventDigestHandler.processEvent(event, true));
 
-        verify(transactionService, never()).upsertTransactionFor(any());
-        verify(transactionMetadataService, never()).upsertMetadataFor(any());
-        verify(payoutService, never()).upsertPayoutFor(any());
-
         verify(mockAppender, times(1)).doAppend(loggingEventArgumentCaptor.capture());
         List<LoggingEvent> loggingEvents = loggingEventArgumentCaptor.getAllValues();
         assertThat(loggingEvents.get(0).getFormattedMessage(),
                 is(format("Event digest processing for resource type [%s] is not supported. " +
                                 "Event type [%s] and resource external id [%s]",
                         event.getResourceType(), event.getEventType(), event.getResourceExternalId())));
-    }
-
-    @Test
-    void shouldAddPaymentDetailsForRefundIfParentExternalIdIsSet() {
-        String parentExternalId = "parent-external-id";
-        EventDigest refundEventDigest = EventDigest.fromEventList(List.of(anEventFixture().withParentResourceExternalId(parentExternalId).toEntity()));
-        EventDigest paymentEventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));
-
-        Event event = anEventFixture().withResourceType(REFUND)
-                .withParentResourceExternalId(parentExternalId)
-                .toEntity();
-
-        when(eventService.getEventDigestForResource(event))
-                .thenReturn(refundEventDigest);
-        when(eventService.getEventDigestForResource(parentExternalId))
-                .thenReturn(paymentEventDigest);
-
-        eventDigestHandler.processEvent(event, true);
-
-        verify(eventService).getEventDigestForResource(event);
-        verify(eventService).getEventDigestForResource(parentExternalId);
-        verify(transactionService).upsertTransaction(any(TransactionEntity.class));
     }
 }
