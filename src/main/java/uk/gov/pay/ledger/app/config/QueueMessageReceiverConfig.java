@@ -4,6 +4,7 @@ import io.dropwizard.Configuration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.Instant;
 
 public class QueueMessageReceiverConfig extends Configuration {
 
@@ -22,6 +23,12 @@ public class QueueMessageReceiverConfig extends Configuration {
     @NotNull
     private int messageRetryDelayInSeconds;
 
+    @Valid
+    private Instant projectLivePaymentsDisputeEventsFromDate;
+
+    @Valid
+    private Instant projectTestPaymentsDisputeEventsFromDate;
+
     public int getThreadDelayInMilliseconds() {
         return threadDelayInMilliseconds;
     }
@@ -35,4 +42,12 @@ public class QueueMessageReceiverConfig extends Configuration {
     }
 
     public boolean isBackgroundProcessingEnabled() { return backgroundProcessingEnabled; }
+
+    public Instant getProjectLivePaymentsDisputeEventsFromDate() {
+        return projectLivePaymentsDisputeEventsFromDate;
+    }
+
+    public Instant getProjectTestPaymentsDisputeEventsFromDate() {
+        return projectTestPaymentsDisputeEventsFromDate;
+    }
 }

@@ -31,7 +31,7 @@ public class ReportService {
     public Map<String, Long> getPaymentCountsByState(TransactionSummaryParams params) {
         // return map with all states, with count of 0 if no payments exist for state
         Map<String, Long> responseMap = new HashMap<>();
-        Arrays.stream(TransactionState.values()).forEach(state -> responseMap.put(state.getStatus() , 0L));
+        TransactionState.PAYMENT_TRANSACTION_STATES.forEach(state -> responseMap.put(state.getStatus() , 0L));
 
         TransactionStatisticQuery transactionStatisticQuery = buildBaseTransactionStatisticQuery(params);
 

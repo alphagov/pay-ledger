@@ -22,18 +22,18 @@ public class PaymentEventProcessor extends EventProcessor {
     private final EventService eventService;
     private final TransactionService transactionService;
     private final TransactionMetadataService transactionMetadataService;
-    private final RefundEventProcessor refundEventProcessor;
+    private final ChildTransactionEventProcessor childTransactionEventProcessor;
     private final TransactionSummaryService transactionSummaryService;
 
     public PaymentEventProcessor(EventService eventService,
                                  TransactionService transactionService,
                                  TransactionMetadataService transactionMetadataService,
-                                 RefundEventProcessor refundEventProcessor,
+                                 ChildTransactionEventProcessor childTransactionEventProcessor,
                                  TransactionSummaryService transactionSummaryService) {
         this.eventService = eventService;
         this.transactionService = transactionService;
         this.transactionMetadataService = transactionMetadataService;
-        this.refundEventProcessor = refundEventProcessor;
+        this.childTransactionEventProcessor = childTransactionEventProcessor;
         this.transactionSummaryService = transactionSummaryService;
     }
 
@@ -65,7 +65,7 @@ public class PaymentEventProcessor extends EventProcessor {
 
         if (shouldCheckForRefundsToUpdate) {
             transactionService.getChildTransactions(event.getResourceExternalId())
-                    .forEach(refundTransactionEntity -> refundEventProcessor.reprojectRefundTransaction(refundTransactionEntity.getExternalId(), paymentEventDigest));
+                    .forEach(refundTransactionEntity -> childTransactionEventProcessor.reprojectChildTransaction(refundTransactionEntity.getExternalId(), paymentEventDigest));
         }
 
         if (!event.isReprojectDomainObject() && isANewEvent) {

@@ -7,8 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
@@ -28,7 +30,11 @@ public enum TransactionState {
     FAILED_CANCELLED("failed", "cancelled", true, "P0030", "Payment was cancelled by the user"),
     CANCELLED("cancelled", "cancelled", true, "P0040", "Payment was cancelled by the service"),
     ERROR("error", "error", true, "P0050", "Payment provider returned an error"),
-    ERROR_GATEWAY("error", "error", true, "P0050", "Payment provider returned an error");
+    ERROR_GATEWAY("error", "error", true, "P0050", "Payment provider returned an error"),
+    DISPUTE_NEEDS_RESPONSE("needs_response", false),
+    DISPUTE_UNDER_REVIEW("under_review", false),
+    DISPUTE_LOST("lost", true),
+    DISPUTE_WON("won", true);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionState.class);
 
@@ -114,11 +120,30 @@ public enum TransactionState {
                     Map.entry(SalientEventType.REFUND_SUBMITTED, SUBMITTED),
                     Map.entry(SalientEventType.REFUND_SUCCEEDED, SUCCESS),
                     Map.entry(SalientEventType.REFUND_ERROR, ERROR),
+                    Map.entry(SalientEventType.DISPUTE_CREATED, DISPUTE_NEEDS_RESPONSE),
+                    Map.entry(SalientEventType.DISPUTE_EVIDENCE_SUBMITTED, DISPUTE_UNDER_REVIEW),
+                    Map.entry(SalientEventType.DISPUTE_LOST, DISPUTE_LOST),
+                    Map.entry(SalientEventType.DISPUTE_WON, DISPUTE_WON),
                     Map.entry(SalientEventType.PAYMENT_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN, SUCCESS),
                     Map.entry(SalientEventType.PAYMENT_STATUS_CORRECTED_TO_ERROR_BY_ADMIN, ERROR),
                     Map.entry(SalientEventType.REFUND_STATUS_CORRECTED_TO_ERROR_BY_ADMIN, ERROR),
                     Map.entry(SalientEventType.REFUND_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN, SUCCESS)
             );
+
+    public static Set<TransactionState> PAYMENT_TRANSACTION_STATES = EnumSet.of(
+            UNDEFINED,
+            CREATED,
+            STARTED,
+            SUBMITTED,
+            CAPTURABLE,
+            SUCCESS,
+            FAILED_REJECTED,
+            FAILED_EXPIRED,
+            FAILED_CANCELLED,
+            CANCELLED,
+            ERROR,
+            ERROR_GATEWAY
+    );
 
     public static TransactionState fromEventType(SalientEventType salientEventType) {
         return EVENT_TYPE_TRANSACTION_STATE_MAP.get(salientEventType);

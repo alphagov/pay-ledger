@@ -35,7 +35,7 @@ class PaymentEventProcessorTest {
     @Mock
     private TransactionMetadataService transactionMetadataService;
     @Mock
-    private RefundEventProcessor refundEventProcessor;
+    private ChildTransactionEventProcessor childTransactionEventProcessor;
     @Mock
     private TransactionSummaryService transactionSummaryService;
 
@@ -44,7 +44,7 @@ class PaymentEventProcessorTest {
 
     @BeforeEach
     void setUp() {
-        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, refundEventProcessor, transactionSummaryService);
+        paymentEventProcessor = new PaymentEventProcessor(eventService, transactionService, transactionMetadataService, childTransactionEventProcessor, transactionSummaryService);
     }
 
     @Test
@@ -70,8 +70,8 @@ class PaymentEventProcessorTest {
 
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
         verify(transactionMetadataService).upsertMetadataFor(event);
-        verify(refundEventProcessor).reprojectRefundTransaction(eq(refundTransaction1.getExternalId()), any(EventDigest.class));
-        verify(refundEventProcessor).reprojectRefundTransaction(eq(refundTransaction2.getExternalId()), any(EventDigest.class));
+        verify(childTransactionEventProcessor).reprojectChildTransaction(eq(refundTransaction1.getExternalId()), any(EventDigest.class));
+        verify(childTransactionEventProcessor).reprojectChildTransaction(eq(refundTransaction2.getExternalId()), any(EventDigest.class));
     }
 
     @Test
@@ -93,7 +93,7 @@ class PaymentEventProcessorTest {
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
         verify(transactionMetadataService).upsertMetadataFor(event);
         verify(transactionService, never()).getChildTransactions(any());
-        verify(refundEventProcessor, never()).reprojectRefundTransaction(any(), any());
+        verify(childTransactionEventProcessor, never()).reprojectChildTransaction(any(), any());
     }
 
     @Test
@@ -115,7 +115,7 @@ class PaymentEventProcessorTest {
         verify(transactionService).upsertTransactionFor(any(EventDigest.class));
         verify(transactionMetadataService).upsertMetadataFor(event);
         verify(transactionService, never()).getChildTransactions(any());
-        verify(refundEventProcessor, never()).reprojectRefundTransaction(any(), any());
+        verify(childTransactionEventProcessor, never()).reprojectChildTransaction(any(), any());
     }
 
     @Test

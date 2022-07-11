@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -38,6 +40,9 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.SUCCESS;
@@ -72,6 +77,7 @@ public class QueueMessageReceiverIT {
     public void setUp() {
         when(reportingConfig.getSearchQueryTimeoutInSeconds()).thenReturn(50);
         when(ledgerConfig.getReportingConfig()).thenReturn(reportingConfig);
+        dbHelper.truncateAllData();
     }
 
     @Test
@@ -207,7 +213,6 @@ public class QueueMessageReceiverIT {
 
         Thread.sleep(500);
 
-        //todo: replace with refunds endpoint when available
         given().port(rule.getAppRule().getLocalPort())
                 .contentType(JSON)
                 .get("/v1/transaction/" + resourceExternalId + "?account_id=" + gatewayAccountId)
@@ -347,20 +352,97 @@ public class QueueMessageReceiverIT {
 
     @Test
     public void shouldHandleDisputeTypeEvent() throws InterruptedException, JsonProcessingException {
-        Event event = aQueueDisputeEventFixture()
-                .withDefaultEventDataForEventType("DISPUTE_CREATED")
-                .insert(rule.getSqsClient())
-                .toEntity();
+        final String resourceExternalId = "rexid";
+        final String parentResourceExternalId = "parentRexId";
+        final String gatewayAccountId = "test_accountId";
 
-        Thread.sleep(1500);
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(parentResourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("PAYMENT_CREATED")
+                .withLive(false)
+                .withDefaultEventDataForEventType("PAYMENT_CREATED")
+                .insert(rule.getSqsClient());
 
-        Map<String, Object> result = dbHelper.getEventByExternalId(event.getResourceExternalId());
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(parentResourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("PAYMENT_DETAILS_ENTERED")
+                .withLive(false)
+                .withDefaultEventDataForEventType("PAYMENT_DETAILS_ENTERED")
+                .insert(rule.getSqsClient());
 
-        assertThat(result.get("sqs_message_id"), is(event.getSqsMessageId()));
-        assertThat(result.get("live"), is(event.getLive()));
-        assertThat(result.get("resource_external_id"), is(event.getResourceExternalId()));
-        assertThat(result.get("event_type").toString(), is(event.getEventType()));
-        assertThat(objectMapper.readTree(result.get("event_data").toString()), is(objectMapper.readTree(event.getEventData())));
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(parentResourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("AUTHORISATION_SUCCEEDED")
+                .withLive(false)
+                .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
+                .insert(rule.getSqsClient());
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(parentResourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("FEE_INCURRED")
+                .withLive(false)
+                .withEventData(gsonBuilder.create()
+                        .toJson(Map.of(
+                                "net_amount", 900,
+                                "fee", 100
+                        )))
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(100);
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withParentResourceExternalId(parentResourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("DISPUTE_CREATED")
+                .withResourceType(ResourceType.DISPUTE)
+                .withLive(false)
+                .withEventData(gsonBuilder.create()
+                        .toJson(Map.of(
+                                "evidence_due_date",  Instant.now().getEpochSecond(),
+                                "gateway_account_id", gatewayAccountId,
+                                "amount", 50,
+                                "reason", "fraudulent"
+                        )))
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
+
+        // TODO: Replace this once the transaction endpoint is returning disputes - https://payments-platform.atlassian.net/browse/PP-9627
+        Map<String, Object> dispute = dbHelper.getTransaction(resourceExternalId);
+
+        assertThat(dispute, hasEntry("state", "DISPUTE_NEEDS_RESPONSE"));
+        assertThat(dispute, hasEntry("amount", 50L));
+        assertThat(dispute, hasEntry("gateway_account_id", gatewayAccountId));
+        assertThat(dispute, hasEntry("fee", null));
+        assertThat(dispute, hasEntry("net_amount", null));
+
+        assertThat(dispute, hasEntry("cardholder_name", "J citizen"));
+        assertThat(dispute, hasEntry("email", "j.doe@example.org"));
+        assertThat(dispute, hasEntry("card_brand", "visa"));
+        assertThat(dispute, hasEntry("description", "a description"));
+        assertThat(dispute, hasEntry("last_digits_card_number", "4242"));
+        assertThat(dispute, hasEntry("first_digits_card_number", "424242"));
+        assertThat(dispute, hasEntry("reference", "aref"));
+    }
+
+    @Test
+    void shouldNotProjectDisputeEventWhenBeforeEnabledDate() throws Exception {
+        aQueuePaymentEventFixture()
+                .withEventDate(CREATED_AT)
+                .withEventType("DISPUTE_CREATED")
+                .withResourceType(ResourceType.DISPUTE)
+                .withLive(true)
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
+
+        List<Map<String, Object>> transactions = dbHelper.getAllTransactions();
+        assertThat(transactions, hasSize(0));
     }
 
     @Test

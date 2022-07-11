@@ -1,12 +1,10 @@
 package uk.gov.pay.ledger.queue;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,21 +14,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
+import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.payout.service.PayoutService;
-import uk.gov.pay.ledger.queue.eventprocessor.DisputeEventProcessor;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.service.TransactionMetadataService;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 import uk.gov.pay.ledger.transactionsummary.service.TransactionSummaryService;
 
+import java.time.Clock;
 import java.util.List;
 
 import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,7 +39,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
-import static uk.gov.pay.ledger.event.model.ResourceType.DISPUTE;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT_INSTRUMENT;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYOUT;
@@ -68,6 +65,10 @@ class EventDigestHandlerTest {
     private TransactionSummaryService transactionSummaryService;
     @Mock
     private AgreementService agreementService;
+    @Mock
+    private LedgerConfig ledgerConfig;
+    @Mock
+    private Clock clock;
 
     private EventDigestHandler eventDigestHandler;
     private EventDigest eventDigest;
@@ -76,7 +77,8 @@ class EventDigestHandlerTest {
     void setUp() {
         TransactionEntityFactory transactionEntityFactory = new TransactionEntityFactory(new ObjectMapper());
         eventDigestHandler =  new EventDigestHandler(eventService, transactionService,
-                transactionMetadataService, payoutService, transactionEntityFactory, transactionSummaryService, agreementService);
+                transactionMetadataService, payoutService, transactionEntityFactory, transactionSummaryService,
+                agreementService, ledgerConfig, clock);
         eventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));
         lenient().when(eventService.getEventDigestForResource(any(Event.class)))
                 .thenReturn(eventDigest);
@@ -185,20 +187,5 @@ class EventDigestHandlerTest {
         verify(eventService).getEventDigestForResource(event);
         verify(eventService).getEventDigestForResource(parentExternalId);
         verify(transactionService).upsertTransaction(any(TransactionEntity.class));
-    }
-
-    @Test
-    void shouldLogForDisputeEventProcessor() {
-        Logger root = (Logger) LoggerFactory.getLogger(DisputeEventProcessor.class);
-        root.setLevel(Level.INFO);
-        root.addAppender(mockAppender);
-
-        Event event = anEventFixture().withResourceType(DISPUTE).toEntity();
-
-        eventDigestHandler.processEvent(event, true);
-        verify(mockAppender, times(1)).doAppend(loggingEventArgumentCaptor.capture());
-        LoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
-        assertThat(loggingEvent.getFormattedMessage(), containsString("DISPUTE resource type processing is not yet implemented."));
-        assertThat(loggingEvent.getArgumentArray().length, CoreMatchers.is(3));
     }
 }
