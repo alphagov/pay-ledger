@@ -110,10 +110,9 @@ public class TransactionResourceTest {
                 .request()
                 .get();
 
-        Map responseMessage = response.readEntity(new GenericType<HashMap>() {
-        });
+        Map responseMessage = response.readEntity(new GenericType<HashMap>() {});
         assertThat(response.getStatus(), is(400));
-        assertThat(responseMessage.get("message"), is("query param transaction_type must be one of [PAYMENT, REFUND]"));
+        assertThat(responseMessage.get("message"), is("query param transaction_type must be one of [PAYMENT, REFUND, DISPUTE]"));
     }
 
     @Test

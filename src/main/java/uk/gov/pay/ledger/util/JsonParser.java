@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +39,15 @@ public class JsonParser {
                 .map(JsonNode::textValue)
                 .map(ZonedDateTime::parse)
                 .orElse(null);
+    }
+
+    public static ZonedDateTime safeGetEpochLongAsDate(JsonNode object, String fieldName) {
+        Optional<Long> mightBeEpochSecond = safeGetJsonElement(object, fieldName).map(JsonNode::longValue);
+
+        return mightBeEpochSecond.map(epochSecond -> {
+            Instant instant = Instant.ofEpochSecond(epochSecond);
+            return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
+        }).orElse(null);
     }
 
     private static Optional<JsonNode> safeGetJsonElement(JsonNode object, String fieldName) {

@@ -33,7 +33,7 @@ import static uk.gov.pay.ledger.util.fixture.TransactionMetadataFixture.aTransac
 public class TransactionFixture implements DbFixture<TransactionFixture, TransactionEntity> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
-    private final String serviceId = RandomStringUtils.randomAlphanumeric(26);
+    private String serviceId = RandomStringUtils.randomAlphanumeric(26);
     private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
     private final String credentialExternalId = "credential-external-id";
     private String externalId = RandomStringUtils.randomAlphanumeric(20);
@@ -323,6 +323,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withVersion3ds(String version3ds) {
         this.version3ds = version3ds;
+        return this;
+    }
+
+    public TransactionFixture withServiceId(String serviceId) {
+        this.serviceId = serviceId;
         return this;
     }
 

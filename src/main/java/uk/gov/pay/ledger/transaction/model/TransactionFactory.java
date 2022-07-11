@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.search.model.PaymentSettlementSummary;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
+import uk.gov.pay.ledger.util.DisputeReasonMapper;
 import uk.gov.service.payments.commons.model.AuthorisationMode;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import static uk.gov.pay.ledger.util.JsonParser.safeGetAsBoolean;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsDate;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
+import static uk.gov.pay.ledger.util.JsonParser.safeGetEpochLongAsDate;
 
 public class TransactionFactory {
 
@@ -37,6 +39,8 @@ public class TransactionFactory {
                 return createPayment(entity);
             case "REFUND":
                 return createRefund(entity);
+            case "DISPUTE":
+                return createDispute(entity);
             default:
                 throw new RuntimeException(String.format("Unexpected transaction type %s", entity.getTransactionType()));
         }
@@ -171,6 +175,54 @@ public class TransactionFactory {
                     .withSettlementSummary(refundSettlementSummary)
                     .build();
 
+        } catch (IOException e) {
+            LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
+        }
+
+        return null;
+    }
+
+    private Transaction createDispute(TransactionEntity entity) {
+        try {
+            JsonNode transactionDetails = objectMapper.readTree(Optional.ofNullable(entity.getTransactionDetails()).orElse("{}"));
+            JsonNode paymentDetailsNode = transactionDetails.get("payment_details");
+
+            CardType cardType = CardType.fromString(safeGetAsString(paymentDetailsNode, "card_type"));
+            CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), null,
+                    safeGetAsString(paymentDetailsNode, "card_brand_label"), entity.getLastDigitsCardNumber(),
+                    entity.getFirstDigitsCardNumber(), safeGetAsString(paymentDetailsNode, "expiry_date"), cardType);
+
+            Payment paymentDetails = new Payment.Builder()
+                    .withDescription(entity.getDescription())
+                    .withReference(entity.getReference())
+                    .withEmail(entity.getEmail())
+                    .withCardDetails(cardDetails)
+                    .withExternalId(entity.getParentExternalId())
+                    .build();
+
+            SettlementSummary settlementSummary = new SettlementSummary(
+                    entity.getPayoutEntity().map(payoutEntity -> payoutEntity.getPaidOutDate()).orElse(null)
+            );
+
+            return new Dispute.Builder()
+                    .withGatewayAccountId(entity.getGatewayAccountId())
+                    .withServiceId(entity.getServiceId())
+                    .withAmount(entity.getAmount())
+                    .withNetAmount(entity.getNetAmount())
+                    .withFee(entity.getFee())
+                    .withState(entity.getState())
+                    .withCreatedDate(entity.getCreatedDate())
+                    .withGatewayTransactionId(entity.getGatewayTransactionId())
+                    .withEvidenceDueDate(safeGetEpochLongAsDate(transactionDetails, "evidence_due_date"))
+                    .withReason(DisputeReasonMapper.mapToApi(safeGetAsString(transactionDetails, "reason")))
+                    .withSettlementSummary(settlementSummary)
+                    .withLive(entity.isLive())
+                    .withPaymentDetails(paymentDetails)
+                    .withExternalId(entity.getExternalId())
+                    .withEventCount(entity.getEventCount())
+                    .withParentTransactionId(entity.getParentExternalId())
+                    .withGatewayPayoutId(entity.getGatewayPayoutId())
+                    .build();
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
         }
