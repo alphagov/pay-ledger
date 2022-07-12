@@ -33,6 +33,7 @@ public class TransactionSearchParams extends SearchParams {
     private static final String FIRST_DIGITS_CARD_NUMBER_FIELD = "first_digits_card_number";
     private static final String PAYMENT_STATES_FIELD = "payment_states";
     private static final String REFUND_STATES_FIELD = "refund_states";
+    private static final String DISPUTE_STATES_FIELD = "dispute_states";
     private static final String CARD_BRAND_FIELD = "card_brand";
     private static final String STATE_FIELD = "state";
     private static final String TRANSACTION_TYPE_FIELD = "transaction_type";
@@ -74,6 +75,7 @@ public class TransactionSearchParams extends SearchParams {
 
     private Map<String, Object> queryMap;
     private String gatewayTransactionId;
+    private CommaDelimitedSetParameter disputeStates;
 
     public void setAccountIds(List<String> accountIds) {
         this.accountIds = List.copyOf(accountIds);
@@ -211,6 +213,12 @@ public class TransactionSearchParams extends SearchParams {
         this.limitTotal = limitTotal;
     }
 
+    @Parameter(description = "Comma delimited dispute states.", example = "won,needs_response", schema = @Schema(type = "string", implementation = String.class))
+    @QueryParam("dispute_states")
+    public void setDisputeStates(CommaDelimitedSetParameter disputeStates) {
+        this.disputeStates = disputeStates;
+    }
+
     public void overrideMaxDisplaySize(Long maxDisplaySize) {
         this.maxDisplaySize = maxDisplaySize;
     }
@@ -269,7 +277,7 @@ public class TransactionSearchParams extends SearchParams {
         if (isNotBlank(toDate)) {
             filters.add(" t.created_date < :" + TO_DATE_FIELD);
         }
-        if (isSet(paymentStates) || isSet(refundStates)) {
+        if (isSet(paymentStates) || isSet(refundStates) || isSet(disputeStates)) {
             filters.add(createStateFilter());
         }
         if (isNotBlank(state)) {
@@ -324,6 +332,9 @@ public class TransactionSearchParams extends SearchParams {
             }
             if (isSet(refundStates)) {
                 queryMap.put(REFUND_STATES_FIELD, getTransactionStatesForStatuses(refundStates));
+            }
+            if (isSet(disputeStates)) {
+                queryMap.put(DISPUTE_STATES_FIELD, getTransactionStatesForStatuses(disputeStates));
             }
             if (isNotBlank(lastDigitsCardNumber)) {
                 queryMap.put(LAST_DIGITS_CARD_NUMBER_FIELD, lastDigitsCardNumber);
@@ -452,6 +463,9 @@ public class TransactionSearchParams extends SearchParams {
         if (refundStates != null && refundStates.isNotEmpty()) {
             queries.add(REFUND_STATES_FIELD + "=" + refundStates.getRawString());
         }
+        if (isSet(disputeStates)) {
+            queries.add(DISPUTE_STATES_FIELD + "=" + disputeStates.getRawString());
+        }
         if (cardBrands != null && cardBrands.isNotEmpty()) {
             queries.add(CARD_BRAND_FIELD + "=" + cardBrands.getRawString());
         }
@@ -490,8 +504,8 @@ public class TransactionSearchParams extends SearchParams {
         return offset;
     }
 
-    private List<String> getTransactionStatesForStatuses(CommaDelimitedSetParameter paymentStates) {
-        return paymentStates.getParameters().stream()
+    private List<String> getTransactionStatesForStatuses(CommaDelimitedSetParameter transactionStates) {
+        return transactionStates.getParameters().stream()
                 .map(status -> getTransactionState(status, statusVersion))
                 .flatMap(List::stream)
                 .map(TransactionState::name)
@@ -501,6 +515,7 @@ public class TransactionSearchParams extends SearchParams {
     private String createStateFilter() {
         String paymentStateFilter = null;
         String refundStateFilter = null;
+        String disputeStatesFilter = null;
         if (isSet(paymentStates)) {
             paymentStateFilter =
                     " (t.state IN (<" + PAYMENT_STATES_FIELD + ">) AND t.type =  'PAYMENT'::transaction_type)";
@@ -510,9 +525,16 @@ public class TransactionSearchParams extends SearchParams {
                     " (t.state IN (<" + REFUND_STATES_FIELD + ">) AND t.type =  'REFUND'::transaction_type)";
         }
 
+        if (isSet(disputeStates)) {
+            disputeStatesFilter =
+                    " (t.state IN (<" + DISPUTE_STATES_FIELD + ">) AND t.type =  'DISPUTE'::transaction_type)";
+        }
+
         return "(" + List.of(
-                        Optional.ofNullable(paymentStateFilter), Optional.ofNullable(refundStateFilter)
-                ).stream()
+                        Optional.ofNullable(paymentStateFilter),
+                        Optional.ofNullable(refundStateFilter),
+                        Optional.ofNullable(disputeStatesFilter))
+                .stream()
                 .flatMap(Optional::stream)
                 .collect(Collectors.joining(" OR ")) + ")";
     }

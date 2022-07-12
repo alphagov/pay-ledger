@@ -141,7 +141,11 @@ public enum TransactionState {
             FAILED_CANCELLED,
             CANCELLED,
             ERROR,
-            ERROR_GATEWAY
+            ERROR_GATEWAY,
+            DISPUTE_NEEDS_RESPONSE,
+            DISPUTE_UNDER_REVIEW,
+            DISPUTE_LOST,
+            DISPUTE_WON
     );
 
     public static TransactionState fromEventType(SalientEventType salientEventType) {
