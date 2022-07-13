@@ -67,7 +67,7 @@ public class ReportServiceTest {
         assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("to_date"), is(ZonedDateTime.parse(toDate)));
 
         assertThat(response, allOf(
-                aMapWithSize(10),
+                aMapWithSize(14),
                 hasEntry("undefined", 0L),
                 hasEntry("created", 2L),
                 hasEntry("started", 0L),
@@ -77,7 +77,11 @@ public class ReportServiceTest {
                 hasEntry("declined", 0L),
                 hasEntry("timedout", 0L),
                 hasEntry("cancelled", 0L),
-                hasEntry("error", 3L)
+                hasEntry("error", 3L),
+                hasEntry("won", 0L),
+                hasEntry("lost", 0L),
+                hasEntry("needs_response", 0L),
+                hasEntry("under_review", 0L)
         ));
     }
 
@@ -95,7 +99,7 @@ public class ReportServiceTest {
         Map<String, Long> response = reportService.getPaymentCountsByState(params);
 
         assertThat(transactionStatisticQueryArgumentCaptor.getValue().getQueryMap().get("account_id"), is(nullValue()));
-        assertThat(response, aMapWithSize(10));
+        assertThat(response, aMapWithSize(14));
     }
 
     @Test

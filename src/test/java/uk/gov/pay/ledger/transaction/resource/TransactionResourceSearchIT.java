@@ -14,7 +14,10 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import javax.ws.rs.core.Response;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -598,5 +601,216 @@ public class TransactionResourceSearchIT {
                 .body("count", is(2))
                 .body("results[0].transaction_id", is(transaction2.getExternalId()))
                 .body("results[1].transaction_id", is(transaction1.getExternalId()));
+    }
+
+    @Test
+    public void shouldSearchCorrectlyUsingDisputeType() {
+        String gatewayAccountId = "1";
+        ZonedDateTime paidOutDate = ZonedDateTime.now();
+
+        TransactionFixture parentTransactionEntity = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+        TransactionFixture disputeLost = aTransactionFixture()
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withParentExternalId(parentTransactionEntity.getExternalId())
+                .withReference(parentTransactionEntity.getReference())
+                .withDescription(parentTransactionEntity.getDescription())
+                .withEmail(parentTransactionEntity.getEmail())
+                .withCardholderName(parentTransactionEntity.getCardholderName())
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withTransactionType("DISPUTE")
+                .withState(TransactionState.DISPUTE_LOST)
+                .withAmount(1000L)
+                .withNetAmount(-2500L)
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jnc\", \"reason\": \"fraudulent\", \"evidence_due_date\": 1652223599}")
+                .withEventCount(3)
+                .withCardBrand(parentTransactionEntity.getCardBrand())
+                .withFee(1500L)
+                .withGatewayTransactionId("du_dl20kdldj20ejs103jnc")
+                .withServiceId(parentTransactionEntity.getServiceId())
+                .withGatewayPayoutId("po_dl0e0sdlejskfklself")
+                .withCreatedDate(ZonedDateTime.parse("2022-06-08T11:22:48.822408Z"))
+                .withLive(true)
+                .insert(rule.getJdbi());
+
+        aPayoutFixture()
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withGatewayPayoutId("po_dl0e0sdlejskfklself")
+                .withPaidOutDate(paidOutDate)
+                .build()
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5" +
+                        "&transaction_type=DISPUTE"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].gateway_account_id", is(gatewayAccountId))
+                .body("results[0].service_id", is(disputeLost.getServiceId()))
+                .body("results[0].amount", is(1000))
+                .body("results[0].net_amount", is(-2500))
+                .body("results[0].fee", is(1500))
+                .body("results[0].state.finished", is(true))
+                .body("results[0].state.status", is("lost"))
+                .body("results[0].created_date", is(is(ISO_INSTANT_MILLISECOND_PRECISION.format(disputeLost.getCreatedDate()))))
+                .body("results[0].gateway_transaction_id", is(disputeLost.getGatewayTransactionId()))
+                .body("results[0].evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1652223599L), ZoneOffset.UTC))))
+                .body("results[0].reason", is("fraudulent"))
+                .body("results[0].settlement_summary.settled_date", is(paidOutDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+                .body("results[0].transaction_type", is("DISPUTE"))
+                .body("results[0].live", is(true))
+                .body("results[0].parent_transaction_id", is(parentTransactionEntity.getExternalId()))
+                .body("results[0].transaction_id", is(disputeLost.getExternalId()));
+    }
+
+    @Test
+    public void shouldSearchCorrectlyUsingDisputeStates() {
+        String gatewayAccountId = "1";
+
+        TransactionFixture parentTransactionEntity = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+        TransactionFixture disputeLost = aTransactionFixture()
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withParentExternalId(parentTransactionEntity.getExternalId())
+                .withReference(parentTransactionEntity.getReference())
+                .withDescription(parentTransactionEntity.getDescription())
+                .withEmail(parentTransactionEntity.getEmail())
+                .withCardholderName(parentTransactionEntity.getCardholderName())
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withTransactionType("DISPUTE")
+                .withState(TransactionState.DISPUTE_LOST)
+                .withAmount(1000L)
+                .withNetAmount(-2500L)
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jns\", \"reason\": \"fraudulent\", \"evidence_due_date\": 1652223599}")
+                .withEventCount(3)
+                .withCardBrand(parentTransactionEntity.getCardBrand())
+                .withFee(1500L)
+                .withGatewayTransactionId("du_dl20kdldj20ejs103jns")
+                .withServiceId(parentTransactionEntity.getServiceId())
+                .withGatewayPayoutId("po_dl0e0sdlejskfklsele")
+                .withCreatedDate(ZonedDateTime.parse("2022-06-08T11:22:48.822408Z"))
+                .withLive(true)
+                .insert(rule.getJdbi());
+
+        TransactionFixture parentTransactionEntity2 = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .withServiceId(parentTransactionEntity.getServiceId())
+                .insert(rule.getJdbi());
+        TransactionFixture disputeWon = aTransactionFixture()
+                .withGatewayAccountId(parentTransactionEntity2.getGatewayAccountId())
+                .withParentExternalId(parentTransactionEntity2.getExternalId())
+                .withReference(parentTransactionEntity2.getReference())
+                .withDescription(parentTransactionEntity2.getDescription())
+                .withEmail(parentTransactionEntity2.getEmail())
+                .withCardholderName(parentTransactionEntity2.getCardholderName())
+                .withGatewayAccountId(parentTransactionEntity2.getGatewayAccountId())
+                .withTransactionType("DISPUTE")
+                .withState(TransactionState.DISPUTE_WON)
+                .withAmount(1000L)
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jny\", \"reason\": \"fraudulent\", \"evidence_due_date\": 1652223599}")
+                .withEventCount(3)
+                .withCardBrand(parentTransactionEntity2.getCardBrand())
+                .withGatewayTransactionId("du_dl20kdldj20ejs103jny")
+                .withServiceId(parentTransactionEntity.getServiceId())
+                .withCreatedDate(ZonedDateTime.parse("2022-06-07T11:22:48.822408Z"))
+                .withLive(true)
+                .insert(rule.getJdbi());
+
+        TransactionFixture parentTransactionEntity3 = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .withServiceId(parentTransactionEntity.getServiceId())
+                .insert(rule.getJdbi());
+        TransactionFixture disputeNeedsResponse = aTransactionFixture()
+                .withGatewayAccountId(parentTransactionEntity3.getGatewayAccountId())
+                .withParentExternalId(parentTransactionEntity3.getExternalId())
+                .withReference(parentTransactionEntity3.getReference())
+                .withDescription(parentTransactionEntity3.getDescription())
+                .withEmail(parentTransactionEntity3.getEmail())
+                .withCardholderName(parentTransactionEntity3.getCardholderName())
+                .withGatewayAccountId(parentTransactionEntity3.getGatewayAccountId())
+                .withTransactionType("DISPUTE")
+                .withState(TransactionState.DISPUTE_NEEDS_RESPONSE)
+                .withAmount(1800L)
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jng\", \"reason\": \"fraudulent\", \"evidence_due_date\": 1652223599}")
+                .withEventCount(3)
+                .withCardBrand(parentTransactionEntity3.getCardBrand())
+                .withGatewayTransactionId("du_dl20kdldj20ejs103jng")
+                .withServiceId(parentTransactionEntity.getServiceId())
+                .withCreatedDate(ZonedDateTime.parse("2022-06-06T13:22:48.822408Z"))
+                .withLive(true)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5" +
+                        "&dispute_states=won,needs_response"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(2))
+                .body("results[0].gateway_account_id", is(gatewayAccountId))
+                .body("results[0].service_id", is(disputeWon.getServiceId()))
+                .body("results[0].amount", is(1000))
+                .body("results[0].net_amount", is(nullValue()))
+                .body("results[0].fee", is(nullValue()))
+                .body("results[0].state.finished", is(true))
+                .body("results[0].state.status", is("won"))
+                .body("results[0].created_date", is(is(ISO_INSTANT_MILLISECOND_PRECISION.format(disputeWon.getCreatedDate()))))
+                .body("results[0].gateway_transaction_id", is(disputeWon.getGatewayTransactionId()))
+                .body("results[0].evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1652223599L), ZoneOffset.UTC))))
+                .body("results[0].reason", is("fraudulent"))
+                .body("results[0].settlement_summary.settled_date", is(nullValue()))
+                .body("results[0].transaction_type", is("DISPUTE"))
+                .body("results[0].live", is(true))
+                .body("results[0].parent_transaction_id", is(parentTransactionEntity2.getExternalId()))
+                .body("results[0].transaction_id", is(disputeWon.getExternalId()))
+
+                .body("results[1].gateway_account_id", is(gatewayAccountId))
+                .body("results[1].service_id", is(disputeNeedsResponse.getServiceId()))
+                .body("results[1].amount", is(1800))
+                .body("results[1].net_amount", is(nullValue()))
+                .body("results[1].fee", is(nullValue()))
+                .body("results[1].state.finished", is(false))
+                .body("results[1].state.status", is("needs_response"))
+                .body("results[1].created_date", is(is(ISO_INSTANT_MILLISECOND_PRECISION.format(disputeNeedsResponse.getCreatedDate()))))
+                .body("results[1].gateway_transaction_id", is(disputeNeedsResponse.getGatewayTransactionId()))
+                .body("results[1].evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1652223599L), ZoneOffset.UTC))))
+                .body("results[1].reason", is("fraudulent"))
+                .body("results[1].settlement_summary.settled_date", is(nullValue()))
+                .body("results[1].transaction_type", is("DISPUTE"))
+                .body("results[1].live", is(true))
+                .body("results[1].parent_transaction_id", is(parentTransactionEntity3.getExternalId()))
+                .body("results[1].transaction_id", is(disputeNeedsResponse.getExternalId()));
     }
 }
