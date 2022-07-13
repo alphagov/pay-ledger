@@ -393,6 +393,7 @@ public class TransactionServiceTest {
         searchParams.setLastDigitsCardNumber("1234");
         searchParams.setPaymentStates(new CommaDelimitedSetParameter("created,submitted"));
         searchParams.setRefundStates(new CommaDelimitedSetParameter("created,refunded"));
+        searchParams.setDisputeStates(new CommaDelimitedSetParameter("won,lost"));
         searchParams.setCardBrands(new CommaDelimitedSetParameter("visa,mastercard"));
         searchParams.setGatewayPayoutId("test-gateway-payout-id");
     }
