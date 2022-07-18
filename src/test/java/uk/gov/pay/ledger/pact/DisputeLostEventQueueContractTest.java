@@ -8,12 +8,12 @@ import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
@@ -44,7 +44,6 @@ public class DisputeLostEventQueueContractTest {
             config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true")
     );
 
-    private GsonBuilder gsonBuilder = new GsonBuilder();
     private byte[] currentMessage;
     private String paymentExternalId = "payment-external-id";
     private final long fee = 1500L;
@@ -62,19 +61,13 @@ public class DisputeLostEventQueueContractTest {
 
     @Pact(provider = "connector", consumer = "ledger")
     public MessagePact createDisputeLostEventPact(MessagePactBuilder builder) {
-        String eventData = gsonBuilder.create()
-                .toJson(Map.of(
-                        "fee", fee,
-                        "gateway_account_id", gatewayAccountId,
-                        "amount", amount
-                ));
         eventFixture = QueueDisputeEventFixture.aQueueDisputeEventFixture()
                 .withLive(true)
                 .withResourceExternalId(paymentExternalId)
                 .withParentResourceExternalId(parentsResourceExternalId)
                 .withEventDate(disputeCreated)
                 .withServiceId(serviceId)
-                .withEventData(eventData)
+                .withDefaultEventDataForEventType(SalientEventType.DISPUTE_LOST.name())
                 .withEventType("DISPUTE_LOST")
                 .withServiceId(serviceId);
 
