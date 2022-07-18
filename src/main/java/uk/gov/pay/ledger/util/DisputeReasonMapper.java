@@ -1,8 +1,13 @@
 package uk.gov.pay.ledger.util;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class DisputeReasonMapper {
 
     public static String mapToApi(String stripeReason) {
+        if (isBlank(stripeReason)) {
+            return "";
+        }
         switch (stripeReason) {
             case "credit_not_processed":
             case "duplicate":
