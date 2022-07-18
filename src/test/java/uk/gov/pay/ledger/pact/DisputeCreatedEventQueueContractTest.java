@@ -8,12 +8,12 @@ import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
@@ -44,12 +44,9 @@ public class DisputeCreatedEventQueueContractTest {
             config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true")
     );
 
-    private GsonBuilder gsonBuilder = new GsonBuilder();
     private byte[] currentMessage;
     private String paymentExternalId = "payment-external-id";
-    private final long fee = 1500L;
     private final long amount = 6500L;
-    private final long evidenceDueDate = 1644883199L; // 14/02/2022 23:59:59
     private final String reason = "duplicate";
     private final String gatewayAccountId = "a-gateway-account-id";
     private final String resourceExternalId = paymentExternalId;
@@ -61,21 +58,13 @@ public class DisputeCreatedEventQueueContractTest {
 
     @Pact(provider = "connector", consumer = "ledger")
     public MessagePact createDisputeCreatedEventPact(MessagePactBuilder builder) {
-        String eventData = gsonBuilder.create()
-                .toJson(Map.of(
-                        "fee", fee,
-                        "evidence_due_date", evidenceDueDate,
-                        "gateway_account_id", gatewayAccountId,
-                        "amount", amount,
-                        "reason", reason)
-                );
         eventFixture = QueueDisputeEventFixture.aQueueDisputeEventFixture()
                 .withLive(true)
                 .withResourceExternalId(paymentExternalId)
                 .withParentResourceExternalId(parentsResourceExternalId)
                 .withEventDate(disputeCreated)
                 .withServiceId(serviceId)
-                .withEventData(eventData)
+                .withDefaultEventDataForEventType(SalientEventType.DISPUTE_CREATED.name())
                 .withEventType("DISPUTE_CREATED")
                 .withServiceId(serviceId);
 
@@ -114,10 +103,8 @@ public class DisputeCreatedEventQueueContractTest {
 
         JsonNode eventData = new ObjectMapper().readTree(event.getEventData());
         assertThat(eventData.get("amount").asLong(), is(amount));
-        assertThat(eventData.get("fee").asLong(), is(fee));
         assertThat(eventData.get("gateway_account_id").asText(), is(gatewayAccountId));
         assertThat(eventData.get("reason").asText(), is(reason));
-        assertThat(eventData.get("evidence_due_date").asLong(), is(evidenceDueDate));
     }
 
     public void setMessage(byte[] messageContents) {

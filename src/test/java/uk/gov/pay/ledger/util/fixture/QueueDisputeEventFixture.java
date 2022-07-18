@@ -10,12 +10,11 @@ import uk.gov.pay.ledger.event.model.ResourceType;
 import java.time.ZonedDateTime;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.pay.ledger.event.model.ResourceType.DISPUTE;
 
 public class QueueDisputeEventFixture implements QueueFixture<QueueDisputeEventFixture, Event> {
     private String sqsMessageId;
-    private String serviceId = randomAlphanumeric(10);;
+    private String serviceId = randomAlphanumeric(10);
     private Boolean live = true;
     private ResourceType resourceType = DISPUTE;
     private String resourceExternalId = randomAlphanumeric(20);
@@ -77,9 +76,7 @@ public class QueueDisputeEventFixture implements QueueFixture<QueueDisputeEventF
             case "DISPUTE_CREATED":
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
-                                .put("fee", 1500)
-                                .put("evidence_due_date", 1644883199)
-                                .put("gateway_account_id", gatewayAccountId)
+                                .put("gateway_account_id", "a-gateway-account-id")
                                 .put("amount", 6500)
                                 .put("reason", "duplicate")
                                 .build());
@@ -89,9 +86,9 @@ public class QueueDisputeEventFixture implements QueueFixture<QueueDisputeEventF
                         .toJson(ImmutableMap.builder()
                                 .put("fee", 1500)
                                 .put("amount", 6500)
-                                .put("net_amount", -8000)
-                                .put("gateway_account_id", gatewayAccountId)
+                                .put("gateway_account_id", "a-gateway-account-id")
                                 .build());
+                break;
             default:
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.of("event_data", "event_data"));
