@@ -79,6 +79,7 @@ public class QueueDisputeEventFixture implements QueueFixture<QueueDisputeEventF
                                 .put("gateway_account_id", "a-gateway-account-id")
                                 .put("amount", 6500)
                                 .put("reason", "duplicate")
+                                .put("evidence_due_date", "2022-02-14T23:59:59.000Z")
                                 .build());
                 break;
             case "DISPUTE_LOST":

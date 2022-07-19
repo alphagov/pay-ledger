@@ -105,6 +105,7 @@ public class DisputeCreatedEventQueueContractTest {
         assertThat(eventData.get("amount").asLong(), is(amount));
         assertThat(eventData.get("gateway_account_id").asText(), is(gatewayAccountId));
         assertThat(eventData.get("reason").asText(), is(reason));
+        assertThat(eventData.get("evidence_due_date").asText(), is("2022-02-14T23:59:59.000Z"));
     }
 
     public void setMessage(byte[] messageContents) {
