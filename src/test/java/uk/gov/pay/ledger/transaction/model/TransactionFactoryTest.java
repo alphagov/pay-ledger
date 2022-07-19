@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.pay.ledger.payout.entity.PayoutEntity.PayoutEntityBuilder.aPayoutEntity;
-import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class TransactionFactoryTest {
@@ -320,7 +319,7 @@ public class TransactionFactoryTest {
                 .withCardholderName(parentTransactionEntity.getCardholderName())
                 .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
                 .withTransactionType("DISPUTE")
-                .withState(TransactionState.DISPUTE_LOST)
+                .withState(TransactionState.LOST)
                 .withAmount(1000L)
                 .withNetAmount(-2500L)
                 .withGatewayTransactionId("gateway-transaction-id")
