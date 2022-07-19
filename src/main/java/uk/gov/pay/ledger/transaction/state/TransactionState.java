@@ -19,22 +19,28 @@ import static java.util.Arrays.stream;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum TransactionState {
 
+    // used for payments only
     UNDEFINED("undefined", false),
-    CREATED("created", false),
     STARTED("started", false),
-    SUBMITTED("submitted", false),
     CAPTURABLE("capturable", false),
-    SUCCESS("success", true),
     FAILED_REJECTED("failed", "declined", true, "P0010", "Payment method rejected"),
     FAILED_EXPIRED("failed", "timedout", true, "P0020", "Payment expired"),
     FAILED_CANCELLED("failed", "cancelled", true, "P0030", "Payment was cancelled by the user"),
     CANCELLED("cancelled", "cancelled", true, "P0040", "Payment was cancelled by the service"),
+
+    // used for payments and refunds
+    CREATED("created", false),
+    SUBMITTED("submitted", false),
+    SUCCESS("success", true),
     ERROR("error", "error", true, "P0050", "Payment provider returned an error"),
     ERROR_GATEWAY("error", "error", true, "P0050", "Payment provider returned an error"),
-    DISPUTE_NEEDS_RESPONSE("needs_response", false),
-    DISPUTE_UNDER_REVIEW("under_review", false),
-    DISPUTE_LOST("lost", true),
-    DISPUTE_WON("won", true);
+
+    // used for disputes only
+    NEEDS_RESPONSE("needs_response", false),
+    UNDER_REVIEW("under_review", false),
+    LOST("lost", true),
+    WON("won", true);
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionState.class);
 
     private final String oldStatus;
@@ -119,10 +125,10 @@ public enum TransactionState {
                     Map.entry(SalientEventType.REFUND_SUBMITTED, SUBMITTED),
                     Map.entry(SalientEventType.REFUND_SUCCEEDED, SUCCESS),
                     Map.entry(SalientEventType.REFUND_ERROR, ERROR),
-                    Map.entry(SalientEventType.DISPUTE_CREATED, DISPUTE_NEEDS_RESPONSE),
-                    Map.entry(SalientEventType.DISPUTE_EVIDENCE_SUBMITTED, DISPUTE_UNDER_REVIEW),
-                    Map.entry(SalientEventType.DISPUTE_LOST, DISPUTE_LOST),
-                    Map.entry(SalientEventType.DISPUTE_WON, DISPUTE_WON),
+                    Map.entry(SalientEventType.DISPUTE_CREATED, NEEDS_RESPONSE),
+                    Map.entry(SalientEventType.DISPUTE_EVIDENCE_SUBMITTED, UNDER_REVIEW),
+                    Map.entry(SalientEventType.DISPUTE_LOST, LOST),
+                    Map.entry(SalientEventType.DISPUTE_WON, WON),
                     Map.entry(SalientEventType.PAYMENT_STATUS_CORRECTED_TO_SUCCESS_BY_ADMIN, SUCCESS),
                     Map.entry(SalientEventType.PAYMENT_STATUS_CORRECTED_TO_ERROR_BY_ADMIN, ERROR),
                     Map.entry(SalientEventType.REFUND_STATUS_CORRECTED_TO_ERROR_BY_ADMIN, ERROR),
@@ -142,10 +148,10 @@ public enum TransactionState {
             CANCELLED,
             ERROR,
             ERROR_GATEWAY,
-            DISPUTE_NEEDS_RESPONSE,
-            DISPUTE_UNDER_REVIEW,
-            DISPUTE_LOST,
-            DISPUTE_WON
+            NEEDS_RESPONSE,
+            UNDER_REVIEW,
+            LOST,
+            WON
     );
 
     public static TransactionState fromEventType(SalientEventType salientEventType) {

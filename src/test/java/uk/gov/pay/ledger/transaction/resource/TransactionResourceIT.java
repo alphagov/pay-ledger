@@ -429,7 +429,7 @@ public class TransactionResourceIT {
                 .withCardholderName(parentTransactionEntity.getCardholderName())
                 .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
                 .withTransactionType("DISPUTE")
-                .withState(TransactionState.DISPUTE_LOST)
+                .withState(TransactionState.LOST)
                 .withAmount(1000L)
                 .withNetAmount(-2500L)
                 .withGatewayTransactionId("gateway-transaction-id")

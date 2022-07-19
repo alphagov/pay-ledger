@@ -415,7 +415,7 @@ public class QueueMessageReceiverIT {
         // TODO: Replace this once the transaction endpoint is returning disputes - https://payments-platform.atlassian.net/browse/PP-9627
         Map<String, Object> dispute = dbHelper.getTransaction(resourceExternalId);
 
-        assertThat(dispute, hasEntry("state", "DISPUTE_NEEDS_RESPONSE"));
+        assertThat(dispute, hasEntry("state", "NEEDS_RESPONSE"));
         assertThat(dispute, hasEntry("amount", 50L));
         assertThat(dispute, hasEntry("gateway_account_id", gatewayAccountId));
         assertThat(dispute, hasEntry("fee", null));
