@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -409,7 +410,7 @@ public class TransactionResourceIT {
     public void shouldGetDisputeTransaction() {
         var createdDate = ZonedDateTime.parse("2022-06-08T11:22:48.822408Z");
         var paidOutDate = ZonedDateTime.parse("2022-07-08T12:20:07.073Z");
-        var evidenceDueDate = 1652223599L;
+        ZonedDateTime evidenceDueDate = ZonedDateTime.parse("2022-05-10T22:59:59.000000Z");
 
         TransactionEntity parentTransactionEntity = aTransactionFixture()
                 .withTransactionType("PAYMENT")
@@ -433,7 +434,7 @@ public class TransactionResourceIT {
                 .withAmount(1000L)
                 .withNetAmount(-2500L)
                 .withGatewayTransactionId("gateway-transaction-id")
-                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jns\", \"reason\": \"fraudulent\", \"evidence_due_date\": " + evidenceDueDate + "}")
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jns\", \"reason\": \"fraudulent\", \"evidence_due_date\": \"" + evidenceDueDate + "\"}")
                 .withEventCount(3)
                 .withCardBrand(parentTransactionEntity.getCardBrand())
                 .withFee(1500L)
@@ -472,7 +473,7 @@ public class TransactionResourceIT {
                 .body("state.status", is("lost"))
                 .body("created_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(createdDate)))
                 .body("gateway_transaction_id", is(disputeTransactionEntity.getGatewayTransactionId()))
-                .body("evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(evidenceDueDate), ZoneOffset.UTC))))
+                .body("evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(evidenceDueDate)))
                 .body("reason", is("fraudulent"))
                 .body("settlement_summary.settled_date", is(paidOutDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
                 .body("transaction_type", is("DISPUTE"))

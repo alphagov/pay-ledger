@@ -21,7 +21,6 @@ import static uk.gov.pay.ledger.util.JsonParser.safeGetAsBoolean;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsDate;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
-import static uk.gov.pay.ledger.util.JsonParser.safeGetEpochLongAsDate;
 
 public class TransactionFactory {
 
@@ -213,7 +212,7 @@ public class TransactionFactory {
                     .withState(entity.getState())
                     .withCreatedDate(entity.getCreatedDate())
                     .withGatewayTransactionId(entity.getGatewayTransactionId())
-                    .withEvidenceDueDate(safeGetEpochLongAsDate(transactionDetails, "evidence_due_date"))
+                    .withEvidenceDueDate(safeGetAsDate(transactionDetails, "evidence_due_date"))
                     .withReason(DisputeReasonMapper.mapToApi(safeGetAsString(transactionDetails, "reason")))
                     .withSettlementSummary(settlementSummary)
                     .withLive(entity.isLive())

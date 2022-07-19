@@ -104,26 +104,4 @@ public class JsonParserTest {
 
         assertThat(value, is(nullValue()));
     }
-
-    @Test
-    public void safeGetEpochLongAsDate_shouldReturnValueIfFieldExists() throws IOException {
-        String data = new GsonBuilder().create()
-                .toJson(ImmutableMap.of("epoch_long", 1652223599L));
-        JsonNode jsonNode = objectMapper.readTree(data);
-
-        ZonedDateTime value = JsonParser.safeGetEpochLongAsDate(jsonNode, "epoch_long");
-
-        assertThat(value.toString(), is("2022-05-10T22:59:59Z"));
-    }
-
-    @Test
-    public void safeGetEpochLongAsDate_shouldReturnNullWhenFieldDoesNotExist() throws IOException {
-        String data = new GsonBuilder().create()
-                .toJson(ImmutableMap.of("somefield", 1652223599L));
-        JsonNode jsonNode = objectMapper.readTree(data);
-
-        ZonedDateTime value = JsonParser.safeGetEpochLongAsDate(jsonNode, "epoch_long");
-
-        assertThat(value, is(nullValue()));
-    }
 }

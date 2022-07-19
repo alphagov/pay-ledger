@@ -15,13 +15,13 @@ import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
 import javax.ws.rs.core.Response;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.now;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
@@ -606,7 +606,7 @@ public class TransactionResourceSearchIT {
     @Test
     public void shouldSearchCorrectlyUsingDisputeType() {
         String gatewayAccountId = "1";
-        ZonedDateTime paidOutDate = ZonedDateTime.now();
+        ZonedDateTime paidOutDate = ZonedDateTime.now(UTC);
 
         TransactionFixture parentTransactionEntity = aTransactionFixture()
                 .withTransactionType("PAYMENT")
@@ -627,7 +627,7 @@ public class TransactionResourceSearchIT {
                 .withState(TransactionState.LOST)
                 .withAmount(1000L)
                 .withNetAmount(-2500L)
-                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jnc\", \"reason\": \"fraudulent\", \"evidence_due_date\": 1652223599}")
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jnc\", \"reason\": \"fraudulent\", \"evidence_due_date\": \"2022-05-10T22:59:59.000Z\"}")
                 .withEventCount(3)
                 .withCardBrand(parentTransactionEntity.getCardBrand())
                 .withFee(1500L)
@@ -667,7 +667,7 @@ public class TransactionResourceSearchIT {
                 .body("results[0].state.status", is("lost"))
                 .body("results[0].created_date", is(is(ISO_INSTANT_MILLISECOND_PRECISION.format(disputeLost.getCreatedDate()))))
                 .body("results[0].gateway_transaction_id", is(disputeLost.getGatewayTransactionId()))
-                .body("results[0].evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1652223599L), ZoneOffset.UTC))))
+                .body("results[0].evidence_due_date", is("2022-05-10T22:59:59.000Z"))
                 .body("results[0].reason", is("fraudulent"))
                 .body("results[0].settlement_summary.settled_date", is(paidOutDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
                 .body("results[0].transaction_type", is("DISPUTE"))
@@ -729,7 +729,7 @@ public class TransactionResourceSearchIT {
                 .withTransactionType("DISPUTE")
                 .withState(TransactionState.WON)
                 .withAmount(1000L)
-                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jny\", \"reason\": \"fraudulent\", \"evidence_due_date\": 1652223599}")
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jny\", \"reason\": \"fraudulent\", \"evidence_due_date\": \"2022-05-10T22:59:59.000Z\"}")
                 .withEventCount(3)
                 .withCardBrand(parentTransactionEntity2.getCardBrand())
                 .withGatewayTransactionId("du_dl20kdldj20ejs103jny")
@@ -757,7 +757,7 @@ public class TransactionResourceSearchIT {
                 .withTransactionType("DISPUTE")
                 .withState(TransactionState.NEEDS_RESPONSE)
                 .withAmount(1800L)
-                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jng\", \"reason\": \"fraudulent\", \"evidence_due_date\": 1652223599}")
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jng\", \"reason\": \"fraudulent\", \"evidence_due_date\": \"2022-05-10T22:59:59Z\"}")
                 .withEventCount(3)
                 .withCardBrand(parentTransactionEntity3.getCardBrand())
                 .withGatewayTransactionId("du_dl20kdldj20ejs103jng")
@@ -788,7 +788,7 @@ public class TransactionResourceSearchIT {
                 .body("results[0].state.status", is("won"))
                 .body("results[0].created_date", is(is(ISO_INSTANT_MILLISECOND_PRECISION.format(disputeWon.getCreatedDate()))))
                 .body("results[0].gateway_transaction_id", is(disputeWon.getGatewayTransactionId()))
-                .body("results[0].evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1652223599L), ZoneOffset.UTC))))
+                .body("results[0].evidence_due_date", is("2022-05-10T22:59:59.000Z"))
                 .body("results[0].reason", is("fraudulent"))
                 .body("results[0].settlement_summary.settled_date", is(nullValue()))
                 .body("results[0].transaction_type", is("DISPUTE"))
@@ -805,7 +805,7 @@ public class TransactionResourceSearchIT {
                 .body("results[1].state.status", is("needs_response"))
                 .body("results[1].created_date", is(is(ISO_INSTANT_MILLISECOND_PRECISION.format(disputeNeedsResponse.getCreatedDate()))))
                 .body("results[1].gateway_transaction_id", is(disputeNeedsResponse.getGatewayTransactionId()))
-                .body("results[1].evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1652223599L), ZoneOffset.UTC))))
+                .body("results[1].evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1652223599L), UTC))))
                 .body("results[1].reason", is("fraudulent"))
                 .body("results[1].settlement_summary.settled_date", is(nullValue()))
                 .body("results[1].transaction_type", is("DISPUTE"))
@@ -817,7 +817,7 @@ public class TransactionResourceSearchIT {
     @Test
     public void shouldSearchCorrectlyUsingState() {
         String gatewayAccountId = "1";
-        ZonedDateTime paidOutDate = ZonedDateTime.now();
+        ZonedDateTime paidOutDate = ZonedDateTime.now(UTC);
 
         TransactionFixture parentTransactionEntity = aTransactionFixture()
                 .withTransactionType("PAYMENT")
@@ -838,7 +838,7 @@ public class TransactionResourceSearchIT {
                 .withState(TransactionState.LOST)
                 .withAmount(1000L)
                 .withNetAmount(-2500L)
-                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jnx\", \"reason\": \"fraudulent\", \"evidence_due_date\": 1652223599}")
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jnx\", \"reason\": \"fraudulent\", \"evidence_due_date\": \"2022-05-10T22:59:59Z\"}")
                 .withEventCount(3)
                 .withCardBrand(parentTransactionEntity.getCardBrand())
                 .withFee(1500L)
@@ -878,7 +878,7 @@ public class TransactionResourceSearchIT {
                 .body("results[0].state.status", is("lost"))
                 .body("results[0].created_date", is(is(ISO_INSTANT_MILLISECOND_PRECISION.format(disputeLost.getCreatedDate()))))
                 .body("results[0].gateway_transaction_id", is(disputeLost.getGatewayTransactionId()))
-                .body("results[0].evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1652223599L), ZoneOffset.UTC))))
+                .body("results[0].evidence_due_date", is(ISO_INSTANT_MILLISECOND_PRECISION.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1652223599L), UTC))))
                 .body("results[0].reason", is("fraudulent"))
                 .body("results[0].settlement_summary.settled_date", is(paidOutDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
                 .body("results[0].transaction_type", is("DISPUTE"))

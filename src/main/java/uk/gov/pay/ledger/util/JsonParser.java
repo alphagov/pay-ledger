@@ -41,15 +41,6 @@ public class JsonParser {
                 .orElse(null);
     }
 
-    public static ZonedDateTime safeGetEpochLongAsDate(JsonNode object, String fieldName) {
-        Optional<Long> mightBeEpochSecond = safeGetJsonElement(object, fieldName).map(JsonNode::longValue);
-
-        return mightBeEpochSecond.map(epochSecond -> {
-            Instant instant = Instant.ofEpochSecond(epochSecond);
-            return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
-        }).orElse(null);
-    }
-
     private static Optional<JsonNode> safeGetJsonElement(JsonNode object, String fieldName) {
         if (object == null) {
             return Optional.empty();

@@ -294,7 +294,7 @@ public class TransactionFactoryTest {
     public void createsDispute() {
         var createdDate = ZonedDateTime.parse("2022-06-08T11:22:48.822408Z");
         var paidOutDate = ZonedDateTime.parse("2022-07-08T12:20:07.073Z");
-        var evidenceDueDate = 1652223599L;
+        var evidenceDueDate = "2022-05-10T22:59:59.000000Z";
         TransactionEntity parentTransactionEntity = aTransactionFixture()
                 .withTransactionType("PAYMENT")
                 .withDefaultCardDetails()
@@ -323,7 +323,7 @@ public class TransactionFactoryTest {
                 .withAmount(1000L)
                 .withNetAmount(-2500L)
                 .withGatewayTransactionId("gateway-transaction-id")
-                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jns\", \"reason\": \"fraudulent\", \"evidence_due_date\": " + evidenceDueDate + "}")
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jns\", \"reason\": \"fraudulent\", \"evidence_due_date\": \"" + evidenceDueDate + "\"}")
                 .withEventCount(3)
                 .withCardBrand(parentTransactionEntity.getCardBrand())
                 .withFee(1500L)
@@ -339,7 +339,7 @@ public class TransactionFactoryTest {
 
         assertThat(transaction.getReason(), is("fraudulent"));
         assertThat(transaction.getParentTransactionId(), is(parentTransactionEntity.getExternalId()));
-        assertThat(transaction.getEvidenceDueDate(), is(ZonedDateTime.ofInstant(Instant.ofEpochSecond(evidenceDueDate), ZoneOffset.UTC)));
+        assertThat(transaction.getEvidenceDueDate(), is(ZonedDateTime.parse(evidenceDueDate)));
         assertThat(transaction.getNetAmount(), is(-2500L));
         assertThat(transaction.getSettlementSummary().getSettledDate().isPresent(), is(true));
         assertThat(transaction.getSettlementSummary().getSettledDate(), is(Optional.of("2022-07-08")));
