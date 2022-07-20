@@ -55,7 +55,8 @@ public class TransactionResourceIT {
                 .withDefaultTransactionDetails()
                 .withLive(Boolean.TRUE)
                 .withSource(String.valueOf(Source.CARD_API))
-                .withGatewayPayoutId(gatewayPayoutId);
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withAgreementId("an-agreement-id");
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -75,6 +76,7 @@ public class TransactionResourceIT {
                 .body("wallet_type", is("APPLE_PAY"))
                 .body("source", is(String.valueOf(Source.CARD_API)))
                 .body("gateway_payout_id", is(gatewayPayoutId))
+                .body("agreement_id", is("an-agreement-id"))
                 .body("authorisation_mode", is("web"));
     }
 

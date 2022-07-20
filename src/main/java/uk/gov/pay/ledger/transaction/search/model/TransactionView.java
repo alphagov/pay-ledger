@@ -95,6 +95,7 @@ public class TransactionView {
     private ZonedDateTime evidenceDueDate;
     @Schema(example = "fraudulent")
     private String reason;
+    private String agreementId;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -135,6 +136,7 @@ public class TransactionView {
         this.paymentDetails = builder.paymentDetails;
         this.evidenceDueDate = builder.evidenceDueDate;
         this.reason = builder.reason;
+        this.agreementId = builder.agreementId;
     }
 
     public TransactionView() {
@@ -176,7 +178,8 @@ public class TransactionView {
                     .withSource(payment.getSource())
                     .withWalletType(payment.getWalletType())
                     .withGatewayPayoutId(payment.getGatewayPayoutId())
-                    .withAuthorisationMode(payment.getAuthorisationMode());
+                    .withAuthorisationMode(payment.getAuthorisationMode())
+                    .withAgreementId(payment.getAgreementId());
             if (payment.getState() != null) {
                 paymentBuilder = paymentBuilder
                         .withState(ExternalTransactionState.from(payment.getState(), statusVersion));
@@ -416,6 +419,10 @@ public class TransactionView {
         return reason;
     }
 
+    public String getAgreementId() {
+        return agreementId;
+    }
+
     public static class Builder {
         private Long id;
         private String gatewayAccountId;
@@ -456,6 +463,7 @@ public class TransactionView {
         private AuthorisationMode authorisationMode;
         private ZonedDateTime evidenceDueDate;
         private String reason;
+        private String agreementId;
 
         public Builder() {
         }
@@ -651,6 +659,11 @@ public class TransactionView {
 
         public Builder withReason(String reason) {
             this.reason = reason;
+            return this;
+        }
+
+        public Builder withAgreementId(String agreementId) {
+            this.agreementId = agreementId;
             return this;
         }
     }

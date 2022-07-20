@@ -48,6 +48,7 @@ public class Payment extends Transaction {
     private Source source;
     private String walletType;
     private AuthorisationMode authorisationMode;
+    private String agreementId;
 
     public Payment() {
 
@@ -80,8 +81,8 @@ public class Payment extends Transaction {
         this.live = builder.live;
         this.source = builder.source;
         this.walletType = builder.walletType;
-        this.eventCount = builder.eventCount;
         this.authorisationMode = builder.authorisationMode;
+        this.agreementId = builder.agreementId;
     }
 
     @Override
@@ -199,6 +200,10 @@ public class Payment extends Transaction {
         return authorisationMode;
     }
 
+    public String getAgreementId() {
+        return agreementId;
+    }
+
     public static class Builder {
         public String serviceId;
         private Long id;
@@ -232,6 +237,7 @@ public class Payment extends Transaction {
         private String gatewayPayoutId;
         private String credentialExternalId;
         private AuthorisationMode authorisationMode;
+        private String agreementId;
 
         public Builder() {
         }
@@ -397,6 +403,11 @@ public class Payment extends Transaction {
 
         public Builder withAuthorisationMode(AuthorisationMode authorisationMode) {
             this.authorisationMode = authorisationMode;
+            return this;
+        }
+
+        public Builder withAgreementId(String agreementId) {
+            this.agreementId = agreementId;
             return this;
         }
     }

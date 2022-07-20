@@ -45,6 +45,7 @@ class TransactionDaoIT {
                 .withLive(true)
                 .withGatewayTransactionId("gateway_transaction_id")
                 .withGatewayPayoutId("payout-id")
+                .withAgreementId("an-agreement-id")
                 .withDefaultTransactionDetails();
         TransactionEntity transactionEntity = fixture.toEntity();
 
@@ -126,7 +127,7 @@ class TransactionDaoIT {
                 .insert(rule.getJdbi());
 
         TransactionEntity retrievedTransaction = transactionDao.findTransactionByExternalId(fixture.getExternalId()).get();
-        
+
         assertThat(retrievedTransaction.getPayoutEntity().isPresent(), is(true));
         assertThat(retrievedTransaction.getPayoutEntity().get().getPaidOutDate(), is(paidOutDate));
     }
@@ -159,6 +160,7 @@ class TransactionDaoIT {
         assertThat(transaction.getRefundStatus(), is(fixture.getRefundStatus()));
         assertThat(transaction.getGatewayTransactionId(), is(fixture.getGatewayTransactionId()));
         assertThat(transaction.getGatewayPayoutId(), is(fixture.getGatewayPayoutId()));
+        assertThat(transaction.getAgreementId(), is(fixture.getAgreementId()));
     }
 
     @Test

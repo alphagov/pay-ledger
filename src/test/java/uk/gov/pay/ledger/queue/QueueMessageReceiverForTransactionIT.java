@@ -29,6 +29,7 @@ class QueueMessageReceiverForTransactionIT {
 
     private final String gatewayAccountId = "test_gateway_account_id";
     private final String serviceId = "test_service_id";
+    private final String agreementId = "an-agreement-id";
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -61,6 +62,7 @@ class QueueMessageReceiverForTransactionIT {
                 .body("transaction_id", is(resourceExternalId))
                 .body("service_id", is(serviceId))
                 .body("live", is(live))
+                .body("agreement_id", is(agreementId))
                 .body("moto", is(moto == null ? false : moto));
 
     }
@@ -82,6 +84,7 @@ class QueueMessageReceiverForTransactionIT {
                 .put("address_postcode", "N1 3QU")
                 .put("address_city", "London")
                 .put("source", CARD_API)
+                .put("agreement_id", agreementId)
                 .put("address_country", "GB");
 
         if (moto != null) {

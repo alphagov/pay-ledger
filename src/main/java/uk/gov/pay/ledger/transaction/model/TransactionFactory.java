@@ -125,6 +125,7 @@ public class TransactionFactory {
                     .withWalletType(safeGetAsString(transactionDetails, "wallet"))
                     .withGatewayPayoutId(entity.getGatewayPayoutId())
                     .withAuthorisationMode(authorisationMode)
+                    .withAgreementId(entity.getAgreementId())
                     .build();
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
