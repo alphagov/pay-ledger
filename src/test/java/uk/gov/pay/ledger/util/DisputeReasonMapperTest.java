@@ -1,11 +1,12 @@
 package uk.gov.pay.ledger.util;
 
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.nullValue;
 
 public class DisputeReasonMapperTest {
 
@@ -24,12 +25,12 @@ public class DisputeReasonMapperTest {
     @Test
     public void shouldHandleNullValue() {
         String mappedValue = DisputeReasonMapper.mapToApi(null);
-        assertThat(mappedValue, is(emptyString()));
+        assertThat(mappedValue, is(CoreMatchers.nullValue()));
     }
 
     @Test
     public void shouldHandleEmptyValue() {
         String mappedValue = DisputeReasonMapper.mapToApi("");
-        assertThat(mappedValue, is(emptyString()));
+        assertThat(mappedValue, is(nullValue()));
     }
 }

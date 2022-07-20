@@ -6,7 +6,7 @@ public class DisputeReasonMapper {
 
     public static String mapToApi(String stripeReason) {
         if (isBlank(stripeReason)) {
-            return "";
+            return null;
         }
         switch (stripeReason) {
             case "credit_not_processed":

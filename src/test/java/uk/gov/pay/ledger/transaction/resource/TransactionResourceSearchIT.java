@@ -677,6 +677,55 @@ public class TransactionResourceSearchIT {
     }
 
     @Test
+    public void searchingForDisputeShouldNotReturnReasonWhenMissing() {
+        String gatewayAccountId = "1";
+
+        TransactionFixture parentTransactionEntity = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.SUCCESS)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+        TransactionFixture disputeLost = aTransactionFixture()
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withParentExternalId(parentTransactionEntity.getExternalId())
+                .withReference(parentTransactionEntity.getReference())
+                .withDescription(parentTransactionEntity.getDescription())
+                .withEmail(parentTransactionEntity.getEmail())
+                .withCardholderName(parentTransactionEntity.getCardholderName())
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withTransactionType("DISPUTE")
+                .withState(TransactionState.LOST)
+                .withAmount(1000L)
+                .withNetAmount(-2500L)
+                .withTransactionDetails("{\"amount\": 1000, \"payment_details\": {\"card_type\": \"CREDIT\", \"expiry_date\": \"11/23\", \"card_brand_label\": \"Visa\"}, \"gateway_account_id\": \"1\", \"gateway_transaction_id\": \"du_dl20kdldj20ejs103jnc\", \"evidence_due_date\": \"2022-05-10T22:59:59.000Z\"}")
+                .withEventCount(3)
+                .withCardBrand(parentTransactionEntity.getCardBrand())
+                .withFee(1500L)
+                .withGatewayTransactionId("du_dl20kdldj20ejs103jnw")
+                .withServiceId(parentTransactionEntity.getServiceId())
+                .withCreatedDate(ZonedDateTime.parse("2022-06-08T11:22:48.822408Z"))
+                .withLive(true)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5" +
+                        "&transaction_type=DISPUTE"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].reason", is(nullValue()));
+    }
+
+    @Test
     public void shouldSearchCorrectlyUsingDisputeStates() {
         String gatewayAccountId = "1";
 
