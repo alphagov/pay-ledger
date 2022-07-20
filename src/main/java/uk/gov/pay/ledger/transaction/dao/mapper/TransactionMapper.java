@@ -48,7 +48,8 @@ public class TransactionMapper implements RowMapper<TransactionEntity> {
                 .withLive(getBooleanWithNullCheck(rs,"live"))
                 .withMoto(rs.getBoolean("moto"))
                 .withGatewayTransactionId(rs.getString("gateway_transaction_id"))
-                .withGatewayPayoutId(rs.getString("gateway_payout_id"));
+                .withGatewayPayoutId(rs.getString("gateway_payout_id"))
+                .withAgreementId(rs.getString("agreement_id"));
         Source.from(rs.getString("source")).ifPresent(transactionBuilder::withSource);
         if (rs.getString("gateway_payout_id") != null) {
             var payoutBuilder = aPayoutEntity()

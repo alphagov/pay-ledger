@@ -140,7 +140,8 @@ public class TransactionDao {
                     "moto, " +
                     "gateway_transaction_id, " +
                     "source, " +
-                    "gateway_payout_id" +
+                    "gateway_payout_id, " +
+                    "agreement_id" +
                     ") " +
                     "VALUES (" +
                     ":externalId," +
@@ -170,7 +171,8 @@ public class TransactionDao {
                     ":moto, " +
                     ":gatewayTransactionId, " +
                     ":source::source, " +
-                    ":gatewayPayoutId" +
+                    ":gatewayPayoutId, " +
+                    ":agreementId" +
                     ") " +
                     "ON CONFLICT (external_id) " +
                     "DO UPDATE SET " +
@@ -201,7 +203,8 @@ public class TransactionDao {
                     "moto = EXCLUDED.moto, " +
                     "gateway_transaction_id = EXCLUDED.gateway_transaction_id, " +
                     "source = EXCLUDED.source, " +
-                    "gateway_payout_id = EXCLUDED.gateway_payout_id " +
+                    "gateway_payout_id = EXCLUDED.gateway_payout_id, " +
+                    "agreement_id = EXCLUDED.agreement_id " +
                     "WHERE EXCLUDED.event_count >= transaction.event_count;";
 
     private static final String GET_SOURCE_TYPE_ENUM_VALUES =

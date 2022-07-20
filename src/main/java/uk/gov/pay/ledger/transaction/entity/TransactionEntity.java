@@ -51,6 +51,7 @@ public class TransactionEntity {
     private Source source;
     private String gatewayPayoutId;
     private PayoutEntity payoutEntity;
+    private String agreementId;
 
     public TransactionEntity() {
     }
@@ -86,6 +87,7 @@ public class TransactionEntity {
         this.source = builder.source;
         this.gatewayPayoutId = builder.gatewayPayoutId;
         this.payoutEntity = builder.payoutEntity;
+        this.agreementId = builder.agreementId;
     }
 
     public Long getId() {
@@ -240,6 +242,10 @@ public class TransactionEntity {
         return gatewayPayoutId;
     }
 
+    public String getAgreementId() {
+        return agreementId;
+    }
+
     public Optional<PayoutEntity> getPayoutEntity() {
         return Optional.ofNullable(payoutEntity);
     }
@@ -289,6 +295,7 @@ public class TransactionEntity {
         private boolean moto;
         private String gatewayPayoutId;
         private PayoutEntity payoutEntity;
+        private String agreementId;
 
         public Builder() {
         }
@@ -444,6 +451,11 @@ public class TransactionEntity {
 
         public Builder withPayoutEntity(PayoutEntity payoutEntity) {
             this.payoutEntity = payoutEntity;
+            return this;
+        }
+
+        public Builder withAgreementId(String agreementId) {
+            this.agreementId = agreementId;
             return this;
         }
     }

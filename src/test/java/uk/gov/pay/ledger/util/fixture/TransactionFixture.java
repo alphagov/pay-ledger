@@ -76,6 +76,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String source;
     private String gatewayPayoutId;
     private String version3ds;
+    private String agreementId;
 
     private TransactionFixture() {
     }
@@ -331,6 +332,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withAgreementId(String agreementId) {
+        this.agreementId = agreementId;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -365,9 +371,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        moto,\n" +
                                 "        gateway_transaction_id,\n" +
                                 "        source,\n" +
-                                "        gateway_payout_id\n" +
+                                "        gateway_payout_id,\n" +
+                                "        agreement_id\n" +
                                 "    )\n" +
-                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?, ?, ?::source, ?)\n",
+                                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? as jsonb), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::transaction_type, ?, ?, ?, ?::source, ?, ?)\n",
                         id,
                         externalId,
                         parentExternalId,
@@ -396,7 +403,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         moto,
                         gatewayTransactionId,
                         source,
-                        gatewayPayoutId
+                        gatewayPayoutId,
+                        agreementId
                 )
         );
         return this;
@@ -508,7 +516,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 .withLive(live)
                 .withMoto(moto)
                 .withGatewayTransactionId(gatewayTransactionId)
-                .withGatewayPayoutId(gatewayPayoutId);
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withAgreementId(agreementId);
         Source.from(source).ifPresent(builder::withSource);
         return builder.build();
     }
@@ -603,6 +612,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public String getCredentialExternalId() {
         return credentialExternalId;
+    }
+
+    public String getAgreementId() {
+        return agreementId;
     }
 
     public TransactionFixture withDefaultCardDetails(boolean includeCardDetails) {

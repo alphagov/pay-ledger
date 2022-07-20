@@ -80,6 +80,7 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getSource(), is(notNullValue()));
         assertThat(transactionEntity.isLive(), is(true));
         assertThat(transactionEntity.getGatewayPayoutId(), is("payout-id"));
+        assertThat(transactionEntity.getAgreementId(), is("an-agreement-id"));
 
         JsonObject transactionDetails = JsonParser.parseString(transactionEntity.getTransactionDetails()).getAsJsonObject();
         assertThat(transactionDetails.get("language").getAsString(), is("en"));

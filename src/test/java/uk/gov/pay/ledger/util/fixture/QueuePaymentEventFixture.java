@@ -5,7 +5,6 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.event.model.Event;
@@ -140,6 +139,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                                 .put("source", CARD_API)
                                 .put("address_country", "GB")
                                 .put("authorisation_mode", "web")
+                                .put("agreement_id", "an-agreement-id")
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":
