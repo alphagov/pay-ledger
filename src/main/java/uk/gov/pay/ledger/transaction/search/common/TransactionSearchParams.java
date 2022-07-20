@@ -45,6 +45,7 @@ public class TransactionSearchParams extends SearchParams {
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 500L;
     private static final Long DEFAULT_LIMIT_TOTAL_SIZE = 10000L;
     private static final String METADATA_VALUE = "metadata_value";
+    private static final String AGREEMENT_ID_FIELD = "agreement_id";
 
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
@@ -67,6 +68,7 @@ public class TransactionSearchParams extends SearchParams {
     private String fromSettledDate;
     private String toSettledDate;
     private String metadataValue;
+    private String agreementId;
     private Long pageNumber = 1L;
 
     private Long displaySize = DEFAULT_MAX_DISPLAY_SIZE;
@@ -186,6 +188,12 @@ public class TransactionSearchParams extends SearchParams {
         this.metadataValue = metadataValue;
     }
 
+    @QueryParam("agreement_id")
+    @Parameter(example = "17ii98mg7f6si930tcjt48ldlc")
+    public void setAgreementId(String agreementId) {
+        this.agreementId = agreementId;
+    }
+
     @QueryParam("page")
     @Parameter(example = "1")
     public void setPageNumber(Long pageNumber) {
@@ -258,6 +266,9 @@ public class TransactionSearchParams extends SearchParams {
         }
         if (isNotBlank(metadataValue)) {
             filters.add(" lower(tm.value) = lower(:" + METADATA_VALUE + ")");
+        }
+        if (isNotBlank(agreementId)) {
+            filters.add( " t.agreement_id = :" + AGREEMENT_ID_FIELD);
         }
 
         return List.copyOf(filters);
@@ -359,6 +370,9 @@ public class TransactionSearchParams extends SearchParams {
             }
             if (isNotBlank(metadataValue)) {
                 queryMap.put(METADATA_VALUE, metadataValue);
+            }
+            if (isNotBlank(agreementId)) {
+                queryMap.put(AGREEMENT_ID_FIELD, agreementId);
             }
         }
         return queryMap;
@@ -486,6 +500,9 @@ public class TransactionSearchParams extends SearchParams {
         }
         if (isNotBlank(metadataValue)) {
             queries.add(METADATA_VALUE + "=" + metadataValue);
+        }
+        if (isNotBlank(agreementId)) {
+            queries.add(AGREEMENT_ID_FIELD + "=" + agreementId);
         }
         queries.add("page=" + forPage);
         queries.add("display_size=" + getDisplaySize());

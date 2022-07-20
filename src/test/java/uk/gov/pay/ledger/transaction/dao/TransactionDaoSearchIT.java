@@ -71,6 +71,7 @@ public class TransactionDaoSearchIT {
         transactionFixture = aTransactionFixture()
                 .withDefaultCardDetails()
                 .withMoto(true)
+                .withAgreementId("an-agreement-id")
                 .insert(rule.getJdbi());
 
         searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
@@ -92,6 +93,7 @@ public class TransactionDaoSearchIT {
         assertThat(transaction.getCardBrand(), is(transactionFixture.getCardDetails().getCardBrand()));
         assertThat(transaction.getCreatedDate(), is(transactionFixture.getCreatedDate()));
         assertThat(transaction.isMoto(), is(transactionFixture.isMoto()));
+        assertThat(transaction.getAgreementId(), is(transactionFixture.getAgreementId()));
 
         Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(1L));
@@ -983,6 +985,31 @@ public class TransactionDaoSearchIT {
         assertThat(transactionList.size(), is(1));
 
         total = transactionDao.getTotalForSearch(searchParams);
+        assertThat(total, is(1L));
+    }
+
+    @Test
+    public void shouldReturn1Record_whenSearchingByAgreementId() {
+        String gatewayAccountId = "account-id-" + nextLong();
+
+        for (int i = 0; i < 2; i++) {
+            aTransactionFixture()
+                    .withGatewayAccountId(gatewayAccountId)
+                    .withAgreementId("agreement-id-" + i)
+                    .withCreatedDate(now().plusSeconds(1L))
+                    .insert(rule.getJdbi());
+        }
+
+        TransactionSearchParams searchParams = new TransactionSearchParams();
+        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAgreementId("agreement-id-1");
+
+        List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
+
+        assertThat(transactionList.size(), Matchers.is(1));
+        assertThat(transactionList.get(0).getAgreementId(), is("agreement-id-1"));
+
+        Long total = transactionDao.getTotalForSearch(searchParams);
         assertThat(total, is(1L));
     }
 

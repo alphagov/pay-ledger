@@ -31,6 +31,23 @@ paths:
       summary: "Healthcheck endpoint the ledger (checks postgresql, sqs queue)"
       tags:
       - Other
+  /v1/event:
+    post:
+      operationId: writeEvent
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/EventMessageDto'
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      tags:
+      - Events
   /v1/event/ticker:
     get:
       operationId: listEvents
@@ -265,17 +282,21 @@ paths:
           type: string
           enum:
           - UNDEFINED
-          - CREATED
           - STARTED
-          - SUBMITTED
           - CAPTURABLE
-          - SUCCESS
           - FAILED_REJECTED
           - FAILED_EXPIRED
           - FAILED_CANCELLED
           - CANCELLED
+          - CREATED
+          - SUBMITTED
+          - SUCCESS
           - ERROR
           - ERROR_GATEWAY
+          - NEEDS_RESPONSE
+          - UNDER_REVIEW
+          - LOST
+          - WON
       responses:
         "200":
           content:
@@ -320,17 +341,21 @@ paths:
           type: string
           enum:
           - UNDEFINED
-          - CREATED
           - STARTED
-          - SUBMITTED
           - CAPTURABLE
-          - SUCCESS
           - FAILED_REJECTED
           - FAILED_EXPIRED
           - FAILED_CANCELLED
           - CANCELLED
+          - CREATED
+          - SUBMITTED
+          - SUCCESS
           - ERROR
           - ERROR_GATEWAY
+          - NEEDS_RESPONSE
+          - UNDER_REVIEW
+          - LOST
+          - WON
       responses:
         "200":
           content:
@@ -539,6 +564,7 @@ paths:
           enum:
           - PAYMENT
           - REFUND
+          - DISPUTE
       - example: po_fj893joishj12lndk
         in: query
         name: gateway_payout_id
@@ -561,6 +587,11 @@ paths:
       - example: metadata-value-1
         in: query
         name: metadata_value
+        schema:
+          type: string
+      - example: 17ii98mg7f6si930tcjt48ldlc
+        in: query
+        name: agreement_id
         schema:
           type: string
       - example: 1
@@ -596,6 +627,12 @@ paths:
         name: gateway_transaction_id
         schema:
           type: string
+      - description: Comma delimited dispute states.
+        example: "won,needs_response"
+        in: query
+        name: dispute_states
+        schema:
+          $ref: '#/components/schemas/CommaDelimitedSetParameter'
       - description: Set to true to list transactions for all accounts.
         in: query
         name: override_account_id_restriction
@@ -723,6 +760,7 @@ paths:
           enum:
           - PAYMENT
           - REFUND
+          - DISPUTE
       - in: query
         name: parent_external_id
         schema:
@@ -890,6 +928,16 @@ components:
           - AGREEMENT_NOT_FOUND
           - ONE_TIME_TOKEN_INVALID
           - ONE_TIME_TOKEN_ALREADY_USED
+          - INVALID_ATTRIBUTE_VALUE
+          - CARD_NUMBER_REJECTED
+          - AUTHORISATION_API_NOT_ALLOWED
+          - AUTHORISATION_REJECTED
+          - AUTHORISATION_ERROR
+          - AUTHORISATION_TIMEOUT
+          - AGREEMENT_NOT_ACTIVE
+          - MISSING_MANDATORY_ATTRIBUTE
+          - UNEXPECTED_ATTRIBUTE
+          - ACCOUNT_DISABLED
           example: GENERIC
         message:
           type: array
@@ -938,6 +986,7 @@ components:
           - card_payment
           - payout
           - dispute
+          - payment_instrument
           example: payment
         service_id:
           type: string
@@ -945,6 +994,37 @@ components:
         sqs_message_id:
           type: string
           example: fe689579-63af-40bf-a783-23de97134b5f
+    EventMessageDto:
+      type: object
+      properties:
+        event_details:
+          type: string
+        event_type:
+          type: string
+        live:
+          type: boolean
+        parent_resource_external_id:
+          type: string
+        reproject_domain_object:
+          type: boolean
+        resource_external_id:
+          type: string
+        resource_type:
+          type: string
+          enum:
+          - agreement
+          - payment
+          - refund
+          - service
+          - card_payment
+          - payout
+          - dispute
+          - payment_instrument
+        service_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
     EventTicker:
       type: object
       properties:
@@ -980,6 +1060,7 @@ components:
           - card_payment
           - payout
           - dispute
+          - payment_instrument
           example: payment
         transaction_type:
           type: string
@@ -1241,6 +1322,8 @@ components:
     TransactionView:
       type: object
       properties:
+        agreement_id:
+          type: string
         amount:
           type: integer
           format: int64
@@ -1250,6 +1333,7 @@ components:
           enum:
           - web
           - moto_api
+          - agreement
           - external
           example: web
         authorisation_summary:
@@ -1274,6 +1358,9 @@ components:
         email:
           type: string
           example: citizen@example.org
+        evidence_due_date:
+          type: string
+          format: date-time
         fee:
           type: integer
           format: int64
@@ -1311,6 +1398,9 @@ components:
         payment_provider:
           type: string
           example: sandbox
+        reason:
+          type: string
+          example: fraudulent
         reference:
           type: string
           example: payment reference
@@ -1356,6 +1446,7 @@ components:
           enum:
           - PAYMENT
           - REFUND
+          - DISPUTE
           example: PAYMENT
         wallet_type:
           type: string
