@@ -77,6 +77,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String gatewayPayoutId;
     private String version3ds;
     private String agreementId;
+    private Boolean disputed;
 
     private TransactionFixture() {
     }
@@ -337,6 +338,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withDisputed(boolean disputed) {
+        this.disputed = disputed;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -482,7 +488,9 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                     transactionDetails.addProperty("version_3ds", version);
                     transactionDetails.addProperty("requires_3ds", true);
                 });
-
+        Optional.ofNullable(disputed).ifPresent(
+                disputed -> transactionDetails.addProperty("disputed", disputed)
+        );
         return transactionDetails;
     }
 
