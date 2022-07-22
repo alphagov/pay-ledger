@@ -103,10 +103,46 @@ class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Error Message"), is("Payment provider returned an error"));
         assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
         assertThat(csvDataMap.get("Time Created"), is("16:25:01"));
-        assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.00"));
+        assertThat(csvDataMap.get("Corporate Card Surcharge"), is(nullValue()));
         assertThat(csvDataMap.get("Total Amount"), is("-1.23"));
         assertThat(csvDataMap.get("Net"), is("-1.23"));
         assertThat(csvDataMap.get("MOTO"), is(nullValue()));
+    }
+
+    @Test
+    void toMapShouldReturnMapWithCorrectCsvDataForDisputeTransaction() {
+        TransactionEntity transactionEntity = transactionFixture
+                .withTransactionType(TransactionType.DISPUTE.name())
+                .withState(TransactionState.LOST)
+                .withAmount(2000L)
+                .withFee(1500L)
+                .withNetAmount(-3500L)
+                .withParentExternalId("parent-external-id")
+                .withReference("ref-1")
+                .withDescription("test description")
+                .withDefaultPaymentDetails()
+                .withDefaultTransactionDetails()
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Amount"), is("-20.00"));
+        assertThat(csvDataMap.get("Net"), is("-35.00"));
+        assertThat(csvDataMap.get("Fee"), is("15.00"));
+        assertThat(csvDataMap.get("Provider ID"), is(transactionFixture.getGatewayTransactionId()));
+        assertThat(csvDataMap.get("GOV.UK Payment ID"), is(transactionFixture.getParentExternalId()));
+        assertThat(csvDataMap.get("State"), is("Dispute lost to customer"));
+        assertThat(csvDataMap.get("Finished"), is(true));
+        assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
+        assertThat(csvDataMap.get("Time Created"), is("16:25:01"));
+
+        assertThat(csvDataMap.get("Reference"), is("ref-1"));
+        assertThat(csvDataMap.get("Description"), is("test description"));
+        assertThat(csvDataMap.get("Card Number"), is("1234"));
+        assertThat(csvDataMap.get("Card Brand"), is("Visa"));
+        assertThat(csvDataMap.get("Cardholder Name"), is("J Doe"));
+        assertThat(csvDataMap.get("Card Expiry Date"), is("10/21"));
     }
 
     @Test

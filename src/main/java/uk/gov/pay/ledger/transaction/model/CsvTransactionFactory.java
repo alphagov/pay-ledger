@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.state.DisputeState;
 import uk.gov.pay.ledger.transaction.state.ExternalTransactionState;
 import uk.gov.pay.ledger.transaction.state.PaymentState;
 import uk.gov.pay.ledger.transaction.state.RefundState;
@@ -28,6 +29,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.replaceChars;
 import static org.apache.commons.text.WordUtils.capitalizeFully;
+import static uk.gov.pay.ledger.transaction.model.TransactionType.DISPUTE;
+import static uk.gov.pay.ledger.transaction.model.TransactionType.REFUND;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsBoolean;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
@@ -107,30 +110,47 @@ public class CsvTransactionFactory {
                 result.put(FIELD_STATE, PaymentState.getDisplayName(transactionEntity.getState()));
                 result.put(FIELD_MOTO, transactionEntity.isMoto());
                 result.put(FIELD_PAYMENT_PROVIDER, safeGetAsString(transactionDetails, "payment_provider"));
+                result.put(FIELD_CORPORATE_CARD_SURCHARGE, penceToCurrency(
+                        Optional.ofNullable(safeGetAsLong(transactionDetails, "corporate_surcharge")).orElse(0L)
+                ));
 
                 JsonNode feeBreakdownNode = transactionDetails.get("fee_breakdown");
                 if (feeBreakdownNode != null && feeBreakdownNode.isArray()) {
                     result.putAll(getFeeBreakdown(transactionEntity, feeBreakdownNode));
                 }
+
+                result.put(FIELD_3D_SECURE_REQUIRED, safeGetAsBoolean(transactionDetails, "requires_3ds", null));
+
+                Optional<Map<String, Object>> externalMetadata = getExternalMetadata(transactionEntity.getTransactionDetails());
+
+                externalMetadata.ifPresent(metadata ->
+                        metadata.forEach((key, value) ->
+                                result.put(String.format("%s (metadata)", key), value)));
             }
-            if (TransactionType.REFUND.name().equals(transactionEntity.getTransactionType())) {
+            if (REFUND.name().equals(transactionEntity.getTransactionType())) {
+                result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalOrAmount * -1));
+                result.put(FIELD_ISSUED_BY, safeGetAsString(transactionDetails, "user_email"));
+                result.put(FIELD_STATE, RefundState.getDisplayName(transactionEntity.getState()));
+                result.put(FIELD_NET, penceToCurrency(netOrTotalOrAmount * -1));
+            }
+            if (DISPUTE.name().equals(transactionEntity.getTransactionType())) {
+                result.put(FIELD_STATE, DisputeState.getDisplayName(transactionEntity.getState()));
+                result.put(FIELD_NET, penceToCurrency(netOrTotalOrAmount));
+                result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
+            }
+
+            if (REFUND.name().equals(transactionEntity.getTransactionType()) ||
+                    DISPUTE.name().equals(transactionEntity.getTransactionType())) {
                 result.putAll(
                         getPaymentTransactionAttributes(transactionEntity, transactionDetails.get("payment_details"))
                 );
                 result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getParentExternalId());
                 result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount() * -1));
-                result.put(FIELD_NET, penceToCurrency(netOrTotalOrAmount * -1));
-                result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalOrAmount * -1));
-                result.put(FIELD_ISSUED_BY, safeGetAsString(transactionDetails, "user_email"));
-                result.put(FIELD_STATE, RefundState.getDisplayName(transactionEntity.getState()));
             }
 
             result.put(FIELD_PROVIDER_ID, sanitiseAgainstSpreadsheetFormulaInjection(transactionEntity.getGatewayTransactionId()));
             result.put(FIELD_DATE_CREATED, dateCreated);
             result.put(FIELD_TIME_CREATED, timeCreated);
-            result.put(FIELD_CORPORATE_CARD_SURCHARGE, penceToCurrency(
-                    Optional.ofNullable(safeGetAsLong(transactionDetails, "corporate_surcharge")).orElse(0L)
-            ));
 
             if (transactionEntity.getState() != null) {
                 ExternalTransactionState state = ExternalTransactionState.from(transactionEntity.getState(), 2);
@@ -138,14 +158,6 @@ public class CsvTransactionFactory {
                 result.put(FIELD_ERROR_CODE, state.getCode());
                 result.put(FIELD_ERROR_MESSAGE, state.getMessage());
             }
-
-            result.put(FIELD_3D_SECURE_REQUIRED, safeGetAsBoolean(transactionDetails, "requires_3ds", null));
-
-            Optional<Map<String, Object>> externalMetadata = getExternalMetadata(transactionEntity.getTransactionDetails());
-
-            externalMetadata.ifPresent(metadata ->
-                    metadata.forEach((key, value) ->
-                            result.put(String.format("%s (metadata)", key), value)));
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]",
                     transactionEntity.getExternalId(), e.getMessage());
