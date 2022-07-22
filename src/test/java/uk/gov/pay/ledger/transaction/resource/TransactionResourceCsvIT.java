@@ -28,7 +28,12 @@ import static org.apache.commons.csv.CSVFormat.RFC4180;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static uk.gov.pay.ledger.transaction.state.TransactionState.LOST;
+import static uk.gov.pay.ledger.transaction.state.TransactionState.SUCCESS;
+import static uk.gov.pay.ledger.transaction.state.TransactionState.UNDER_REVIEW;
+import static uk.gov.pay.ledger.transaction.state.TransactionState.WON;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.GatewayAccountMetadataFixture.aGatewayAccountMetadataFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
@@ -149,12 +154,108 @@ public class TransactionResourceCsvIT {
         assertThat(refundRecord.get("Error Message"), is("Payment provider returned an error"));
         assertThat(refundRecord.get("Date Created"), is("12 Mar 2018"));
         assertThat(refundRecord.get("Time Created"), is("16:24:01"));
-        assertThat(refundRecord.get("Corporate Card Surcharge"), is("0.00"));
         assertThat(refundRecord.get("Total Amount"), is("-1.00"));
         assertThat(refundRecord.get("Wallet Type"), is("Apple Pay"));
         assertThat(refundRecord.get("Issued By"), is("refund-by-user-email@example.org"));
         assertThat(refundRecord.isMapped("MOTO"), is(false));
         assertThat(refundRecord.get("3-D Secure Required"), is(""));
+    }
+
+    @Test
+    public void shouldReturnDisputeTransactionsInCSV() throws IOException {
+        String targetGatewayAccountId = "123";
+        String otherGatewayAccountId = "456";
+
+        TransactionFixture transactionFixture = insertTransaction(null, targetGatewayAccountId,
+                "PAYMENT", SUCCESS, ZonedDateTime.parse("2018-03-12T16:24:01.123456Z"),
+                1000L, 100L, 900L, "gw_tx_12345");
+
+        TransactionFixture disputeTxFixture = insertTransaction(transactionFixture.getExternalId(), transactionFixture.getGatewayAccountId(),
+                "DISPUTE", LOST, ZonedDateTime.parse("2018-03-13T16:24:01.123456Z"),
+                1000L, 1500L, -2500L, "du_12345");
+        TransactionFixture disputeTxFixtureToExclude = insertTransaction(transactionFixture.getExternalId(), transactionFixture.getGatewayAccountId(),
+                "DISPUTE", UNDER_REVIEW, ZonedDateTime.parse("2018-03-12T16:24:01.123456Z"),
+                1200L, null, null, "du_123456789");
+        TransactionFixture disputeTxFixtureToExclude2 = insertTransaction(transactionFixture.getExternalId(), otherGatewayAccountId,
+                "DISPUTE", WON, ZonedDateTime.parse("2018-03-12T16:24:01.123456Z"),
+                1100L, null, null, "du_1234567890");
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction/?" +
+                        "account_id=" + targetGatewayAccountId +
+                        "&payment_states=success" +
+                        "&dispute_states=lost" +
+                        "&fee_headers=true" +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(2));
+
+        CSVRecord paymentRecord = csvRecords.get(1);
+        assertThat(paymentRecord.size(), is(28));
+        assertCommonPaymentFields(paymentRecord, transactionFixture);
+        assertThat(paymentRecord.get("Amount"), is("10.00"));
+        assertThat(paymentRecord.get("GOV.UK Payment ID"), is(transactionFixture.getExternalId()));
+        assertThat(paymentRecord.get("Provider ID"), is(transactionFixture.getGatewayTransactionId()));
+        assertThat(paymentRecord.get("State"), is("Success"));
+        assertThat(paymentRecord.get("Finished"), is("true"));
+        assertThat(paymentRecord.get("Date Created"), is("12 Mar 2018"));
+        assertThat(paymentRecord.get("Time Created"), is("16:24:01"));
+        assertThat(paymentRecord.get("Total Amount"), is("10.00"));
+        assertThat(paymentRecord.get("Wallet Type"), is("Apple Pay"));
+        assertThat(paymentRecord.get("Net"), is("9.00"));
+        assertThat(paymentRecord.get("Fee"), is("1.00"));
+        assertThat(paymentRecord.get("Payment Provider"), is("sandbox"));
+
+        CSVRecord disputeRecord = csvRecords.get(0);
+        assertCommonPaymentFields(disputeRecord, disputeTxFixture);
+        assertThat(disputeRecord.get("Amount"), is("-10.00"));
+        assertThat(disputeRecord.get("Net"), is("-25.00"));
+        assertThat(disputeRecord.get("Fee"), is("15.00"));
+        assertThat(disputeRecord.get("GOV.UK Payment ID"), is(disputeTxFixture.getParentExternalId()));
+        assertThat(disputeRecord.get("Provider ID"), is(disputeTxFixture.getGatewayTransactionId()));
+        assertThat(disputeRecord.get("State"), is("Dispute lost to customer"));
+        assertThat(disputeRecord.get("Finished"), is("true"));
+        assertThat(disputeRecord.get("Date Created"), is("13 Mar 2018"));
+        assertThat(disputeRecord.get("Time Created"), is("16:24:01"));
+        assertThat(disputeRecord.get("Wallet Type"), is("Apple Pay"));
+    }
+
+    private TransactionFixture insertTransaction(String parentExternalExternalId, String gatewayAccountId,
+                                                 String transactionType, TransactionState state, ZonedDateTime createdDate,
+                                                 Long amount, Long fee, Long netAmount, String gatewayTransactionId) {
+        TransactionFixture transactionFixture = aTransactionFixture()
+                .withTransactionType(transactionType)
+                .withParentExternalId(parentExternalExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(createdDate)
+                .withAmount(amount)
+                .withState(state)
+                .withGatewayTransactionId(gatewayTransactionId)
+                .withDefaultPaymentDetails()
+                .withDefaultTransactionDetails();
+
+        if (transactionType.equals("PAYMENT")) {
+            transactionFixture.withDefaultCardDetails();
+            transactionFixture.withDefaultTransactionDetails();
+        }
+
+        if (netAmount != null) {
+            transactionFixture.withNetAmount(netAmount);
+        }
+        if (fee != null) {
+            transactionFixture.withFee(fee);
+        }
+
+        return transactionFixture.insert(rule.getJdbi());
     }
 
     @Test

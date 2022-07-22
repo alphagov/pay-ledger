@@ -267,6 +267,14 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return firstDigitsCardNumber;
     }
 
+    public Long getFee() {
+        return fee;
+    }
+
+    public Long getNetAmount() {
+        return netAmount;
+    }
+
     public TransactionFixture withFirstDigitsCardNumber(String firstDigitsCardNumber) {
         this.firstDigitsCardNumber = firstDigitsCardNumber;
         return this;
@@ -452,7 +460,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("card_type", defaultCardType);
         transactionDetails.addProperty("wallet", defaultWalletType);
 
-        if ("REFUND".equals(transactionType)) {
+        if ("REFUND".equals(transactionType) || "DISPUTE".equals(transactionType)) {
             refundPaymentDetails.addProperty("card_brand_label", cardBrandLabel);
             refundPaymentDetails.addProperty("expiry_date", cardExpiryDate);
             refundPaymentDetails.addProperty("card_type", defaultCardType);
