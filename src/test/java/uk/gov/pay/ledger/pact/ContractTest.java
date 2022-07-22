@@ -21,7 +21,6 @@ import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
@@ -358,6 +357,47 @@ public abstract class ContractTest {
                 .insert(app.getJdbi());
     }
 
+    @State("a dispute lost transaction exists")
+    public void createADisputeTransaction(Map<String, String> params) {
+        String transactionId = params.get("transaction_external_id");
+        String gatewayAccountId = params.get("gateway_account_id");
+        String parentTransactionExternalId = params.get("parent_external_id");
+
+        String gatewayPayoutId = randomAlphanumeric(15);
+
+        aTransactionFixture()
+                .withExternalId(parentTransactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .withCreatedDate(ZonedDateTime.parse("2022-05-10T14:05:00Z"))
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withDefaultTransactionDetails()
+                .insert(app.getJdbi()).toEntity();
+
+        aPayoutFixture()
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withPaidOutDate(ZonedDateTime.parse("2022-05-27T19:05:00Z"))
+                .build()
+                .insert(app.getJdbi());
+
+        String transactionDetails = new GsonBuilder().create().toJson(ImmutableMap.builder()
+                .put("amount", 1000L)
+                .put("payment_details", ImmutableMap.builder()
+                        .put("card_type", "CREDIT")
+                        .put("expiry_date", "11/23")
+                        .put("card_brand_label", "Visa"))
+                .put("gateway_account_id", gatewayAccountId)
+                .put("reason", "fraudulent")
+                .put("evidence_due_date", 1652223599)
+                .build());
+
+        createDisputeTransaction(transactionId, gatewayAccountId, parentTransactionExternalId, transactionDetails,
+                TransactionState.LOST, gatewayPayoutId);
+    }
+
     @State("a payment with all fields and a corresponding refund exists")
     public void createAPaymentWithAllFieldsAndWithACorrespondingRefund(Map<String, String> params) {
         String gatewayAccountId = params.get("gateway_account_id");
@@ -525,6 +565,35 @@ public abstract class ContractTest {
                 .withGatewayAccountId(gatewayAccountId)
                 .withTransactionType(TransactionType.PAYMENT.name())
                 .withDefaultTransactionDetails()
+                .insert(app.getJdbi()).toEntity();
+    }
+
+    private void createDisputeTransaction(String transactionExternalId, String gatewayAccountId,
+                                          String parentExternalId, String transactionDetails,
+                                          TransactionState transactionState, String gatewayPayoutId) {
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withExternalId(transactionExternalId)
+                .withAmount(1000L)
+                .withReference("my payment reference")
+                .withDescription("Test payment")
+                .withState(transactionState)
+                .withEmail("joe.blogs@example.com")
+                .withCardholderName("Mr Test")
+                .withCreatedDate(ZonedDateTime.parse("2022-05-20T19:05:00Z"))
+                .withTransactionDetails(transactionDetails)
+                .withCardBrand("visa")
+                .withLastDigitsCardNumber("4242")
+                .withFirstDigitsCardNumber("424242")
+                .withNetAmount(-2500L)
+                .withFee(1500L)
+                .withGatewayTransactionId("du_dl20kdldj20ejs103jns")
+                .withTransactionType(TransactionType.DISPUTE.name())
+                .withParentExternalId(parentExternalId)
+                .withLive(true)
+                .withMoto(false)
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withServiceId("36806175a0f944ff8bc88f97634b38a2")
                 .insert(app.getJdbi()).toEntity();
     }
 
