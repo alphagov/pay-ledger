@@ -49,6 +49,7 @@ public class Payment extends Transaction {
     private String walletType;
     private AuthorisationMode authorisationMode;
     private String agreementId;
+    private Boolean disputed;
 
     public Payment() {
 
@@ -83,6 +84,7 @@ public class Payment extends Transaction {
         this.walletType = builder.walletType;
         this.authorisationMode = builder.authorisationMode;
         this.agreementId = builder.agreementId;
+        this.disputed = builder.disputed;
     }
 
     @Override
@@ -204,6 +206,10 @@ public class Payment extends Transaction {
         return agreementId;
     }
 
+    public Boolean getDisputed() {
+        return disputed;
+    }
+
     public static class Builder {
         public String serviceId;
         private Long id;
@@ -238,6 +244,7 @@ public class Payment extends Transaction {
         private String credentialExternalId;
         private AuthorisationMode authorisationMode;
         private String agreementId;
+        private Boolean disputed;
 
         public Builder() {
         }
@@ -408,6 +415,11 @@ public class Payment extends Transaction {
 
         public Builder withAgreementId(String agreementId) {
             this.agreementId = agreementId;
+            return this;
+        }
+
+        public Builder withDisputed(Boolean disputed) {
+            this.disputed = disputed;
             return this;
         }
     }

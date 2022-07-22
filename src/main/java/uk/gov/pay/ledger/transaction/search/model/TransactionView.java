@@ -96,6 +96,7 @@ public class TransactionView {
     @Schema(example = "fraudulent")
     private String reason;
     private String agreementId;
+    private Boolean disputed;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -137,6 +138,7 @@ public class TransactionView {
         this.evidenceDueDate = builder.evidenceDueDate;
         this.reason = builder.reason;
         this.agreementId = builder.agreementId;
+        this.disputed = builder.disputed;
     }
 
     public TransactionView() {
@@ -179,7 +181,8 @@ public class TransactionView {
                     .withWalletType(payment.getWalletType())
                     .withGatewayPayoutId(payment.getGatewayPayoutId())
                     .withAuthorisationMode(payment.getAuthorisationMode())
-                    .withAgreementId(payment.getAgreementId());
+                    .withAgreementId(payment.getAgreementId())
+                    .withDisputed(payment.getDisputed());
             if (payment.getState() != null) {
                 paymentBuilder = paymentBuilder
                         .withState(ExternalTransactionState.from(payment.getState(), statusVersion));
@@ -423,6 +426,10 @@ public class TransactionView {
         return agreementId;
     }
 
+    public Boolean getDisputed() {
+        return disputed;
+    }
+
     public static class Builder {
         private Long id;
         private String gatewayAccountId;
@@ -464,6 +471,7 @@ public class TransactionView {
         private ZonedDateTime evidenceDueDate;
         private String reason;
         private String agreementId;
+        private Boolean disputed;
 
         public Builder() {
         }
@@ -664,6 +672,11 @@ public class TransactionView {
 
         public Builder withAgreementId(String agreementId) {
             this.agreementId = agreementId;
+            return this;
+        }
+
+        public Builder withDisputed(Boolean disputed) {
+            this.disputed = disputed;
             return this;
         }
     }

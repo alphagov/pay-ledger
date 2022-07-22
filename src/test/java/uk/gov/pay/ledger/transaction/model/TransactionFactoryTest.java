@@ -84,6 +84,7 @@ public class TransactionFactoryTest {
         fullTransactionDetails.addProperty("expiry_date", cardExpiryDate);
         fullTransactionDetails.addProperty("wallet", walletType);
         fullTransactionDetails.addProperty("authorisation_mode", "moto_api");
+        fullTransactionDetails.addProperty("disputed", true);
 
         var payoutObject = aPayoutEntity()
                 .withPaidOutDate(paidOutDate)
@@ -192,6 +193,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getSettlementSummary().getSettlementSubmittedTime(), is(Optional.empty()));
         assertThat(payment.getSettlementSummary().getSettledDate(), is(Optional.empty()));
         assertThat(payment.getAuthorisationMode(), is(AuthorisationMode.WEB));
+        assertThat(payment.getDisputed(), is(false));
     }
 
     @Test
@@ -392,5 +394,6 @@ public class TransactionFactoryTest {
         assertThat(payment.getSettlementSummary().getSettledDate(), is(Optional.of("2017-09-19")));
         assertThat(payment.getWalletType(), is(walletType));
         assertThat(payment.getAuthorisationMode(), is(AuthorisationMode.MOTO_API));
+        assertThat(payment.getDisputed(), is(true));
     }
 }
