@@ -391,7 +391,7 @@ public abstract class ContractTest {
                         .put("card_brand_label", "Visa"))
                 .put("gateway_account_id", gatewayAccountId)
                 .put("reason", "fraudulent")
-                .put("evidence_due_date", 1652223599)
+                .put("evidence_due_date", "2022-05-27T19:05:00Z")
                 .build());
 
         createDisputeTransaction(transactionId, gatewayAccountId, parentTransactionExternalId, transactionDetails,
