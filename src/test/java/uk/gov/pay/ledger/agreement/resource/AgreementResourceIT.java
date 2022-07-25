@@ -1,11 +1,13 @@
 package uk.gov.pay.ledger.agreement.resource;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.model.CardType;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
+import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.PaymentInstrumentFixture;
 import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
@@ -132,6 +134,112 @@ public class AgreementResourceIT {
                 .body("results.size()", is(2))
                 .body("results[0].external_id", is("a-five-agreement-id"))
                 .body("results[1].external_id", is("a-one-agreement-id"));
+    }
+
+    @Test
+    public void shouldGetConsistentAgreement_GetExistingProjectionWhenUpToDate() {
+        var agreementFixture = AgreementFixture.anAgreementFixture("agreement-id", "service-id", "CREATED", "projected-agreement-reference");
+        agreementFixture.setEventCount(1);
+        agreementFixture.insert(rule.getJdbi());
+
+        EventFixture.anEventFixture()
+                .withResourceExternalId("agreement-id")
+                .withServiceId("service-id")
+                .withEventType("AGREEMENT_CREATED")
+                .withEventData(
+                        new JSONObject()
+                                .put("reference", "event-stream-reference")
+                                .put("status", "CREATED")
+                                .toString()
+                )
+                .insert(rule.getJdbi());
+
+        given()
+                .port(port)
+                .contentType(JSON)
+                .header("X-Consistent", true)
+                .get("/v1/agreement/agreement-id")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("external_id", is("agreement-id"))
+                .body("reference", is("projected-agreement-reference"));
+    }
+
+    @Test
+    public void shouldGetConsistentAgreement_GetEventStreamCalculatedWhenProjectionCountBehind() {
+        var agreementFixture = AgreementFixture.anAgreementFixture("agreement-id", "service-id", "CREATED", "projected-agreement-reference");
+        agreementFixture.setEventCount(1);
+        agreementFixture.insert(rule.getJdbi());
+
+        EventFixture.anEventFixture()
+                .withResourceExternalId("agreement-id")
+                .withServiceId("service-id")
+                .withEventType("AGREEMENT_CREATED")
+                .withEventData(
+                        new JSONObject()
+                                .put("reference", "event-stream-reference")
+                                .put("status", "CREATED")
+                                .toString()
+                )
+                .insert(rule.getJdbi());
+
+        EventFixture.anEventFixture()
+                .withResourceExternalId("agreement-id")
+                .withServiceId("service-id")
+                .withEventType("AGREEMENT_SETUP")
+                .withEventData(
+                        new JSONObject()
+                                .put("status", "ACTIVE")
+                                .toString()
+                )
+                .insert(rule.getJdbi());
+
+        given()
+                .port(port)
+                .contentType(JSON)
+                .header("X-Consistent", true)
+                .get("/v1/agreement/agreement-id")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("external_id", is("agreement-id"))
+                .body("reference", is("event-stream-reference"))
+                .body("status", is("ACTIVE"));
+    }
+
+    @Test
+    public void shouldGetConsistentAgreement_GetEventStreamCalculatedWhenProjectionMissing() {
+        EventFixture.anEventFixture()
+                .withResourceExternalId("agreement-id")
+                .withServiceId("service-id")
+                .withEventType("AGREEMENT_CREATED")
+                .withEventData(
+                        new JSONObject()
+                                .put("reference", "event-stream-reference")
+                                .put("status", "CREATED")
+                                .toString()
+                )
+                .insert(rule.getJdbi());
+
+        given()
+                .port(port)
+                .contentType(JSON)
+                .header("X-Consistent", true)
+                .get("/v1/agreement/agreement-id")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("external_id", is("agreement-id"))
+                .body("reference", is("event-stream-reference"));
+    }
+
+    @Test
+    public void shouldGetConsistentAgreement_404GivenNoProjectionOrEvents() {
+        given()
+                .port(port)
+                .contentType(JSON)
+                .header("X-Consistent", true)
+                .get("/v1/agreement/agreement-id")
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
     }
 
     private void prepareAgreementsForService(String serviceId, int numberOfAgreements) {
