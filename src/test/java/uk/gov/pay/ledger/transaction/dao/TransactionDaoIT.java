@@ -22,6 +22,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.mockito.Mockito.mock;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
@@ -217,7 +219,7 @@ class TransactionDaoIT {
                 .findTransaction(
                         transactionEntity.getExternalId(),
                         transactionEntity.getGatewayAccountId(),
-                        TransactionType.REFUND, parentTransactionEntity.getExternalId())
+                        null, parentTransactionEntity.getExternalId())
                 .get();
 
         assertThat(transaction.getId(), notNullValue());
@@ -334,30 +336,68 @@ class TransactionDaoIT {
     }
 
     @Test
-    void findTransactionByParentIdAndGatewayAccountId_shouldFilterByParentExternalId() {
+    void findTransactionByParentIdAndGatewayAccountId_shouldFilterByParentExternalId_whenNoTransactionTypeSpecified() {
         TransactionEntity transaction1 = aTransactionFixture()
                 .withState(TransactionState.CREATED)
                 .withTransactionType("PAYMENT")
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        TransactionEntity transactionWithParentExternalId = aTransactionFixture()
-                .withState(TransactionState.SUBMITTED)
-                .withTransactionType("REFUND")
+        TransactionEntity refundTransaction = aTransactionFixture()
+                .withTransactionType(TransactionType.REFUND.name())
+                .withGatewayAccountId(transaction1.getGatewayAccountId())
+                .withParentExternalId(transaction1.getExternalId())
+                .insert(rule.getJdbi())
+                .toEntity();
+        TransactionEntity disputeTransaction = aTransactionFixture()
+                .withTransactionType(TransactionType.DISPUTE.name())
                 .withGatewayAccountId(transaction1.getGatewayAccountId())
                 .withParentExternalId(transaction1.getExternalId())
                 .insert(rule.getJdbi())
                 .toEntity();
 
         List<TransactionEntity> transactionEntityList =
-                transactionDao.findTransactionByParentIdAndGatewayAccountId(
-                        transactionWithParentExternalId.getParentExternalId(),
-                        transactionWithParentExternalId.getGatewayAccountId());
+                transactionDao.findTransactionsByParentIdAndGatewayAccountId(
+                        transaction1.getExternalId(),
+                        transaction1.getGatewayAccountId(),
+                        null);
+
+        assertThat(transactionEntityList.size(), is(2));
+        assertThat(transactionEntityList, containsInAnyOrder(
+                hasProperty("id", is(refundTransaction.getId())),
+                hasProperty("id", is(disputeTransaction.getId()))
+        ));
+    }
+
+    @Test
+    void findTransactionByParentIdAndGatewayAccountId_shouldFilterByParentExternalIdAndTransactionType() {
+        TransactionEntity transaction1 = aTransactionFixture()
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        TransactionEntity refundTransaction = aTransactionFixture()
+                .withTransactionType(TransactionType.REFUND.name())
+                .withGatewayAccountId(transaction1.getGatewayAccountId())
+                .withParentExternalId(transaction1.getExternalId())
+                .insert(rule.getJdbi())
+                .toEntity();
+        aTransactionFixture()
+                .withTransactionType(TransactionType.DISPUTE.name())
+                .withGatewayAccountId(transaction1.getGatewayAccountId())
+                .withParentExternalId(transaction1.getExternalId())
+                .insert(rule.getJdbi());
+
+        List<TransactionEntity> transactionEntityList =
+                transactionDao.findTransactionsByParentIdAndGatewayAccountId(
+                        transaction1.getExternalId(),
+                        transaction1.getGatewayAccountId(),
+                        TransactionType.REFUND);
 
         assertThat(transactionEntityList.size(), is(1));
         TransactionEntity transactionEntity = transactionEntityList.get(0);
 
-        assertThat(transactionEntity.getId(), is(transactionWithParentExternalId.getId()));
+        assertThat(transactionEntity.getId(), is(refundTransaction.getId()));
     }
 
     @Test

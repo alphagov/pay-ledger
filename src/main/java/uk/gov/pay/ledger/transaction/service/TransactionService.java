@@ -72,12 +72,13 @@ public class TransactionService {
                 .map(entity -> TransactionView.from(transactionFactory.createTransactionEntity(entity), statusVersion));
     }
 
-    public TransactionsForTransactionResponse getTransactions(String parentTransactionExternalId, String gatewayAccountId) {
+    public TransactionsForTransactionResponse getTransactions(String parentTransactionExternalId, String gatewayAccountId, TransactionType transactionType) {
         return transactionDao.findTransactionByExternalIdAndGatewayAccountId(parentTransactionExternalId, gatewayAccountId)
                 .map(transactionEntity ->
                         findTransactionsForParentExternalId(
                                 transactionEntity.getExternalId(),
-                                transactionEntity.getGatewayAccountId()))
+                                transactionEntity.getGatewayAccountId(),
+                                transactionType))
                 .orElseThrow(() ->
                         new WebApplicationException(format("Transaction with id [%s] not found", parentTransactionExternalId),
                                 Response.Status.NOT_FOUND));
@@ -225,9 +226,9 @@ public class TransactionService {
                 .collect(Collectors.toList());
     }
 
-    private TransactionsForTransactionResponse findTransactionsForParentExternalId(String parentTransactionExternalId, String gatewayAccountId) {
-        List<TransactionView> transactions = transactionDao.findTransactionByParentIdAndGatewayAccountId(
-                parentTransactionExternalId, gatewayAccountId)
+    private TransactionsForTransactionResponse findTransactionsForParentExternalId(String parentTransactionExternalId, String gatewayAccountId, TransactionType transactionType) {
+        List<TransactionView> transactions = transactionDao.findTransactionsByParentIdAndGatewayAccountId(
+                parentTransactionExternalId, gatewayAccountId, transactionType)
                 .stream()
                 .sorted(Comparator.comparing(TransactionEntity::getCreatedDate))
                 .map(transactionEntity ->

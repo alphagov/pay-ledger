@@ -718,6 +718,16 @@ paths:
         required: true
         schema:
           type: string
+      - description: The type of transactions to return
+        example: REFUND
+        in: query
+        name: transaction_type
+        schema:
+          type: string
+          enum:
+          - PAYMENT
+          - REFUND
+          - DISPUTE
       responses:
         "200":
           content:
@@ -917,6 +927,7 @@ components:
           - GENERIC
           - REFUND_NOT_AVAILABLE
           - REFUND_AMOUNT_AVAILABLE_MISMATCH
+          - REFUND_NOT_AVAILABLE_DUE_TO_DISPUTE
           - ZERO_AMOUNT_NOT_ALLOWED
           - MOTO_NOT_ALLOWED
           - CANCEL_CHARGE_FAILURE_DUE_TO_CONFLICTING_TERMINAL_STATE_AT_GATEWAY_CHARGE_STATE_FORCIBLY_TRANSITIONED
@@ -935,6 +946,7 @@ components:
           - AUTHORISATION_ERROR
           - AUTHORISATION_TIMEOUT
           - AGREEMENT_NOT_ACTIVE
+          - INCORRECT_AUTHORISATION_MODE_FOR_SAVE_PAYMENT_INSTRUMENT_TO_AGREEMENT
           - MISSING_MANDATORY_ATTRIBUTE
           - UNEXPECTED_ATTRIBUTE
           - ACCOUNT_DISABLED
@@ -1355,6 +1367,8 @@ components:
         description:
           type: string
           example: New passport application
+        disputed:
+          type: boolean
         email:
           type: string
           example: citizen@example.org
