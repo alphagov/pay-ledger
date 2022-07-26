@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.agreement.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import uk.gov.pay.ledger.transaction.model.CardType;
+import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
 import java.time.ZonedDateTime;
 
@@ -22,17 +24,19 @@ public class PaymentInstrumentEntity {
     private String addressCountry;
 
     private String lastDigitsCardNumber;
+    private String firstDigitsCardNumber;
     private String expiryDate;
     private String cardBrand;
-
+    private CardType cardType;
     private ZonedDateTime createdDate;
+    private PaymentInstrumentType type;
     private Integer eventCount;
 
     public PaymentInstrumentEntity() {
 
     }
 
-    public PaymentInstrumentEntity(String externalId, String agreementExternalId, String email, String cardholderName, String addressLine1, String addressLine2, String addressPostcode, String addressCity, String addressCounty, String addressCountry, String lastDigitsCardNumber, String expiryDate, String cardBrand, ZonedDateTime createdDate, Integer eventCount) {
+    public PaymentInstrumentEntity(String externalId, String agreementExternalId, String email, String cardholderName, String addressLine1, String addressLine2, String addressPostcode, String addressCity, String addressCounty, String addressCountry, String lastDigitsCardNumber, String firstDigitsCardNumber, String expiryDate, String cardBrand, CardType cardType, PaymentInstrumentType type, ZonedDateTime createdDate, Integer eventCount) {
         this.externalId = externalId;
         this.agreementExternalId = agreementExternalId;
         this.email = email;
@@ -44,8 +48,11 @@ public class PaymentInstrumentEntity {
         this.addressCounty = addressCounty;
         this.addressCountry = addressCountry;
         this.lastDigitsCardNumber = lastDigitsCardNumber;
+        this.firstDigitsCardNumber = firstDigitsCardNumber;
         this.expiryDate = expiryDate;
         this.cardBrand = cardBrand;
+        this.cardType = cardType;
+        this.type = type;
         this.createdDate = createdDate;
         this.eventCount = eventCount;
     }
@@ -102,12 +109,24 @@ public class PaymentInstrumentEntity {
         this.lastDigitsCardNumber = lastDigitsCardNumber;
     }
 
+    public void setType(PaymentInstrumentType type) {
+        this.type = type;
+    }
+
     public void setExpiryDate(String expiryDate) {
         this.expiryDate = expiryDate;
     }
 
     public void setCardBrand(String cardBrand) {
         this.cardBrand = cardBrand;
+    }
+
+    public void setFirstDigitsCardNumber(String firstDigitsCardNumber) {
+        this.firstDigitsCardNumber = firstDigitsCardNumber;
+    }
+
+    public void setCardType(CardType cardType) {
+        this.cardType = cardType;
     }
 
     public String getExternalId() {
@@ -167,5 +186,17 @@ public class PaymentInstrumentEntity {
     }
     public String getAddressCounty() {
         return addressCounty;
+    }
+
+    public PaymentInstrumentType getType() {
+        return type;
+    }
+
+    public String getFirstDigitsCardNumber() {
+        return firstDigitsCardNumber;
+    }
+
+    public CardType getCardType() {
+        return cardType;
     }
 }

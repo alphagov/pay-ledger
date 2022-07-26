@@ -20,8 +20,11 @@ public class PaymentInstrumentDao {
             "address_county," +
             "address_country," +
             "last_digits_card_number," +
+            "first_digits_card_number," +
             "expiry_date," +
             "card_brand," +
+            "card_type," +
+            "type," +
             "event_count," +
             "created_date" +
             ") " +
@@ -37,8 +40,11 @@ public class PaymentInstrumentDao {
             ":addressCounty, " +
             ":addressCountry, " +
             ":lastDigitsCardNumber, " +
+            ":firstDigitsCardNumber, " +
             ":expiryDate, " +
             ":cardBrand, " +
+            ":cardType, " +
+            ":type, " +
             ":eventCount, " +
             ":createdDate" +
             ") " +
@@ -54,8 +60,11 @@ public class PaymentInstrumentDao {
             "address_county = EXCLUDED.address_county," +
             "address_country = EXCLUDED.address_country," +
             "last_digits_card_number = EXCLUDED.last_digits_card_number," +
+            "first_digits_card_number = EXCLUDED.first_digits_card_number," +
             "expiry_date = EXCLUDED.expiry_date," +
             "card_brand = EXCLUDED.card_brand," +
+            "card_type = EXCLUDED.card_type," +
+            "type = EXCLUDED.type," +
             "event_count = EXCLUDED.event_count," +
             "created_date = EXCLUDED.created_date " +
             "WHERE EXCLUDED.event_count >= payment_instrument.event_count";

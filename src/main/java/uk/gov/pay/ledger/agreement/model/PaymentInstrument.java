@@ -7,6 +7,7 @@ import uk.gov.pay.ledger.agreement.entity.PaymentInstrumentEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
 import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
 import java.time.ZonedDateTime;
 
@@ -15,13 +16,15 @@ public class PaymentInstrument {
     private String externalId;
     private String agreementExternalId;
     private CardDetails cardDetails;
+    private PaymentInstrumentType type;
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private ZonedDateTime createdDate;
 
-    public PaymentInstrument(String externalId, String agreementExternalId, CardDetails cardDetails, ZonedDateTime createdDate) {
+    public PaymentInstrument(String externalId, String agreementExternalId, CardDetails cardDetails, PaymentInstrumentType type, ZonedDateTime createdDate) {
         this.externalId = externalId;
         this.agreementExternalId = agreementExternalId;
         this.cardDetails = cardDetails;
+        this.type = type;
         this.createdDate = createdDate;
     }
 
@@ -39,14 +42,15 @@ public class PaymentInstrument {
                 billingAddress,
                 entity.getCardBrand(),
                 entity.getLastDigitsCardNumber(),
-                null,
+                entity.getFirstDigitsCardNumber(),
                 entity.getExpiryDate(),
-                null
+                entity.getCardType()
         );
         return new PaymentInstrument(
                 entity.getExternalId(),
                 entity.getAgreementExternalId(),
                 cardDetails,
+                entity.getType(),
                 entity.getCreatedDate()
         );
     }
@@ -65,5 +69,9 @@ public class PaymentInstrument {
 
     public ZonedDateTime getCreatedDate() {
         return createdDate;
+    }
+
+    public PaymentInstrumentType getType() {
+        return type;
     }
 }
