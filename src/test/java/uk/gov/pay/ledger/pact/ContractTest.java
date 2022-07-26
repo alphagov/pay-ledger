@@ -6,6 +6,7 @@ import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -316,6 +317,44 @@ public abstract class ContractTest {
                 "2019-09-21T19:05:16.067Z", TransactionState.SUCCESS);
     }
 
+    @State("dispute transactions exist with states `lost` and `under_review` for selfservice search")
+    public void createDisputeTransactionsForSearch() {
+        String gatewayAccountId = "123456";
+        String disputeLostExternalId = "duslqp12kpdfskopek230";
+        String disputeUnderReviewExternalId = "du2slqp12kpdfskopek230";
+        String paymentExternalId = "q5qo9mt6ajfcn2oqgaktkm2ksk";
+        String paymentExternalId2 = "dklpej3vlkn2oqgaktkm2ksk";
+
+        aTransactionFixture()
+                .withExternalId(paymentExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(app.getJdbi()).toEntity();
+        aTransactionFixture()
+                .withExternalId(paymentExternalId2)
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType(TransactionType.PAYMENT.name())
+                .withAmount(1000L)
+                .withState(TransactionState.SUCCESS)
+                .insert(app.getJdbi()).toEntity();
+
+        JsonObject transactionDetails = new JsonObject();
+        transactionDetails.addProperty("amount", 1000L);
+        transactionDetails.addProperty("gateway_account_id", gatewayAccountId);
+
+        JsonObject paymentDetails = new JsonObject();
+        paymentDetails.addProperty("expiry_date", "8/23");
+        paymentDetails.addProperty("card_brand_label", "Visa");
+        transactionDetails.add("payment_details", paymentDetails);
+
+        createDisputeTransaction(disputeLostExternalId, gatewayAccountId, paymentExternalId, transactionDetails.toString(),
+                TransactionState.LOST, null, 2000L, -3500L, 1500L);
+        createDisputeTransaction(disputeUnderReviewExternalId, gatewayAccountId, paymentExternalId2, transactionDetails.toString(),
+                TransactionState.UNDER_REVIEW, null, 1000L, null, null);
+    }
+
     @State("a payment with success state exists")
     public void createAPaymentWithSuccessState(Map<String, String> params) {
         String gatewayAccountId = params.get("gateway_account_id");
@@ -395,7 +434,7 @@ public abstract class ContractTest {
                 .build());
 
         createDisputeTransaction(transactionId, gatewayAccountId, parentTransactionExternalId, transactionDetails,
-                TransactionState.LOST, gatewayPayoutId);
+                TransactionState.LOST, gatewayPayoutId, 1000L, -2500L, 1500L);
     }
 
     @State("a payment with all fields and a corresponding refund exists")
@@ -570,11 +609,12 @@ public abstract class ContractTest {
 
     private void createDisputeTransaction(String transactionExternalId, String gatewayAccountId,
                                           String parentExternalId, String transactionDetails,
-                                          TransactionState transactionState, String gatewayPayoutId) {
-        aTransactionFixture()
+                                          TransactionState transactionState, String gatewayPayoutId,
+                                          Long amount, Long netAmount, Long fee) {
+        TransactionFixture transactionFixture = aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId)
                 .withExternalId(transactionExternalId)
-                .withAmount(1000L)
+                .withAmount(amount)
                 .withReference("my payment reference")
                 .withDescription("Test payment")
                 .withState(transactionState)
@@ -585,16 +625,22 @@ public abstract class ContractTest {
                 .withCardBrand("visa")
                 .withLastDigitsCardNumber("4242")
                 .withFirstDigitsCardNumber("424242")
-                .withNetAmount(-2500L)
-                .withFee(1500L)
                 .withGatewayTransactionId("du_dl20kdldj20ejs103jns")
                 .withTransactionType(TransactionType.DISPUTE.name())
                 .withParentExternalId(parentExternalId)
                 .withLive(true)
                 .withMoto(false)
                 .withGatewayPayoutId(gatewayPayoutId)
-                .withServiceId("36806175a0f944ff8bc88f97634b38a2")
-                .insert(app.getJdbi()).toEntity();
+                .withServiceId("36806175a0f944ff8bc88f97634b38a2");
+
+        if (netAmount != null) {
+            transactionFixture.withNetAmount(netAmount);
+        }
+        if (fee != null) {
+            transactionFixture.withFee(fee);
+        }
+
+        transactionFixture.insert(app.getJdbi()).toEntity();
     }
 
     private void createPaymentTransaction(String transactionExternalId, String gatewayAccountId, Long amount, TransactionState state, String createdDate) {
