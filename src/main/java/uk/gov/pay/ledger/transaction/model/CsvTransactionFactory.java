@@ -135,7 +135,7 @@ public class CsvTransactionFactory {
             }
             if (DISPUTE.name().equals(transactionEntity.getTransactionType())) {
                 result.put(FIELD_STATE, DisputeState.getDisplayName(transactionEntity.getState()));
-                result.put(FIELD_NET, penceToCurrency(netOrTotalOrAmount));
+                result.put(FIELD_NET, penceToCurrency(transactionEntity.getNetAmount()));
                 result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
             }
 
