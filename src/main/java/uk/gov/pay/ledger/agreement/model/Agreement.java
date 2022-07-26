@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -15,13 +16,13 @@ public class Agreement {
     private String serviceId;
     private String reference;
     private String description;
-    private String status;
+    private AgreementStatus status;
     private Boolean live;
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private ZonedDateTime createdDate;
     private PaymentInstrument paymentInstrument;
 
-    public Agreement(String externalId, String serviceId, String reference, String description, String status, Boolean live, ZonedDateTime createdDate, PaymentInstrument paymentInstrument) {
+    public Agreement(String externalId, String serviceId, String reference, String description, AgreementStatus status, Boolean live, ZonedDateTime createdDate, PaymentInstrument paymentInstrument) {
         this.externalId = externalId;
         this.serviceId = serviceId;
         this.reference = reference;
@@ -61,7 +62,7 @@ public class Agreement {
         return description;
     }
 
-    public String getStatus() {
+    public AgreementStatus getStatus() {
         return status;
     }
 

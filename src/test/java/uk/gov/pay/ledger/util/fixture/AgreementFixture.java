@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
+import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -16,7 +17,7 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
     private String externalId = RandomStringUtils.randomAlphanumeric(20);
     private String reference = RandomStringUtils.randomAlphanumeric(10);
     private String description = RandomStringUtils.randomAlphanumeric(20);
-    private String status = "ACTIVE";
+    private AgreementStatus status = AgreementStatus.ACTIVE;
     private boolean live = false;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
     private Integer eventCount = 1;
@@ -31,7 +32,7 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
         return fixture;
     }
 
-    public static AgreementFixture anAgreementFixture(String externalId, String serviceId, String status, String reference) {
+    public static AgreementFixture anAgreementFixture(String externalId, String serviceId, AgreementStatus status, String reference) {
         var fixture = new AgreementFixture();
         fixture.setExternalId(externalId);
         fixture.setServiceId(serviceId);
@@ -101,7 +102,7 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
         this.externalId = externalId;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(AgreementStatus status) {
         this.status = status;
     }
 

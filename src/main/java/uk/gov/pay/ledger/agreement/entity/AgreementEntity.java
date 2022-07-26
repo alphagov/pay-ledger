@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.agreement.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.time.ZonedDateTime;
 
@@ -14,7 +15,7 @@ public class AgreementEntity {
     private String serviceId;
     private String reference;
     private String description;
-    private String status;
+    private AgreementStatus status;
     private Boolean live;
     private ZonedDateTime createdDate;
     private Integer eventCount;
@@ -24,7 +25,7 @@ public class AgreementEntity {
 
     }
 
-    public AgreementEntity(String externalId, String gatewayAccountId, String serviceId, String reference, String description, String status, Boolean live, ZonedDateTime createdDate, Integer eventCount, PaymentInstrumentEntity paymentInstrument) {
+    public AgreementEntity(String externalId, String gatewayAccountId, String serviceId, String reference, String description, AgreementStatus status, Boolean live, ZonedDateTime createdDate, Integer eventCount, PaymentInstrumentEntity paymentInstrument) {
         this.externalId = externalId;
         this.gatewayAccountId = gatewayAccountId;
         this.serviceId = serviceId;
@@ -57,7 +58,7 @@ public class AgreementEntity {
         return description;
     }
 
-    public String getStatus() {
+    public AgreementStatus getStatus() {
         return status;
     }
 
@@ -109,7 +110,7 @@ public class AgreementEntity {
         this.description = description;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(AgreementStatus status) {
         this.status = status;
     }
 

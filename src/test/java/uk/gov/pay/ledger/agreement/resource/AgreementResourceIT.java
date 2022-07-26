@@ -7,6 +7,7 @@ import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.model.CardType;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
 import uk.gov.pay.ledger.util.fixture.PaymentInstrumentFixture;
+import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
 import javax.ws.rs.core.Response;
@@ -111,11 +112,11 @@ public class AgreementResourceIT {
 
     @Test
     public void shouldSearchWithFilterParams() {
-        AgreementFixture.anAgreementFixture("a-one-agreement-id", "a-one-service-id", "CREATED", "partial-ref-1").insert(rule.getJdbi());
-        AgreementFixture.anAgreementFixture("a-two-agreement-id", "a-one-service-id", "CREATED", "notmatchingref").insert(rule.getJdbi());
-        AgreementFixture.anAgreementFixture("a-three-agreement-id", "a-one-service-id", "ACTIVE", "anotherref").insert(rule.getJdbi());
-        AgreementFixture.anAgreementFixture("a-four-agreement-id", "a-two-service-id", "CREATED", "reference").insert(rule.getJdbi());
-        AgreementFixture.anAgreementFixture("a-five-agreement-id", "a-one-service-id", "CREATED", "avalid-partial-ref").insert(rule.getJdbi());
+        AgreementFixture.anAgreementFixture("a-one-agreement-id", "a-one-service-id", AgreementStatus.CREATED, "partial-ref-1").insert(rule.getJdbi());
+        AgreementFixture.anAgreementFixture("a-two-agreement-id", "a-one-service-id", AgreementStatus.CREATED, "notmatchingref").insert(rule.getJdbi());
+        AgreementFixture.anAgreementFixture("a-three-agreement-id", "a-one-service-id", AgreementStatus.ACTIVE, "anotherref").insert(rule.getJdbi());
+        AgreementFixture.anAgreementFixture("a-four-agreement-id", "a-two-service-id", AgreementStatus.CREATED, "reference").insert(rule.getJdbi());
+        AgreementFixture.anAgreementFixture("a-five-agreement-id", "a-one-service-id", AgreementStatus.CREATED, "avalid-partial-ref").insert(rule.getJdbi());
         given().port(port)
                 .contentType(JSON)
                 .queryParam("service_id", "a-one-service-id")

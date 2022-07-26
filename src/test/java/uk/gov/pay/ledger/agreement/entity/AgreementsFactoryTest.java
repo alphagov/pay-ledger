@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.Test;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.ResourceType;
+import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ class AgreementsFactoryTest {
         assertThat(entity.getEventCount(), is(1));
         assertThat(entity.getReference(), is("agreement-reference"));
         assertThat(entity.getDescription(), is("agreement description text"));
-        assertThat(entity.getStatus(), is("CREATED"));
+        assertThat(entity.getStatus(), is(AgreementStatus.CREATED));
     }
 
     @Test
