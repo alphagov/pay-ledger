@@ -102,6 +102,29 @@ public abstract class ContractTest {
                 "2018-09-22T10:16:16.067Z", TransactionState.ERROR_GATEWAY);
     }
 
+    @State("refund and dispute transactions for a transaction exist")
+    public void createRefundAndDisputeTransactionsForATransaction(Map<String, String> params) {
+        String transactionExternalId = params.get("transaction_external_id");
+        String gatewayAccountId = params.get("gateway_account_id");
+
+        createPaymentTransaction(transactionExternalId, gatewayAccountId);
+
+        createARefundTransaction(transactionExternalId, gatewayAccountId, "refund-transaction-1d1",
+                100L, "reference1", "description1",
+                "2018-09-22T10:14:16.067Z", TransactionState.SUBMITTED);
+
+        createARefundTransaction(transactionExternalId, gatewayAccountId, "refund-transaction-1d2",
+                200L, "reference2", "description2",
+                "2018-09-22T10:16:16.067Z", TransactionState.ERROR_GATEWAY);
+
+        JsonObject transactionDetails = new JsonObject();
+        transactionDetails.addProperty("amount", 1000L);
+        transactionDetails.addProperty("gateway_account_id", gatewayAccountId);
+
+        createDisputeTransaction("dispute-transaction", gatewayAccountId, transactionExternalId, transactionDetails.toString(),
+                TransactionState.NEEDS_RESPONSE, null, 1000L, null, null);
+    }
+
     @State("refund transactions exists for a gateway account")
     public void createRefundTransactionsForAGatewayAccount(Map<String, String> params) {
         String transactionExternalId1 = "someExternalId1";
