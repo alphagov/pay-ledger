@@ -25,8 +25,10 @@ public class AgreementDao {
             "pi.address_county as p_address_county," +
             "pi.address_country as p_address_country," +
             "pi.last_digits_card_number as p_last_digits_card_number," +
+            "pi.first_digits_card_number as p_first_digits_card_number," +
             "pi.expiry_date as p_expiry_date," +
             "pi.card_brand as p_card_brand," +
+            "pi.card_type as p_card_type," +
             "pi.type as p_type," +
             "pi.event_count as p_event_count," +
             "pi.created_date as p_created_date " +

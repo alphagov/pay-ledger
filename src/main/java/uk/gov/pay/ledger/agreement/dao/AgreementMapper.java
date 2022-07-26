@@ -6,6 +6,7 @@ import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.entity.PaymentInstrumentEntity;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
+import uk.gov.pay.ledger.transaction.model.CardType;
 import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
 import java.sql.ResultSet;
@@ -21,6 +22,7 @@ public class AgreementMapper implements RowMapper<AgreementEntity> {
         PaymentInstrumentEntity paymentInstrument = null;
         var paymentInstrumentExternalId = resultSet.getString("p_external_id");
         var paymentInstrumentType = PaymentInstrumentType.from(resultSet.getString("p_type"));
+        var paymentInstrumentCardType = CardType.fromString(resultSet.getString("p_card_type"));
 
         if (paymentInstrumentExternalId != null) {
             paymentInstrument = new PaymentInstrumentEntity(
@@ -35,8 +37,10 @@ public class AgreementMapper implements RowMapper<AgreementEntity> {
                     resultSet.getString("p_address_county"),
                     resultSet.getString("p_address_country"),
                     resultSet.getString("p_last_digits_card_number"),
+                    resultSet.getString("p_first_digits_card_number"),
                     resultSet.getString("p_expiry_date"),
                     resultSet.getString("p_card_brand"),
+                    paymentInstrumentCardType,
                     paymentInstrumentType.orElseGet(() -> null),
                     ZonedDateTime.ofInstant(resultSet.getTimestamp("p_created_date").toInstant(), ZoneOffset.UTC),
                     resultSet.getInt("p_event_count")

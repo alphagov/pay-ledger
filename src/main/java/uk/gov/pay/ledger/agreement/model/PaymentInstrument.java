@@ -42,9 +42,9 @@ public class PaymentInstrument {
                 billingAddress,
                 entity.getCardBrand(),
                 entity.getLastDigitsCardNumber(),
-                null,
+                entity.getFirstDigitsCardNumber(),
                 entity.getExpiryDate(),
-                null
+                entity.getCardType()
         );
         return new PaymentInstrument(
                 entity.getExternalId(),

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
+import uk.gov.pay.ledger.transaction.model.CardType;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
 import uk.gov.pay.ledger.util.fixture.PaymentInstrumentFixture;
 import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
@@ -58,7 +59,9 @@ public class AgreementResourceIT {
                 .contentType(JSON)
                 .body("external_id", is(agreementFixture.getExternalId()))
                 .body("payment_instrument.external_id", is(paymentInstrumentFixture.getExternalId()))
-                .body("payment_instrument.type", is(PaymentInstrumentType.CARD.name()));
+                .body("payment_instrument.type", is(PaymentInstrumentType.CARD.name()))
+                .body("payment_instrument.card_details.card_type", is(CardType.CREDIT.name().toLowerCase()))
+                .body("payment_instrument.card_details.first_digits_card_number", is("424242"));
     }
 
     @Test
