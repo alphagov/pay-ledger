@@ -27,6 +27,7 @@ public class AgreementDao {
             "pi.last_digits_card_number as p_last_digits_card_number," +
             "pi.expiry_date as p_expiry_date," +
             "pi.card_brand as p_card_brand," +
+            "pi.type as p_type," +
             "pi.event_count as p_event_count," +
             "pi.created_date as p_created_date " +
             "FROM agreement a LEFT JOIN (" +

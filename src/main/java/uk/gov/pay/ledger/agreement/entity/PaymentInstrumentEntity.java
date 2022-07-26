@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.agreement.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
 import java.time.ZonedDateTime;
 
@@ -26,13 +27,14 @@ public class PaymentInstrumentEntity {
     private String cardBrand;
 
     private ZonedDateTime createdDate;
+    private PaymentInstrumentType type;
     private Integer eventCount;
 
     public PaymentInstrumentEntity() {
 
     }
 
-    public PaymentInstrumentEntity(String externalId, String agreementExternalId, String email, String cardholderName, String addressLine1, String addressLine2, String addressPostcode, String addressCity, String addressCounty, String addressCountry, String lastDigitsCardNumber, String expiryDate, String cardBrand, ZonedDateTime createdDate, Integer eventCount) {
+    public PaymentInstrumentEntity(String externalId, String agreementExternalId, String email, String cardholderName, String addressLine1, String addressLine2, String addressPostcode, String addressCity, String addressCounty, String addressCountry, String lastDigitsCardNumber, String expiryDate, String cardBrand, PaymentInstrumentType type, ZonedDateTime createdDate, Integer eventCount) {
         this.externalId = externalId;
         this.agreementExternalId = agreementExternalId;
         this.email = email;
@@ -46,6 +48,7 @@ public class PaymentInstrumentEntity {
         this.lastDigitsCardNumber = lastDigitsCardNumber;
         this.expiryDate = expiryDate;
         this.cardBrand = cardBrand;
+        this.type = type;
         this.createdDate = createdDate;
         this.eventCount = eventCount;
     }
@@ -100,6 +103,10 @@ public class PaymentInstrumentEntity {
 
     public void setLastDigitsCardNumber(String lastDigitsCardNumber) {
         this.lastDigitsCardNumber = lastDigitsCardNumber;
+    }
+
+    public void setType(PaymentInstrumentType type) {
+        this.type = type;
     }
 
     public void setExpiryDate(String expiryDate) {
@@ -167,5 +174,9 @@ public class PaymentInstrumentEntity {
     }
     public String getAddressCounty() {
         return addressCounty;
+    }
+
+    public PaymentInstrumentType getType() {
+        return type;
     }
 }

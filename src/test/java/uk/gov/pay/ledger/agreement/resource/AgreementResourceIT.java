@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
 import uk.gov.pay.ledger.util.fixture.PaymentInstrumentFixture;
+import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
 import javax.ws.rs.core.Response;
 
@@ -56,7 +57,8 @@ public class AgreementResourceIT {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("external_id", is(agreementFixture.getExternalId()))
-                .body("payment_instrument.external_id", is(paymentInstrumentFixture.getExternalId()));
+                .body("payment_instrument.external_id", is(paymentInstrumentFixture.getExternalId()))
+                .body("payment_instrument.type", is(PaymentInstrumentType.CARD.name()));
     }
 
     @Test

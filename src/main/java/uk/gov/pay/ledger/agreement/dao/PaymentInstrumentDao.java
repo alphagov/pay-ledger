@@ -22,6 +22,7 @@ public class PaymentInstrumentDao {
             "last_digits_card_number," +
             "expiry_date," +
             "card_brand," +
+            "type," +
             "event_count," +
             "created_date" +
             ") " +
@@ -39,6 +40,7 @@ public class PaymentInstrumentDao {
             ":lastDigitsCardNumber, " +
             ":expiryDate, " +
             ":cardBrand, " +
+            ":type, " +
             ":eventCount, " +
             ":createdDate" +
             ") " +
@@ -56,6 +58,7 @@ public class PaymentInstrumentDao {
             "last_digits_card_number = EXCLUDED.last_digits_card_number," +
             "expiry_date = EXCLUDED.expiry_date," +
             "card_brand = EXCLUDED.card_brand," +
+            "type = EXCLUDED.type," +
             "event_count = EXCLUDED.event_count," +
             "created_date = EXCLUDED.created_date " +
             "WHERE EXCLUDED.event_count >= payment_instrument.event_count";

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.agreement.entity.PaymentInstrumentEntity;
+import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -24,7 +25,7 @@ public class PaymentInstrumentFixture implements DbFixture<PaymentInstrumentFixt
     private String lastDigitsCardNumber = "4242";
     private String expiryDate = "10/21";
     private String cardBrand = "visa";
-
+    private PaymentInstrumentType type = PaymentInstrumentType.CARD;
     private Integer eventCount = 1;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
 
@@ -46,9 +47,9 @@ public class PaymentInstrumentFixture implements DbFixture<PaymentInstrumentFixt
     @Override
     public PaymentInstrumentFixture insert(Jdbi jdbi) {
         var sql = "INSERT INTO payment_instrument" +
-                "(id, external_id, agreement_external_id, email, cardholder_name, address_line1, address_line2, address_postcode, address_city, address_county, address_country, last_digits_card_number, expiry_date, card_brand, event_count, created_date) " +
+                "(id, external_id, agreement_external_id, email, cardholder_name, address_line1, address_line2, address_postcode, address_city, address_county, address_country, last_digits_card_number, expiry_date, card_brand, type, event_count, created_date) " +
                 "VALUES " +
-                "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         jdbi.withHandle(h ->
                 h.execute(
@@ -67,6 +68,7 @@ public class PaymentInstrumentFixture implements DbFixture<PaymentInstrumentFixt
                         lastDigitsCardNumber,
                         expiryDate,
                         cardBrand,
+                        type,
                         eventCount,
                         createdDate
                 )
@@ -90,6 +92,7 @@ public class PaymentInstrumentFixture implements DbFixture<PaymentInstrumentFixt
                 lastDigitsCardNumber,
                 expiryDate,
                 cardBrand,
+                type,
                 createdDate,
                 eventCount
         );
