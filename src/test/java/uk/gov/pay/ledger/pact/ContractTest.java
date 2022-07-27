@@ -366,6 +366,8 @@ public abstract class ContractTest {
         JsonObject transactionDetails = new JsonObject();
         transactionDetails.addProperty("amount", 1000L);
         transactionDetails.addProperty("gateway_account_id", gatewayAccountId);
+        transactionDetails.addProperty("reason", "other");
+        transactionDetails.addProperty("evidence_due_date", "2022-05-21T19:05:00Z");
 
         JsonObject paymentDetails = new JsonObject();
         paymentDetails.addProperty("expiry_date", "8/23");
