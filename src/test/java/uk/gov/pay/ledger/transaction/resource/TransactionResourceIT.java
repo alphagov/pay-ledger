@@ -27,6 +27,9 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
+import static uk.gov.pay.ledger.transaction.model.TransactionType.DISPUTE;
+import static uk.gov.pay.ledger.transaction.model.TransactionType.REFUND;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
@@ -270,7 +273,7 @@ public class TransactionResourceIT {
     }
 
     @Test
-    public void getTransactionsForTransactionShouldReturnTransactionsWithParentExternalId() {
+    public void getTransactionsForTransactionShouldReturnTransactionsWithParentExternalId_notFilteredByTransactionType() {
         TransactionEntity parentTransactionEntity = aTransactionFixture()
                 .withTransactionType("PAYMENT")
                 .withDefaultCardDetails()
@@ -287,12 +290,19 @@ public class TransactionResourceIT {
                 .withCardholderName(parentTransactionEntity.getCardholderName())
 
                 .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
-                .withTransactionType("REFUND")
+                .withTransactionType(REFUND.name())
                 .withState(TransactionState.SUCCESS)
                 .withAmount(1000L)
                 .withRefundedById("refund-by-user-id")
                 .withGatewayTransactionId("gateway-transaction-id")
                 .withDefaultTransactionDetails()
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        TransactionEntity disputeTransactionEntity = aTransactionFixture()
+                .withParentExternalId(parentTransactionEntity.getExternalId())
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withTransactionType(DISPUTE.name())
                 .insert(rule.getJdbi())
                 .toEntity();
 
@@ -303,6 +313,7 @@ public class TransactionResourceIT {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("parent_transaction_id", is(parentTransactionEntity.getExternalId()))
+                .body("transactions", hasSize(2))
                 .body("transactions[0].gateway_account_id", is(refundTransactionEntity.getGatewayAccountId()))
                 .body("transactions[0].amount", is(1000))
                 .body("transactions[0].state.status", is(refundTransactionEntity.getState().getStatus()))
@@ -315,7 +326,41 @@ public class TransactionResourceIT {
                 .body("transactions[0].payment_details.description", is(parentTransactionEntity.getDescription()))
                 .body("transactions[0].payment_details.reference", is(parentTransactionEntity.getReference()))
                 .body("transactions[0].payment_details.email", is(parentTransactionEntity.getEmail()))
-                .body("transactions[0].payment_details.card_details.cardholder_name", is(parentTransactionEntity.getCardholderName()));
+                .body("transactions[0].payment_details.card_details.cardholder_name", is(parentTransactionEntity.getCardholderName()))
+                .body("transactions[1].transaction_id", is(disputeTransactionEntity.getExternalId()));
+    }
+
+    @Test
+    public void getTransactionsForTransactionShouldReturnTransactionsWithParentExternalId_filteredByTransactionType() {
+        TransactionEntity parentTransactionEntity = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        TransactionEntity refundTransactionEntity = aTransactionFixture()
+                .withParentExternalId(parentTransactionEntity.getExternalId())
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withTransactionType(REFUND.name())
+                .insert(rule.getJdbi())
+                .toEntity();
+        aTransactionFixture()
+                .withParentExternalId(parentTransactionEntity.getExternalId())
+                .withGatewayAccountId(parentTransactionEntity.getGatewayAccountId())
+                .withTransactionType(DISPUTE.name())
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + parentTransactionEntity.getExternalId() + "/transaction?gateway_account_id=" + parentTransactionEntity.getGatewayAccountId() + "&transaction_type=REFUND")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("parent_transaction_id", is(parentTransactionEntity.getExternalId()))
+                .body("transactions", hasSize(1))
+                .body("transactions[0].transaction_id", is(refundTransactionEntity.getExternalId()));
     }
 
     @Test

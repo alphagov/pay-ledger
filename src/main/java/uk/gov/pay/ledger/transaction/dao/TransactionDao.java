@@ -56,7 +56,8 @@ public class TransactionDao {
             "t.gateway_payout_id = po.gateway_payout_id " +
             ":payoutJoinOnGatewayIdField " +
             "WHERE t.parent_external_id = :parentExternalId " +
-            "AND t.gateway_account_id = :gatewayAccountId";
+            "AND t.gateway_account_id = :gatewayAccountId " +
+            "AND (:transactionType::transaction_type is NULL OR type = :transactionType::transaction_type)";
 
     private static final String FIND_TRANSACTIONS_BY_PARENT_EXT_ID =
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
@@ -264,7 +265,7 @@ public class TransactionDao {
         );
     }
 
-    public List<TransactionEntity> findTransactionByParentIdAndGatewayAccountId(String parentExternalId, String gatewayAccountId) {
+    public List<TransactionEntity> findTransactionsByParentIdAndGatewayAccountId(String parentExternalId, String gatewayAccountId, TransactionType transactionType) {
         String query = FIND_TRANSACTIONS_BY_PARENT_EXT_ID_AND_GATEWAY_ACCOUNT_ID
                 .replace(":payoutJoinOnGatewayIdField",
                         isNotBlank(gatewayAccountId)
@@ -273,6 +274,7 @@ public class TransactionDao {
                 handle.createQuery(query)
                         .bind("parentExternalId", parentExternalId)
                         .bind("gatewayAccountId", gatewayAccountId)
+                        .bind("transactionType", transactionType)
                         .map(new TransactionMapper())
                         .stream().collect(Collectors.toList())
         );

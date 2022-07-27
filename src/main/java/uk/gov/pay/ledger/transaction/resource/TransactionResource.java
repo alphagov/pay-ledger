@@ -247,12 +247,14 @@ public class TransactionResource {
             @Parameter(example = "d0sk01d9amdk3ks0dk2dj03kd", description = "Parent transaction external ID", required = true)
             @PathParam("parentTransactionExternalId") String parentTransactionExternalId,
             @Parameter(example = "1", description = "Gateway account ID")
-            @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId
+            @QueryParam("gateway_account_id") @NotEmpty String gatewayAccountId,
+            @Parameter(example = "REFUND", description = "The type of transactions to return")
+            @QueryParam("transaction_type") TransactionType transactionType
     ) {
         LOGGER.info("Get transactions for parent transaction: [{}], gateway_account_id [{}]",
                 parentTransactionExternalId, gatewayAccountId);
 
-        return transactionService.getTransactions(parentTransactionExternalId, gatewayAccountId);
+        return transactionService.getTransactions(parentTransactionExternalId, gatewayAccountId, transactionType);
     }
 
     @Path("/gateway-transaction/{gatewayTransactionId}")
