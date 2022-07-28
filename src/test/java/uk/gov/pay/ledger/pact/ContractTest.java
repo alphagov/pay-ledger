@@ -423,9 +423,9 @@ public abstract class ContractTest {
 
     @State("a dispute lost transaction exists")
     public void createADisputeTransaction(Map<String, String> params) {
-        String transactionId = params.get("transaction_external_id");
-        String gatewayAccountId = params.get("gateway_account_id");
-        String parentTransactionExternalId = params.get("parent_external_id");
+        String transactionId = params.getOrDefault("transaction_external_id", "vldb123def456");
+        String gatewayAccountId = params.getOrDefault("gateway_account_id", "123456");
+        String parentTransactionExternalId = params.getOrDefault("parent_external_id", "adb123def456");
 
         String gatewayPayoutId = randomAlphanumeric(15);
 
@@ -447,18 +447,19 @@ public abstract class ContractTest {
                 .build()
                 .insert(app.getJdbi());
 
-        String transactionDetails = new GsonBuilder().create().toJson(ImmutableMap.builder()
-                .put("amount", 1000L)
-                .put("payment_details", ImmutableMap.builder()
-                        .put("card_type", "CREDIT")
-                        .put("expiry_date", "11/23")
-                        .put("card_brand_label", "Visa"))
-                .put("gateway_account_id", gatewayAccountId)
-                .put("reason", "fraudulent")
-                .put("evidence_due_date", "2022-05-27T19:05:00Z")
-                .build());
+        JsonObject transactionDetails = new JsonObject();
+        transactionDetails.addProperty("amount", 1000L);
+        transactionDetails.addProperty("gateway_account_id", gatewayAccountId);
+        transactionDetails.addProperty("reason", "fraudulent");
+        transactionDetails.addProperty("evidence_due_date", "2022-05-27T19:05:00Z");
 
-        createDisputeTransaction(transactionId, gatewayAccountId, parentTransactionExternalId, transactionDetails,
+        JsonObject paymentDetails = new JsonObject();
+        paymentDetails.addProperty("expiry_date", "8/23");
+        paymentDetails.addProperty("card_brand_label", "Visa");
+        paymentDetails.addProperty("card_type", "CREDIT");
+        transactionDetails.add("payment_details", paymentDetails);
+
+        createDisputeTransaction(transactionId, gatewayAccountId, parentTransactionExternalId, transactionDetails.toString(),
                 TransactionState.LOST, gatewayPayoutId, 1000L, -2500L, 1500L);
     }
 
