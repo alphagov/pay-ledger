@@ -55,6 +55,38 @@ class AgreementResourceTest {
     }
 
     @Test
+    public void searchShouldReturn200_WithUpperAndLowercaseStatus() {
+        when(agreementService.searchAgreements(any(), any())).thenReturn(new AgreementSearchResponse(0L, 0L, 0L, List.of()));
+        var lowerResponse = resources
+                .target("/v1/agreement")
+                .queryParam("service_id", "a-valid-service-id")
+                .queryParam("status", "created")
+                .request()
+                .get();
+        var upperResponse= resources
+                .target("/v1/agreement")
+                .queryParam("service_id", "a-valid-service-id")
+                .queryParam("status", "CREATED")
+                .request()
+                .get();
+
+        assertThat(lowerResponse.getStatus(), is(200));
+        assertThat(upperResponse.getStatus(), is(200));
+    }
+
+    @Test
+    public void searchShouldReturn400_WithInvalidStatusParam() {
+        Response response = resources
+                .target("/v1/agreement")
+                .queryParam("service_id", "a-valid-service-id")
+                .queryParam("status", "NOT_A_STATUS")
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(400));
+    }
+
+    @Test
     public void findShouldReturn404_IfMissing() {
         Response response = resources
                 .target("/v1/agreement/missing-agreement-id")

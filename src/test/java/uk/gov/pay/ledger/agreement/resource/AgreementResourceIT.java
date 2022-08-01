@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.agreement.resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.model.CardType;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
@@ -110,8 +112,9 @@ public class AgreementResourceIT {
                 .body("results.size()", is((int)(numberOfAgreements - DEFAULT_DISPLAY_SIZE)));
     }
 
-    @Test
-    public void shouldSearchWithFilterParams() {
+    @ParameterizedTest
+    @ValueSource(strings = { "created", "CREATED" })
+    public void shouldSearchWithFilterParams(String searchStatus) {
         AgreementFixture.anAgreementFixture("a-one-agreement-id", "a-one-service-id", AgreementStatus.CREATED, "partial-ref-1").insert(rule.getJdbi());
         AgreementFixture.anAgreementFixture("a-two-agreement-id", "a-one-service-id", AgreementStatus.CREATED, "notmatchingref").insert(rule.getJdbi());
         AgreementFixture.anAgreementFixture("a-three-agreement-id", "a-one-service-id", AgreementStatus.ACTIVE, "anotherref").insert(rule.getJdbi());
@@ -120,7 +123,7 @@ public class AgreementResourceIT {
         given().port(port)
                 .contentType(JSON)
                 .queryParam("service_id", "a-one-service-id")
-                .queryParam("status", "CREATED")
+                .queryParam("status", searchStatus)
                 .queryParam("reference", "partial-ref")
                 .get("/v1/agreement")
                 .then()

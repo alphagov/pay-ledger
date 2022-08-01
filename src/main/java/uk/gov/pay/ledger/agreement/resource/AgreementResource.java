@@ -7,7 +7,6 @@ import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
