@@ -20,7 +20,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class AgreementSearchParams extends SearchParams {
 
     private static final String SERVICE_ID_FIELD = "service_id";
-    private static final String GATEWAY_ACCOUNT_ID_FIELD = "gateway_account_id";
+    private static final String GATEWAY_ACCOUNT_ID_FIELD = "account_id";
     private static final String LIVE_FIELD = "live";
     private static final String STATUS_FIELD = "status";
     private static final String REFERENCE_FIELD = "reference";
@@ -35,7 +35,7 @@ public class AgreementSearchParams extends SearchParams {
     private List<String> serviceIds;
     @QueryParam("live")
     private Boolean live;
-    @QueryParam("gateway_account_id")
+    @QueryParam("account_id")
     private List<String> gatewayAccountIds;
     @QueryParam("status")
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
