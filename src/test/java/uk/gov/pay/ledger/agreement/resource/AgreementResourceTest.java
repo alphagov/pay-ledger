@@ -10,7 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
-import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
@@ -19,10 +18,11 @@ import uk.gov.pay.ledger.exception.JerseyViolationExceptionMapper;
 
 import javax.ws.rs.core.Response;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -193,10 +193,8 @@ class AgreementResourceTest {
     }
 
     private EventDigest stubEventDigest(String agreementId, Integer eventCount) {
-        List<Event> events = new ArrayList<>();
-        for (int i = 0; i < eventCount; i++) {
-            events.add(anEventFixture().withResourceExternalId(agreementId).toEntity());
-        }
-        return EventDigest.fromEventList(events);
+        return EventDigest.fromEventList(IntStream.range(0, eventCount)
+                .mapToObj(i -> anEventFixture().withResourceExternalId(agreementId).toEntity())
+                .collect(Collectors.toUnmodifiableList()));
     }
 }

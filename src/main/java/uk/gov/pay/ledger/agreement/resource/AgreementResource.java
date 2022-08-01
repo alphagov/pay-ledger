@@ -2,9 +2,11 @@ package uk.gov.pay.ledger.agreement.resource;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
+import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
+import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.exception.EmptyEventsException;
 
@@ -45,27 +47,24 @@ public class AgreementResource {
         return agreementService.searchAgreements(searchParams, uriInfo);
     }
 
+    private boolean databaseProjectionSnapshotIsUpToDateWithEventStream(AgreementEntity agreementEntity, EventDigest eventDigest) {
+        return eventDigest.getEventCount() <= agreementEntity.getEventCount();
+    }
+
     @Path("/{agreementExternalId}")
     @GET
     @Timed
     public Agreement get(@PathParam("agreementExternalId") String agreementExternalId,
                          @HeaderParam(HEADER_PARAM_X_CONSISTENT) Boolean isConsistent,
                          @Context UriInfo uriInfo) {
-        if (isConsistent != null && isConsistent) {
+        if (Boolean.TRUE.equals(isConsistent)) {
             try {
                 var eventDigest = eventService.getEventDigestForResource(agreementExternalId);
 
-                // compare the current event stream to the existing projection snapshot
-                return agreementService.findAgreementEntity(agreementExternalId)
-                        .map(agreementEntity -> {
-                            if (agreementEntity.getEventCount() < eventDigest.getEventCount()) {
-                                // the projection from the database is behind, rebuild a projection using the latest events
-                                return Agreement.from(agreementService.projectAgreement(eventDigest));
-                            } else {
-                                return Agreement.from(agreementEntity);
-                            }
-                        })
-                        .orElseGet(() -> Agreement.from(agreementService.projectAgreement(eventDigest)));
+                var agreementEntity = agreementService.findAgreementEntity(agreementExternalId)
+                        .filter(projectedAgreementEntity -> databaseProjectionSnapshotIsUpToDateWithEventStream(projectedAgreementEntity, eventDigest))
+                        .orElseGet(() -> agreementService.projectAgreement(eventDigest));
+                return Agreement.from(agreementEntity);
             } catch (EmptyEventsException e) {
                 throw new WebApplicationException(Response.Status.NOT_FOUND);
             }

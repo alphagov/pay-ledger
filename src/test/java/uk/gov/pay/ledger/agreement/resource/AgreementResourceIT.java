@@ -138,7 +138,7 @@ public class AgreementResourceIT {
 
     @Test
     public void shouldGetConsistentAgreement_GetExistingProjectionWhenUpToDate() {
-        var agreementFixture = AgreementFixture.anAgreementFixture("agreement-id", "service-id", "CREATED", "projected-agreement-reference");
+        var agreementFixture = AgreementFixture.anAgreementFixture("agreement-id", "service-id", AgreementStatus.CREATED, "projected-agreement-reference");
         agreementFixture.setEventCount(1);
         agreementFixture.insert(rule.getJdbi());
 
@@ -167,7 +167,7 @@ public class AgreementResourceIT {
 
     @Test
     public void shouldGetConsistentAgreement_GetEventStreamCalculatedWhenProjectionCountBehind() {
-        var agreementFixture = AgreementFixture.anAgreementFixture("agreement-id", "service-id", "CREATED", "projected-agreement-reference");
+        var agreementFixture = AgreementFixture.anAgreementFixture("agreement-id", "service-id", AgreementStatus.CREATED, "projected-agreement-reference");
         agreementFixture.setEventCount(1);
         agreementFixture.insert(rule.getJdbi());
 
