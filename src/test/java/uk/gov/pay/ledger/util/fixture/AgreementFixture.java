@@ -110,6 +110,10 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
         this.reference = reference;
     }
 
+    public void setEventCount(Integer eventCount) {
+        this.eventCount = eventCount;
+    }
+
     public String getDescription() {
         return description;
     }

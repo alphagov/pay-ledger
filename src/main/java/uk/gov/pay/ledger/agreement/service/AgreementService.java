@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.agreement.service;
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.agreement.dao.AgreementDao;
 import uk.gov.pay.ledger.agreement.dao.PaymentInstrumentDao;
+import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.entity.AgreementsFactory;
 import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
@@ -33,9 +34,16 @@ public class AgreementService {
                 .map(Agreement::from);
     }
 
+    public Optional<AgreementEntity> findAgreementEntity(String externalId) {
+        return agreementDao.findByExternalId(externalId);
+    }
+
+    public AgreementEntity projectAgreement(EventDigest eventDigest) {
+        return agreementEntityFactory.create(eventDigest);
+    }
+
     public void upsertAgreementFor(EventDigest eventDigest) {
-        var entity = agreementEntityFactory.create(eventDigest);
-        agreementDao.upsert(entity);
+        agreementDao.upsert(projectAgreement(eventDigest));
     }
 
     public void upsertPaymentInstrumentFor(EventDigest eventDigest) {
