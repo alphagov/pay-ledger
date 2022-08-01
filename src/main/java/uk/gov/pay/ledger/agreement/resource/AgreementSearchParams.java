@@ -1,6 +1,8 @@
 package uk.gov.pay.ledger.agreement.resource;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import uk.gov.pay.ledger.common.search.SearchParams;
+import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
@@ -36,7 +38,8 @@ public class AgreementSearchParams extends SearchParams {
     @QueryParam("gateway_account_id")
     private List<String> gatewayAccountIds;
     @QueryParam("status")
-    private String status;
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+    private AgreementStatus status;
     @QueryParam("exact_reference_match")
     private Boolean exactReferenceMatch;
     @QueryParam("reference")
@@ -59,7 +62,7 @@ public class AgreementSearchParams extends SearchParams {
         this.gatewayAccountIds = List.copyOf(gatewayAccountIds);
     }
 
-    public void setStatus(String status) {
+    public void setStatus(AgreementStatus status) {
         this.status = status;
     }
 
@@ -87,7 +90,7 @@ public class AgreementSearchParams extends SearchParams {
             filters.add(" a.gateway_account_id IN (<" + GATEWAY_ACCOUNT_ID_FIELD + ">)");
         }
 
-        if (isNotBlank(status)) {
+        if (status != null) {
             filters.add(" a.status = :" + STATUS_FIELD);
         }
 
@@ -117,7 +120,7 @@ public class AgreementSearchParams extends SearchParams {
                 queryMap.put(GATEWAY_ACCOUNT_ID_FIELD, gatewayAccountIds);
             }
 
-            if (isNotBlank(status)) {
+            if (status != null) {
                 queryMap.put(STATUS_FIELD, status);
             }
 
@@ -144,7 +147,7 @@ public class AgreementSearchParams extends SearchParams {
         return serviceIds;
     }
 
-    public String getStatus() {
+    public AgreementStatus getStatus() {
         return status;
     }
 
@@ -184,7 +187,7 @@ public class AgreementSearchParams extends SearchParams {
             queries.add(GATEWAY_ACCOUNT_ID_FIELD + "=" + String.join(",", gatewayAccountIds));
         }
 
-        if (isNotBlank(status)) {
+        if (status != null) {
             queries.add(STATUS_FIELD + "=" + status);
         }
 
