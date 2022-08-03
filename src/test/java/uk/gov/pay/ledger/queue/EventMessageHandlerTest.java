@@ -162,36 +162,34 @@ class EventMessageHandlerTest {
 
     @Test
     void shouldPublishCardPaymentMessageWhenSnsEnabled() throws Exception {
-        var deserializedEvent = "deserialized event";
+        String messageBody = "{ \"foo\": \"bar\"}";
+
         Event event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
-        var eventDto = new EventMessageDto();
-        when(eventMessage.getEventDto()).thenReturn(eventDto);
+        when(eventMessage.getRawMessageBody()).thenReturn(messageBody);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
         when(snsConfig.isSnsEnabled()).thenReturn(true);
         when(snsConfig.isPublishCardPaymentEventsToSns()).thenReturn(true);
-        when(objectMapper.writeValueAsString(eventDto)).thenReturn(deserializedEvent);
 
         eventMessageHandler.handle();
 
-        verify(eventPublisher).publishMessageToTopic(deserializedEvent, TopicName.CARD_PAYMENT_EVENTS);
+        verify(eventPublisher).publishMessageToTopic(messageBody, TopicName.CARD_PAYMENT_EVENTS);
     }
 
     @Test
-    void shouldPublishDisputeMessageWhenSnsEnabled() throws Exception {
-        var deserializedEvent = "deserialized event";
+    void shouldPublishDisputeMessageWhenSnsEnabled() throws Exception {;
+        String messageBody = "{ \"foo\": \"bar\"}";
+
         Event event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
-        var eventDto = new EventMessageDto();
-        when(eventMessage.getEventDto()).thenReturn(eventDto);
+        when(eventMessage.getRawMessageBody()).thenReturn(messageBody);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
         when(snsConfig.isSnsEnabled()).thenReturn(true);
         when(snsConfig.isPublishCardPaymentDisputeEventsToSns()).thenReturn(true);
-        when(objectMapper.writeValueAsString(eventDto)).thenReturn(deserializedEvent);
 
         eventMessageHandler.handle();
 
-        verify(eventPublisher).publishMessageToTopic(deserializedEvent, TopicName.CARD_PAYMENT_DISPUTE_EVENTS);
+        verify(eventPublisher).publishMessageToTopic(messageBody, TopicName.CARD_PAYMENT_DISPUTE_EVENTS);
     }
 
     @Test
