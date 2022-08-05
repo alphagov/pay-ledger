@@ -22,6 +22,10 @@ public class EventMessage {
         return Optional.ofNullable(queueMessage).map(QueueMessage::getMessageId);
     }
 
+    public String getRawMessageBody() {
+        return queueMessage.getMessageBody();
+    }
+
     public Event getEvent() {
         return new Event(
                 getQueueMessageId().orElse(null),

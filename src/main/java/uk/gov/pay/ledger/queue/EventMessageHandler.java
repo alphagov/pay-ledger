@@ -35,7 +35,6 @@ public class EventMessageHandler {
     private final EventPublisher eventPublisher;
     private final MetricRegistry metricRegistry;
     private final LedgerConfig ledgerConfig;
-    private final ObjectMapper objectMapper;
     private final Jdbi jdbi;
 
     @Inject
@@ -45,7 +44,6 @@ public class EventMessageHandler {
                                EventPublisher eventPublisher,
                                MetricRegistry metricRegistry,
                                LedgerConfig ledgerConfig,
-                               ObjectMapper objectMapper,
                                Jdbi jdbi) {
         this.eventQueue = eventQueue;
         this.eventService = eventService;
@@ -53,7 +51,6 @@ public class EventMessageHandler {
         this.eventPublisher = eventPublisher;
         this.metricRegistry = metricRegistry;
         this.ledgerConfig = ledgerConfig;
-        this.objectMapper = objectMapper;
         this.jdbi = jdbi;
     }
 
@@ -103,14 +100,14 @@ public class EventMessageHandler {
                 if (message.getEvent().getResourceType() == ResourceType.DISPUTE) {
                     if (ledgerConfig.getSnsConfig().isPublishCardPaymentDisputeEventsToSns()) {
                         eventPublisher.publishMessageToTopic(
-                                objectMapper.writeValueAsString(message.getEventDto()),
+                                message.getRawMessageBody(),
                                 TopicName.CARD_PAYMENT_DISPUTE_EVENTS
                         );
                     }
                 } else {
                     if (ledgerConfig.getSnsConfig().isPublishCardPaymentEventsToSns()) {
                         eventPublisher.publishMessageToTopic(
-                                objectMapper.writeValueAsString(message.getEventDto()),
+                                message.getRawMessageBody(),
                                 TopicName.CARD_PAYMENT_EVENTS
                         );
                     }
