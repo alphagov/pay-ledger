@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.pact;
+package uk.gov.pay.ledger.pact.event;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.MessagePactProviderRule;
@@ -12,7 +12,6 @@ import uk.gov.pay.ledger.payout.dao.PayoutDao;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
-import uk.gov.pay.ledger.util.fixture.PayoutFixture;
 import uk.gov.pay.ledger.util.fixture.QueuePayoutEventFixture;
 
 import java.time.ZonedDateTime;
@@ -26,11 +25,9 @@ import static java.time.ZonedDateTime.parse;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static uk.gov.pay.ledger.payout.state.PayoutState.PAID_OUT;
-import static uk.gov.pay.ledger.payout.state.PayoutState.UNDEFINED;
-import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
+import static uk.gov.pay.ledger.payout.state.PayoutState.FAILED;
 
-public class PayoutPaidEventQueueContractTest {
+public class PayoutFailedEventQueueContractTest {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -40,12 +37,12 @@ public class PayoutPaidEventQueueContractTest {
     );
 
     private byte[] currentMessage;
-    private String gatewayPayoutId = "po_paid_1234567890";
+    private String gatewayPayoutId = "po_failed_1234567890";
     private ZonedDateTime eventDate = parse("2020-05-13T18:50:00Z");
-    private String eventType = "PAYOUT_PAID";
+    private String eventType = "PAYOUT_FAILED";
 
     @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createPayoutPaidEventPact(MessagePactBuilder builder) {
+    public MessagePact createPayoutFailedEventPact(MessagePactBuilder builder) {
         QueuePayoutEventFixture payoutEventFixture = QueuePayoutEventFixture.aQueuePayoutEventFixture()
                 .withResourceExternalId(gatewayPayoutId)
                 .withEventDate(eventDate)
@@ -56,7 +53,7 @@ public class PayoutPaidEventQueueContractTest {
         metadata.put("contentType", "application/json");
 
         return builder
-                .expectsToReceive("a payout paid message")
+                .expectsToReceive("a payout failed message")
                 .withMetadata(metadata)
                 .withContent(payoutEventFixture.getAsPact())
                 .toPact();
@@ -75,11 +72,13 @@ public class PayoutPaidEventQueueContractTest {
         Optional<PayoutEntity> payoutEntity = payoutDao.findByGatewayPayoutId(gatewayPayoutId);
         assertThat(payoutEntity.isPresent(), is(true));
         assertThat(payoutEntity.get().getGatewayPayoutId(), is(gatewayPayoutId));
-        assertThat(payoutEntity.get().getPaidOutDate().toString(), is("2020-05-13T18:50Z"));
-        assertThat(payoutEntity.get().getState(), is(PAID_OUT));
+        assertThat(payoutEntity.get().getState(), is(FAILED));
 
         Map<String, Object> payoutDetails = new Gson().fromJson(payoutEntity.get().getPayoutDetails(), Map.class);
-        assertThat(payoutDetails.get("gateway_status"), is("paid"));
+        assertThat(payoutDetails.get("gateway_status"), is("failed"));
+        assertThat(payoutDetails.get("failure_code"), is("account_closed"));
+        assertThat(payoutDetails.get("failure_message"), is("The bank account has been closed"));
+        assertThat(payoutDetails.get("failure_balance_transaction"), is("ba_aaaaaaaaaa"));
     }
 
     public void setMessage(byte[] messageContents) {

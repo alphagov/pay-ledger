@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.pact;
+package uk.gov.pay.ledger.pact.event;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.MessagePactProviderRule;
@@ -8,12 +8,12 @@ import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
@@ -35,7 +35,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.event.model.ResourceType.DISPUTE;
 
-public class DisputeEvidenceSubmittedEventQueueContractTest {
+public class DisputeLostEventQueueContractTest {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -44,9 +44,13 @@ public class DisputeEvidenceSubmittedEventQueueContractTest {
             config("queueMessageReceiverConfig.backgroundProcessingEnabled", "true")
     );
 
-    private GsonBuilder gsonBuilder = new GsonBuilder();
     private byte[] currentMessage;
     private String paymentExternalId = "payment-external-id";
+    private final long fee = 1500L;
+    private final long amount = 6500L;
+    // there is a bug in pact assert where a negative number is not recognised as an integer.
+    // add net_amount to pact check once a fix is released
+    private final long netAmount = -8000L;
     private final String gatewayAccountId = "a-gateway-account-id";
     private final String resourceExternalId = paymentExternalId;
     private final String parentsResourceExternalId = "external-id";
@@ -56,26 +60,22 @@ public class DisputeEvidenceSubmittedEventQueueContractTest {
     private QueueDisputeEventFixture eventFixture;
 
     @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createDisputeWonEventPact(MessagePactBuilder builder) {
-        String eventData = gsonBuilder.create()
-                .toJson(Map.of(
-                        "gateway_account_id", gatewayAccountId
-                ));
+    public MessagePact createDisputeLostEventPact(MessagePactBuilder builder) {
         eventFixture = QueueDisputeEventFixture.aQueueDisputeEventFixture()
                 .withLive(true)
                 .withResourceExternalId(paymentExternalId)
                 .withParentResourceExternalId(parentsResourceExternalId)
                 .withEventDate(disputeCreated)
                 .withServiceId(serviceId)
-                .withEventData(eventData)
-                .withEventType("DISPUTE_EVIDENCE_SUBMITTED")
+                .withDefaultEventDataForEventType(SalientEventType.DISPUTE_LOST.name())
+                .withEventType("DISPUTE_LOST")
                 .withServiceId(serviceId);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         return builder
-                .expectsToReceive("a dispute evidence submitted event")
+                .expectsToReceive("a dispute lost event")
                 .withMetadata(metadata)
                 .withContent(eventFixture.getAsPact())
                 .toPact();
@@ -98,13 +98,15 @@ public class DisputeEvidenceSubmittedEventQueueContractTest {
         List<Event> events = eventDao.findEventsForExternalIds(Set.of(resourceExternalId));
         assertThat(events.isEmpty(), is(false));
         Event event = events.get(0);
-        assertThat(event.getEventType(), is("DISPUTE_EVIDENCE_SUBMITTED"));
+        assertThat(event.getEventType(), is("DISPUTE_LOST"));
         assertThat(event.getEventDate(), is(disputeCreated));
         assertThat(event.getResourceType(), is(DISPUTE));
         assertThat(event.getResourceExternalId(), is(resourceExternalId));
         assertThat(event.getParentResourceExternalId(), is(parentsResourceExternalId));
 
         JsonNode eventData = new ObjectMapper().readTree(event.getEventData());
+        assertThat(eventData.get("amount").asLong(), is(amount));
+        assertThat(eventData.get("fee").asLong(), is(fee));
         assertThat(eventData.get("gateway_account_id").asText(), is(gatewayAccountId));
     }
 
