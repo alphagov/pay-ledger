@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.pact;
+package uk.gov.pay.ledger.pact.event;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.MessagePactProviderRule;
