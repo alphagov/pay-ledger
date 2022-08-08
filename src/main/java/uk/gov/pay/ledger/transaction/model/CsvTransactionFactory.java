@@ -99,7 +99,15 @@ public class CsvTransactionFactory {
 
                 result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getExternalId());
                 result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount()));
-                result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalOrAmount));
+
+                if (transactionEntity.getState() == TransactionState.SUCCESS) {
+                    result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalOrAmount));
+                } else if (transactionEntity.getState().isFinished()) {
+                    result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(0L));
+                } else {
+                    result.put(FIELD_TOTAL_AMOUNT, "");
+                }
+
                 result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
                 if (transactionEntity.getState() == TransactionState.SUCCESS) {
                     result.put(FIELD_NET, penceToCurrency(netOrTotalOrAmount));

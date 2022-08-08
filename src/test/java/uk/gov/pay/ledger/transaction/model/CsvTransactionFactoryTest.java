@@ -68,7 +68,7 @@ class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
         assertThat(csvDataMap.get("Time Created"), is("16:25:01"));
         assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.23"));
-        assertThat(csvDataMap.get("Total Amount"), is("1.23"));
+        assertThat(csvDataMap.get("Total Amount"), is("0.00"));
         assertThat(csvDataMap.get("MOTO"), is(true));
         assertThat(csvDataMap.get("Payment Provider"), is("sandbox"));
         assertThat(csvDataMap.get("3-D Secure Required"), is(nullValue()));
@@ -143,6 +143,42 @@ class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Card Brand"), is("Visa"));
         assertThat(csvDataMap.get("Cardholder Name"), is("J Doe"));
         assertThat(csvDataMap.get("Card Expiry Date"), is("10/21"));
+    }
+
+    @Test
+    void toMapShouldUseAmountForTotalAmountForSuccessfulPayment() {
+        TransactionEntity transactionEntity = transactionFixture
+                .withState(TransactionState.SUCCESS)
+                .withAmount(1500L)
+                .toEntity();
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Total Amount"), is("15.00"));
+    }
+
+    @Test
+    void toMapShouldUseZeroForTotalAmountForFailedPayment() {
+        TransactionEntity transactionEntity = transactionFixture
+                .withState(TransactionState.FAILED_REJECTED)
+                .withAmount(1500L)
+                .toEntity();
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Total Amount"), is("0.00"));
+    }
+
+    @Test
+    void toMapShouldLeaveTotalAmountBlankForInProgressPayment() {
+        TransactionEntity transactionEntity = transactionFixture
+                .withState(TransactionState.STARTED)
+                .withAmount(1500L)
+                .toEntity();
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Total Amount"), is(""));
     }
 
     @Test
@@ -361,7 +397,7 @@ class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
         assertThat(csvDataMap.get("Time Created"), is("16:25:01"));
         assertThat(csvDataMap.get("Corporate Card Surcharge"), is("0.23"));
-        assertThat(csvDataMap.get("Total Amount"), is("1.23"));
+        assertThat(csvDataMap.get("Total Amount"), is("0.00"));
         assertThat(csvDataMap.get("MOTO"), is(true));
         assertThat(csvDataMap.get("Payment Provider"), is("sandbox"));
         assertThat(csvDataMap.get("3-D Secure Required"), is(true));

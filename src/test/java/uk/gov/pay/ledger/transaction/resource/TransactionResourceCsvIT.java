@@ -134,7 +134,7 @@ public class TransactionResourceCsvIT {
         assertThat(paymentRecord.get("Date Created"), is("12 Mar 2018"));
         assertThat(paymentRecord.get("Time Created"), is("16:25:01"));
         assertThat(paymentRecord.get("Corporate Card Surcharge"), is("0.05"));
-        assertThat(paymentRecord.get("Total Amount"), is("1.23"));
+        assertThat(paymentRecord.get("Total Amount"), is("0.00"));
         assertThat(paymentRecord.get("test-key-1 (metadata)"), is("value1"));
         assertThat(paymentRecord.get("Wallet Type"), is("Apple Pay"));
         assertThat(paymentRecord.isMapped("Net"), is(false));
