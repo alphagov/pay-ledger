@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.pact;
+package uk.gov.pay.ledger.pact.event;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.MessagePactProviderRule;
@@ -28,8 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
-public class GatewayRequires3dsAuthorisationEventQueueContractTest {
-
+public class PaymentDetailsEnteredEventQueueContractTest {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -39,26 +38,27 @@ public class GatewayRequires3dsAuthorisationEventQueueContractTest {
     );
 
     private byte[] currentMessage;
-    private String externalId = "requires_3ds_externalId";
-    private ZonedDateTime eventDate = ZonedDateTime.parse("2021-09-09T13:40:01.123456Z");
+    private String externalId = "paymentDetails_externalId";
+    private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
 
     @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createGatewayRequires3dsAuthorisationEventPact(MessagePactBuilder builder) {
-        String gatewayRequires3dsAuthorisationEvent = "GATEWAY_REQUIRES_3DS_AUTHORISATION";
-        QueuePaymentEventFixture gatewayRequires3dsAuthorisation = aQueuePaymentEventFixture()
+    public MessagePact createPaymentDetailsEnteredEventPact(MessagePactBuilder builder) {
+        String paymentDetailsEnteredEventName = "PAYMENT_DETAILS_ENTERED";
+        QueuePaymentEventFixture paymentDetailsEntered = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
-                .withEventType(gatewayRequires3dsAuthorisationEvent)
-                .withDefaultEventDataForEventType(gatewayRequires3dsAuthorisationEvent)
+                .withEventType(paymentDetailsEnteredEventName)
+                .withGatewayAccountId("I0YI1")
+                .withDefaultEventDataForEventType(paymentDetailsEnteredEventName)
                 .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         return builder
-                .expectsToReceive("a gateway requires 3DS authorisation message")
+                .expectsToReceive("a payment details entered message")
                 .withMetadata(metadata)
-                .withContent(gatewayRequires3dsAuthorisation.getAsPact())
+                .withContent(paymentDetailsEntered.getAsPact())
                 .toPact();
     }
 
@@ -66,19 +66,41 @@ public class GatewayRequires3dsAuthorisationEventQueueContractTest {
     @PactVerification({"connector"})
     public void test() {
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
+        setupTransaction(transactionDao);
 
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
 
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
-                        && transactionDao.findTransactionByExternalId(externalId).get().getTransactionDetails().contains("\"requires_3ds\""));
+                        && transactionDao.findTransactionByExternalId(externalId).get().getCardholderName() != null
+        );
 
         Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
 
         assertThat(transaction.isPresent(), is(true));
         assertThat(transaction.get().getExternalId(), is(externalId));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"version_3ds\": \"1.2.1\""));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"requires_3ds\": true"));
+        assertThat(transaction.get().getCardBrand(), is("visa"));
+        assertThat(transaction.get().getFirstDigitsCardNumber(), is("424242"));
+        assertThat(transaction.get().getLastDigitsCardNumber(), is("4242"));
+        assertThat(transaction.get().getCardholderName(), is("J citizen"));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"corporate_surcharge\": 5"));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"11/21\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_line1\": \"12 Rouge Avenue\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_postcode\": \"N1 3QU\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_city\": \"London\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_country\": \"GB\""));
+        assertThat(transaction.get().getTotalAmount(), is(1005L));
+    }
+
+    private void setupTransaction(TransactionDao transactionDao) {
+        aQueuePaymentEventFixture()
+                .withEventType("PAYMENT_CREATED")
+                .withResourceExternalId(externalId)
+                .withEventDate(eventDate.minusHours(1))
+                .insert(appRule.getSqsClient());
+        await().atMost(1, TimeUnit.SECONDS).until(
+                () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
+        );
     }
 
     public void setMessage(byte[] messageContents) {
