@@ -21,13 +21,12 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static io.dropwizard.testing.ConfigOverride.config;
-import static java.time.ZonedDateTime.parse;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static uk.gov.pay.ledger.payout.state.PayoutState.FAILED;
+import static uk.gov.pay.ledger.payout.state.PayoutState.IN_TRANSIT;
 
-public class PayoutFailedEventQueueContractTest {
+public class PayoutCreatedEventQueueConsumerIT {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -37,23 +36,21 @@ public class PayoutFailedEventQueueContractTest {
     );
 
     private byte[] currentMessage;
-    private String gatewayPayoutId = "po_failed_1234567890";
-    private ZonedDateTime eventDate = parse("2020-05-13T18:50:00Z");
-    private String eventType = "PAYOUT_FAILED";
+    private String gatewayPayoutId = "po_1234567890";
+    private ZonedDateTime eventDate = ZonedDateTime.parse("2020-05-13T18:45:00.000000Z");
 
     @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createPayoutFailedEventPact(MessagePactBuilder builder) {
+    public MessagePact createPayoutCreatedEventPact(MessagePactBuilder builder) {
         QueuePayoutEventFixture payoutEventFixture = QueuePayoutEventFixture.aQueuePayoutEventFixture()
-                .withResourceExternalId(gatewayPayoutId)
+                .withResourceExternalId("po_1234567890")
                 .withEventDate(eventDate)
-                .withEventType(eventType)
-                .withDefaultEventDataForEventType(eventType);
+                .withDefaultEventDataForEventType("PAYOUT_CREATED");
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         return builder
-                .expectsToReceive("a payout failed message")
+                .expectsToReceive("a payout created message")
                 .withMetadata(metadata)
                 .withContent(payoutEventFixture.getAsPact())
                 .toPact();
@@ -63,6 +60,7 @@ public class PayoutFailedEventQueueContractTest {
     @PactVerification({"connector"})
     public void test() {
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
+
         PayoutDao payoutDao = new PayoutDao(appRule.getJdbi());
 
         await().atMost(1, TimeUnit.SECONDS).until(
@@ -71,14 +69,18 @@ public class PayoutFailedEventQueueContractTest {
 
         Optional<PayoutEntity> payoutEntity = payoutDao.findByGatewayPayoutId(gatewayPayoutId);
         assertThat(payoutEntity.isPresent(), is(true));
+        assertThat(payoutEntity.get().getCreatedDate().toString(), is("2020-05-13T18:45Z"));
         assertThat(payoutEntity.get().getGatewayPayoutId(), is(gatewayPayoutId));
-        assertThat(payoutEntity.get().getState(), is(FAILED));
+        assertThat(payoutEntity.get().getGatewayAccountId(), is("123456789"));
+        assertThat(payoutEntity.get().getAmount(), is(1000L));
+        assertThat(payoutEntity.get().getState(), is(IN_TRANSIT));
 
         Map<String, Object> payoutDetails = new Gson().fromJson(payoutEntity.get().getPayoutDetails(), Map.class);
-        assertThat(payoutDetails.get("gateway_status"), is("failed"));
-        assertThat(payoutDetails.get("failure_code"), is("account_closed"));
-        assertThat(payoutDetails.get("failure_message"), is("The bank account has been closed"));
-        assertThat(payoutDetails.get("failure_balance_transaction"), is("ba_aaaaaaaaaa"));
+
+        assertThat(payoutDetails.get("estimated_arrival_date_in_bank"), is("2020-05-13T18:45:33.000000Z"));
+        assertThat(payoutDetails.get("gateway_status"), is("pending"));
+        assertThat(payoutDetails.get("destination_type"), is("bank_account"));
+        assertThat(payoutDetails.get("statement_descriptor"), is("SERVICE NAME"));
     }
 
     public void setMessage(byte[] messageContents) {

@@ -5,7 +5,6 @@ import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
-import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,9 +30,7 @@ import static org.mockito.Mockito.mock;
 import static uk.gov.pay.ledger.util.fixture.QueueRefundEventFixture.aQueueRefundEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
-public class RefundCreatedByUserEventQueueContractTest {
-    Gson gson = new Gson();
-
+public class RefundSubmittedEventQueueConsumerIT {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -43,37 +40,33 @@ public class RefundCreatedByUserEventQueueContractTest {
     );
 
     private byte[] currentMessage;
-
     private QueueRefundEventFixture refundFixture = aQueueRefundEventFixture()
             .withResourceType(ResourceType.REFUND)
-            .withEventType("REFUND_CREATED_BY_USER")
-            .withRefundedBy("a_user_id")
-            .withUserEmail("test@example.com")
-            .withDefaultEventDataForEventType("REFUND_CREATED_BY_USER");
+            .withEventType("REFUND_SUBMITTED")
+            .withDefaultEventDataForEventType("REFUND_SUBMITTED");
+
+    @Pact(provider = "connector", consumer = "ledger")
+    public MessagePact createRefundSubmittedEventPact(MessagePactBuilder builder) {
+        Map<String, String> metadata = new HashMap();
+        metadata.put("contentType", "application/json");
+
+        return builder
+                .expectsToReceive("a refund submitted message")
+                .withMetadata(metadata)
+                .withContent(refundFixture.getAsPact())
+                .toPact();
+    }
 
     @Before
     public void setUp() {
         DatabaseTestHelper.aDatabaseTestHelper(appRule.getJdbi()).truncateAllData();
     }
 
-    @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createRefundCreatedByUserEventPact(MessagePactBuilder builder) {
-        Map<String, String> metadata = new HashMap<>();
-        metadata.put("contentType", "application/json");
-
-        return builder
-                .expectsToReceive("a refund created by user message")
-                .withMetadata(metadata)
-                .withContent(refundFixture.getAsPact())
-                .toPact();
-    }
-
     @Test
     @PactVerification({"connector"})
     public void test() {
-        aTransactionFixture()  // adds parent payment transaction for refund to be inserted
+        aTransactionFixture()
                 .withExternalId(refundFixture.getParentResourceExternalId())
-                .withTransactionType("PAYMENT")
                 .insert(appRule.getJdbi());
 
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
@@ -86,13 +79,9 @@ public class RefundCreatedByUserEventQueueContractTest {
         Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(refundFixture.getResourceExternalId());
 
         assertThat(transaction.get().getExternalId(), is(refundFixture.getResourceExternalId()));
-        assertThat(transaction.get().getParentExternalId(), is(refundFixture.getParentResourceExternalId()));
-        assertThat(transaction.get().getAmount(), is(refundFixture.getAmount()));
+        assertThat(transaction.get().getParentExternalId(),is(refundFixture.getParentResourceExternalId()));
         assertThat(transaction.get().getCreatedDate(),is(refundFixture.getEventDate()));
-
-        Map<String, String> transactionDetails = gson.fromJson(transaction.get().getTransactionDetails(), Map.class);
-        assertThat(transactionDetails.get("refunded_by"), is(refundFixture.getRefundedBy()));
-        assertThat(transactionDetails.get("user_email"), is(refundFixture.getUserEmail()));
+        assertThat(transaction.get().getTransactionDetails(), is("{}"));
     }
 
     public void setMessage(byte[] messageContents) {

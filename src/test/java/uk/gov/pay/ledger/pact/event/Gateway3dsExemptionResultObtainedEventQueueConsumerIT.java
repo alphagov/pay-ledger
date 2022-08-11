@@ -28,8 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
-public class GatewayRequires3dsAuthorisationEventQueueContractTest {
-
+public class Gateway3dsExemptionResultObtainedEventQueueConsumerIT {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -39,26 +38,26 @@ public class GatewayRequires3dsAuthorisationEventQueueContractTest {
     );
 
     private byte[] currentMessage;
-    private String externalId = "requires_3ds_externalId";
-    private ZonedDateTime eventDate = ZonedDateTime.parse("2021-09-09T13:40:01.123456Z");
+    private String externalId = "exemptionResult_externalId";
+    private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
 
     @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createGatewayRequires3dsAuthorisationEventPact(MessagePactBuilder builder) {
-        String gatewayRequires3dsAuthorisationEvent = "GATEWAY_REQUIRES_3DS_AUTHORISATION";
-        QueuePaymentEventFixture gatewayRequires3dsAuthorisation = aQueuePaymentEventFixture()
+    public MessagePact createGateway3dsExemptionResultObtainedEventPact(MessagePactBuilder builder) {
+        String gateway3dsExemptionResultObtainedEvent = "GATEWAY_3DS_EXEMPTION_RESULT_OBTAINED";
+        QueuePaymentEventFixture gateway3dsExemptionResultObtained = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
-                .withEventType(gatewayRequires3dsAuthorisationEvent)
-                .withDefaultEventDataForEventType(gatewayRequires3dsAuthorisationEvent)
+                .withEventType(gateway3dsExemptionResultObtainedEvent)
+                .withDefaultEventDataForEventType(gateway3dsExemptionResultObtainedEvent)
                 .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         return builder
-                .expectsToReceive("a gateway requires 3DS authorisation message")
+                .expectsToReceive("a gateway 3DS exemption result obtained message")
                 .withMetadata(metadata)
-                .withContent(gatewayRequires3dsAuthorisation.getAsPact())
+                .withContent(gateway3dsExemptionResultObtained.getAsPact())
                 .toPact();
     }
 
@@ -71,14 +70,13 @@ public class GatewayRequires3dsAuthorisationEventQueueContractTest {
 
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
-                        && transactionDao.findTransactionByExternalId(externalId).get().getTransactionDetails().contains("\"requires_3ds\""));
+                && transactionDao.findTransactionByExternalId(externalId).get().getTransactionDetails().contains("\"exemption3ds\""));
 
         Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
 
         assertThat(transaction.isPresent(), is(true));
         assertThat(transaction.get().getExternalId(), is(externalId));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"version_3ds\": \"1.2.1\""));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"requires_3ds\": true"));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"exemption3ds\": \"HONOURED\""));
     }
 
     public void setMessage(byte[] messageContents) {

@@ -30,7 +30,7 @@ import static uk.gov.pay.ledger.payout.state.PayoutState.PAID_OUT;
 import static uk.gov.pay.ledger.payout.state.PayoutState.UNDEFINED;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 
-public class PayoutPaidEventQueueContractTest {
+public class PayoutPaidEventQueueConsumerIT {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
