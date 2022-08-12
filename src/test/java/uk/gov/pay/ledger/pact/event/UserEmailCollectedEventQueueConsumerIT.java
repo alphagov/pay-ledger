@@ -5,11 +5,9 @@ import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
-import com.google.gson.Gson;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.app.LedgerConfig;
-import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
@@ -27,10 +25,9 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
+import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
-public class CaptureSubmittedEventQueueContractTest {
-    Gson gson = new Gson();
-
+public class UserEmailCollectedEventQueueConsumerIT {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -40,46 +37,46 @@ public class CaptureSubmittedEventQueueContractTest {
     );
 
     private byte[] currentMessage;
-    private String externalId = "externalId";
+    private String externalId = "userEmailCol_externalId";
     private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
-    private String gatewayAccountId = "gateway_account_id";
 
     @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createPaymentCreatedEventPact(MessagePactBuilder builder) {
-        QueuePaymentEventFixture paymentCreatedEventFixture = QueuePaymentEventFixture.aQueuePaymentEventFixture()
+    public MessagePact createUserEmailCollectedEventPact(MessagePactBuilder builder) {
+        String userEmailCollectedEvent = "USER_EMAIL_COLLECTED";
+        QueuePaymentEventFixture paymentDetailsEntered = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
-                .withGatewayAccountId(gatewayAccountId)
-                .withEventType(SalientEventType.CAPTURE_SUBMITTED.toString())
-                .withDefaultEventDataForEventType(SalientEventType.CAPTURE_SUBMITTED.toString())
+                .withEventType(userEmailCollectedEvent)
+                .withDefaultEventDataForEventType(userEmailCollectedEvent)
                 .withLive(true);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         return builder
-                .expectsToReceive("a capture submitted message")
+                .expectsToReceive("a user email collected message")
                 .withMetadata(metadata)
-                .withContent(paymentCreatedEventFixture.getAsPact())
+                .withContent(paymentDetailsEntered.getAsPact())
                 .toPact();
     }
 
     @Test
     @PactVerification({"connector"})
     public void test() {
-        appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
-
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
+
+        appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
 
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
+                        && transactionDao.findTransactionByExternalId(externalId).get().getEmail() != null
         );
 
         Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
+
         assertThat(transaction.isPresent(), is(true));
         assertThat(transaction.get().getExternalId(), is(externalId));
-        Map<String, String> transactionDetails = gson.fromJson(transaction.get().getTransactionDetails(), Map.class);
-        assertThat(transactionDetails.get("capture_submitted_date"), is(eventDate.toString()));
+        assertThat(transaction.get().getEmail(), is("test@example.org"));
     }
 
     public void setMessage(byte[] messageContents) {

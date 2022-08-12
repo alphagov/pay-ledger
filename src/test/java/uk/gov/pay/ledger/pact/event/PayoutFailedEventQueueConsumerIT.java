@@ -21,12 +21,13 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static io.dropwizard.testing.ConfigOverride.config;
+import static java.time.ZonedDateTime.parse;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static uk.gov.pay.ledger.payout.state.PayoutState.IN_TRANSIT;
+import static uk.gov.pay.ledger.payout.state.PayoutState.FAILED;
 
-public class PayoutCreatedEventQueueContractTest {
+public class PayoutFailedEventQueueConsumerIT {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -36,21 +37,23 @@ public class PayoutCreatedEventQueueContractTest {
     );
 
     private byte[] currentMessage;
-    private String gatewayPayoutId = "po_1234567890";
-    private ZonedDateTime eventDate = ZonedDateTime.parse("2020-05-13T18:45:00.000000Z");
+    private String gatewayPayoutId = "po_failed_1234567890";
+    private ZonedDateTime eventDate = parse("2020-05-13T18:50:00Z");
+    private String eventType = "PAYOUT_FAILED";
 
     @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createPayoutCreatedEventPact(MessagePactBuilder builder) {
+    public MessagePact createPayoutFailedEventPact(MessagePactBuilder builder) {
         QueuePayoutEventFixture payoutEventFixture = QueuePayoutEventFixture.aQueuePayoutEventFixture()
-                .withResourceExternalId("po_1234567890")
+                .withResourceExternalId(gatewayPayoutId)
                 .withEventDate(eventDate)
-                .withDefaultEventDataForEventType("PAYOUT_CREATED");
+                .withEventType(eventType)
+                .withDefaultEventDataForEventType(eventType);
 
         Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         return builder
-                .expectsToReceive("a payout created message")
+                .expectsToReceive("a payout failed message")
                 .withMetadata(metadata)
                 .withContent(payoutEventFixture.getAsPact())
                 .toPact();
@@ -60,7 +63,6 @@ public class PayoutCreatedEventQueueContractTest {
     @PactVerification({"connector"})
     public void test() {
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
-
         PayoutDao payoutDao = new PayoutDao(appRule.getJdbi());
 
         await().atMost(1, TimeUnit.SECONDS).until(
@@ -69,18 +71,14 @@ public class PayoutCreatedEventQueueContractTest {
 
         Optional<PayoutEntity> payoutEntity = payoutDao.findByGatewayPayoutId(gatewayPayoutId);
         assertThat(payoutEntity.isPresent(), is(true));
-        assertThat(payoutEntity.get().getCreatedDate().toString(), is("2020-05-13T18:45Z"));
         assertThat(payoutEntity.get().getGatewayPayoutId(), is(gatewayPayoutId));
-        assertThat(payoutEntity.get().getGatewayAccountId(), is("123456789"));
-        assertThat(payoutEntity.get().getAmount(), is(1000L));
-        assertThat(payoutEntity.get().getState(), is(IN_TRANSIT));
+        assertThat(payoutEntity.get().getState(), is(FAILED));
 
         Map<String, Object> payoutDetails = new Gson().fromJson(payoutEntity.get().getPayoutDetails(), Map.class);
-
-        assertThat(payoutDetails.get("estimated_arrival_date_in_bank"), is("2020-05-13T18:45:33.000000Z"));
-        assertThat(payoutDetails.get("gateway_status"), is("pending"));
-        assertThat(payoutDetails.get("destination_type"), is("bank_account"));
-        assertThat(payoutDetails.get("statement_descriptor"), is("SERVICE NAME"));
+        assertThat(payoutDetails.get("gateway_status"), is("failed"));
+        assertThat(payoutDetails.get("failure_code"), is("account_closed"));
+        assertThat(payoutDetails.get("failure_message"), is("The bank account has been closed"));
+        assertThat(payoutDetails.get("failure_balance_transaction"), is("ba_aaaaaaaaaa"));
     }
 
     public void setMessage(byte[] messageContents) {

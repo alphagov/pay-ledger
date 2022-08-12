@@ -35,7 +35,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.event.model.ResourceType.DISPUTE;
 
-public class DisputeCreatedEventQueueContractTest {
+public class DisputeCreatedEventQueueConsumerIT {
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 

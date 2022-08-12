@@ -5,18 +5,18 @@ import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
-import org.junit.Before;
+import com.google.gson.Gson;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.app.LedgerConfig;
-import uk.gov.pay.ledger.event.model.ResourceType;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
-import uk.gov.pay.ledger.util.DatabaseTestHelper;
-import uk.gov.pay.ledger.util.fixture.QueueRefundEventFixture;
+import uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -27,10 +27,10 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
-import static uk.gov.pay.ledger.util.fixture.QueueRefundEventFixture.aQueueRefundEventFixture;
-import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
-public class RefundSubmittedEventQueueContractTest {
+public class CancelledByUserEventQueueConsumerIT {
+    Gson gson = new Gson();
+
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
@@ -40,48 +40,46 @@ public class RefundSubmittedEventQueueContractTest {
     );
 
     private byte[] currentMessage;
-    private QueueRefundEventFixture refundFixture = aQueueRefundEventFixture()
-            .withResourceType(ResourceType.REFUND)
-            .withEventType("REFUND_SUBMITTED")
-            .withDefaultEventDataForEventType("REFUND_SUBMITTED");
+    private String externalId = "externalId";
+    private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
+    private String gatewayAccountId = "gateway_account_id";
+    private String gatewayTransactionId = "validGatewayTransactionId";
 
     @Pact(provider = "connector", consumer = "ledger")
-    public MessagePact createRefundSubmittedEventPact(MessagePactBuilder builder) {
-        Map<String, String> metadata = new HashMap();
+    public MessagePact createCancelledByUserEventPact(MessagePactBuilder builder) {
+        QueuePaymentEventFixture canceledByUserEventFixture = QueuePaymentEventFixture.aQueuePaymentEventFixture()
+                .withResourceExternalId(externalId)
+                .withEventDate(eventDate)
+                .withGatewayAccountId(gatewayAccountId)
+                .withEventType(SalientEventType.CANCELLED_BY_USER.toString())
+                .withDefaultEventDataForEventType(SalientEventType.CANCELLED_BY_USER.toString())
+                .withLive(true);
+
+        Map<String, String> metadata = new HashMap<>();
         metadata.put("contentType", "application/json");
 
         return builder
-                .expectsToReceive("a refund submitted message")
-                .withMetadata(metadata)
-                .withContent(refundFixture.getAsPact())
+                .expectsToReceive("a cancelled by user message")
+                .withContent(canceledByUserEventFixture.getAsPact())
                 .toPact();
-    }
-
-    @Before
-    public void setUp() {
-        DatabaseTestHelper.aDatabaseTestHelper(appRule.getJdbi()).truncateAllData();
     }
 
     @Test
     @PactVerification({"connector"})
     public void test() {
-        aTransactionFixture()
-                .withExternalId(refundFixture.getParentResourceExternalId())
-                .insert(appRule.getJdbi());
-
         appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
+
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
 
         await().atMost(1, TimeUnit.SECONDS).until(
-                () -> transactionDao.findTransactionByExternalId(refundFixture.getResourceExternalId()).isPresent()
+                () -> transactionDao.findTransactionByExternalId(externalId).isPresent()
         );
 
-        Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(refundFixture.getResourceExternalId());
-
-        assertThat(transaction.get().getExternalId(), is(refundFixture.getResourceExternalId()));
-        assertThat(transaction.get().getParentExternalId(),is(refundFixture.getParentResourceExternalId()));
-        assertThat(transaction.get().getCreatedDate(),is(refundFixture.getEventDate()));
-        assertThat(transaction.get().getTransactionDetails(), is("{}"));
+        Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(externalId);
+        assertThat(transaction.isPresent(), is(true));
+        assertThat(transaction.get().getExternalId(), is(externalId));
+        Map<String, String> transactionDetails = gson.fromJson(transaction.get().getTransactionDetails(), Map.class);
+        assertThat(transactionDetails.get("gateway_transaction_id"), is(gatewayTransactionId));
     }
 
     public void setMessage(byte[] messageContents) {
