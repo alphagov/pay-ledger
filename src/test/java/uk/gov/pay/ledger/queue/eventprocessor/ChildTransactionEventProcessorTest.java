@@ -12,8 +12,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.pay.ledger.app.LedgerConfig;
-import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.ResourceType;
@@ -23,8 +21,6 @@ import uk.gov.pay.ledger.exception.EmptyEventsException;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +29,6 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.event.model.ResourceType.REFUND;
@@ -49,10 +42,6 @@ class ChildTransactionEventProcessorTest {
     private EventService mockEventService;
     @Mock
     private TransactionService mockTransactionService;
-    @Mock
-    private LedgerConfig mockLedgerConfig;
-    @Mock
-    private Clock mockClock;
     @Captor
     private ArgumentCaptor<TransactionEntity> transactionEntityArgumentCaptor;
 
@@ -63,7 +52,7 @@ class ChildTransactionEventProcessorTest {
     void setUp() {
         transactionEntityFactory = new TransactionEntityFactory(new ObjectMapper());
         childTransactionEventProcessor = new ChildTransactionEventProcessor(mockEventService, mockTransactionService,
-                transactionEntityFactory, mockLedgerConfig, mockClock);
+                transactionEntityFactory);
     }
 
     @Test
@@ -196,58 +185,9 @@ class ChildTransactionEventProcessorTest {
         assertThat(transactionDetails.get("payment_details").getAsJsonObject().get("card_type").getAsString(), is("visa"));
     }
 
-    @Test
-    void shouldNotProjectTestDisputeIfBeforeEnabledDate() {
-        when(mockClock.instant()).thenReturn(Instant.parse("2022-07-08T00:00:00Z"));
-        QueueMessageReceiverConfig mockQueueMessageReceiverConfig = mock(QueueMessageReceiverConfig.class);
-        when(mockLedgerConfig.getQueueMessageReceiverConfig()).thenReturn(mockQueueMessageReceiverConfig);
-        when(mockQueueMessageReceiverConfig.getProjectTestPaymentsDisputeEventsFromDate()).thenReturn(Instant.parse("2022-07-08T00:00:01Z"));
-
-        Event disputeEvent = anEventFixture().withResourceType(ResourceType.DISPUTE).withLive(false).toEntity();
-        when(mockEventService.getEventDigestForResource(disputeEvent)).thenReturn(EventDigest.fromEventList(List.of(disputeEvent)));
-        childTransactionEventProcessor.process(disputeEvent, true);
-
-        verify(mockTransactionService, never()).upsertTransaction(any());
-        verify(mockTransactionService, never()).upsertTransactionFor(any());
-    }
 
     @Test
-    void shouldNotProjectLiveDisputeIfBeforeEnabledDate() {
-        when(mockClock.instant()).thenReturn(Instant.parse("2022-07-08T00:00:00Z"));
-        QueueMessageReceiverConfig mockQueueMessageReceiverConfig = mock(QueueMessageReceiverConfig.class);
-        when(mockLedgerConfig.getQueueMessageReceiverConfig()).thenReturn(mockQueueMessageReceiverConfig);
-        when(mockQueueMessageReceiverConfig.getProjectLivePaymentsDisputeEventsFromDate()).thenReturn(Instant.parse("2022-07-08T00:00:01Z"));
-
-        Event disputeEvent = anEventFixture().withResourceType(ResourceType.DISPUTE).withLive(true).toEntity();
-        when(mockEventService.getEventDigestForResource(disputeEvent)).thenReturn(EventDigest.fromEventList(List.of(disputeEvent)));
-        childTransactionEventProcessor.process(disputeEvent, true);
-
-        verify(mockTransactionService, never()).upsertTransaction(any());
-        verify(mockTransactionService, never()).upsertTransactionFor(any());
-    }
-
-    @Test
-    void shouldProjectTestDisputeIfAfterEnabledDate() {
-        when(mockClock.instant()).thenReturn(Instant.parse("2022-07-08T00:00:01Z"));
-        QueueMessageReceiverConfig mockQueueMessageReceiverConfig = mock(QueueMessageReceiverConfig.class);
-        when(mockLedgerConfig.getQueueMessageReceiverConfig()).thenReturn(mockQueueMessageReceiverConfig);
-        when(mockQueueMessageReceiverConfig.getProjectTestPaymentsDisputeEventsFromDate()).thenReturn(Instant.parse("2022-07-08T00:00:00Z"));
-
-        Event disputeEvent = anEventFixture().withResourceType(ResourceType.DISPUTE).withLive(false).toEntity();
-        EventDigest eventDigest = EventDigest.fromEventList(List.of(disputeEvent));
-        when(mockEventService.getEventDigestForResource(disputeEvent)).thenReturn(eventDigest);
-        childTransactionEventProcessor.process(disputeEvent, true);
-
-        verify(mockTransactionService).upsertTransactionFor(eventDigest);
-    }
-
-    @Test
-    void shouldProjectLiveDisputeIfAfterEnabledDate() {
-        when(mockClock.instant()).thenReturn(Instant.parse("2022-07-08T00:00:01Z"));
-        QueueMessageReceiverConfig mockQueueMessageReceiverConfig = mock(QueueMessageReceiverConfig.class);
-        when(mockLedgerConfig.getQueueMessageReceiverConfig()).thenReturn(mockQueueMessageReceiverConfig);
-        when(mockQueueMessageReceiverConfig.getProjectLivePaymentsDisputeEventsFromDate()).thenReturn(Instant.parse("2022-07-08T00:00:00Z"));
-
+    void shouldProjectDisputeTransaction() {
         Event disputeEvent = anEventFixture().withResourceType(ResourceType.DISPUTE).withLive(true).toEntity();
         EventDigest eventDigest = EventDigest.fromEventList(List.of(disputeEvent));
         when(mockEventService.getEventDigestForResource(disputeEvent)).thenReturn(eventDigest);

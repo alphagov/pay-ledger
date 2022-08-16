@@ -82,8 +82,6 @@ queueMessageReceiverConfig:
   threadDelayInMilliseconds: ${QUEUE_MESSAGE_RECEIVER_THREAD_DELAY_IN_MILLISECONDS:-1}
   numberOfThreads: ${QUEUE_MESSAGE_RECEIVER_NUMBER_OF_THREADS:-1}
   messageRetryDelayInSeconds: ${QUEUE_MESSAGE_RETRY_DELAY_IN_SECONDS:-900}
-  projectLivePaymentsDisputeEventsFromDate: ${PROJECT_LIVE_PAYMENTS_DISPUTE_EVENTS_FROM_DATE:-1893456000} # 1 January 2030 00:00:00
-  projectTestPaymentsDisputeEventsFromDate: ${PROJECT_TEST_PAYMENTS_DISPUTE_EVENTS_FROM_DATE:-1893456000} # 1 January 2030 00:00:00
 
 reportingConfig:
   streamingCsvPageSize: ${STREAMING_CSV_PAGE_SIZE:-5000}
