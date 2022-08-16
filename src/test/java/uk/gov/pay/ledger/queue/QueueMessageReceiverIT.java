@@ -431,21 +431,6 @@ public class QueueMessageReceiverIT {
     }
 
     @Test
-    void shouldNotProjectDisputeEventWhenBeforeEnabledDate() throws Exception {
-        aQueuePaymentEventFixture()
-                .withEventDate(CREATED_AT)
-                .withEventType("DISPUTE_CREATED")
-                .withResourceType(ResourceType.DISPUTE)
-                .withLive(true)
-                .insert(rule.getSqsClient());
-
-        Thread.sleep(500);
-
-        List<Map<String, Object>> transactions = dbHelper.getAllTransactions();
-        assertThat(transactions, hasSize(0));
-    }
-
-    @Test
     public void shouldHandleAgreementEvent() throws InterruptedException {
         aQueuePaymentEventFixture()
                 .withResourceExternalId("a-valid-agreement-id")

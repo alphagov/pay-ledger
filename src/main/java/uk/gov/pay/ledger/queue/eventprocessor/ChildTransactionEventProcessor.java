@@ -1,20 +1,14 @@
 package uk.gov.pay.ledger.queue.eventprocessor;
 
 import com.google.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
-import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.exception.EmptyEventsException;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.service.TransactionService;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,34 +18,23 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ChildTransactionEventProcessor extends EventProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChildTransactionEventProcessor.class);
-
     private final EventService eventService;
     private final TransactionService transactionService;
     private final TransactionEntityFactory transactionEntityFactory;
-    private final LedgerConfig ledgerConfig;
-    private final Clock clock;
 
     @Inject
     public ChildTransactionEventProcessor(EventService eventService,
                                           TransactionService transactionService,
-                                          TransactionEntityFactory transactionEntityFactory,
-                                          LedgerConfig ledgerConfig,
-                                          Clock clock) {
+                                          TransactionEntityFactory transactionEntityFactory) {
 
         this.eventService = eventService;
         this.transactionService = transactionService;
         this.transactionEntityFactory = transactionEntityFactory;
-        this.ledgerConfig = ledgerConfig;
-        this.clock = clock;
     }
 
     @Override
     public void process(Event event, boolean isANewEvent) {
         EventDigest childTransactionEventDigest = eventService.getEventDigestForResource(event);
-        if (event.getResourceType() == ResourceType.DISPUTE && !shouldProjectDisputeTransaction(event, childTransactionEventDigest)) {
-            return;
-        }
 
         Optional<EventDigest> mayBePaymentEventDigest = Optional.empty();
 
@@ -62,26 +45,6 @@ public class ChildTransactionEventProcessor extends EventProcessor {
         mayBePaymentEventDigest.ifPresentOrElse(
                 paymentEventDigest -> projectChildTransactionWithPaymentDetails(childTransactionEventDigest, paymentEventDigest),
                 () -> transactionService.upsertTransactionFor(childTransactionEventDigest));
-    }
-
-    private boolean shouldProjectDisputeTransaction(Event event, EventDigest childTransactionEventDigest) {
-        Instant now = clock.instant();
-        if (Boolean.TRUE.equals(childTransactionEventDigest.isLive())) {
-            if (now.isBefore(ledgerConfig.getQueueMessageReceiverConfig().getProjectLivePaymentsDisputeEventsFromDate())) {
-                LOGGER.info("Projecting disputes is not enabled for live transactions. Event type {} and resource external id {}",
-                        event.getEventType(),
-                        event.getResourceExternalId());
-                return false;
-            }
-        } else {
-            if (now.isBefore(ledgerConfig.getQueueMessageReceiverConfig().getProjectTestPaymentsDisputeEventsFromDate())) {
-                LOGGER.info("Projecting disputes is not enabled for test transactions. Event type {} and resource external id {}",
-                        event.getEventType(),
-                        event.getResourceExternalId());
-                return false;
-            }
-        }
-        return true;
     }
 
     public void reprojectChildTransaction(String childTransactionExternalId, EventDigest paymentEventDigest) {
