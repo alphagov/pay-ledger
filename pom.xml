@@ -13,7 +13,7 @@
         <dropwizard.version>2.1.0</dropwizard.version>
         <jackson.version>2.13.3</jackson.version>
         <testcontainers.version>1.17.3</testcontainers.version>
-        <postgresql.version>42.4.1</postgresql.version>
+        <postgresql.version>42.4.2</postgresql.version>
         <pay-java-commons.version>1.0.20220816095248</pay-java-commons.version>
         <junit5.version>5.9.0</junit5.version>
         <surefire.version>3.0.0-M7</surefire.version>
