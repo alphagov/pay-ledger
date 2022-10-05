@@ -39,6 +39,7 @@ import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 
 public class TransactionService {
 
+    public static final String REDACTED_REFERENCE_NUMBER = "****************";
     public static final int DEFAULT_STATUS_VERSION = 2;
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionService.class);
     private final TransactionDao transactionDao;
@@ -235,5 +236,14 @@ public class TransactionService {
                         TransactionView.from(transactionFactory.createTransactionEntity(transactionEntity), DEFAULT_STATUS_VERSION))
                 .collect(Collectors.toList());
         return TransactionsForTransactionResponse.of(parentTransactionExternalId, transactions);
+    }
+
+    public void redactReference(String transactionExternalId) {
+        transactionDao.findTransactionByExternalId(transactionExternalId)
+                .ifPresentOrElse(transactionEntity -> {
+                    transactionEntity.setReference(REDACTED_REFERENCE_NUMBER);
+                    transactionDao.upsert(transactionEntity);
+                }, () -> new WebApplicationException(format("Transaction with id [%s] not found", transactionExternalId),
+                        Response.Status.NOT_FOUND));
     }
 }

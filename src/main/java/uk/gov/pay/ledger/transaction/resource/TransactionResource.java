@@ -35,6 +35,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -72,6 +73,14 @@ public class TransactionResource {
         this.transactionService = transactionService;
         this.csvService = csvService;
         this.configuration = configuration;
+    }
+
+    @Path("/redact-reference/{transactionExternalId}")
+    @POST
+    @Timed
+    public Response redactReference(@PathParam("transactionExternalId") String transactionExternalId) {
+        transactionService.redactReference(transactionExternalId);
+        return Response.ok().build();
     }
 
     @Path("/{transactionExternalId}")

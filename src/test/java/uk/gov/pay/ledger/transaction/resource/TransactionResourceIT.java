@@ -15,14 +15,11 @@ import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 import uk.gov.service.payments.commons.model.Source;
 
 import javax.ws.rs.core.Response;
-import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -30,6 +27,7 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.DISPUTE;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.REFUND;
+import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_REFERENCE_NUMBER;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
@@ -49,6 +47,31 @@ public class TransactionResourceIT {
         aDatabaseTestHelper(rule.getJdbi()).truncateAllData();
     }
 
+    public TransactionResourceIT() {
+        super();
+    }
+
+    @Test
+    public void shouldRedactReference() {
+        transactionFixture = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withReference("4242424242424242");
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .post("/v1/transaction/redact-reference/" + transactionFixture.getExternalId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("reference", is(REDACTED_REFERENCE_NUMBER));
+    }
     @Test
     public void shouldGetTransaction() {
         var gatewayPayoutId = "payout-id";

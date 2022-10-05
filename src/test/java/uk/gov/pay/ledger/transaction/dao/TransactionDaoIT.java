@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.mockito.Mockito.mock;
+import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_REFERENCE_NUMBER;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -240,14 +241,15 @@ class TransactionDaoIT {
     void shouldUpsertTransaction() {
         TransactionEntity transaction = aTransactionFixture()
                 .withState(TransactionState.CREATED)
+                .withReference("4242424242424242")
                 .insert(rule.getJdbi())
                 .toEntity();
-
 
         TransactionEntity modifiedTransaction = aTransactionFixture()
                 .withExternalId(transaction.getExternalId())
                 .withEventCount(2)
                 .withState(TransactionState.SUBMITTED)
+                .withReference(REDACTED_REFERENCE_NUMBER)
                 .toEntity();
 
         transactionDao.upsert(modifiedTransaction);
@@ -255,6 +257,7 @@ class TransactionDaoIT {
         TransactionEntity retrievedTransaction = transactionDao.findTransactionByExternalId(transaction.getExternalId()).get();
 
         assertThat(retrievedTransaction.getState(), is(modifiedTransaction.getState()));
+        assertThat(retrievedTransaction.getReference(), is(REDACTED_REFERENCE_NUMBER));
     }
 
     @Test

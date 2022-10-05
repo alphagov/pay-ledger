@@ -158,6 +158,10 @@ public class TransactionEntity {
         return firstDigitsCardNumber;
     }
 
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
     public void setTransactionDetails(String transactionDetails) {
         this.transactionDetails = transactionDetails;
     }
