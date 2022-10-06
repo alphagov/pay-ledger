@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.util.JsonParser;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
 import javax.ws.rs.WebApplicationException;
@@ -243,6 +245,19 @@ public class TransactionService {
                 .ifPresentOrElse(transactionEntity -> {
                     transactionEntity.setReference(REDACTED_REFERENCE_NUMBER);
                     transactionDao.upsert(transactionEntity);
+                    eventDao.getEventsByResourceExternalId(transactionExternalId).forEach(
+                            event -> {
+                                Map<String, Object> eventDataMap = JsonParser.jsonStringToMap(event.getEventData());
+                                if (eventDataMap.containsKey("reference")) {
+                                    eventDataMap.put("reference", REDACTED_REFERENCE_NUMBER);
+                                    try {
+                                        eventDao.updateEventData(transactionExternalId, event.getEventType(), objectMapper.writeValueAsString(eventDataMap));
+                                    } catch (JsonProcessingException e) {
+                                        LOGGER.error("An error occurred while converting the event data to a string.", e);
+                                    }
+                                }
+                            }
+                    );
                 }, () -> new WebApplicationException(format("Transaction with id [%s] not found", transactionExternalId),
                         Response.Status.NOT_FOUND));
     }

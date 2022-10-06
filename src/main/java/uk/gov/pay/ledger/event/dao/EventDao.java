@@ -83,4 +83,8 @@ public interface EventDao {
             "FROM event e LEFT JOIN transaction t ON e.resource_external_id = t.external_id " +
             "WHERE (e.event_date between :fromDate AND :toDate) AND t.live ORDER BY e.event_date DESC")
     List<EventTicker> findEventsTickerFromDate(@Bind("fromDate") ZonedDateTime fromDate, @Bind("toDate") ZonedDateTime toDate);
+
+    @SqlUpdate("UPDATE event SET event_data = CAST(:eventData as jsonb) " +
+            "WHERE resource_external_id = :resourceExternalId AND event_type = :eventType")
+    void updateEventData(@Bind("resourceExternalId") String resourceExternalId, @Bind("eventType") String eventType, @Bind("eventData") String eventData);
 }

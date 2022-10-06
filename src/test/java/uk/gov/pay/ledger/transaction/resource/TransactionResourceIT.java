@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 import uk.gov.service.payments.commons.model.Source;
@@ -20,15 +21,19 @@ import java.time.format.DateTimeFormatter;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.lang.String.format;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.DISPUTE;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.REFUND;
 import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_REFERENCE_NUMBER;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
+import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 import static uk.gov.service.payments.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
@@ -42,9 +47,12 @@ public class TransactionResourceIT {
 
     private TransactionFixture transactionFixture;
 
+    private DatabaseTestHelper databaseTestHelper;
+
     @BeforeEach
     public void setUp() {
-        aDatabaseTestHelper(rule.getJdbi()).truncateAllData();
+        databaseTestHelper = aDatabaseTestHelper(rule.getJdbi());
+        databaseTestHelper.truncateAllData();
     }
 
     public TransactionResourceIT() {
@@ -57,6 +65,15 @@ public class TransactionResourceIT {
                 .withDefaultCardDetails()
                 .withReference("4242424242424242");
         transactionFixture.insert(rule.getJdbi());
+        String eventData = "{\"address\": \"Silicon Valley\", \"reference\": \"4242424242424242\"}";
+        anEventFixture().withEventData(eventData)
+                .withEventType("PAYMENT_CREATED")
+                .withResourceExternalId(transactionFixture.getExternalId())
+                .insert(rule.getJdbi());
+        anEventFixture().withEventData(eventData)
+                .withEventType("PAYMENT_SUCCEEDED")
+                .withResourceExternalId(transactionFixture.getExternalId())
+                .insert(rule.getJdbi());
 
         given().port(port)
                 .contentType(JSON)
@@ -71,6 +88,11 @@ public class TransactionResourceIT {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("reference", is(REDACTED_REFERENCE_NUMBER));
+
+        var results = databaseTestHelper.getEventsByExternalId(transactionFixture.getExternalId());
+        assertThat(results, hasSize(2));
+        results.forEach(result ->
+                assertThat(result.get("event_data").toString(), containsString(format("\"reference\": \"%s\"", REDACTED_REFERENCE_NUMBER))));
     }
     @Test
     public void shouldGetTransaction() {

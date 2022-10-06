@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,6 +51,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_REFERENCE_NUMBER;
+import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,10 +89,19 @@ public class TransactionServiceTest {
     public void shouldRedactReference() {
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity();
         when(mockTransactionDao.findTransactionByExternalId(transaction.getExternalId())).thenReturn(Optional.of(transaction));
+        when(mockEventDao.getEventsByResourceExternalId(transaction.getExternalId())).thenReturn(List.of(
+                anEventFixture()
+                        .withResourceExternalId(transaction.getExternalId())
+                        .withEventType("PAYMENT_CREATED")
+                        .withEventData("{\"address\":\"Silicon Valley\",\"reference\":\"4242424242424242\"}")
+                        .toEntity()));
 
         transactionService.redactReference(transaction.getExternalId());
 
         verify(mockTransactionDao).upsert(transactionEntityArgumentCaptor.capture());
+        verify(mockEventDao).updateEventData(transaction.getExternalId(),
+                "PAYMENT_CREATED",
+                format("{\"address\":\"Silicon Valley\",\"reference\":\"%s\"}", REDACTED_REFERENCE_NUMBER));
         TransactionEntity transactionEntity = transactionEntityArgumentCaptor.getValue();
         assertThat(transactionEntity.getReference(), is(REDACTED_REFERENCE_NUMBER));
     }
