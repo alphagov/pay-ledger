@@ -68,14 +68,12 @@ public class EventDaoIT {
         assertThat(events, hasSize(2));
         events.forEach(event -> assertThat(event.getEventData(), is(eventData)));
 
-        String newEventData = "{\"address\": \"Silicon Valley\", \"reference\": \"****\"}";
-
-        eventDao.updateEventData(paymentCreatedEvent.getResourceExternalId(), paymentCreatedEvent.getEventType(), newEventData);
-        eventDao.updateEventData(paymentSucceededEvent.getResourceExternalId(), paymentSucceededEvent.getEventType(), newEventData);
+        eventDao.redactReference(paymentCreatedEvent.getResourceExternalId());
+        eventDao.redactReference(paymentSucceededEvent.getResourceExternalId());
 
         events = eventDao.getEventsByResourceExternalId(resourceExternalId);
         assertThat(events, hasSize(2));
-        events.forEach(event -> assertThat(event.getEventData(), is(newEventData)));
+        events.forEach(event -> assertThat(event.getEventData(), is("{\"address\": \"Silicon Valley\", \"reference\": \"****\"}")));
     }
 
     @Test

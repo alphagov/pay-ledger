@@ -1,10 +1,7 @@
 package uk.gov.pay.ledger.transaction.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
@@ -21,7 +18,6 @@ import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.model.TransactionsForTransactionResponse;
 import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
-import uk.gov.pay.ledger.util.JsonParser;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
 import javax.ws.rs.WebApplicationException;
@@ -41,9 +37,9 @@ import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 
 public class TransactionService {
 
-    public static final String REDACTED_REFERENCE_NUMBER = "****************";
+    public static final String REDACTED_REFERENCE_NUMBER = "****";
     public static final int DEFAULT_STATUS_VERSION = 2;
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionService.class);
+
     private final TransactionDao transactionDao;
     private final EventDao eventDao;
     private TransactionEntityFactory transactionEntityFactory;
@@ -197,7 +193,7 @@ public class TransactionService {
 
     private Map<String, TransactionEntity> getTransactionsAsMap(String externalId, String gatewayAccountId) {
         return transactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(
-                externalId, gatewayAccountId)
+                        externalId, gatewayAccountId)
                 .stream()
                 .collect(Collectors.toMap(TransactionEntity::getExternalId,
                         transactionEntity -> transactionEntity));
@@ -231,7 +227,7 @@ public class TransactionService {
 
     private TransactionsForTransactionResponse findTransactionsForParentExternalId(String parentTransactionExternalId, String gatewayAccountId, TransactionType transactionType) {
         List<TransactionView> transactions = transactionDao.findTransactionsByParentIdAndGatewayAccountId(
-                parentTransactionExternalId, gatewayAccountId, transactionType)
+                        parentTransactionExternalId, gatewayAccountId, transactionType)
                 .stream()
                 .sorted(Comparator.comparing(TransactionEntity::getCreatedDate))
                 .map(transactionEntity ->
@@ -245,19 +241,7 @@ public class TransactionService {
                 .ifPresentOrElse(transactionEntity -> {
                     transactionEntity.setReference(REDACTED_REFERENCE_NUMBER);
                     transactionDao.upsert(transactionEntity);
-                    eventDao.getEventsByResourceExternalId(transactionExternalId).forEach(
-                            event -> {
-                                Map<String, Object> eventDataMap = JsonParser.jsonStringToMap(event.getEventData());
-                                if (eventDataMap.containsKey("reference")) {
-                                    eventDataMap.put("reference", REDACTED_REFERENCE_NUMBER);
-                                    try {
-                                        eventDao.updateEventData(transactionExternalId, event.getEventType(), objectMapper.writeValueAsString(eventDataMap));
-                                    } catch (JsonProcessingException e) {
-                                        LOGGER.error("An error occurred while converting the event data to a string.", e);
-                                    }
-                                }
-                            }
-                    );
+                    eventDao.redactReference(transactionExternalId);
                 }, () -> new WebApplicationException(format("Transaction with id [%s] not found", transactionExternalId),
                         Response.Status.NOT_FOUND));
     }

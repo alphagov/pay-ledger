@@ -84,7 +84,7 @@ public interface EventDao {
             "WHERE (e.event_date between :fromDate AND :toDate) AND t.live ORDER BY e.event_date DESC")
     List<EventTicker> findEventsTickerFromDate(@Bind("fromDate") ZonedDateTime fromDate, @Bind("toDate") ZonedDateTime toDate);
 
-    @SqlUpdate("UPDATE event SET event_data = CAST(:eventData as jsonb) " +
-            "WHERE resource_external_id = :resourceExternalId AND event_type = :eventType")
-    void updateEventData(@Bind("resourceExternalId") String resourceExternalId, @Bind("eventType") String eventType, @Bind("eventData") String eventData);
+    @SqlUpdate("UPDATE event SET event_data = jsonb_set(event_data, '{reference}', '\"****\"', false) " +
+            "WHERE resource_external_id = :resourceExternalId")
+    void redactReference(@Bind("resourceExternalId") String resourceExternalId);
 }
