@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_REFERENCE_NUMBER;
+
 @RegisterRowMapper(EventMapper.class)
 @RegisterRowMapper(EventTickerMapper.class)
 public interface EventDao {
@@ -83,4 +85,8 @@ public interface EventDao {
             "FROM event e LEFT JOIN transaction t ON e.resource_external_id = t.external_id " +
             "WHERE (e.event_date between :fromDate AND :toDate) AND t.live ORDER BY e.event_date DESC")
     List<EventTicker> findEventsTickerFromDate(@Bind("fromDate") ZonedDateTime fromDate, @Bind("toDate") ZonedDateTime toDate);
+
+    @SqlUpdate("UPDATE event SET event_data = jsonb_set(event_data, '{reference}', '\"" + REDACTED_REFERENCE_NUMBER + "\"', false) " +
+            "WHERE resource_external_id = :resourceExternalId")
+    void redactReference(@Bind("resourceExternalId") String resourceExternalId);
 }

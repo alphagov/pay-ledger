@@ -2,8 +2,6 @@ package uk.gov.pay.ledger.transaction.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventDigest;
@@ -39,8 +37,9 @@ import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 
 public class TransactionService {
 
+    public static final String REDACTED_REFERENCE_NUMBER = "****";
     public static final int DEFAULT_STATUS_VERSION = 2;
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionService.class);
+
     private final TransactionDao transactionDao;
     private final EventDao eventDao;
     private TransactionEntityFactory transactionEntityFactory;
@@ -194,7 +193,7 @@ public class TransactionService {
 
     private Map<String, TransactionEntity> getTransactionsAsMap(String externalId, String gatewayAccountId) {
         return transactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(
-                externalId, gatewayAccountId)
+                        externalId, gatewayAccountId)
                 .stream()
                 .collect(Collectors.toMap(TransactionEntity::getExternalId,
                         transactionEntity -> transactionEntity));
@@ -228,12 +227,22 @@ public class TransactionService {
 
     private TransactionsForTransactionResponse findTransactionsForParentExternalId(String parentTransactionExternalId, String gatewayAccountId, TransactionType transactionType) {
         List<TransactionView> transactions = transactionDao.findTransactionsByParentIdAndGatewayAccountId(
-                parentTransactionExternalId, gatewayAccountId, transactionType)
+                        parentTransactionExternalId, gatewayAccountId, transactionType)
                 .stream()
                 .sorted(Comparator.comparing(TransactionEntity::getCreatedDate))
                 .map(transactionEntity ->
                         TransactionView.from(transactionFactory.createTransactionEntity(transactionEntity), DEFAULT_STATUS_VERSION))
                 .collect(Collectors.toList());
         return TransactionsForTransactionResponse.of(parentTransactionExternalId, transactions);
+    }
+
+    public void redactReference(String transactionExternalId) {
+        transactionDao.findTransactionByExternalId(transactionExternalId)
+                .ifPresentOrElse(transactionEntity -> {
+                    transactionEntity.setReference(REDACTED_REFERENCE_NUMBER);
+                    transactionDao.upsert(transactionEntity);
+                    eventDao.redactReference(transactionExternalId);
+                }, () -> new WebApplicationException(format("Transaction with id [%s] not found", transactionExternalId),
+                        Response.Status.NOT_FOUND));
     }
 }

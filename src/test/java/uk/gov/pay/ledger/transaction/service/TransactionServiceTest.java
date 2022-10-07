@@ -5,6 +5,8 @@ import io.dropwizard.jackson.Jackson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.dao.EventDao;
@@ -47,11 +49,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_REFERENCE_NUMBER;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 @ExtendWith(MockitoExtension.class)
 public class TransactionServiceTest {
 
+    @Captor
+    private ArgumentCaptor<TransactionEntity> transactionEntityArgumentCaptor;
     @Mock
     private TransactionDao mockTransactionDao;
     @Mock
@@ -76,6 +81,19 @@ public class TransactionServiceTest {
 
         lenient().when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://app.com"));
         lenient().when(mockUriInfo.getPath()).thenReturn("/v1/transaction");
+    }
+
+    @Test
+    public void shouldRedactReference() {
+        TransactionEntity transaction = aTransactionFixture().withState(TransactionState.FAILED_REJECTED).toEntity();
+        when(mockTransactionDao.findTransactionByExternalId(transaction.getExternalId())).thenReturn(Optional.of(transaction));
+
+        transactionService.redactReference(transaction.getExternalId());
+
+        verify(mockTransactionDao).upsert(transactionEntityArgumentCaptor.capture());
+        verify(mockEventDao).redactReference(transaction.getExternalId());
+        TransactionEntity transactionEntity = transactionEntityArgumentCaptor.getValue();
+        assertThat(transactionEntity.getReference(), is(REDACTED_REFERENCE_NUMBER));
     }
 
     @Test

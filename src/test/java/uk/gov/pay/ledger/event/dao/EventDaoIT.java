@@ -20,6 +20,7 @@ import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.ZonedDateTimeTimestampMatcher.isDate;
@@ -44,6 +45,34 @@ public class EventDaoIT {
         resourceTypeDao = rule.getJdbi().onDemand(ResourceTypeDao.class);
         dbHelper = aDatabaseTestHelper(rule.getJdbi());
         dbHelper.truncateAllData();
+    }
+
+    @Test
+    public void shouldRedactReference() {
+        String resourceExternalId = "52pfbqbta";
+        String eventData = "{\"address\": \"Silicon Valley\", \"reference\": \"4242424242424242\"}";
+        var paymentCreatedEvent = anEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventData(eventData)
+                .withEventType("PAYMENT_CREATED");
+        var paymentSucceededEvent = anEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventData(eventData)
+                .withEventType("PAYMENT_SUCCEEDED");
+
+        eventDao.insertEventWithResourceTypeId(paymentCreatedEvent.toEntity());
+        eventDao.insertEventWithResourceTypeId(paymentSucceededEvent.toEntity());
+
+        List<Event> events = eventDao.getEventsByResourceExternalId(resourceExternalId);
+        assertThat(events, hasSize(2));
+        events.forEach(event -> assertThat(event.getEventData(), is(eventData)));
+
+        eventDao.redactReference(paymentCreatedEvent.getResourceExternalId());
+        eventDao.redactReference(paymentSucceededEvent.getResourceExternalId());
+
+        events = eventDao.getEventsByResourceExternalId(resourceExternalId);
+        assertThat(events, hasSize(2));
+        events.forEach(event -> assertThat(event.getEventData(), is("{\"address\": \"Silicon Valley\", \"reference\": \"****\"}")));
     }
 
     @Test
