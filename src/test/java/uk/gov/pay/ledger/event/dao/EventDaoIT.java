@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.event.dao;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +48,7 @@ public class EventDaoIT {
     }
 
     @Test
-    public void shouldUpdateEvent() throws JsonProcessingException {
+    public void shouldRedactReference() {
         String resourceExternalId = "52pfbqbta";
         String eventData = "{\"address\": \"Silicon Valley\", \"reference\": \"4242424242424242\"}";
         var paymentCreatedEvent = anEventFixture()
