@@ -72,7 +72,7 @@ public class EventDaoIT {
 
         events = eventDao.getEventsByResourceExternalId(resourceExternalId);
         assertThat(events, hasSize(2));
-        events.forEach(event -> assertThat(event.getEventData(), is("{\"address\": \"Silicon Valley\", \"reference\": \"****\"}")));
+        events.forEach(event -> assertThat(event.getEventData(), is("{\"address\": \"Silicon Valley\", \"reference\": \"****************\"}")));
     }
 
     @Test
