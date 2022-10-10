@@ -37,7 +37,7 @@ import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 
 public class TransactionService {
 
-    public static final String REDACTED_REFERENCE_NUMBER = "****";
+    public static final String REDACTED_REFERENCE_NUMBER = "****************";
     public static final int DEFAULT_STATUS_VERSION = 2;
 
     private final TransactionDao transactionDao;
