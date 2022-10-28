@@ -2,6 +2,12 @@
 
 This is a bare bones Dropwizard App for the Pay Ledger microservice.
 
+## API Specification
+
+The [API Specification](/openapi/ledger_spec.yaml) provides more detail on the paths and operations including examples.
+
+[View the API specification for ledger in Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/alphagov/pay-ledger/master/openapi/ledger_spec.yaml).
+
 ## Environment variables
 
 There are several environment variables used for the app configuration. They're grouped in categories: database, SQS

@@ -700,6 +700,22 @@ paths:
       summary: Get transaction for a gateway transaction ID
       tags:
       - Transactions
+  /v1/transaction/redact-reference/{transactionExternalId}:
+    post:
+      operationId: redactReference
+      parameters:
+      - in: path
+        name: transactionExternalId
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json; qs=1: {}
+          description: default response
+      tags:
+      - Transactions
   /v1/transaction/{parentTransactionExternalId}/transaction:
     get:
       operationId: getTransactionsForParentTransaction
