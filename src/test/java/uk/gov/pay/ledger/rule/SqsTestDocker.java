@@ -13,7 +13,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 public class SqsTestDocker {
     private static final Logger logger = LoggerFactory.getLogger(SqsTestDocker.class);
 
-    private static GenericContainer sqsContainer;
+    private static GenericContainer<?> sqsContainer;
 
     public static AmazonSQS initialise(String... queues) {
         try {
@@ -29,9 +29,9 @@ public class SqsTestDocker {
         if (sqsContainer == null) {
             logger.info("Creating SQS Container");
 
-            sqsContainer = new GenericContainer("mvisonneau/alpine-sqs:1.2.0")
+            sqsContainer = new GenericContainer<>("softwaremill/elasticmq-native")
                     .withExposedPorts(9324)
-                    .waitingFor(Wait.forHttp("/?Action=GetQueueUrl&QueueName=default"));
+                    .waitingFor(Wait.forLogMessage(".*ElasticMQ server.*.*started.*", 1));
 
             sqsContainer.start();
         }

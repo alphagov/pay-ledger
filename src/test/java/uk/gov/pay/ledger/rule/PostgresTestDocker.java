@@ -2,7 +2,7 @@ package uk.gov.pay.ledger.rule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -16,24 +16,19 @@ public class PostgresTestDocker {
     private static final String DB_NAME = "ledger_test";
     private static final String DB_USERNAME = "test";
     private static final String DB_PASSWORD = "test";
-    private static GenericContainer container;
+    private static PostgreSQLContainer<?> POSTGRES_CONTAINER;
 
     public static void getOrCreate() {
         try {
-            if (container == null) {
+            if (POSTGRES_CONTAINER == null) {
                 logger.info("Creating Postgres Container");
 
-                container = new GenericContainer("postgres:11.1");
-                container.addExposedPort(5432);
+                POSTGRES_CONTAINER = new PostgreSQLContainer<>("postgres:11.16")
+                        .withUsername(DB_USERNAME)
+                        .withPassword(DB_PASSWORD);
 
-                container.addEnv("POSTGRES_USER", DB_USERNAME);
-                container.addEnv("POSTGRES_PASSWORD", DB_PASSWORD);
-
-                container.start();
-
-                //todo: add DB health check
-                Thread.sleep(5000);
-                createDatabase(DB_NAME);
+                POSTGRES_CONTAINER.start();
+                createDatabase();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -41,28 +36,22 @@ public class PostgresTestDocker {
     }
 
     public static String getConnectionUrl() {
-        return "jdbc:postgresql://localhost:" + container.getMappedPort(5432) + "/";
+        return POSTGRES_CONTAINER.getJdbcUrl();
     }
 
     public static void stopContainer() {
-        container.stop();
-        container = null;
+        POSTGRES_CONTAINER.stop();
+        POSTGRES_CONTAINER = null;
     }
 
-    private static void createDatabase(final String dbName) {
-        final String dbUser = getDbUsername();
-
-        try (Connection connection = getConnection(getConnectionUrl(), dbUser, getDbPassword())) {
-            connection.createStatement().execute("CREATE DATABASE " + dbName + " WITH owner=" + dbUser + " TEMPLATE postgres");
-            connection.createStatement().execute("GRANT ALL PRIVILEGES ON DATABASE " + dbName + " TO " + dbUser);
+    private static void createDatabase() {
+        try (Connection connection = getConnection(getConnectionUrl(), DB_USERNAME, getDbPassword())) {
+            connection.createStatement().execute("CREATE DATABASE " + DB_NAME + " WITH owner=" + DB_USERNAME + " TEMPLATE postgres");
+            connection.createStatement().execute("GRANT ALL PRIVILEGES ON DATABASE " + DB_NAME + " TO " + DB_USERNAME);
             connection.createStatement().execute("CREATE EXTENSION IF NOT EXISTS pg_trgm");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    static String getDbUri() {
-        return getConnectionUrl() + DB_NAME;
     }
 
     public static String getDbPassword() {
