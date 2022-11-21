@@ -18,7 +18,7 @@
         <junit5.version>5.9.1</junit5.version>
         <surefire.version>3.0.0-M7</surefire.version>
         <guice.version>5.1.0</guice.version>
-        <rest-assured.version>5.2.0</rest-assured.version>
+        <rest-assured.version>5.3.0</rest-assured.version>
         <swaggger-version>2.2.7</swaggger-version>
         <PACT_BROKER_URL/>
         <PACT_BROKER_USERNAME/>
