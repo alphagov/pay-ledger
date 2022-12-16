@@ -20,12 +20,13 @@ public class AgreementEntity {
     private ZonedDateTime createdDate;
     private Integer eventCount;
     private PaymentInstrumentEntity paymentInstrument;
+    private String userIdentifier;
 
     public AgreementEntity() {
 
     }
 
-    public AgreementEntity(String externalId, String gatewayAccountId, String serviceId, String reference, String description, AgreementStatus status, Boolean live, ZonedDateTime createdDate, Integer eventCount, PaymentInstrumentEntity paymentInstrument) {
+    public AgreementEntity(String externalId, String gatewayAccountId, String serviceId, String reference, String description, AgreementStatus status, Boolean live, ZonedDateTime createdDate, Integer eventCount, PaymentInstrumentEntity paymentInstrument, String userIdentifier) {
         this.externalId = externalId;
         this.gatewayAccountId = gatewayAccountId;
         this.serviceId = serviceId;
@@ -36,6 +37,7 @@ public class AgreementEntity {
         this.createdDate = createdDate;
         this.eventCount = eventCount;
         this.paymentInstrument = paymentInstrument;
+        this.userIdentifier = userIdentifier;
     }
 
     public String getExternalId() {
@@ -116,5 +118,13 @@ public class AgreementEntity {
 
     public void setPaymentInstrument(PaymentInstrumentEntity paymentInstrument) {
         this.paymentInstrument = paymentInstrument;
+    }
+
+    public String getUserIdentifier() {
+        return userIdentifier;
+    }
+
+    public void setUserIdentifier(String userIdentifier) {
+        this.userIdentifier = userIdentifier;
     }
 }

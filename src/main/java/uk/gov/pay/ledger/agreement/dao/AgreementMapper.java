@@ -4,8 +4,6 @@ import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.entity.PaymentInstrumentEntity;
-import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.transaction.model.CardType;
 import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
@@ -58,7 +56,7 @@ public class AgreementMapper implements RowMapper<AgreementEntity> {
                 getBooleanWithNullCheck(resultSet,"live"),
                 ZonedDateTime.ofInstant(resultSet.getTimestamp("created_date").toInstant(), ZoneOffset.UTC),
                 resultSet.getInt("event_count"),
-                paymentInstrument
-        );
+                paymentInstrument,
+                resultSet.getString("user_identifier"));
     }
 }

@@ -29,12 +29,14 @@ class AgreementDaoIT {
     @Test
     void shouldInsertAgreement() {
         AgreementFixture fixture = AgreementFixture.anAgreementFixture();
+        fixture.setUserIdentifier("an-valid-user-identifier");
         agreementDao.upsert(fixture.toEntity());
 
         AgreementEntity fetchedEntity = agreementDao.findByExternalId(fixture.getExternalId()).get();
 
         assertThat(fetchedEntity, is(notNullValue()));
         assertThat(fetchedEntity.getExternalId(), is(fixture.getExternalId()));
+        assertThat(fetchedEntity.getUserIdentifier(), is("an-valid-user-identifier"));
     }
 
     @Test
