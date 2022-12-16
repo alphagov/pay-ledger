@@ -37,8 +37,9 @@ public class AgreementResourceIT {
 
     @Test
     public void shouldGetAgreement() {
-        var fixture = AgreementFixture.anAgreementFixture("a-valid-agreement-id", "a-valid-service-id")
-            .insert(rule.getJdbi());
+        var fixture = AgreementFixture.anAgreementFixture("a-valid-agreement-id", "a-valid-service-id");
+        fixture.setUserIdentifier("a-valid-user-identifier");
+        fixture.insert(rule.getJdbi());
 
         given().port(port)
                 .contentType(JSON)
@@ -46,7 +47,8 @@ public class AgreementResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("external_id", is(fixture.getExternalId()));
+                .body("external_id", is(fixture.getExternalId()))
+                .body("user_identifier", is("a-valid-user-identifier"));
     }
 
     @Test

@@ -21,8 +21,9 @@ public class Agreement {
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private ZonedDateTime createdDate;
     private PaymentInstrument paymentInstrument;
+    private String userIdentifier;
 
-    public Agreement(String externalId, String serviceId, String reference, String description, AgreementStatus status, Boolean live, ZonedDateTime createdDate, PaymentInstrument paymentInstrument) {
+    public Agreement(String externalId, String serviceId, String reference, String description, AgreementStatus status, Boolean live, ZonedDateTime createdDate, PaymentInstrument paymentInstrument, String userIdentifier) {
         this.externalId = externalId;
         this.serviceId = serviceId;
         this.reference = reference;
@@ -31,6 +32,7 @@ public class Agreement {
         this.live = live;
         this.createdDate = createdDate;
         this.paymentInstrument = paymentInstrument;
+        this.userIdentifier = userIdentifier;
     }
 
     public static Agreement from(AgreementEntity entity) {
@@ -42,8 +44,8 @@ public class Agreement {
                 entity.getStatus(),
                 entity.getLive(),
                 entity.getCreatedDate(),
-                Optional.ofNullable(entity.getPaymentInstrument()).map(PaymentInstrument::from).orElse(null)
-        );
+                Optional.ofNullable(entity.getPaymentInstrument()).map(PaymentInstrument::from).orElse(null),
+                entity.getUserIdentifier());
     }
 
     public String getExternalId() {
@@ -76,5 +78,9 @@ public class Agreement {
 
     public PaymentInstrument getPaymentInstrument() {
         return paymentInstrument;
+    }
+
+    public String getUserIdentifier() {
+        return userIdentifier;
     }
 }
