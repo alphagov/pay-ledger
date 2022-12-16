@@ -27,6 +27,7 @@ class AgreementsFactoryTest {
                         .toJson(Map.of(
                                 "reference", "agreement-reference",
                                 "description", "agreement description text",
+                                "user_identifier", "a-valid-user-identifier",
                                 "status", "CREATED"
                         ))
                 )
@@ -40,6 +41,7 @@ class AgreementsFactoryTest {
         assertThat(entity.getEventCount(), is(1));
         assertThat(entity.getReference(), is("agreement-reference"));
         assertThat(entity.getDescription(), is("agreement description text"));
+        assertThat(entity.getUserIdentifier(), is("a-valid-user-identifier"));
         assertThat(entity.getStatus(), is(AgreementStatus.CREATED));
     }
 

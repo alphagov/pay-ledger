@@ -50,7 +50,8 @@ public class AgreementDao {
             "description," +
             "status," +
             "created_date," +
-            "event_count" +
+            "event_count," +
+            "user_identifier" +
             ") " +
             "VALUES (" +
             ":externalId, " +
@@ -61,7 +62,8 @@ public class AgreementDao {
             ":description, " +
             ":status, " +
             ":createdDate, " +
-            ":eventCount" +
+            ":eventCount," +
+            ":userIdentifier" +
             ") " +
             "ON CONFLICT (external_id) DO UPDATE SET " +
             "external_id = EXCLUDED.external_id, " +
@@ -72,7 +74,8 @@ public class AgreementDao {
             "description = EXCLUDED.description, " +
             "status = EXCLUDED.status, " +
             "created_date = EXCLUDED.created_date, " +
-            "event_count = EXCLUDED.event_count " +
+            "event_count = EXCLUDED.event_count," +
+            "user_identifier = EXCLUDED.user_identifier " +
             "WHERE EXCLUDED.event_count >= agreement.event_count";
 
     private static final String SEARCH_AGREEMENT =
