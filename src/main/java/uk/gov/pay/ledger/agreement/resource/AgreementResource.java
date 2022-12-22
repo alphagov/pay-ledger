@@ -17,6 +17,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -55,6 +56,8 @@ public class AgreementResource {
     @GET
     @Timed
     public Agreement get(@PathParam("agreementExternalId") String agreementExternalId,
+                         @QueryParam("account_id") String accountId,
+                         @QueryParam("service_id") String serviceId,
                          @HeaderParam(HEADER_PARAM_X_CONSISTENT) Boolean isConsistent,
                          @Context UriInfo uriInfo) {
         if (Boolean.TRUE.equals(isConsistent)) {
@@ -62,6 +65,8 @@ public class AgreementResource {
                 var eventDigest = eventService.getEventDigestForResource(agreementExternalId);
 
                 var agreementEntity = agreementService.findAgreementEntity(agreementExternalId)
+                        .filter(entity -> accountId == null || accountId.equals(entity.getGatewayAccountId()))
+                        .filter(entity -> serviceId == null || serviceId.equals(entity.getServiceId()))
                         .filter(projectedAgreementEntity -> databaseProjectionSnapshotIsUpToDateWithEventStream(projectedAgreementEntity, eventDigest))
                         .orElseGet(() -> agreementService.projectAgreement(eventDigest));
                 return Agreement.from(agreementEntity);
@@ -70,6 +75,8 @@ public class AgreementResource {
             }
         } else {
             return agreementService.findAgreementEntity(agreementExternalId)
+                    .filter(entity -> accountId == null || accountId.equals(entity.getGatewayAccountId()))
+                    .filter(entity -> serviceId == null || serviceId.equals(entity.getServiceId()))
                     .map(Agreement::from)
                     .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
         }
