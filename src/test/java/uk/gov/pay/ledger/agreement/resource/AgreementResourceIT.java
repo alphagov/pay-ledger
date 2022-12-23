@@ -24,19 +24,19 @@ import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.agreement.resource.AgreementSearchParams.DEFAULT_DISPLAY_SIZE;
 
-public class AgreementResourceIT {
+class AgreementResourceIT {
     @RegisterExtension
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private Integer port = rule.getAppRule().getLocalPort();
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         aDatabaseTestHelper(rule.getJdbi()).truncateAllData();
     }
 
     @Test
-    public void shouldGetAgreement() {
+    void shouldGetAgreement() {
         var fixture = AgreementFixture.anAgreementFixture("a-valid-agreement-id", "a-valid-service-id");
         fixture.setUserIdentifier("a-valid-user-identifier");
         fixture.insert(rule.getJdbi());
@@ -52,7 +52,7 @@ public class AgreementResourceIT {
     }
 
     @Test
-    public void shouldGetAgreementWithPaymentInstrument() {
+    void shouldGetAgreementWithPaymentInstrument() {
         var agreementFixture = AgreementFixture.anAgreementFixture("a-valid-agreement-id", "a-valid-service-id")
                 .insert(rule.getJdbi());
         var paymentInstrumentFixture = PaymentInstrumentFixture.aPaymentInstrumentFixture("a-payment-instrument-id", "a-valid-agreement-id", ZonedDateTime.now())
@@ -72,7 +72,7 @@ public class AgreementResourceIT {
     }
 
     @Test
-    public void shouldSearchEmptyWithNoAgreements() {
+    void shouldSearchEmptyWithNoAgreements() {
         given().port(port)
                 .contentType(JSON)
                 .queryParam("service_id", "a-valid-service-id")
@@ -87,7 +87,7 @@ public class AgreementResourceIT {
     }
 
     @Test
-    public void shouldSearchWithPaginationForAgreements() {
+    void shouldSearchWithPaginationForAgreements_defaultDisplaySize() {
         int numberOfAgreements = (int) Math.ceil(DEFAULT_DISPLAY_SIZE + (DEFAULT_DISPLAY_SIZE / 2));
         prepareAgreementsForService("a-valid-service-id", numberOfAgreements);
         given().port(port)
@@ -116,9 +116,28 @@ public class AgreementResourceIT {
                 .body("results.size()", is((int)(numberOfAgreements - DEFAULT_DISPLAY_SIZE)));
     }
 
+    @Test
+    void shouldSearchWithPaginationForAgreements_withCustomDisplaySize() {
+        prepareAgreementsForService("a-valid-service-id", 3);
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("service_id", "a-valid-service-id")
+                .queryParam("display_size", 2)
+                .queryParam("page", 2)
+                .get("/v1/agreement")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("total", is(3))
+                .body("count", is(1))
+                .body("page", is(2))
+                .body("results.size()", is(1));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = { "created", "CREATED" })
-    public void shouldSearchWithFilterParams(String searchStatus) {
+    void shouldSearchWithFilterParams(String searchStatus) {
         AgreementFixture.anAgreementFixture("a-one-agreement-id", "a-one-service-id", AgreementStatus.CREATED, "partial-ref-1").insert(rule.getJdbi());
         AgreementFixture.anAgreementFixture("a-two-agreement-id", "a-one-service-id", AgreementStatus.CREATED, "notmatchingref").insert(rule.getJdbi());
         AgreementFixture.anAgreementFixture("a-three-agreement-id", "a-one-service-id", AgreementStatus.ACTIVE, "anotherref").insert(rule.getJdbi());
@@ -142,7 +161,7 @@ public class AgreementResourceIT {
     }
 
     @Test
-    public void shouldGetConsistentAgreement_GetExistingProjectionWhenUpToDate() {
+    void shouldGetConsistentAgreement_GetExistingProjectionWhenUpToDate() {
         var agreementFixture = AgreementFixture.anAgreementFixture("agreement-id", "service-id", AgreementStatus.CREATED, "projected-agreement-reference");
         agreementFixture.setEventCount(1);
         agreementFixture.insert(rule.getJdbi());
@@ -171,7 +190,7 @@ public class AgreementResourceIT {
     }
 
     @Test
-    public void shouldGetConsistentAgreement_GetEventStreamCalculatedWhenProjectionCountBehind() {
+    void shouldGetConsistentAgreement_GetEventStreamCalculatedWhenProjectionCountBehind() {
         var agreementFixture = AgreementFixture.anAgreementFixture("agreement-id", "service-id", AgreementStatus.CREATED, "projected-agreement-reference");
         agreementFixture.setEventCount(1);
         agreementFixture.insert(rule.getJdbi());
@@ -212,7 +231,7 @@ public class AgreementResourceIT {
     }
 
     @Test
-    public void shouldGetConsistentAgreement_GetEventStreamCalculatedWhenProjectionMissing() {
+    void shouldGetConsistentAgreement_GetEventStreamCalculatedWhenProjectionMissing() {
         EventFixture.anEventFixture()
                 .withResourceExternalId("agreement-id")
                 .withServiceId("service-id")
@@ -237,7 +256,7 @@ public class AgreementResourceIT {
     }
 
     @Test
-    public void shouldGetConsistentAgreement_404GivenNoProjectionOrEvents() {
+    void shouldGetConsistentAgreement_404GivenNoProjectionOrEvents() {
         given()
                 .port(port)
                 .contentType(JSON)

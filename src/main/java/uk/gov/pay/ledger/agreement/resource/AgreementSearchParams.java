@@ -1,6 +1,8 @@
 package uk.gov.pay.ledger.agreement.resource;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.pay.ledger.common.search.SearchParams;
 import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
@@ -8,7 +10,6 @@ import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,8 +45,8 @@ public class AgreementSearchParams extends SearchParams {
     private Boolean exactReferenceMatch;
     @QueryParam("reference")
     private String reference;
-    @DefaultValue("true")
     private Long pageNumber = 1L;
+
     private Long displaySize = DEFAULT_DISPLAY_SIZE;
     private Map<String, Object> queryMap;
 
@@ -69,6 +70,13 @@ public class AgreementSearchParams extends SearchParams {
     @QueryParam("page")
     public void setPageNumber(Long pageNumber) {
         this.pageNumber = Objects.requireNonNullElse(pageNumber, DEFAULT_PAGE_NUMBER);
+    }
+
+    @Parameter(example = "10", schema = @Schema(defaultValue = "20"))
+    @DefaultValue("20")
+    @QueryParam("display_size")
+    public void setDisplaySize(Long displaySize) {
+        this.displaySize = displaySize;
     }
 
     public void setExactReferenceMatch(Boolean exactReferenceMatch) {
