@@ -966,6 +966,7 @@ components:
           - MISSING_MANDATORY_ATTRIBUTE
           - UNEXPECTED_ATTRIBUTE
           - ACCOUNT_DISABLED
+          - RECURRING_CARD_PAYMENTS_NOT_ALLOWED
           example: GENERIC
         message:
           type: array
