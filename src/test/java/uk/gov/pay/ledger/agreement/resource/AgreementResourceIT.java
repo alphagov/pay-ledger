@@ -21,6 +21,8 @@ import java.time.ZonedDateTime;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.agreement.resource.AgreementSearchParams.DEFAULT_DISPLAY_SIZE;
 
@@ -100,7 +102,12 @@ class AgreementResourceIT {
                 .body("total", is(numberOfAgreements))
                 .body("count", is((int)DEFAULT_DISPLAY_SIZE))
                 .body("page", is(1))
-                .body("results.size()", is((int)DEFAULT_DISPLAY_SIZE));
+                .body("results.size()", is((int)DEFAULT_DISPLAY_SIZE))
+                .body("_links.self.href", containsString("v1/agreement?service_id=a-valid-service-id&page=1&display_size=20"))
+                .body("_links.first_page.href", containsString("v1/agreement?service_id=a-valid-service-id&page=1&display_size=20"))
+                .body("_links.last_page.href", containsString("v1/agreement?service_id=a-valid-service-id&page=2&display_size=20"))
+                .body("_links.prev_page", is(nullValue()))
+                .body("_links.next_page.href", containsString("v1/agreement?service_id=a-valid-service-id&page=2&display_size=20"));
 
         given().port(port)
                 .contentType(JSON)
@@ -113,7 +120,12 @@ class AgreementResourceIT {
                 .body("total", is(numberOfAgreements))
                 .body("count", is((int)(numberOfAgreements - DEFAULT_DISPLAY_SIZE)))
                 .body("page", is(2))
-                .body("results.size()", is((int)(numberOfAgreements - DEFAULT_DISPLAY_SIZE)));
+                .body("results.size()", is((int)(numberOfAgreements - DEFAULT_DISPLAY_SIZE)))
+                .body("_links.self.href", containsString("v1/agreement?service_id=a-valid-service-id&page=2&display_size=20"))
+                .body("_links.first_page.href", containsString("v1/agreement?service_id=a-valid-service-id&page=1&display_size=20"))
+                .body("_links.last_page.href", containsString("v1/agreement?service_id=a-valid-service-id&page=2&display_size=20"))
+                .body("_links.prev_page.href", containsString("v1/agreement?service_id=a-valid-service-id&page=1&display_size=20"))
+                .body("_links.next_page", is(nullValue()));
     }
 
     @Test
