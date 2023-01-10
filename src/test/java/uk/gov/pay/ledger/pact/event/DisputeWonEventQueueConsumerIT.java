@@ -12,10 +12,13 @@ import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
+import uk.gov.pay.ledger.transaction.dao.TransactionDao;
+import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.QueueDisputeEventFixture;
 
@@ -23,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +37,10 @@ import static java.time.ZonedDateTime.ofInstant;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 import static uk.gov.pay.ledger.event.model.ResourceType.DISPUTE;
+import static uk.gov.pay.ledger.transaction.state.TransactionState.WON;
+import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 public class DisputeWonEventQueueConsumerIT {
     @Rule
@@ -46,12 +53,11 @@ public class DisputeWonEventQueueConsumerIT {
 
     private GsonBuilder gsonBuilder = new GsonBuilder();
     private byte[] currentMessage;
-    private String paymentExternalId = "payment-external-id";
+    private String resourceExternalId = "dispute-won-external-id";
     private final String gatewayAccountId = "a-gateway-account-id";
-    private final String resourceExternalId = paymentExternalId;
-    private final String parentsResourceExternalId = "external-id";
+    private final String parentsResourceExternalId = "parent-extid-dispute-won";
     private final String serviceId = "service-id";
-    private final ZonedDateTime disputeCreated = ofInstant(ofEpochSecond(1642579160L), UTC);
+    private final ZonedDateTime eventDate = ofInstant(ofEpochSecond(1642579160L), UTC);
 
     private QueueDisputeEventFixture eventFixture;
 
@@ -63,9 +69,9 @@ public class DisputeWonEventQueueConsumerIT {
                 ));
         eventFixture = QueueDisputeEventFixture.aQueueDisputeEventFixture()
                 .withLive(true)
-                .withResourceExternalId(paymentExternalId)
+                .withResourceExternalId(resourceExternalId)
                 .withParentResourceExternalId(parentsResourceExternalId)
-                .withEventDate(disputeCreated)
+                .withEventDate(eventDate)
                 .withServiceId(serviceId)
                 .withEventData(eventData)
                 .withEventType("DISPUTE_WON")
@@ -84,6 +90,7 @@ public class DisputeWonEventQueueConsumerIT {
     @Before
     public void setUp() {
         DatabaseTestHelper.aDatabaseTestHelper(appRule.getJdbi()).truncateAllData();
+        aTransactionFixture().withExternalId(parentsResourceExternalId).insert(appRule.getJdbi());
     }
 
     @Test
@@ -99,13 +106,21 @@ public class DisputeWonEventQueueConsumerIT {
         assertThat(events.isEmpty(), is(false));
         Event event = events.get(0);
         assertThat(event.getEventType(), is("DISPUTE_WON"));
-        assertThat(event.getEventDate(), is(disputeCreated));
+        assertThat(event.getEventDate(), is(eventDate));
         assertThat(event.getResourceType(), is(DISPUTE));
         assertThat(event.getResourceExternalId(), is(resourceExternalId));
         assertThat(event.getParentResourceExternalId(), is(parentsResourceExternalId));
 
         JsonNode eventData = new ObjectMapper().readTree(event.getEventData());
         assertThat(eventData.get("gateway_account_id").asText(), is(gatewayAccountId));
+
+        TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
+
+        Optional<TransactionEntity> transaction = transactionDao.findTransactionByExternalId(resourceExternalId);
+        assertThat(transaction.isPresent(), is(true));
+        assertThat(transaction.get().getExternalId(), is(resourceExternalId));
+        assertThat(transaction.get().getParentExternalId(), is(parentsResourceExternalId));
+        assertThat(transaction.get().getState(), is(WON));
     }
 
     public void setMessage(byte[] messageContents) {
