@@ -28,8 +28,7 @@ class AgreementDaoIT {
 
     @Test
     void shouldInsertAgreement() {
-        AgreementFixture fixture = AgreementFixture.anAgreementFixture();
-        fixture.setUserIdentifier("a-valid-user-identifier");
+        AgreementFixture fixture = AgreementFixture.anAgreementFixture().withUserIdentifier("a-valid-user-identifier");
         agreementDao.upsert(fixture.toEntity());
 
         AgreementEntity fetchedEntity = agreementDao.findByExternalId(fixture.getExternalId()).get();
@@ -79,7 +78,7 @@ class AgreementDaoIT {
         AgreementFixture agreementFixture = AgreementFixture.anAgreementFixture();
         var paymentInstrumentFixtureOne = PaymentInstrumentFixture.aPaymentInstrumentFixture("aaa", agreementFixture.getExternalId(), ZonedDateTime.now(ZoneOffset.UTC).minusDays(10));
         var paymentInstrumentFixtureTwo = PaymentInstrumentFixture.aPaymentInstrumentFixture("aab", agreementFixture.getExternalId(), ZonedDateTime.now(ZoneOffset.UTC));
-        var paymentInstrumentFixtureThree= PaymentInstrumentFixture.aPaymentInstrumentFixture("aac", agreementFixture.getExternalId(), ZonedDateTime.now(ZoneOffset.UTC).minusDays(5));
+        var paymentInstrumentFixtureThree = PaymentInstrumentFixture.aPaymentInstrumentFixture("aac", agreementFixture.getExternalId(), ZonedDateTime.now(ZoneOffset.UTC).minusDays(5));
         agreementDao.upsert(agreementFixture.toEntity());
         paymentInstrumentDao.upsert(paymentInstrumentFixtureOne.toEntity());
         paymentInstrumentDao.upsert(paymentInstrumentFixtureTwo.toEntity());
@@ -91,8 +90,12 @@ class AgreementDaoIT {
 
     @Test
     void shouldSearchAgreement() {
-        var fixture = AgreementFixture.anAgreementFixture("external-id", "service-id");
-        var secondFixture = AgreementFixture.anAgreementFixture("second-external-id", "second-service-id");
+        var fixture = AgreementFixture.anAgreementFixture()
+                .withExternalId("external-id")
+                .withServiceId("service-id");
+        var secondFixture = AgreementFixture.anAgreementFixture()
+                .withExternalId("second-external-id")
+                .withServiceId("second-service-id");
         agreementDao.upsert(fixture.toEntity());
         agreementDao.upsert(secondFixture.toEntity());
 
