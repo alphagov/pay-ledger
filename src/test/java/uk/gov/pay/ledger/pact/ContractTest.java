@@ -17,7 +17,9 @@ import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
+import uk.gov.pay.ledger.util.fixture.AgreementFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
+import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -602,6 +604,27 @@ public abstract class ContractTest {
                 .withGatewayAccountId(gatewayAccountId)
                 .withPaidOutDate(ZonedDateTime.parse("2020-09-19T19:05:00Z"))
                 .build()
+                .insert(app.getJdbi());
+    }
+
+    @State("3 agreements exist for account")
+    public void agreementsExist(Map<String, String> params) {
+        String accountId = params.get("account_id");
+
+        AgreementFixture.anAgreementFixture()
+                .withGatewayAccountId(accountId)
+                .withExternalId("agreement-1")
+                .withStatus(AgreementStatus.CREATED)
+                .insert(app.getJdbi());
+        AgreementFixture.anAgreementFixture()
+                .withGatewayAccountId(accountId)
+                .withExternalId("agreement-2")
+                .withStatus(AgreementStatus.CREATED)
+                .insert(app.getJdbi());
+        AgreementFixture.anAgreementFixture()
+                .withGatewayAccountId(accountId)
+                .withExternalId("agreement-3")
+                .withStatus(AgreementStatus.ACTIVE)
                 .insert(app.getJdbi());
     }
 

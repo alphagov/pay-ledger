@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
+import uk.gov.pay.ledger.agreement.entity.PaymentInstrumentEntity;
 import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.time.ZoneOffset;
@@ -12,11 +13,11 @@ import java.time.ZonedDateTime;
 public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEntity> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
-    private String serviceId = RandomStringUtils.randomAlphanumeric(26);
-    private String gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
-    private String externalId = RandomStringUtils.randomAlphanumeric(20);
-    private String reference = RandomStringUtils.randomAlphanumeric(10);
-    private String description = RandomStringUtils.randomAlphanumeric(20);
+    private String serviceId = "a-service-id";
+    private String gatewayAccountId = "1";
+    private String externalId = "an-external-id";
+    private String reference = "a-reference";
+    private String description = "a description";
     private AgreementStatus status = AgreementStatus.ACTIVE;
     private boolean live = false;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
@@ -26,24 +27,74 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
     private AgreementFixture() {
     }
 
-    public static AgreementFixture anAgreementFixture(String externalId, String serviceId) {
-        var fixture = new AgreementFixture();
-        fixture.setExternalId(externalId);
-        fixture.setServiceId(serviceId);
-        return fixture;
-    }
-
-    public static AgreementFixture anAgreementFixture(String externalId, String serviceId, AgreementStatus status, String reference) {
-        var fixture = new AgreementFixture();
-        fixture.setExternalId(externalId);
-        fixture.setServiceId(serviceId);
-        fixture.setStatus(status);
-        fixture.setReference(reference);
-        return fixture;
-    }
-
     public static AgreementFixture anAgreementFixture() {
         return new AgreementFixture();
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public AgreementFixture withExternalId(String externalId) {
+        this.externalId = externalId;
+        return this;
+    }
+
+    public AgreementFixture withGatewayAccountId(String gatewayAccountId) {
+        this.gatewayAccountId = gatewayAccountId;
+        return this;
+    }
+
+    public AgreementFixture withServiceId(String serviceId) {
+        this.serviceId = serviceId;
+        return this;
+    }
+
+    public AgreementFixture withReference(String reference) {
+        this.reference = reference;
+        return this;
+    }
+
+    public AgreementFixture withDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public AgreementFixture withStatus(AgreementStatus status) {
+        this.status = status;
+        return this;
+    }
+
+    public AgreementFixture withLive(Boolean live) {
+        this.live = live;
+        return this;
+    }
+
+    public AgreementFixture withCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
+        return this;
+    }
+
+    public AgreementFixture withEventCount(Integer eventCount) {
+        this.eventCount = eventCount;
+        return this;
+    }
+
+    public AgreementFixture withUserIdentifier(String userIdentifier) {
+        this.userIdentifier = userIdentifier;
+        return this;
     }
 
     @Override
@@ -86,45 +137,5 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
                 eventCount,
                 null,
                 userIdentifier);
-    }
-
-    public String getExternalId() {
-        return externalId;
-    }
-
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
-    }
-
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
-    }
-
-    public void setStatus(AgreementStatus status) {
-        this.status = status;
-    }
-
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
-
-    public void setEventCount(Integer eventCount) {
-        this.eventCount = eventCount;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public ZonedDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setUserIdentifier(String userIdentifier) {
-        this.userIdentifier = userIdentifier;
     }
 }
