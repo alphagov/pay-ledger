@@ -9,6 +9,8 @@ import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
 import uk.gov.pay.ledger.event.model.EventDigest;
+import uk.gov.pay.ledger.event.service.EventService;
+import uk.gov.pay.ledger.exception.EmptyEventsException;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
 import javax.ws.rs.WebApplicationException;
@@ -21,12 +23,14 @@ public class AgreementService {
     private final AgreementDao agreementDao;
     private final PaymentInstrumentDao paymentInstrumentDao;
     private final AgreementsFactory agreementEntityFactory;
+    private final EventService eventService;
 
     @Inject
-    public AgreementService(AgreementDao agreementDao, PaymentInstrumentDao paymentInstrumentDao, AgreementsFactory agreementsFactory) {
+    public AgreementService(AgreementDao agreementDao, PaymentInstrumentDao paymentInstrumentDao, AgreementsFactory agreementsFactory, EventService eventService) {
         this.agreementDao = agreementDao;
         this.paymentInstrumentDao = paymentInstrumentDao;
         this.agreementEntityFactory = agreementsFactory;
+        this.eventService = eventService;
     }
 
     public Optional<Agreement> findAgreement(String externalId) {
@@ -34,8 +38,26 @@ public class AgreementService {
                 .map(Agreement::from);
     }
 
-    public Optional<AgreementEntity> findAgreementEntity(String externalId) {
-        return agreementDao.findByExternalId(externalId);
+    public Optional<AgreementEntity> findAgreementEntity(
+            String externalId,
+            boolean isConsistent
+    ) {
+        if (isConsistent) {
+            EventDigest eventDigest;
+            try {
+                eventDigest = eventService.getEventDigestForResource(externalId);
+            }
+            catch (EmptyEventsException e) {
+                return Optional.empty();
+            }
+
+
+            return Optional.of(agreementDao.findByExternalId(externalId)
+                    .filter(projectedAgreementEntity -> databaseProjectionSnapshotIsUpToDateWithEventStream(projectedAgreementEntity, eventDigest))
+                    .orElse(projectAgreement(eventDigest)));
+        } else {
+            return agreementDao.findByExternalId(externalId);
+        }
     }
 
     public AgreementEntity projectAgreement(EventDigest eventDigest) {
@@ -74,5 +96,9 @@ public class AgreementService {
         return new AgreementSearchResponse(total, agreements.size(),
                 searchParams.getPageNumber(), agreements)
                 .withPaginationBuilder(paginationBuilder);
+    }
+
+    private boolean databaseProjectionSnapshotIsUpToDateWithEventStream(AgreementEntity agreementEntity, EventDigest eventDigest) {
+        return eventDigest.getEventCount() <= agreementEntity.getEventCount();
     }
 }
