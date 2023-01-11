@@ -13,6 +13,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -46,8 +47,15 @@ public class AgreementResource {
     @Timed
     public Agreement get(@PathParam("agreementExternalId") String agreementExternalId,
                          @HeaderParam(HEADER_PARAM_X_CONSISTENT) Boolean isConsistent,
+                         @QueryParam("account_id") String accountId,
+                         @QueryParam("service_id") String serviceId,
+                         @QueryParam("override_account_or_service_id_restriction") Boolean overrideFilterRestrictions,
                          @Context UriInfo uriInfo) {
-        return agreementService.findAgreementEntity(agreementExternalId, Boolean.TRUE.equals(isConsistent))
+        if (!Boolean.TRUE.equals(overrideFilterRestrictions) && accountId == null && serviceId == null) {
+            throw new WebApplicationException("One of [service_id] or [account_id] fields is required", 422);
+        }
+
+        return agreementService.findAgreementEntity(agreementExternalId, Boolean.TRUE.equals(isConsistent), accountId, serviceId)
                 .map(Agreement::from)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }

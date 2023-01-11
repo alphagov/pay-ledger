@@ -465,6 +465,7 @@ public class QueueMessageReceiverIT {
 
         given().port(rule.getAppRule().getLocalPort())
                 .contentType(JSON)
+                .queryParam("override_account_or_service_id_restriction", true)
                 .get("/v1/agreement/a-valid-agreement-id")
                 .then()
                 .statusCode(200)
@@ -517,6 +518,7 @@ public class QueueMessageReceiverIT {
 
         given().port(rule.getAppRule().getLocalPort())
                 .contentType(JSON)
+                .queryParam("override_account_or_service_id_restriction", true)
                 .get("/v1/agreement/" + agreementId)
                 .then()
                 .statusCode(200)
