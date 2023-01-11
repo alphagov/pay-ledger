@@ -42,16 +42,6 @@ class AgreementResourceTest {
     }
 
     @Test
-    public void searchShouldReturn422_WithMissingBothServiceIdAndGatewayAccountId() {
-        Response response = resources
-                .target("/v1/agreement")
-                .request()
-                .get();
-
-        assertThat(response.getStatus(), is(422));
-    }
-
-    @Test
     public void searchShouldReturn200_WithValidParams() {
         when(agreementService.searchAgreements(any(), any())).thenReturn(new AgreementSearchResponse(0L, 0L, 0L, List.of()));
         Response response = resources
@@ -93,6 +83,39 @@ class AgreementResourceTest {
                 .get();
 
         assertThat(response.getStatus(), is(400));
+    }
+
+    @Test
+    public void searchShouldReturn422_WithMissingBothServiceIdAndGatewayAccountId_WhenOverrideNotSpecified() {
+        Response response = resources
+                .target("/v1/agreement")
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void searchShouldReturn422_WithMissingBothServiceIdAndGatewayAccountId_WhenOverrideIsFalse() {
+        Response response = resources
+                .target("/v1/agreement")
+                .queryParam("override_account_or_service_id_restriction", false)
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void searchShouldReturn200_WithMissingBothServiceIdAndGatewayAccountId_WhenOverrideIsTrue() {
+        when(agreementService.searchAgreements(any(), any())).thenReturn(new AgreementSearchResponse(0L, 0L, 0L, List.of()));
+        Response response = resources
+                .target("/v1/agreement")
+                .queryParam("override_account_or_service_id_restriction", true)
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(200));
     }
 
     @Test
