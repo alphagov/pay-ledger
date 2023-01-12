@@ -17,6 +17,7 @@ import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.service.payments.commons.model.AuthorisationMode;
 import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZoneOffset;
@@ -78,6 +79,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String version3ds;
     private String agreementId;
     private Boolean disputed;
+    private AuthorisationMode authorisationMode = AuthorisationMode.WEB;
 
     private TransactionFixture() {
     }
@@ -351,6 +353,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withAuthorisationMode(AuthorisationMode authorisationMode) {
+        this.authorisationMode = authorisationMode;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -459,6 +466,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         transactionDetails.addProperty("user_email", refundedByUserEmail);
         transactionDetails.addProperty("card_type", defaultCardType);
         transactionDetails.addProperty("wallet", defaultWalletType);
+        transactionDetails.addProperty("authorisation_mode", authorisationMode.getName());
 
         if ("REFUND".equals(transactionType) || "DISPUTE".equals(transactionType)) {
             refundPaymentDetails.addProperty("card_brand_label", cardBrandLabel);

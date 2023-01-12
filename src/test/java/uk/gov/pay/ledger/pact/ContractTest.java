@@ -19,6 +19,7 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
+import uk.gov.service.payments.commons.model.AuthorisationMode;
 import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.time.ZonedDateTime;
@@ -625,6 +626,25 @@ public abstract class ContractTest {
                 .withGatewayAccountId(accountId)
                 .withExternalId("agreement-3")
                 .withStatus(AgreementStatus.ACTIVE)
+                .insert(app.getJdbi());
+    }
+
+    @State("a recurring card payment exists for agreement")
+    public void recurringCardPaymentExistsForAgreement(Map<String, String> params) {
+        String accountId = params.get("account_id");
+        String agreementId = params.get("agreement_id");
+
+        TransactionFixture.aTransactionFixture()
+                .withGatewayAccountId(accountId)
+                .withAgreementId(agreementId)
+                .withAuthorisationMode(AuthorisationMode.AGREEMENT)
+                .withDefaultTransactionDetails()
+                .insert(app.getJdbi());
+        TransactionFixture.aTransactionFixture()
+                .withGatewayAccountId(accountId)
+                .withAgreementId("other-agreement-id")
+                .withAuthorisationMode(AuthorisationMode.AGREEMENT)
+                .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
 
