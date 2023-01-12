@@ -22,6 +22,7 @@ public class AgreementSearchParams extends SearchParams {
 
     private static final String SERVICE_ID_FIELD = "service_id";
     private static final String GATEWAY_ACCOUNT_ID_FIELD = "account_id";
+    private static final String FILTERS_RESTRICTION_OVERRIDE_FIELD = "override_account_or_service_id_restriction";
     private static final String LIVE_FIELD = "live";
     private static final String STATUS_FIELD = "status";
     private static final String REFERENCE_FIELD = "reference";
@@ -38,6 +39,8 @@ public class AgreementSearchParams extends SearchParams {
     private Boolean live;
     @QueryParam("account_id")
     private List<String> gatewayAccountIds;
+    @QueryParam("override_account_or_service_id_restriction")
+    private Boolean overrideAccountOrServiceIdRestriction;
     @QueryParam("status")
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private AgreementStatus status;
@@ -52,7 +55,7 @@ public class AgreementSearchParams extends SearchParams {
 
     @AssertTrue(message = "One of field [" + SERVICE_ID_FIELD + "] or field [" + GATEWAY_ACCOUNT_ID_FIELD + "] are required")
     private boolean isServiceIdsOrGatewayAccountIds() {
-        return !(getServiceIds().isEmpty() && getGatewayAccountIds().isEmpty());
+        return Boolean.TRUE == getOverrideAccountOrServiceIdRestriction() || !(getServiceIds().isEmpty() && getGatewayAccountIds().isEmpty());
     }
 
     public void setServiceIds(List<String> serviceIds) {
@@ -61,6 +64,10 @@ public class AgreementSearchParams extends SearchParams {
 
     public void setGatewayAccountIds(List<String> gatewayAccountIds) {
         this.gatewayAccountIds = List.copyOf(gatewayAccountIds);
+    }
+
+    public void setOverrideAccountOrServiceIdRestriction(Boolean overrideAccountOrServiceIdRestriction) {
+        this.overrideAccountOrServiceIdRestriction = overrideAccountOrServiceIdRestriction;
     }
 
     public void setStatus(AgreementStatus status) {
@@ -153,6 +160,10 @@ public class AgreementSearchParams extends SearchParams {
 
     public List<String> getServiceIds() {
         return serviceIds;
+    }
+
+    public Boolean getOverrideAccountOrServiceIdRestriction() {
+        return overrideAccountOrServiceIdRestriction;
     }
 
     public AgreementStatus getStatus() {

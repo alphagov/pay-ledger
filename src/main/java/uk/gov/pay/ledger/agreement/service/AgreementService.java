@@ -13,6 +13,7 @@ import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.exception.EmptyEventsException;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -42,6 +43,15 @@ public class AgreementService {
             String externalId,
             boolean isConsistent
     ) {
+        return findAgreementEntity(externalId, isConsistent, null, null);
+    }
+
+    public Optional<AgreementEntity> findAgreementEntity(
+            String externalId,
+            boolean isConsistent,
+            @Nullable String accountId,
+            @Nullable String serviceId
+    ) {
         if (isConsistent) {
             EventDigest eventDigest;
             try {
@@ -51,12 +61,15 @@ public class AgreementService {
                 return Optional.empty();
             }
 
-
             return Optional.of(agreementDao.findByExternalId(externalId)
                     .filter(projectedAgreementEntity -> databaseProjectionSnapshotIsUpToDateWithEventStream(projectedAgreementEntity, eventDigest))
-                    .orElse(projectAgreement(eventDigest)));
+                    .orElse(projectAgreement(eventDigest)))
+                    .filter(agreement -> accountId == null || agreement.getGatewayAccountId().equals(accountId))
+                    .filter(agreement -> serviceId == null || agreement.getServiceId().equals(serviceId));
         } else {
-            return agreementDao.findByExternalId(externalId);
+            return agreementDao.findByExternalId(externalId)
+                    .filter(agreement -> accountId == null || agreement.getGatewayAccountId().equals(accountId))
+                    .filter(agreement -> serviceId == null || agreement.getServiceId().equals(serviceId));
         }
     }
 

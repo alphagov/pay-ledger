@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
@@ -38,16 +39,6 @@ class AgreementResourceTest {
     @BeforeEach
     public void setUp() {
         Mockito.reset(agreementService);
-    }
-
-    @Test
-    public void searchShouldReturn422_WithMissingBothServiceIdAndGatewayAccountId() {
-        Response response = resources
-                .target("/v1/agreement")
-                .request()
-                .get();
-
-        assertThat(response.getStatus(), is(422));
     }
 
     @Test
@@ -95,9 +86,84 @@ class AgreementResourceTest {
     }
 
     @Test
+    public void searchShouldReturn422_WithMissingBothServiceIdAndGatewayAccountId_WhenOverrideNotSpecified() {
+        Response response = resources
+                .target("/v1/agreement")
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void searchShouldReturn422_WithMissingBothServiceIdAndGatewayAccountId_WhenOverrideIsFalse() {
+        Response response = resources
+                .target("/v1/agreement")
+                .queryParam("override_account_or_service_id_restriction", false)
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void searchShouldReturn200_WithMissingBothServiceIdAndGatewayAccountId_WhenOverrideIsTrue() {
+        when(agreementService.searchAgreements(any(), any())).thenReturn(new AgreementSearchResponse(0L, 0L, 0L, List.of()));
+        Response response = resources
+                .target("/v1/agreement")
+                .queryParam("override_account_or_service_id_restriction", true)
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(200));
+    }
+
+    @Test
+    public void findShouldReturn422_IfFiltersNotProvidedAndOverrideNotSpecified() {
+        when(agreementService.findAgreementEntity("agreement-id", false, null, null))
+                .thenReturn(Optional.of(stubAgreement("agreement-id", 1)));
+
+        var response = resources
+                .target("/v1/agreement/agreement-id")
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void findShouldReturn422_IfFiltersNotProvidedAndOverrideIsFalse() {
+        when(agreementService.findAgreementEntity("agreement-id", false, null, null))
+                .thenReturn(Optional.of(stubAgreement("agreement-id", 1)));
+
+        var response = resources
+                .target("/v1/agreement/agreement-id")
+                .queryParam("override_account_or_service_id_restriction", false)
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void findShouldSucceedIfFiltersNotProvidedButOverrideIsTrue() {
+        when(agreementService.findAgreementEntity("agreement-id", false, null, null))
+                .thenReturn(Optional.of(stubAgreement("agreement-id", 1)));
+
+        var response = resources
+                .target("/v1/agreement/agreement-id")
+                .queryParam("override_account_or_service_id_restriction", true)
+                .request()
+                .get();
+
+        assertThat(response.getStatus(), is(200));
+    }
+
+    @Test
     public void findShouldReturn404_IfMissing() {
         Response response = resources
                 .target("/v1/agreement/missing-agreement-id")
+                .queryParam("override_account_or_service_id_restriction", true)
                 .request()
                 .get();
 
@@ -111,9 +177,17 @@ class AgreementResourceTest {
                 .thenReturn(Optional.empty());
         var response = resources
                 .target("/v1/agreement/" + resourceId)
+                .queryParam("override_account_or_service_id_restriction", true)
                 .request()
                 .header("X-Consistent", true)
                 .get();
         assertThat(response.getStatus(), is(404));
+    }
+
+    private AgreementEntity stubAgreement(String agreementId, Integer eventCount) {
+        var agreementEntity = new AgreementEntity();
+        agreementEntity.setExternalId(agreementId);
+        agreementEntity.setEventCount(eventCount);
+        return agreementEntity;
     }
 }

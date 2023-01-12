@@ -38,46 +38,6 @@ class AgreementResourceIT {
     }
 
     @Test
-    void shouldGetAgreement() {
-        var fixture = AgreementFixture.anAgreementFixture()
-                .withExternalId("a-valid-agreement-id")
-                .withServiceId("a-valid-service-id")
-                .withUserIdentifier("a-valid-user-identifier")
-                .insert(rule.getJdbi());
-
-        given().port(port)
-                .contentType(JSON)
-                .get("/v1/agreement/a-valid-agreement-id")
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON)
-                .body("external_id", is(fixture.getExternalId()))
-                .body("user_identifier", is("a-valid-user-identifier"));
-    }
-
-    @Test
-    void shouldGetAgreementWithPaymentInstrument() {
-        var agreementFixture = AgreementFixture.anAgreementFixture()
-                .withExternalId("a-valid-agreement-id")
-                .withServiceId("a-valid-service-id")
-                .insert(rule.getJdbi());
-        var paymentInstrumentFixture = PaymentInstrumentFixture.aPaymentInstrumentFixture("a-payment-instrument-id", "a-valid-agreement-id", ZonedDateTime.now())
-                .insert(rule.getJdbi());
-
-        given().port(port)
-                .contentType(JSON)
-                .get("/v1/agreement/a-valid-agreement-id")
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON)
-                .body("external_id", is(agreementFixture.getExternalId()))
-                .body("payment_instrument.external_id", is(paymentInstrumentFixture.getExternalId()))
-                .body("payment_instrument.type", is(PaymentInstrumentType.CARD.name()))
-                .body("payment_instrument.card_details.card_type", is(CardType.CREDIT.name().toLowerCase()))
-                .body("payment_instrument.card_details.first_digits_card_number", is("424242"));
-    }
-
-    @Test
     void shouldSearchEmptyWithNoAgreements() {
         given().port(port)
                 .contentType(JSON)
@@ -202,10 +162,55 @@ class AgreementResourceIT {
     }
 
     @Test
-    void shouldGetConsistentAgreement_GetExistingProjectionWhenUpToDate() {
+    void shouldGetAgreement() {
+        var serviceId = "a-valid-service-id";
+        var fixture = AgreementFixture.anAgreementFixture()
+                .withExternalId("a-valid-agreement-id")
+                .withServiceId(serviceId)
+                .withUserIdentifier("a-valid-user-identifier")
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("service_id", serviceId)
+                .get("/v1/agreement/a-valid-agreement-id")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("external_id", is(fixture.getExternalId()))
+                .body("user_identifier", is("a-valid-user-identifier"));
+    }
+
+    @Test
+    void shouldGetAgreementWithPaymentInstrument() {
+        var serviceId = "a-valid-service-id";
         var agreementFixture = AgreementFixture.anAgreementFixture()
+                .withExternalId("a-valid-agreement-id")
+                .withServiceId(serviceId)
+                .insert(rule.getJdbi());
+        var paymentInstrumentFixture = PaymentInstrumentFixture.aPaymentInstrumentFixture("a-payment-instrument-id", "a-valid-agreement-id", ZonedDateTime.now())
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("service_id", serviceId)
+                .get("/v1/agreement/a-valid-agreement-id")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("external_id", is(agreementFixture.getExternalId()))
+                .body("payment_instrument.external_id", is(paymentInstrumentFixture.getExternalId()))
+                .body("payment_instrument.type", is(PaymentInstrumentType.CARD.name()))
+                .body("payment_instrument.card_details.card_type", is(CardType.CREDIT.name().toLowerCase()))
+                .body("payment_instrument.card_details.first_digits_card_number", is("424242"));
+    }
+
+    @Test
+    void shouldGetConsistentAgreement_GetExistingProjectionWhenUpToDate() {
+        var serviceId = "a-valid-service-id";
+        AgreementFixture.anAgreementFixture()
                 .withExternalId("agreement-id")
-                .withServiceId("service-id")
+                .withServiceId(serviceId)
                 .withStatus(AgreementStatus.CREATED)
                 .withReference("projected-agreement-reference")
                 .withEventCount(1)
@@ -213,7 +218,7 @@ class AgreementResourceIT {
 
         EventFixture.anEventFixture()
                 .withResourceExternalId("agreement-id")
-                .withServiceId("service-id")
+                .withServiceId(serviceId)
                 .withEventType("AGREEMENT_CREATED")
                 .withEventData(
                         new JSONObject()
@@ -227,6 +232,7 @@ class AgreementResourceIT {
                 .port(port)
                 .contentType(JSON)
                 .header("X-Consistent", true)
+                .queryParam("service_id", serviceId)
                 .get("/v1/agreement/agreement-id")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
@@ -236,9 +242,10 @@ class AgreementResourceIT {
 
     @Test
     void shouldGetConsistentAgreement_GetEventStreamCalculatedWhenProjectionCountBehind() {
-        var agreementFixture = AgreementFixture.anAgreementFixture()
+        var serviceId = "a-valid-service-id";
+        AgreementFixture.anAgreementFixture()
                 .withExternalId("agreement-id")
-                .withServiceId("service-id")
+                .withServiceId(serviceId)
                 .withStatus(AgreementStatus.CREATED)
                 .withReference("projected-agreement-reference")
                 .withEventCount(1)
@@ -246,7 +253,7 @@ class AgreementResourceIT {
 
         EventFixture.anEventFixture()
                 .withResourceExternalId("agreement-id")
-                .withServiceId("service-id")
+                .withServiceId(serviceId)
                 .withEventType("AGREEMENT_CREATED")
                 .withEventData(
                         new JSONObject()
@@ -258,7 +265,7 @@ class AgreementResourceIT {
 
         EventFixture.anEventFixture()
                 .withResourceExternalId("agreement-id")
-                .withServiceId("service-id")
+                .withServiceId(serviceId)
                 .withEventType("AGREEMENT_SETUP")
                 .withEventData(
                         new JSONObject()
@@ -271,6 +278,7 @@ class AgreementResourceIT {
                 .port(port)
                 .contentType(JSON)
                 .header("X-Consistent", true)
+                .queryParam("service_id", serviceId)
                 .get("/v1/agreement/agreement-id")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
@@ -281,9 +289,10 @@ class AgreementResourceIT {
 
     @Test
     void shouldGetConsistentAgreement_GetEventStreamCalculatedWhenProjectionMissing() {
+        var serviceId = "a-valid-service-id";
         EventFixture.anEventFixture()
                 .withResourceExternalId("agreement-id")
-                .withServiceId("service-id")
+                .withServiceId(serviceId)
                 .withEventType("AGREEMENT_CREATED")
                 .withEventData(
                         new JSONObject()
@@ -297,6 +306,7 @@ class AgreementResourceIT {
                 .port(port)
                 .contentType(JSON)
                 .header("X-Consistent", true)
+                .queryParam("service_id", serviceId)
                 .get("/v1/agreement/agreement-id")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
@@ -310,7 +320,27 @@ class AgreementResourceIT {
                 .port(port)
                 .contentType(JSON)
                 .header("X-Consistent", true)
+                .queryParam("service_id", "a-service-id")
                 .get("/v1/agreement/agreement-id")
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
+    void shouldGetAgreement_ShouldApplySpecifiedFilters() {
+        var agreementId = "a-valid-agreement-id";
+        AgreementFixture.anAgreementFixture()
+                .withExternalId(agreementId)
+                .withServiceId("a-valid-service-id")
+                .withUserIdentifier("a-valid-user-identifier")
+                .insert(rule.getJdbi());
+
+        given()
+                .port(port)
+                .contentType(JSON)
+                .queryParam("account_id", "wrong-account-id")
+                .queryParam("service_id", "wrong-service-id")
+                .get("/v1/agreement/" + agreementId)
                 .then()
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode());
     }

@@ -13,6 +13,7 @@ import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.exception.EmptyEventsException;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -108,10 +109,67 @@ public class AgreementServiceTest {
         assertThat(result, is(Optional.empty()));
     }
 
+    @Test
+    public void findShouldApplyFiltersWhenConsistentIsFalse() {
+        var resourceId = "agreement-id";
+        var accountId = "123";
+        var serviceId = "service-id";
+        var agreement = stubAgreement(resourceId, 1, accountId, serviceId);
+        when(agreementDao.findByExternalId(resourceId))
+                .thenReturn(Optional.of(agreement));
+
+        BiFunction<String, String, Optional<AgreementEntity>> findAgreement = (String accountFilter, String serviceFilter) ->
+                agreementService.findAgreementEntity(resourceId, false, accountFilter, serviceFilter);
+
+        assertThat(findAgreement.apply(accountId, serviceId), is(Optional.of(agreement)));
+        assertThat(findAgreement.apply(accountId, null), is(Optional.of(agreement)));
+        assertThat(findAgreement.apply(null, serviceId), is(Optional.of(agreement)));
+        assertThat(findAgreement.apply(null, null), is(Optional.of(agreement)));
+        assertThat(findAgreement.apply("456", "other-service-id"), is(Optional.empty()));
+        assertThat(findAgreement.apply(null, "other-service-id"), is(Optional.empty()));
+        assertThat(findAgreement.apply("456", null), is(Optional.empty()));
+        assertThat(findAgreement.apply(accountId, "other-service-id"), is(Optional.empty()));
+        assertThat(findAgreement.apply("456", serviceId), is(Optional.empty()));
+    }
+
+    @Test
+    public void findShouldApplyFiltersWhenConsistentIsTrue() {
+        var resourceId = "agreement-id";
+        var accountId = "123";
+        var serviceId = "service-id";
+        var agreement = stubAgreement(resourceId, 1, accountId, serviceId);
+        when(eventService.getEventDigestForResource(resourceId))
+                .thenReturn(stubEventDigest(resourceId, 1));
+        when(agreementDao.findByExternalId(resourceId))
+                .thenReturn(Optional.of(agreement));
+
+        BiFunction<String, String, Optional<AgreementEntity>> findAgreement = (String accountFilter, String serviceFilter) ->
+                agreementService.findAgreementEntity(resourceId, true, accountFilter, serviceFilter);
+
+        assertThat(findAgreement.apply(accountId, serviceId), is(Optional.of(agreement)));
+        assertThat(findAgreement.apply(accountId, null), is(Optional.of(agreement)));
+        assertThat(findAgreement.apply(null, serviceId), is(Optional.of(agreement)));
+        assertThat(findAgreement.apply(null, null), is(Optional.of(agreement)));
+        assertThat(findAgreement.apply("456", "other-service-id"), is(Optional.empty()));
+        assertThat(findAgreement.apply(null, "other-service-id"), is(Optional.empty()));
+        assertThat(findAgreement.apply("456", null), is(Optional.empty()));
+        assertThat(findAgreement.apply(accountId, "other-service-id"), is(Optional.empty()));
+        assertThat(findAgreement.apply("456", serviceId), is(Optional.empty()));
+    }
+
     private AgreementEntity stubAgreement(String agreementId, Integer eventCount) {
         var agreementEntity = new AgreementEntity();
         agreementEntity.setExternalId(agreementId);
         agreementEntity.setEventCount(eventCount);
+        return agreementEntity;
+    }
+
+    private AgreementEntity stubAgreement(String agreementId, Integer eventCount, String accountId, String serviceId) {
+        var agreementEntity = new AgreementEntity();
+        agreementEntity.setExternalId(agreementId);
+        agreementEntity.setEventCount(eventCount);
+        agreementEntity.setGatewayAccountId(accountId);
+        agreementEntity.setServiceId(serviceId);
         return agreementEntity;
     }
 
