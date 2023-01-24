@@ -29,27 +29,17 @@ public class AgreementSearchParams extends SearchParams {
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final long DEFAULT_MAX_DISPLAY_SIZE = 20L;
     public static final long DEFAULT_DISPLAY_SIZE = 20L;
-
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
-    @NotNull
-    @QueryParam("service_id")
+
     private List<String> serviceIds;
-    @QueryParam("live")
     private Boolean live;
-    @QueryParam("account_id")
     private List<String> gatewayAccountIds;
-    @QueryParam("override_account_or_service_id_restriction")
     private Boolean overrideAccountOrServiceIdRestriction;
-    @QueryParam("status")
-    @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private AgreementStatus status;
-    @QueryParam("exact_reference_match")
     private Boolean exactReferenceMatch;
-    @QueryParam("reference")
     private String reference;
     private Long pageNumber = 1L;
-
     private Long displaySize = DEFAULT_DISPLAY_SIZE;
     private Map<String, Object> queryMap;
 
@@ -58,38 +48,59 @@ public class AgreementSearchParams extends SearchParams {
         return Boolean.TRUE == getOverrideAccountOrServiceIdRestriction() || !(getServiceIds().isEmpty() && getGatewayAccountIds().isEmpty());
     }
 
+    @QueryParam("live")
+    @Parameter(description = "Limit the results to agreement(s) relating to live (not test) accounts", example="true")
+    public void setLive(Boolean live) {
+        this.live = live;
+    }
+
+    @QueryParam("service_id")
+    @Parameter(description = "Service id(s)", example = "1")
     public void setServiceIds(List<String> serviceIds) {
         this.serviceIds = List.copyOf(serviceIds);
     }
 
+    @QueryParam("account_id")
+    @Parameter(description = "Gateway account id(s)", example = "1")
     public void setGatewayAccountIds(List<String> gatewayAccountIds) {
         this.gatewayAccountIds = List.copyOf(gatewayAccountIds);
     }
 
+    @QueryParam("override_account_or_service_id_restriction")
+    @Parameter(description = "Unless set to true, either service_id or account_id field must be completed", example="true")
     public void setOverrideAccountOrServiceIdRestriction(Boolean overrideAccountOrServiceIdRestriction) {
         this.overrideAccountOrServiceIdRestriction = overrideAccountOrServiceIdRestriction;
     }
 
+    @QueryParam("status")
+    @Parameter(description = "Status of agreement", example = "CREATED")
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     public void setStatus(AgreementStatus status) {
         this.status = status;
     }
 
+
     @QueryParam("page")
+    @Parameter(description = "Page number of results", example = "1")
     public void setPageNumber(Long pageNumber) {
         this.pageNumber = Objects.requireNonNullElse(pageNumber, DEFAULT_PAGE_NUMBER);
     }
 
-    @Parameter(example = "10", schema = @Schema(defaultValue = "20"))
-    @DefaultValue("20")
     @QueryParam("display_size")
+    @Parameter(description = "Number of results to be displayed", example = "10", schema = @Schema(defaultValue = "20"))
+    @DefaultValue("20")
     public void setDisplaySize(Long displaySize) {
         this.displaySize = displaySize;
     }
 
+    @QueryParam("exact_reference_match")
+    @Parameter(description = "Limit the results to exact matches for the given reference", example = "true")
     public void setExactReferenceMatch(Boolean exactReferenceMatch) {
         this.exactReferenceMatch = exactReferenceMatch;
     }
 
+    @QueryParam("reference")
+    @Parameter(description = "The reference provided by the service when creating the agreement(s)", example = "12345")
     public void setReference(String reference) {
         this.reference = reference;
     }
@@ -152,6 +163,10 @@ public class AgreementSearchParams extends SearchParams {
             }
         }
         return Map.copyOf(queryMap);
+    }
+
+    public Boolean getLive() {
+        return live;
     }
 
     public List<String> getGatewayAccountIds() {

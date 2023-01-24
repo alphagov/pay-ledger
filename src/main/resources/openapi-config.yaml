@@ -5,6 +5,7 @@ resourceClasses:
   - uk.gov.pay.ledger.report.resource.PerformanceReportResource
   - uk.gov.pay.ledger.report.resource.ReportResource
   - uk.gov.pay.ledger.transaction.resource.TransactionResource
+  - uk.gov.pay.ledger.agreement.resource.AgreementResource
 readAllResources: true
 sortOutput: true
 prettyPrint: true

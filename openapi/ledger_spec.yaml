@@ -31,6 +31,141 @@ paths:
       summary: "Healthcheck endpoint the ledger (checks postgresql, sqs queue)"
       tags:
       - Other
+  /v1/agreement:
+    get:
+      operationId: search
+      parameters:
+      - description: Service id(s)
+        example: 1
+        in: query
+        name: service_id
+        schema:
+          type: array
+          items:
+            type: string
+      - description: Limit the results to agreement(s) relating to live (not test)
+          accounts
+        example: true
+        in: query
+        name: live
+        schema:
+          type: boolean
+      - description: Gateway account id(s)
+        example: 1
+        in: query
+        name: account_id
+        schema:
+          type: array
+          items:
+            type: string
+      - description: "Unless set to true, either service_id or account_id field must\
+          \ be completed"
+        example: true
+        in: query
+        name: override_account_or_service_id_restriction
+        schema:
+          type: boolean
+      - description: Status of agreement
+        example: CREATED
+        in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CREATED
+          - ACTIVE
+          - CANCELLED
+          - EXPIRED
+      - description: Limit the results to exact matches for the given reference
+        example: true
+        in: query
+        name: exact_reference_match
+        schema:
+          type: boolean
+      - description: The reference provided by the service when creating the agreement(s)
+        example: 12345
+        in: query
+        name: reference
+        schema:
+          type: string
+      - description: Page number of results
+        example: 1
+        in: query
+        name: page
+        schema:
+          type: integer
+          format: int64
+      - description: Number of results to be displayed
+        example: 10
+        in: query
+        name: display_size
+        schema:
+          type: integer
+          format: int64
+          default: 20
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementSearchResponse'
+          description: OK
+        "404":
+          description: Not found
+      summary: Search agreements by query params
+      tags:
+      - Agreements
+  /v1/agreement/{agreementExternalId}:
+    get:
+      operationId: get
+      parameters:
+      - description: The unique external id for the agreement
+        example: cgc1ocvh0pt9fqs0ma67r42l58
+        in: path
+        name: agreementExternalId
+        required: true
+        schema:
+          type: string
+      - description: "If true, an additional check will be carried out to ensure that\
+          \ ledger database is up-to-date with latest events before responding"
+        example: true
+        in: header
+        name: X-Consistent
+        schema:
+          type: boolean
+      - description: The gateway account id linked to the agreement
+        example: 1
+        in: query
+        name: account_id
+        schema:
+          type: string
+      - description: The service id linked to the agreement
+        example: 1
+        in: query
+        name: service_id
+        schema:
+          type: string
+      - description: "If false, the account_id or service_id must be specified"
+        example: false
+        in: query
+        name: override_account_or_service_id_restriction
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
+          description: OK
+        "404":
+          description: Not found
+        "422":
+          description: Invalid parameters. One of service_id or account_id fields
+            is required unless override_account_or_service_id_restriction=true
+      summary: Find agreement by ID
+      tags:
+      - Agreements
   /v1/event:
     post:
       operationId: writeEvent
@@ -110,7 +245,7 @@ paths:
       - Events
   /v1/payout:
     get:
-      operationId: search
+      operationId: search_1
       parameters:
       - description: "State of payout. allowed values are intransit, paidout, failed"
         in: query
@@ -892,6 +1027,51 @@ components:
         postcode:
           type: string
           example: Ex 8RR
+    Agreement:
+      type: object
+      properties:
+        created_date:
+          type: string
+          format: date-time
+        description:
+          type: string
+        external_id:
+          type: string
+        live:
+          type: boolean
+        payment_instrument:
+          $ref: '#/components/schemas/PaymentInstrument'
+        reference:
+          type: string
+        service_id:
+          type: string
+        status:
+          type: string
+          enum:
+          - CREATED
+          - ACTIVE
+          - CANCELLED
+          - EXPIRED
+        user_identifier:
+          type: string
+    AgreementSearchResponse:
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/PaginationBuilder'
+        count:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agreement'
+        total:
+          type: integer
+          format: int64
     AuthorisationSummary:
       type: object
       properties:
@@ -1153,6 +1333,22 @@ components:
         href:
           type: string
           example: https://an.example.link
+    PaymentInstrument:
+      type: object
+      properties:
+        agreement_external_id:
+          type: string
+        card_details:
+          $ref: '#/components/schemas/CardDetails'
+        created_date:
+          type: string
+          format: date-time
+        external_id:
+          type: string
+        type:
+          type: string
+          enum:
+          - CARD
     PayoutSearchResponse:
       type: object
       properties:
