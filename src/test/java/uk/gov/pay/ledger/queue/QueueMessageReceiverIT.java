@@ -436,8 +436,7 @@ public class QueueMessageReceiverIT {
                         gsonBuilder.create()
                                 .toJson(Map.of(
                                         "reference", "agreement-reference",
-                                        "description", "agreement description text",
-                                        "status", "CREATED"
+                                        "description", "agreement description text"
                                 ))
                 )
                 .insert(rule.getSqsClient());
@@ -446,11 +445,10 @@ public class QueueMessageReceiverIT {
                 .withResourceExternalId("a-valid-agreement-id")
                 .withResourceType(ResourceType.AGREEMENT)
                 .withEventDate(CREATED_AT.plusMinutes(10))
-                .withEventType("AGREEMENT_SETUP")
+                .withEventType("AGREEMENT_SET_UP")
                 .withEventData(
                         gsonBuilder.create()
                                 .toJson(Map.of(
-                                        "status", "ACTIVE",
                                         "payment_instrument_external_id", "a-valid-instrument-id"
                                 ))
                 )
@@ -481,8 +479,7 @@ public class QueueMessageReceiverIT {
                         gsonBuilder.create()
                                 .toJson(Map.of(
                                         "reference", "agreement-reference",
-                                        "description", "agreement description text",
-                                        "status", "ACTIVE"
+                                        "description", "agreement description text"
                                 ))
                 )
                 .insert(rule.getSqsClient());

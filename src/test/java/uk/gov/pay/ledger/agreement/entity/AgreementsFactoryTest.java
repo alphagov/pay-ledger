@@ -27,8 +27,7 @@ class AgreementsFactoryTest {
                         .toJson(Map.of(
                                 "reference", "agreement-reference",
                                 "description", "agreement description text",
-                                "user_identifier", "a-valid-user-identifier",
-                                "status", "CREATED"
+                                "user_identifier", "a-valid-user-identifier"
                         ))
                 )
                 .toEntity();
