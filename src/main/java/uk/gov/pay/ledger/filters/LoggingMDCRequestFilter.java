@@ -6,6 +6,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import java.util.Optional;
 
+import static uk.gov.service.payments.logging.LoggingKeys.AGREEMENT_EXTERNAL_ID;
 import static uk.gov.service.payments.logging.LoggingKeys.LEDGER_EVENT_ID;
 
 public class LoggingMDCRequestFilter implements ContainerRequestFilter {
@@ -23,6 +24,9 @@ public class LoggingMDCRequestFilter implements ContainerRequestFilter {
 
         getPathParameterFromRequest("parentTransactionExternalId", requestContext)
                 .ifPresent(parentTransactionExternalId -> MDC.put(PARENT_TRANSACTION_EXTERNAL_ID, parentTransactionExternalId));
+
+        getPathParameterFromRequest("agreementExternalId", requestContext)
+                .ifPresent(agreementExternalId -> MDC.put(AGREEMENT_EXTERNAL_ID, agreementExternalId));
     }
 
     private Optional<String> getPathParameterFromRequest(String parameterName, ContainerRequestContext requestContext) {
