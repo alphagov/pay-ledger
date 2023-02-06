@@ -266,7 +266,7 @@ class AgreementResourceIT {
         EventFixture.anEventFixture()
                 .withResourceExternalId("agreement-id")
                 .withServiceId(serviceId)
-                .withEventType("AGREEMENT_SETUP")
+                .withEventType("AGREEMENT_SET_UP")
                 .withEventData(
                         new JSONObject()
                                 .put("status", "ACTIVE")

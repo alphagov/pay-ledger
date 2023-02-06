@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.ReportingConfig;
-import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
@@ -41,13 +39,10 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.SUCCESS;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
-import static uk.gov.pay.ledger.util.fixture.QueueDisputeEventFixture.aQueueDisputeEventFixture;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
@@ -441,8 +436,7 @@ public class QueueMessageReceiverIT {
                         gsonBuilder.create()
                                 .toJson(Map.of(
                                         "reference", "agreement-reference",
-                                        "description", "agreement description text",
-                                        "status", "CREATED"
+                                        "description", "agreement description text"
                                 ))
                 )
                 .insert(rule.getSqsClient());
@@ -451,11 +445,10 @@ public class QueueMessageReceiverIT {
                 .withResourceExternalId("a-valid-agreement-id")
                 .withResourceType(ResourceType.AGREEMENT)
                 .withEventDate(CREATED_AT.plusMinutes(10))
-                .withEventType("AGREEMENT_SETUP")
+                .withEventType("AGREEMENT_SET_UP")
                 .withEventData(
                         gsonBuilder.create()
                                 .toJson(Map.of(
-                                        "status", "ACTIVE",
                                         "payment_instrument_external_id", "a-valid-instrument-id"
                                 ))
                 )
@@ -486,8 +479,7 @@ public class QueueMessageReceiverIT {
                         gsonBuilder.create()
                                 .toJson(Map.of(
                                         "reference", "agreement-reference",
-                                        "description", "agreement description text",
-                                        "status", "ACTIVE"
+                                        "description", "agreement description text"
                                 ))
                 )
                 .insert(rule.getSqsClient());

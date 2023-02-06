@@ -54,7 +54,12 @@ public enum SalientEventType {
 
     PAYOUT_CREATED,
     PAYOUT_PAID,
-    PAYOUT_FAILED;
+    PAYOUT_FAILED,
+
+    AGREEMENT_CREATED,
+    AGREEMENT_SET_UP,
+    AGREEMENT_CANCELLED_BY_SERVICE,
+    AGREEMENT_CANCELLED_BY_USER;
 
     public static Optional<SalientEventType> from(String eventName) {
         return Arrays.stream(SalientEventType.values())
