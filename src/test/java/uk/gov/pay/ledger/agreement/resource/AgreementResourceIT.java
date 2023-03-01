@@ -345,6 +345,134 @@ class AgreementResourceIT {
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode());
     }
 
+    @Test
+    void shouldGetAgreementEvents_shouldReturnEventsForAgreementAndItsPaymentInstruments() {
+        var agreementId = "agreement-id";
+        var paymentInstrumentId = "payment-instrument-id";
+        var serviceId = "a-valid-service-id";
+
+        AgreementFixture.anAgreementFixture()
+                .withExternalId(agreementId)
+                .withServiceId(serviceId)
+                .withStatus(AgreementStatus.CREATED)
+                .insert(rule.getJdbi());
+        
+        PaymentInstrumentFixture.aPaymentInstrumentFixture()
+                .withExternalId(paymentInstrumentId)
+                .withAgreementExternalId(agreementId)
+                .insert(rule.getJdbi());
+
+        EventFixture.anEventFixture()
+                .withResourceExternalId(agreementId)
+                .withServiceId(serviceId)
+                .withEventType("AGREEMENT_CREATED")
+                .withEventDate(ZonedDateTime.parse("2007-12-03T10:15:30+00:00[Europe/London]"))
+                .withLive(true)
+                .withEventData(
+                        new JSONObject()
+                                .put("reference", "event-stream-reference")
+                                .put("status", "CREATED")
+                                .toString()
+                )
+                .insert(rule.getJdbi());
+
+        EventFixture.anEventFixture()
+                .withResourceExternalId(agreementId)
+                .withServiceId(serviceId)
+                .withEventType("AGREEMENT_SET_UP")
+                .withEventDate(ZonedDateTime.parse("2007-12-03T13:15:30+00:00[Europe/London]"))
+                .withLive(true)
+                .withEventData(
+                        new JSONObject()
+                                .put("status", "ACTIVE")
+                                .toString()
+                )
+                .insert(rule.getJdbi());
+        
+        EventFixture.anEventFixture()
+                .withResourceExternalId(paymentInstrumentId)
+                .withServiceId(serviceId)
+                .withEventType("PAYMENT_INSTRUMENT_CREATED")
+                .withEventDate(ZonedDateTime.parse("2007-12-03T13:30:30+00:00[Europe/London]"))
+                .withLive(true)
+                .withEventData(
+                        new JSONObject()
+                                .put("status", "CREATED")
+                                .toString()
+                )
+                .insert(rule.getJdbi());
+
+        given()
+                .port(port)
+                .contentType(JSON)
+                .header("X-Consistent", true)
+                .queryParam("service_id", serviceId)
+                .get("/v1/agreement/agreement-id/event")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("events.size()", is(3))
+                .body("events[0].resource_external_id", is(agreementId))
+                .body("events[0].resource_type", is("AGREEMENT"))
+                .body("events[0].event_type", is("AGREEMENT_CREATED"))
+                .body("events[0].timestamp", is("2007-12-03T10:15:30.000Z"))
+                .body("events[0].live", is(true))
+                .body("events[0].service_id", is(serviceId))
+                .body("events[0].data.reference", is("event-stream-reference"))
+                .body("events[0].data.status", is("CREATED"))
+                .body("events[1].resource_external_id", is(agreementId))
+                .body("events[1].resource_type", is("AGREEMENT"))
+                .body("events[1].event_type", is("AGREEMENT_SET_UP"))
+                .body("events[1].timestamp", is("2007-12-03T13:15:30.000Z"))
+                .body("events[1].live", is(true))
+                .body("events[1].service_id", is(serviceId))
+                .body("events[1].data.status", is("ACTIVE"))
+                .body("events[2].resource_external_id", is(paymentInstrumentId))
+                .body("events[2].resource_type", is("PAYMENT_INSTRUMENT"))
+                .body("events[2].event_type", is("PAYMENT_INSTRUMENT_CREATED"))
+                .body("events[2].timestamp", is("2007-12-03T13:30:30.000Z"))
+                .body("events[2].live", is(true))
+                .body("events[2].service_id", is(serviceId))
+                .body("events[2].data.status", is("CREATED"));
+    }
+
+    @Test
+    void shouldGetAgreementEvents_shouldReturn404WhenAgreementNotFound() {
+        var serviceId = "a-valid-service-id";
+
+        AgreementFixture.anAgreementFixture()
+                .withExternalId("agreement-id")
+                .withServiceId(serviceId)
+                .withStatus(AgreementStatus.CREATED)
+                .insert(rule.getJdbi());
+
+        given()
+                .port(port)
+                .contentType(JSON)
+                .header("X-Consistent", true)
+                .queryParam("service_id", serviceId)
+                .get("/v1/agreement/wrong-agreement-id/event")
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
+    void shouldGetAgreementEvents_shouldReturn404WhenServiceIdIncorrect() {
+        AgreementFixture.anAgreementFixture()
+                .withExternalId("agreement-id")
+                .withServiceId("service-id")
+                .withStatus(AgreementStatus.CREATED)
+                .insert(rule.getJdbi());
+
+        given()
+                .port(port)
+                .contentType(JSON)
+                .header("X-Consistent", true)
+                .queryParam("service_id", "wrong-service-id")
+                .get("/v1/agreement/agreement-id/event")
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
     private void prepareAgreementsForService(String serviceId, int numberOfAgreements) {
         for (int i = 0; i < numberOfAgreements; i++) {
             AgreementFixture.anAgreementFixture()

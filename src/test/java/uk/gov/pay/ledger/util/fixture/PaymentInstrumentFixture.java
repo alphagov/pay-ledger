@@ -36,11 +36,10 @@ public class PaymentInstrumentFixture implements DbFixture<PaymentInstrumentFixt
     }
 
     public static PaymentInstrumentFixture aPaymentInstrumentFixture(String externalId, String agreementExternalId, ZonedDateTime createdDate) {
-        var fixture = new PaymentInstrumentFixture();
-        fixture.setExternalId(externalId);
-        fixture.setAgreementExternalId(agreementExternalId);
-        fixture.setCreatedDate(createdDate);
-        return fixture;
+        return new PaymentInstrumentFixture()
+                .withExternalId(externalId)
+                .withAgreementExternalId(agreementExternalId)
+                .withCreatedDate(createdDate);
     }
 
     public static PaymentInstrumentFixture aPaymentInstrumentFixture() {
@@ -109,14 +108,6 @@ public class PaymentInstrumentFixture implements DbFixture<PaymentInstrumentFixt
         return externalId;
     }
 
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
-    }
-
-    public void setAgreementExternalId(String agreementExternalId) {
-        this.agreementExternalId = agreementExternalId;
-    }
-
     public String getAgreementExternalId() {
         return agreementExternalId;
     }
@@ -125,7 +116,18 @@ public class PaymentInstrumentFixture implements DbFixture<PaymentInstrumentFixt
         return createdDate;
     }
 
-    public void setCreatedDate(ZonedDateTime createdDate) {
+    public PaymentInstrumentFixture withExternalId(String externalId) {
+        this.externalId = externalId;
+        return this;
+    }
+
+    public PaymentInstrumentFixture withAgreementExternalId(String agreementExternalId) {
+        this.agreementExternalId = agreementExternalId;
+        return this;
+    }
+
+    public PaymentInstrumentFixture withCreatedDate(ZonedDateTime createdDate) {
         this.createdDate = createdDate;
+        return this;
     }
 }

@@ -166,6 +166,35 @@ paths:
       summary: Find agreement by ID
       tags:
       - Agreements
+  /v1/agreement/{agreementExternalId}/event:
+    get:
+      operationId: getEvents
+      parameters:
+      - description: The unique external id for the agreement
+        example: cgc1ocvh0pt9fqs0ma67r42l58
+        in: path
+        name: agreementExternalId
+        required: true
+        schema:
+          type: string
+      - description: The service id linked to the agreement
+        example: 1
+        in: query
+        name: service_id
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementEventsResponse'
+          description: OK
+        "404":
+          description: Not found
+      summary: Find agreement events by agreement ID
+      tags:
+      - Agreements
   /v1/event:
     post:
       operationId: writeEvent
@@ -1054,6 +1083,13 @@ components:
           - EXPIRED
         user_identifier:
           type: string
+    AgreementEventsResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDto'
     AgreementSearchResponse:
       type: object
       properties:
@@ -1203,6 +1239,28 @@ components:
         sqs_message_id:
           type: string
           example: fe689579-63af-40bf-a783-23de97134b5f
+    EventDto:
+      type: object
+      properties:
+        data:
+          type: object
+          additionalProperties:
+            type: object
+        event_type:
+          type: string
+          example: CREATED
+        live:
+          type: boolean
+        resource_external_id:
+          type: string
+        resource_type:
+          type: string
+          example: AGREEMENT
+        service_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
     EventMessageDto:
       type: object
       properties:
