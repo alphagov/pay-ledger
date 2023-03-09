@@ -10,7 +10,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
@@ -222,9 +222,9 @@ public class TransactionServiceTest {
         when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
                 .thenReturn(transactionEntityList);
 
-        Event event = EventFixture.anEventFixture().withEventType(SalientEventType.AUTHORISATION_CANCELLED.toString())
+        EventEntity event = EventFixture.anEventFixture().withEventType(SalientEventType.AUTHORISATION_CANCELLED.toString())
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
-        List<Event> eventList = List.of(event);
+        List<EventEntity> eventList = List.of(event);
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
         TransactionEventResponse transactionEventResponse
@@ -243,9 +243,9 @@ public class TransactionServiceTest {
         when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
                 .thenReturn(transactionEntityList);
 
-        Event event = EventFixture.anEventFixture().withEventType(SalientEventType.AUTHORISATION_CANCELLED.toString())
+        EventEntity event = EventFixture.anEventFixture().withEventType(SalientEventType.AUTHORISATION_CANCELLED.toString())
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
-        List<Event> eventList = List.of(event);
+        List<EventEntity> eventList = List.of(event);
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
         TransactionEventResponse transactionEventResponse
@@ -264,11 +264,11 @@ public class TransactionServiceTest {
         when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
                 .thenReturn(transactionEntityList);
 
-        Event event = EventFixture.anEventFixture().withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
-        Event eventWithoutStateMapping = EventFixture.anEventFixture()
+        EventEntity event = EventFixture.anEventFixture().withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
+        EventEntity eventWithoutStateMapping = EventFixture.anEventFixture()
                 .withEventType("EVENT_WITHOUT_ANY_STATE_MAPPING")
                 .withResourceExternalId(transactionEntityList.get(1).getExternalId()).toEntity();
-        List<Event> eventList = List.of(event, eventWithoutStateMapping);
+        List<EventEntity> eventList = List.of(event, eventWithoutStateMapping);
 
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
@@ -300,21 +300,21 @@ public class TransactionServiceTest {
         when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
                 .thenReturn(transactionEntityList);
 
-        Event event1ForStateSubmitted = EventFixture.anEventFixture()
+        EventEntity event1ForStateSubmitted = EventFixture.anEventFixture()
                 .withEventType("PAYMENT_STARTED")
                 .withEventDate(ZonedDateTime.now())
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
-        Event event2ForStateSubmitted = EventFixture.anEventFixture()
+        EventEntity event2ForStateSubmitted = EventFixture.anEventFixture()
                 .withEventType("GATEWAY_REQUIRES_3DS_AUTHORISATION")
                 .withEventDate(ZonedDateTime.now().plusDays(1))
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
-        Event event1ForStateError = EventFixture.anEventFixture()
+        EventEntity event1ForStateError = EventFixture.anEventFixture()
                 .withEventType("REFUND_SUBMITTED")
                 .withResourceType(ResourceType.REFUND)
                 .withEventDate(ZonedDateTime.now().plusDays(2))
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
 
-        List<Event> eventList = List.of(event1ForStateSubmitted, event2ForStateSubmitted, event1ForStateError);
+        List<EventEntity> eventList = List.of(event1ForStateSubmitted, event2ForStateSubmitted, event1ForStateError);
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
         TransactionEventResponse transactionEventResponse
@@ -335,20 +335,20 @@ public class TransactionServiceTest {
         when(mockTransactionDao.findTransactionByExternalOrParentIdAndGatewayAccountId(anyString(), anyString()))
                 .thenReturn(transactionEntityList);
 
-        Event event1ForStateSubmitted = EventFixture.anEventFixture()
+        EventEntity event1ForStateSubmitted = EventFixture.anEventFixture()
                 .withEventType("AUTHORISATION_SUCCEEDED")
                 .withEventDate(ZonedDateTime.now())
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
-        Event event2ForStateSubmitted = EventFixture.anEventFixture()
+        EventEntity event2ForStateSubmitted = EventFixture.anEventFixture()
                 .withEventType("USER_APPROVED_FOR_CAPTURE_AWAITING_SERVICE_APPROVAL")
                 .withEventDate(ZonedDateTime.now().plusDays(1))
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
-        Event eventForUnknownType = EventFixture.anEventFixture()
+        EventEntity eventForUnknownType = EventFixture.anEventFixture()
                 .withEventType("UNKNOWN_EVENT")
                 .withEventDate(ZonedDateTime.now().plusDays(1))
                 .withResourceExternalId(transactionEntityList.get(0).getExternalId()).toEntity();
 
-        List<Event> eventList = List.of(event1ForStateSubmitted, event2ForStateSubmitted, eventForUnknownType);
+        List<EventEntity> eventList = List.of(event1ForStateSubmitted, event2ForStateSubmitted, eventForUnknownType);
         when(mockEventDao.findEventsForExternalIds(any())).thenReturn(eventList);
 
         TransactionEventResponse transactionEventResponse
@@ -388,7 +388,7 @@ public class TransactionServiceTest {
         assertThat(mayBeTransactionView.get().getPaymentProvider(), is("sandbox"));
     }
 
-    private void assertTransactionEvent(Event event, TransactionEvent transactionEvent, Long amount, String state) {
+    private void assertTransactionEvent(EventEntity event, TransactionEvent transactionEvent, Long amount, String state) {
         try {
             assertThat(transactionEvent.getState() == null ? null : transactionEvent.getState().getStatus(), is(state));
             assertThat(transactionEvent.getAmount(), is(amount));

@@ -14,17 +14,17 @@ public class EventDigestTest {
 
     @Test
     public void shouldDeriveNonNullParentExternalIdCorrectlyFromEventDigest() {
-        Event eventWithParentExternalId = anEventFixture()
+        EventEntity eventWithParentExternalId = anEventFixture()
                 .withEventDate(ZonedDateTime.now().minusHours(2L))
                 .withParentResourceExternalId("parent_external_id")
                 .toEntity();
 
-        Event eventWithOutParentExternalId = anEventFixture()
+        EventEntity eventWithOutParentExternalId = anEventFixture()
                 .withEventDate(ZonedDateTime.now())
                 .withParentResourceExternalId(null)
                 .toEntity();
 
-        Event latestEventWithOutParentExternalId = anEventFixture()
+        EventEntity latestEventWithOutParentExternalId = anEventFixture()
                 .withEventDate(ZonedDateTime.now().plusDays(2))
                 .withParentResourceExternalId(null)
                 .toEntity();
@@ -37,15 +37,15 @@ public class EventDigestTest {
 
     @Test
     public void shouldDeriveParentExternalIdToNullIfNoEventsHasParentExternalId() {
-        Event eventWithoutParentExternalId = anEventFixture()
+        EventEntity eventWithoutParentExternalId = anEventFixture()
                 .withParentResourceExternalId(null)
                 .toEntity();
 
-        Event event2WithoutParentExternalId = anEventFixture()
+        EventEntity event2WithoutParentExternalId = anEventFixture()
                 .withParentResourceExternalId(null)
                 .toEntity();
 
-        Event event3WithoutParentExternalId = anEventFixture()
+        EventEntity event3WithoutParentExternalId = anEventFixture()
                 .withParentResourceExternalId(null)
                 .toEntity();
 
@@ -57,16 +57,16 @@ public class EventDigestTest {
 
     @Test
     public void shouldDeriveNonNullServiceIdCorrectlyFromEventDigest() {
-        Event eventWithServiceId = anEventFixture()
+        EventEntity eventWithServiceId = anEventFixture()
                 .withEventDate(ZonedDateTime.now().minusHours(2L))
                 .withServiceId("service-id")
                 .toEntity();
 
-        Event eventWithOutServiceId = anEventFixture()
+        EventEntity eventWithOutServiceId = anEventFixture()
                 .withEventDate(ZonedDateTime.now())
                 .toEntity();
 
-        Event latestEventWithOutServiceId = anEventFixture()
+        EventEntity latestEventWithOutServiceId = anEventFixture()
                 .withEventDate(ZonedDateTime.now().plusDays(2))
                 .withServiceId(null)
                 .toEntity();
@@ -79,15 +79,15 @@ public class EventDigestTest {
 
     @Test
     public void shouldDeriveServiceIdToNullIfNoEventsHasServiceId() {
-        Event eventWithoutServiceId = anEventFixture()
+        EventEntity eventWithoutServiceId = anEventFixture()
                 .withParentResourceExternalId(null)
                 .toEntity();
 
-        Event event2WithoutServiceId = anEventFixture()
+        EventEntity event2WithoutServiceId = anEventFixture()
                 .withParentResourceExternalId(null)
                 .toEntity();
 
-        Event event3WithoutServiceId = anEventFixture()
+        EventEntity event3WithoutServiceId = anEventFixture()
                 .withParentResourceExternalId(null)
                 .toEntity();
 
@@ -99,8 +99,8 @@ public class EventDigestTest {
 
     @Test
     public void shouldBeLiveTrueIfContainsTrueEvent() {
-        Event eventWithNullLiveValue = anEventFixture().withLive(null).toEntity();
-        Event eventWithTrueLiveValue = anEventFixture().withLive(true).toEntity();
+        EventEntity eventWithNullLiveValue = anEventFixture().withLive(null).toEntity();
+        EventEntity eventWithTrueLiveValue = anEventFixture().withLive(true).toEntity();
 
         EventDigest eventDigest = EventDigest.fromEventList(
                 List.of(eventWithTrueLiveValue, eventWithNullLiveValue));
@@ -110,8 +110,8 @@ public class EventDigestTest {
 
     @Test
     public void shouldBeLiveFalseIfContainsFalseEvent() {
-        Event eventWithNullLiveValue = anEventFixture().withLive(null).toEntity();
-        Event eventWithFalseLiveValue = anEventFixture().withLive(false).toEntity();
+        EventEntity eventWithNullLiveValue = anEventFixture().withLive(null).toEntity();
+        EventEntity eventWithFalseLiveValue = anEventFixture().withLive(false).toEntity();
 
         EventDigest eventDigest = EventDigest.fromEventList(
                 List.of(eventWithFalseLiveValue, eventWithNullLiveValue));
@@ -121,7 +121,7 @@ public class EventDigestTest {
     
     @Test
     public void shouldBeLiveNullIfContainsOnlyNullEvents() {
-        Event eventWithNullLiveValue = anEventFixture().withLive(null).toEntity();
+        EventEntity eventWithNullLiveValue = anEventFixture().withLive(null).toEntity();
 
         EventDigest eventDigest = EventDigest.fromEventList(
                 List.of(eventWithNullLiveValue));

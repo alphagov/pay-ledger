@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.queue.EventMessageHandler;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 
@@ -26,7 +26,7 @@ public class EventResourceTest {
     private static final EventMessageHandler eventMessageHandler = mock(EventMessageHandler.class);
     private static final Long eventId = 1L;
     private static final String nonExistentId = "I'm not really here";
-    private final Event event = EventFixture.anEventFixture()
+    private final EventEntity event = EventFixture.anEventFixture()
             .withId(eventId)
             .toEntity();
 
@@ -38,18 +38,7 @@ public class EventResourceTest {
     public void setup() {
         when(dao.getById(eventId)).thenReturn(Optional.of(event));
     }
-
-    @Test
-    public void shouldReturnEventIfItExists() {
-        Event returnedEvent = resources.target("/v1/event/" + eventId).request().get(Event.class);
-        assertThat(returnedEvent.getResourceExternalId(), is(event.getResourceExternalId()));
-    }
-
-    @Test
-    public void shouldReturn404IfEventDoesNotExist() {
-        Response response = resources.target("/v1/event/" + nonExistentId).request().get();
-        assertThat(response.getStatus(), is(404));
-    }
+    
 
     @Test
     public void shouldReturn400IfFromAndToDatesNotSuppliedToTickerEndpoint() {

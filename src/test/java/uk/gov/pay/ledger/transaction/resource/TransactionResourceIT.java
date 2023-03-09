@@ -6,7 +6,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -284,7 +284,7 @@ public class TransactionResourceIT {
                 .withDefaultTransactionDetails();
         transactionFixture.insert(rule.getJdbi());
 
-        Event event = EventFixture.anEventFixture()
+        EventEntity event = EventFixture.anEventFixture()
                 .withResourceExternalId(transactionFixture.getExternalId())
                 .withEventDate(ZonedDateTime.parse("2019-07-31T09:52:43.451Z"))
                 .insert(rule.getJdbi())

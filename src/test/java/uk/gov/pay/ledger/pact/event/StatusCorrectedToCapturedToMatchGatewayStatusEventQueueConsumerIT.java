@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
@@ -88,7 +88,7 @@ public class StatusCorrectedToCapturedToMatchGatewayStatusEventQueueConsumerIT {
         Map<String, Object> transactionDetails = new Gson().fromJson(transaction.get().getTransactionDetails(), Map.class);
         assertThat(transactionDetails.get("captured_date"), is("2018-03-12T16:25:01.123456Z"));
 
-        Event event = eventDao.getEventsByResourceExternalId(externalId).get(0);
+        EventEntity event = eventDao.getEventsByResourceExternalId(externalId).get(0);
         Map<String, Object> eventDetails = new Gson().fromJson(event.getEventData(), Map.class);
         assertThat(eventDetails.get("gateway_event_date"),  is("2018-03-12T16:25:01.123456Z"));
         assertThat(eventDetails.get("captured_date"),  is("2018-03-12T16:25:01.123456Z"));

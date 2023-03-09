@@ -4,13 +4,13 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-public class EventFixture implements DbFixture<EventFixture, Event> {
+public class EventFixture implements DbFixture<EventFixture, EventEntity> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private String sqsMessageId = RandomStringUtils.randomAlphanumeric(50);
     private String serviceId;
@@ -119,8 +119,8 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
     }
 
     @Override
-    public Event toEntity() {
-        return new Event(id, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
+    public EventEntity toEntity() {
+        return new EventEntity(id, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
     }
 
     public Long getId() {
@@ -151,7 +151,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         return eventData;
     }
 
-    public EventFixture from(Event event) {
+    public EventFixture from(EventEntity event) {
         id = event.getId();
         sqsMessageId = event.getSqsMessageId();
         resourceType = event.getResourceType();

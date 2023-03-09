@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.model.EventTicker;
 import uk.gov.pay.ledger.exception.ErrorResponse;
 import uk.gov.pay.ledger.queue.EventMessage;
@@ -24,10 +23,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -49,22 +46,6 @@ public class EventResource {
     public EventResource(EventDao eventDao, EventMessageHandler eventMessageHandler) {
         this.eventDao = eventDao;
         this.eventMessageHandler = eventMessageHandler;
-    }
-
-    @Path("/{eventId}")
-    @GET
-    @Timed
-    @Operation(
-            summary = "Find event by ID (id of event table)",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Event.class))),
-                    @ApiResponse(responseCode = "404", description = "Not found")
-            }
-    )
-    public Event getEvent(@PathParam("eventId") Long eventId) {
-        LOGGER.info("Get event request: {}", eventId);
-        return eventDao.getById(eventId)
-                .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
 
     @POST
