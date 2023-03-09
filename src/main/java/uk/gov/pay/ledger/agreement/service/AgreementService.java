@@ -10,7 +10,7 @@ import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
 import uk.gov.pay.ledger.event.model.EventDigest;
-import uk.gov.pay.ledger.event.model.EventDto;
+import uk.gov.pay.ledger.event.model.Event;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.exception.EmptyEventsException;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
@@ -122,14 +122,14 @@ public class AgreementService {
                 .withPaginationBuilder(paginationBuilder);
     }
 
-    public List<EventDto> findEvents(String agreementExternalId, String serviceId) {
+    public List<Event> findEvents(String agreementExternalId, String serviceId) {
         if (findAgreementEntity(agreementExternalId, true, null, serviceId).isEmpty()) {
             throw new WebApplicationException(format("Agreement with id [%s] not found", agreementExternalId), Response.Status.NOT_FOUND);
         }
 
         var events = agreementDao.findAssociatedEvents(agreementExternalId);
 
-        return events.stream().map(event -> EventDto.from(event, objectMapper)).collect(Collectors.toList());
+        return events.stream().map(event -> Event.from(event, objectMapper)).collect(Collectors.toList());
     }
 
     private boolean databaseProjectionSnapshotIsUpToDateWithEventStream(AgreementEntity agreementEntity, EventDigest eventDigest) {
