@@ -7,7 +7,7 @@ import com.google.inject.Inject;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.event.model.EventEntity;
+import uk.gov.pay.ledger.event.dao.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.gatewayaccountmetadata.service.GatewayAccountMetadataService;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;

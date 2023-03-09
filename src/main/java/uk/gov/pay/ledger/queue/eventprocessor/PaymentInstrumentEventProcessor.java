@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
-import uk.gov.pay.ledger.event.model.EventEntity;
+import uk.gov.pay.ledger.event.dao.entity.EventEntity;
 import uk.gov.pay.ledger.event.service.EventService;
 
 public class PaymentInstrumentEventProcessor extends EventProcessor {

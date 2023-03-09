@@ -1,6 +1,6 @@
 package uk.gov.pay.ledger.queue;
 
-import uk.gov.pay.ledger.event.model.EventEntity;
+import uk.gov.pay.ledger.event.dao.entity.EventEntity;
 import uk.gov.service.payments.commons.queue.model.QueueMessage;
 
 import java.util.Optional;

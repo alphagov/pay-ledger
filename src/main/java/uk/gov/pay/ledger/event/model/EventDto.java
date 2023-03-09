@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.ledger.event.dao.entity.EventEntity;
 import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
 
 import java.io.IOException;
