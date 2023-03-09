@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.transaction.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TransactionEvent {
 
-    private static Logger logger = LoggerFactory.getLogger(TransactionFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionEvent.class);
 
     @JsonIgnore
     private final String externalId;
@@ -70,8 +70,8 @@ public class TransactionEvent {
             logger.error("Error parsing transaction event data [Transaction external ID - {}] [errorMessage={}]",
                     transactionEntity.getExternalId(),
                     e.getMessage());
+            return null;
         }
-        return null;
     }
 
     public String getExternalId() {

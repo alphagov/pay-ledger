@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.agreement.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.agreement.dao.AgreementDao;
 import uk.gov.pay.ledger.agreement.dao.PaymentInstrumentDao;
@@ -9,6 +10,7 @@ import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
 import uk.gov.pay.ledger.event.model.EventDigest;
+import uk.gov.pay.ledger.event.model.EventDto;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.exception.EmptyEventsException;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
@@ -17,21 +19,30 @@ import javax.annotation.Nullable;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 public class AgreementService {
     private final AgreementDao agreementDao;
     private final PaymentInstrumentDao paymentInstrumentDao;
     private final AgreementsFactory agreementEntityFactory;
     private final EventService eventService;
+    private final ObjectMapper objectMapper;
 
     @Inject
-    public AgreementService(AgreementDao agreementDao, PaymentInstrumentDao paymentInstrumentDao, AgreementsFactory agreementsFactory, EventService eventService) {
+    public AgreementService(AgreementDao agreementDao,
+                            PaymentInstrumentDao paymentInstrumentDao,
+                            AgreementsFactory agreementsFactory,
+                            EventService eventService,
+                            ObjectMapper objectMapper) {
         this.agreementDao = agreementDao;
         this.paymentInstrumentDao = paymentInstrumentDao;
         this.agreementEntityFactory = agreementsFactory;
         this.eventService = eventService;
+        this.objectMapper = objectMapper;
     }
 
     public Optional<Agreement> findAgreement(String externalId) {
@@ -109,6 +120,16 @@ public class AgreementService {
         return new AgreementSearchResponse(total, agreements.size(),
                 searchParams.getPageNumber(), agreements)
                 .withPaginationBuilder(paginationBuilder);
+    }
+
+    public List<EventDto> findEvents(String agreementExternalId, String serviceId) {
+        if (findAgreementEntity(agreementExternalId, true, null, serviceId).isEmpty()) {
+            throw new WebApplicationException(format("Agreement with id [%s] not found", agreementExternalId), Response.Status.NOT_FOUND);
+        }
+
+        var events = agreementDao.findAssociatedEvents(agreementExternalId);
+
+        return events.stream().map(event -> EventDto.from(event, objectMapper)).collect(Collectors.toList());
     }
 
     private boolean databaseProjectionSnapshotIsUpToDateWithEventStream(AgreementEntity agreementEntity, EventDigest eventDigest) {

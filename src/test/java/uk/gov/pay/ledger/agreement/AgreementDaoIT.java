@@ -1,13 +1,17 @@
 package uk.gov.pay.ledger.agreement;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.agreement.dao.AgreementDao;
 import uk.gov.pay.ledger.agreement.dao.PaymentInstrumentDao;
 import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
+import uk.gov.pay.ledger.event.dao.EventDao;
+import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
+import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.PaymentInstrumentFixture;
 
 import java.time.ZoneOffset;
@@ -17,6 +21,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 
 class AgreementDaoIT {
 
@@ -25,6 +30,12 @@ class AgreementDaoIT {
 
     private final AgreementDao agreementDao = new AgreementDao(rule.getJdbi());
     private final PaymentInstrumentDao paymentInstrumentDao = new PaymentInstrumentDao(rule.getJdbi());
+    private final EventDao eventDao = rule.getJdbi().onDemand(EventDao.class);
+
+    @AfterEach
+    void tearDown() {
+        aDatabaseTestHelper(rule.getJdbi()).truncateAllData();
+    }
 
     @Test
     void shouldInsertAgreement() {
@@ -113,5 +124,88 @@ class AgreementDaoIT {
 
         var missing = agreementDao.searchAgreements(missingParams);
         assertThat(missing.size(), is(0));
+    }
+
+    @Test
+    void shouldFindAssociatedEventsForAnAgreementAndItsPaymentInstruments() {
+        var serviceId = "service-id";
+        var agreementId = "agreement-id";
+        var differentAgreementId = "different-agreement-id";
+        var oldPaymentInstrumentId = "old-payment-instrument-id";
+        var newPaymentInstrumentId = "new-payment-instrument-id";
+        var differentPaymentInstrumentId = "etc-payment-instrument-id";
+        
+        var agreementFixture = AgreementFixture.anAgreementFixture()
+                .withExternalId(agreementId)
+                .withServiceId(serviceId);
+        var differentAgreementFixture = AgreementFixture.anAgreementFixture()
+                .withExternalId(differentAgreementId)
+                .withServiceId(serviceId);
+        agreementDao.upsert(agreementFixture.toEntity());
+        agreementDao.upsert(differentAgreementFixture.toEntity());
+        
+        var oldPaymentInstrument = PaymentInstrumentFixture.aPaymentInstrumentFixture()
+                .withExternalId(oldPaymentInstrumentId)
+                .withAgreementExternalId(agreementId);
+        var newPaymentInstrument = PaymentInstrumentFixture.aPaymentInstrumentFixture()
+                .withExternalId(newPaymentInstrumentId)
+                .withAgreementExternalId(agreementId);
+        var differentPaymentInstrument = PaymentInstrumentFixture.aPaymentInstrumentFixture()
+                .withExternalId(differentPaymentInstrumentId)
+                .withAgreementExternalId(differentAgreementId);
+        paymentInstrumentDao.upsert(oldPaymentInstrument.toEntity());
+        paymentInstrumentDao.upsert(newPaymentInstrument.toEntity());
+        paymentInstrumentDao.upsert(differentPaymentInstrument.toEntity());
+
+        var agreementEvent1 = EventFixture.anEventFixture()
+                .withResourceExternalId(agreementId)
+                .withServiceId(serviceId)
+                .withResourceType(ResourceType.AGREEMENT)
+                .withEventType("CREATED")
+                .withEventData("{\"data\": \"Event 1\"}");
+        var agreementEvent2 = EventFixture.anEventFixture()
+                .withResourceExternalId(agreementId)
+                .withServiceId(serviceId)
+                .withResourceType(ResourceType.AGREEMENT)
+                .withEventType("AGREEMENT_SET_UP")
+                .withEventData("{\"data\": \"Event 2\"}");
+        var differentAgreementEvent = EventFixture.anEventFixture()
+                .withResourceExternalId(differentAgreementId)
+                .withServiceId(serviceId)
+                .withResourceType(ResourceType.AGREEMENT)
+                .withEventType("CREATED")
+                .withEventData("{\"data\": \"Event 3\"}");
+        var oldPaymentInstrumentEvent = EventFixture.anEventFixture()
+                .withResourceExternalId(agreementId)
+                .withServiceId(serviceId)
+                .withResourceType(ResourceType.PAYMENT_INSTRUMENT)
+                .withEventType("CREATED")
+                .withEventData("{\"data\": \"Event 4\"}");
+        var newPaymentInstrumentEvent = EventFixture.anEventFixture()
+                .withResourceExternalId(agreementId)
+                .withServiceId(serviceId)
+                .withResourceType(ResourceType.PAYMENT_INSTRUMENT)
+                .withEventType("CREATED")
+                .withEventData("{\"data\": \"Event 5\"}");
+        var differentPaymentInstrumentEvent = EventFixture.anEventFixture()
+                .withResourceExternalId(differentAgreementId)
+                .withServiceId(serviceId)
+                .withResourceType(ResourceType.PAYMENT_INSTRUMENT)
+                .withEventType("CREATED")
+                .withEventData("{\"data\": \"Event 6\"}");
+        eventDao.insertEventWithResourceTypeId(agreementEvent1.toEntity());
+        eventDao.insertEventWithResourceTypeId(agreementEvent2.toEntity());
+        eventDao.insertEventWithResourceTypeId(differentAgreementEvent.toEntity());
+        eventDao.insertEventWithResourceTypeId(oldPaymentInstrumentEvent.toEntity());
+        eventDao.insertEventWithResourceTypeId(newPaymentInstrumentEvent.toEntity());
+        eventDao.insertEventWithResourceTypeId(differentPaymentInstrumentEvent.toEntity());
+        
+        var results = agreementDao.findAssociatedEvents(agreementId);
+        
+        assertThat(results.size(), is(4));
+        assertThat(results.get(0).getEventData(), is("{\"data\": \"Event 1\"}"));
+        assertThat(results.get(1).getEventData(), is("{\"data\": \"Event 2\"}"));
+        assertThat(results.get(2).getEventData(), is("{\"data\": \"Event 4\"}"));
+        assertThat(results.get(3).getEventData(), is("{\"data\": \"Event 5\"}"));
     }
 }

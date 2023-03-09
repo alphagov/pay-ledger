@@ -9,11 +9,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import uk.gov.pay.ledger.agreement.model.Agreement;
+import uk.gov.pay.ledger.agreement.model.AgreementEventsResponse;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
-import uk.gov.pay.ledger.event.model.Event;
-import uk.gov.pay.ledger.payout.model.PayoutSearchResponse;
-import uk.gov.pay.ledger.transaction.search.common.TransactionSearchParams;
 
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
@@ -90,5 +88,23 @@ public class AgreementResource {
         return agreementService.findAgreementEntity(agreementExternalId, Boolean.TRUE.equals(isConsistent), accountId, serviceId)
                 .map(Agreement::from)
                 .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
+    }
+
+    @Path("/{agreementExternalId}/event")
+    @GET
+    @Timed
+    @Operation(
+            summary = "Find agreement events by agreement ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AgreementEventsResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
+    public AgreementEventsResponse getEvents(@Parameter(description = "The unique external id for the agreement", example = "cgc1ocvh0pt9fqs0ma67r42l58")
+                                 @PathParam("agreementExternalId") String agreementExternalId,
+                                 @Parameter(description = "The service id linked to the agreement", example = "1")
+                                 @QueryParam("service_id") String serviceId,
+                                 @Context UriInfo uriInfo) {
+        return new AgreementEventsResponse(agreementService.findEvents(agreementExternalId, serviceId));
     }
 }

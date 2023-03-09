@@ -6,6 +6,8 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
+import uk.gov.pay.ledger.event.dao.mapper.EventMapper;
+import uk.gov.pay.ledger.event.model.Event;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +42,7 @@ public class AgreementDao {
             SELECT_AGREEMENT_WITH_PAYMENT_INSTRUMENT +
             "WHERE a.external_id = :externalId";
 
-    private final String UPSERT_AGREEMENT = "INSERT INTO agreement " +
+    private static final String UPSERT_AGREEMENT = "INSERT INTO agreement " +
             "(" +
             "external_id," +
             "gateway_account_id, " +
@@ -87,6 +89,21 @@ public class AgreementDao {
             "FROM agreement a " +
             ":searchExtraFields";
 
+    private static final String SELECT_ASSOCIATED_EVENTS = "SELECT results.* FROM " +
+            "(" +
+                "SELECT e.id, e.sqs_message_id, e.service_id, e.live, 'payment_instrument' AS resource_type_name, " +
+                "e.resource_external_id, e.parent_resource_external_id, e.event_date, e.event_type, e.event_data " +
+                "FROM payment_instrument pi " +
+                "JOIN event e ON e.resource_external_id = pi.external_id " +
+                "WHERE pi.agreement_external_id = :externalId " +
+                "UNION SELECT " +
+                "e.id, e.sqs_message_id, e.service_id, e.live, 'agreement' AS resource_type_name, e.resource_external_id, " +
+                "e.parent_resource_external_id, e.event_date, e.event_type, e.event_data " +
+                "FROM event e " +
+                "WHERE e.resource_external_id = :externalId " +
+            ") AS results " +
+            "ORDER BY results.event_date ASC";
+
     private final Jdbi jdbi;
 
     @Inject
@@ -127,6 +144,17 @@ public class AgreementDao {
             return query
                     .mapTo(Long.class)
                     .one();
+        });
+    }
+
+    // Includes events for all associated payment instruments, including old payment instruments that have been replaced.
+    public List<Event> findAssociatedEvents(String agreementExternalId) {
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(SELECT_ASSOCIATED_EVENTS);
+            query.bind("externalId", agreementExternalId);
+            return query
+                    .map(new EventMapper())
+                    .list();
         });
     }
 

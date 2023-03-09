@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.agreement.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,13 +33,14 @@ public class AgreementServiceTest {
     private static final PaymentInstrumentDao paymentInstrumentDao = mock(PaymentInstrumentDao.class);
     private static final AgreementsFactory agreementEntityFactory = mock(AgreementsFactory.class);
     private static final EventService eventService = mock(EventService.class);
+    private static final ObjectMapper objectMapper = mock(ObjectMapper.class);
 
     private AgreementService agreementService;
 
     @BeforeEach
     public void setUp() {
         reset(agreementDao, paymentInstrumentDao, agreementEntityFactory, eventService);
-        agreementService = new AgreementService(agreementDao, paymentInstrumentDao, agreementEntityFactory, eventService);
+        agreementService = new AgreementService(agreementDao, paymentInstrumentDao, agreementEntityFactory, eventService, objectMapper);
     }
 
     @Test
