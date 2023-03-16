@@ -19,7 +19,8 @@ import java.util.Map;
 public class Event {
 
     private static final Logger logger = LoggerFactory.getLogger(Event.class);
-    
+
+    @Schema(example = "58na2dr7rv7h6h53bef1l0soep")
     private final String resourceExternalId;
     @Schema(example = "AGREEMENT")
     private final ResourceType resourceType;
@@ -28,8 +29,11 @@ public class Event {
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     @Schema(example = "\"2022-03-29T16:58:49.298Z\"")
     private final ZonedDateTime timestamp;
+    @Schema(example = "true")
     private final Boolean live;
+    @Schema(example = "ea2d6673b23d4ff7ad88a1fd3c7ab0f6")
     private final String serviceId;
+    @Schema(example = "{\"live\": false, \"moto\": false, \"amount\": 1000, \"source\": \"CARD_API\", \"language\": \"en\", \"reference\": \"my payment reference\", \"return_url\": \"https://www.payments.service.gov.uk\", \"description\": \"my payment\", \"delayed_capture\": false, \"payment_provider\": \"sandbox\", \"gateway_account_id\": \"3\", \"credential_external_id\": \"ddb294481de146c09598c8cce0461af9\", \"save_payment_instrument_to_agreement\": false}\"")
     private final Map<String, Object> data;
 
     public Event(String resourceExternalId,
