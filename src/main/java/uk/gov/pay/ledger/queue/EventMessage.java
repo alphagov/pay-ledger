@@ -1,6 +1,6 @@
 package uk.gov.pay.ledger.queue;
 
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.service.payments.commons.queue.model.QueueMessage;
 
 import java.util.Optional;
@@ -26,8 +26,8 @@ public class EventMessage {
         return queueMessage.getMessageBody();
     }
 
-    public Event getEvent() {
-        return new Event(
+    public EventEntity getEvent() {
+        return new EventEntity(
                 getQueueMessageId().orElse(null),
                 eventDto.getServiceId(),
                 eventDto.isLive(),

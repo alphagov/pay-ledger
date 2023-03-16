@@ -11,7 +11,7 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class Event {
+public class EventEntity {
 
     @JsonIgnore
     private Long id;
@@ -37,20 +37,20 @@ public class Event {
     @Schema(example = "true", defaultValue = "false")
     private boolean reprojectDomainObject;
 
-    public Event() {
+    public EventEntity() {
     }
 
-    public Event(Long id,
-                 String sqsMessageId,
-                 String serviceId,
-                 Boolean live,
-                 ResourceType resourceType,
-                 String resourceExternalId,
-                 String parentResourceExternalId,
-                 ZonedDateTime eventDate,
-                 String eventType,
-                 String eventData,
-                 boolean reprojectDomainObject) {
+    public EventEntity(Long id,
+                       String sqsMessageId,
+                       String serviceId,
+                       Boolean live,
+                       ResourceType resourceType,
+                       String resourceExternalId,
+                       String parentResourceExternalId,
+                       ZonedDateTime eventDate,
+                       String eventType,
+                       String eventData,
+                       boolean reprojectDomainObject) {
         this.id = id;
         this.sqsMessageId = sqsMessageId;
         this.serviceId = serviceId;
@@ -64,16 +64,16 @@ public class Event {
         this.reprojectDomainObject = reprojectDomainObject;
     }
 
-    public Event(String sqsMessageId,
-                 String serviceId,
-                 Boolean live,
-                 ResourceType resourceType,
-                 String resourceExternalId,
-                 String parentResourceExternalId,
-                 ZonedDateTime eventDate,
-                 String eventType,
-                 String eventData,
-                 boolean reprojectDomainObject) {
+    public EventEntity(String sqsMessageId,
+                       String serviceId,
+                       Boolean live,
+                       ResourceType resourceType,
+                       String resourceExternalId,
+                       String parentResourceExternalId,
+                       ZonedDateTime eventDate,
+                       String eventType,
+                       String eventData,
+                       boolean reprojectDomainObject) {
         this(null, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType,
                 eventData, reprojectDomainObject);
     }
@@ -142,7 +142,7 @@ public class Event {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Event event = (Event) o;
+        EventEntity event = (EventEntity) o;
         return live == event.live &&
                 reprojectDomainObject == event.reprojectDomainObject &&
                 Objects.equals(id, event.id) &&

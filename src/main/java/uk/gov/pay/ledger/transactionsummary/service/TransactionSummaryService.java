@@ -1,7 +1,7 @@
 package uk.gov.pay.ledger.transactionsummary.service;
 
 import com.google.inject.Inject;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
@@ -40,14 +40,14 @@ public class TransactionSummaryService {
         this.transactionSummaryDao = transactionSummaryDao;
     }
 
-    public void projectTransactionSummary(TransactionEntity transaction, Event currentEvent, List<Event> events) {
+    public void projectTransactionSummary(TransactionEntity transaction, EventEntity currentEvent, List<EventEntity> events) {
         if (TransactionType.PAYMENT.name().equals(transaction.getTransactionType())) {
             projectPaymentTransactionSummary(transaction, currentEvent, events);
         }
     }
 
-    private void projectPaymentTransactionSummary(TransactionEntity transaction, Event currentEvent,
-                                                  List<Event> events) {
+    private void projectPaymentTransactionSummary(TransactionEntity transaction, EventEntity currentEvent,
+                                                  List<EventEntity> events) {
         if (canProjectTransactionAmount(currentEvent, events)) {
             projectTransactionAmount(transaction, currentEvent, events);
         }
@@ -57,7 +57,7 @@ public class TransactionSummaryService {
         }
     }
 
-    private boolean canProjectTransactionAmount(Event currentEvent, List<Event> events) {
+    private boolean canProjectTransactionAmount(EventEntity currentEvent, List<EventEntity> events) {
         if (!hasPaymentCreatedOrNotificationEvent(events)
                 || ignoreEventsForTransactionAmount.contains(currentEvent.getEventType())) {
             return false;
@@ -71,7 +71,7 @@ public class TransactionSummaryService {
         return getTransactionState(currentEvent).map(TransactionState::isFinished).orElse(false);
     }
 
-    private boolean canProjectTransactionFee(TransactionEntity transaction, Event currentEvent, List<Event> events) {
+    private boolean canProjectTransactionFee(TransactionEntity transaction, EventEntity currentEvent, List<EventEntity> events) {
         Optional<SalientEventType> mayBeCurrentSalientEventType = from(currentEvent.getEventType());
         if (mayBeCurrentSalientEventType.isPresent()) {
             long noOfCaptureConfirmedEvents = events
@@ -90,19 +90,19 @@ public class TransactionSummaryService {
         return false;
     }
 
-    private boolean isAPaymentOrNotificationCreatedEvent(Event event) {
+    private boolean isAPaymentOrNotificationCreatedEvent(EventEntity event) {
         return from(event.getEventType()).orElse(null) == PAYMENT_CREATED
                 || "PAYMENT_NOTIFICATION_CREATED".equals(event.getEventType());
     }
 
-    private void projectTransactionAmount(TransactionEntity transaction, Event currentEvent,
-                                          List<Event> events) {
-        List<Event> eventsMappingToFinishedState =
+    private void projectTransactionAmount(TransactionEntity transaction, EventEntity currentEvent,
+                                          List<EventEntity> events) {
+        List<EventEntity> eventsMappingToFinishedState =
                 getEventsMappingToTransactionFinishedStateInDescendingOrder(events);
 
         if (eventsMappingToFinishedState.size() > 1
                 && PAYMENT_CREATED != from(currentEvent.getEventType()).orElse(null)) {
-            Event previousEvent = eventsMappingToFinishedState.get(1);
+            EventEntity previousEvent = eventsMappingToFinishedState.get(1);
 
             if (currentEventTransactionStateMatchesWithPreviousEvent(currentEvent, previousEvent)) {
                 return;
@@ -130,27 +130,27 @@ public class TransactionSummaryService {
         return LocalDate.ofInstant(createdDate.toInstant(), UTC);
     }
 
-    private boolean currentEventTransactionStateMatchesWithPreviousEvent(Event currentEvent, Event previousEvent) {
+    private boolean currentEventTransactionStateMatchesWithPreviousEvent(EventEntity currentEvent, EventEntity previousEvent) {
         Optional<TransactionState> previousEventTransactionState = getTransactionState(previousEvent);
         Optional<TransactionState> currentEventTransactionState = getTransactionState(currentEvent);
 
         return previousEventTransactionState.equals(currentEventTransactionState);
     }
 
-    private Optional<TransactionState> getTransactionState(Event previousEvent) {
+    private Optional<TransactionState> getTransactionState(EventEntity previousEvent) {
         return from(previousEvent.getEventType())
                 .map(TransactionState::fromEventType);
     }
 
-    private List<Event> getEventsMappingToTransactionFinishedStateInDescendingOrder(List<Event> events) {
+    private List<EventEntity> getEventsMappingToTransactionFinishedStateInDescendingOrder(List<EventEntity> events) {
         return events.stream()
                 .filter(event -> !ignoreEventsForTransactionAmount.contains(event.getEventType()))
                 .filter(event -> getTransactionState(event).map(TransactionState::isFinished).orElse(false))
-                .sorted(Comparator.comparing(Event::getEventDate).reversed())
+                .sorted(Comparator.comparing(EventEntity::getEventDate).reversed())
                 .collect(Collectors.toList());
     }
 
-    private boolean hasPaymentCreatedOrNotificationEvent(List<Event> events) {
+    private boolean hasPaymentCreatedOrNotificationEvent(List<EventEntity> events) {
         return events.stream()
                 .anyMatch(this::isAPaymentOrNotificationCreatedEvent);
     }

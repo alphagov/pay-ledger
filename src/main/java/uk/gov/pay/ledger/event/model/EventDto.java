@@ -47,7 +47,7 @@ public class EventDto {
         this.data = data;
     }
 
-    public static EventDto from(Event event, ObjectMapper objectMapper) {
+    public static EventDto from(EventEntity event, ObjectMapper objectMapper) {
         try {
             return new EventDto(
                     event.getResourceExternalId(),

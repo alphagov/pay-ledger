@@ -1,7 +1,7 @@
 package uk.gov.pay.ledger.queue.eventprocessor;
 
 import com.google.inject.Inject;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.payout.service.PayoutService;
 
@@ -16,7 +16,7 @@ public class PayoutEventProcessor extends EventProcessor {
     }
 
     @Override
-    public void process(Event event, boolean isANewEvent) {
+    public void process(EventEntity event, boolean isANewEvent) {
         payoutService.upsertPayoutFor(eventService.getEventDigestForResource(event));
     }
 }

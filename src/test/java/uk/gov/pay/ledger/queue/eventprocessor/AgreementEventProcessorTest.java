@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.service.EventService;
 
@@ -31,7 +31,7 @@ class AgreementEventProcessorTest {
 
     @Test
     void shouldUpsertAgreement() {
-        Event event = anEventFixture().withResourceType(AGREEMENT).toEntity();
+        EventEntity event = anEventFixture().withResourceType(AGREEMENT).toEntity();
         var eventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));
         when(mockEventService.getEventDigestForResource(event)).thenReturn(eventDigest);
 

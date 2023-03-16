@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
@@ -34,12 +34,12 @@ public class EventServiceTest {
 
     private EventService eventService;
 
-    private Event event;
+    private EventEntity event;
 
     private ZonedDateTime latestEventTime;
     private final String resourceExternalId = "resource_external_id";
-    private Event event1;
-    private Event event2;
+    private EventEntity event1;
+    private EventEntity event2;
 
     @BeforeEach
     public void setUp() {
@@ -80,13 +80,13 @@ public class EventServiceTest {
     @Test
     public void shouldGetCorrectLatestSalientEventType() {
         String eventDetails1 = "{ \"amount\": 1000}";
-        Event event1 = EventFixture.anEventFixture()
+        EventEntity event1 = EventFixture.anEventFixture()
                 .withEventData(eventDetails1)
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(latestEventTime)
                 .toEntity();
         String eventDetails2 = "{ \"amount\": 2000, \"description\": \"a payment\"}";
-        Event event2 = EventFixture.anEventFixture()
+        EventEntity event2 = EventFixture.anEventFixture()
                 .withEventData(eventDetails2)
                 .withEventType("A_WEIRD_EVENT_THAT_SHOULD_NOT_BE_CONSIDERED_SALIENT")
                 .withResourceExternalId(resourceExternalId)

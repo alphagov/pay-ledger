@@ -7,7 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.service.payments.commons.model.Source;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
 import java.time.ZonedDateTime;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 import static uk.gov.service.payments.commons.model.Source.CARD_API;
 
-public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventFixture, Event> {
+public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventFixture, EventEntity> {
     private String sqsMessageId;
     private String serviceId = "a-service-id";
     private Boolean live;
@@ -233,8 +233,8 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     }
 
     @Override
-    public Event toEntity() {
-        return new Event(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
+    public EventEntity toEntity() {
+        return new EventEntity(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, reprojectDomainObject);
     }
 
     public String getSqsMessageId() {

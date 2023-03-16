@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.service.payments.commons.api.json.ApiResponseDateTimeSerializer;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -50,7 +50,7 @@ public class TransactionEvent {
         this.data = builder.data;
     }
 
-    public static TransactionEvent from(TransactionEntity transactionEntity, Event event, ObjectMapper objectMapper, int statusVersion) {
+    public static TransactionEvent from(TransactionEntity transactionEntity, EventEntity event, ObjectMapper objectMapper, int statusVersion) {
         try {
             ExternalTransactionState state = SalientEventType.from(event.getEventType())
                     .map(TransactionState::fromEventType)

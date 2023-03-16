@@ -1,7 +1,7 @@
 package uk.gov.pay.ledger.queue.eventprocessor;
 
 import com.google.inject.Inject;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.event.service.EventService;
@@ -33,7 +33,7 @@ public class ChildTransactionEventProcessor extends EventProcessor {
     }
 
     @Override
-    public void process(Event event, boolean isANewEvent) {
+    public void process(EventEntity event, boolean isANewEvent) {
         EventDigest childTransactionEventDigest = eventService.getEventDigestForResource(event);
 
         Optional<EventDigest> mayBePaymentEventDigest = Optional.empty();

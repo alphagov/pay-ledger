@@ -12,7 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
@@ -60,7 +60,7 @@ class ChildTransactionEventProcessorTest {
         String refundExternalId = "refund-external-id";
         String paymentExternalId = "payment-external-id";
 
-        Event refundEvent = anEventFixture()
+        EventEntity refundEvent = anEventFixture()
                 .withResourceType(REFUND)
                 .withEventType("REFUND_SUCCEEDED")
                 .withEventDate(ZonedDateTime.parse("2022-07-01T10:00:00Z"))
@@ -73,19 +73,19 @@ class ChildTransactionEventProcessorTest {
                                 .build()))
                 .toEntity();
 
-        Event paymentEvent1 = aQueuePaymentEventFixture()
+        EventEntity paymentEvent1 = aQueuePaymentEventFixture()
                 .withResourceExternalId(paymentExternalId)
                 .withEventType("PAYMENT_CREATED")
                 .withEventDate(ZonedDateTime.parse("2022-06-01T10:00:00Z"))
                 .withDefaultEventDataForEventType("PAYMENT_CREATED")
                 .toEntity();
-        Event paymentEvent2 = aQueuePaymentEventFixture()
+        EventEntity paymentEvent2 = aQueuePaymentEventFixture()
                 .withResourceExternalId(paymentExternalId)
                 .withEventType("PAYMENT_DETAILS_ENTERED")
                 .withEventDate(ZonedDateTime.parse("2022-06-01T10:01:00Z"))
                 .withDefaultEventDataForEventType("PAYMENT_DETAILS_ENTERED")
                 .toEntity();
-        Event paymentEvent3 = aQueuePaymentEventFixture()
+        EventEntity paymentEvent3 = aQueuePaymentEventFixture()
                 .withResourceExternalId(paymentExternalId)
                 .withEventType("FEE_INCURRED")
                 .withEventDate(ZonedDateTime.parse("2022-06-01T10:02:00Z"))
@@ -132,7 +132,7 @@ class ChildTransactionEventProcessorTest {
         String refundExternalId = "refund-external-id";
         String paymentExternalId = "payment-external-id";
 
-        Event refundEvent = anEventFixture()
+        EventEntity refundEvent = anEventFixture()
                 .withResourceType(REFUND)
                 .withEventType("REFUND_SUCCEEDED")
                 .withResourceExternalId(refundExternalId)
@@ -157,7 +157,7 @@ class ChildTransactionEventProcessorTest {
                         .put("reference", "payment-ref")
                         .put("card_type", "visa")
                         .build());
-        Event paymentEvent = anEventFixture().withEventData(paymentEventData).toEntity();
+        EventEntity paymentEvent = anEventFixture().withEventData(paymentEventData).toEntity();
         EventDigest paymentEventDigest = EventDigest.fromEventList(List.of(paymentEvent));
 
         String refundEventData = new GsonBuilder().create()
@@ -165,7 +165,7 @@ class ChildTransactionEventProcessorTest {
                         .put("amount", -50)
                         .put("some_refund_info", "blah")
                         .build());
-        Event refundEvent = anEventFixture().withEventData(refundEventData).toEntity();
+        EventEntity refundEvent = anEventFixture().withEventData(refundEventData).toEntity();
         EventDigest refundEventDigest = EventDigest.fromEventList(List.of(refundEvent));
 
         String refundExternalId = "refund-external-id";
@@ -188,7 +188,7 @@ class ChildTransactionEventProcessorTest {
 
     @Test
     void shouldProjectDisputeTransaction() {
-        Event disputeEvent = anEventFixture().withResourceType(ResourceType.DISPUTE).withLive(true).toEntity();
+        EventEntity disputeEvent = anEventFixture().withResourceType(ResourceType.DISPUTE).withLive(true).toEntity();
         EventDigest eventDigest = EventDigest.fromEventList(List.of(disputeEvent));
         when(mockEventService.getEventDigestForResource(disputeEvent)).thenReturn(eventDigest);
         childTransactionEventProcessor.process(disputeEvent, true);

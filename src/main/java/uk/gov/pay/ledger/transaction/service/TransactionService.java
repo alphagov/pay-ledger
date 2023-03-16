@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.transaction.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.TransactionEntityFactory;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
@@ -200,11 +200,11 @@ public class TransactionService {
     }
 
     private List<TransactionEvent> getTransactionEventsFor(Map<String, TransactionEntity> transactionEntityMap, int statusVersion) {
-        List<Event> events = eventDao.findEventsForExternalIds(transactionEntityMap.keySet());
+        List<EventEntity> events = eventDao.findEventsForExternalIds(transactionEntityMap.keySet());
         return mapToTransactionEvent(transactionEntityMap, events, statusVersion);
     }
 
-    private List<TransactionEvent> mapToTransactionEvent(Map<String, TransactionEntity> transactionEntityMap, List<Event> eventList, int statusVersion) {
+    private List<TransactionEvent> mapToTransactionEvent(Map<String, TransactionEntity> transactionEntityMap, List<EventEntity> eventList, int statusVersion) {
         return eventList.stream()
                 .map(event -> TransactionEvent.from(transactionEntityMap.get(event.getResourceExternalId()), event, objectMapper, statusVersion))
                 .collect(Collectors.toList());

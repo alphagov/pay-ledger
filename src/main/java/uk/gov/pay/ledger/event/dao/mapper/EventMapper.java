@@ -2,7 +2,7 @@ package uk.gov.pay.ledger.event.dao.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
 import java.sql.ResultSet;
@@ -12,11 +12,11 @@ import java.time.ZonedDateTime;
 
 import static uk.gov.pay.ledger.util.dao.MapperUtils.getBooleanWithNullCheck;
 
-public class EventMapper implements RowMapper<Event> {
+public class EventMapper implements RowMapper<EventEntity> {
 
     @Override
-    public Event map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
-        return new Event(resultSet.getLong("id"),
+    public EventEntity map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
+        return new EventEntity(resultSet.getLong("id"),
                 resultSet.getString("sqs_message_id"),
                 resultSet.getString("service_id"),
                 getBooleanWithNullCheck(resultSet, "live"),

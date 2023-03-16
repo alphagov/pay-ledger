@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.payout.state.PayoutState;
@@ -35,7 +35,7 @@ public class PayoutEntityFactoryTest {
     @Test
     public void shouldConvertEventDigestToPayoutEntity() {
         ZonedDateTime paidOutDate = ZonedDateTime.parse("2020-05-04T00:20:00.123456Z");
-        Event payoutCreatedEvent = aQueuePaymentEventFixture()
+        EventEntity payoutCreatedEvent = aQueuePaymentEventFixture()
                 .withEventType("PAYOUT_CREATED")
                 .withEventData(gsonBuilder.create()
                         .toJson(Map.of(
@@ -44,7 +44,7 @@ public class PayoutEntityFactoryTest {
                         ))
                 )
                 .toEntity();
-        Event payoutPaidOutEvent = aQueuePaymentEventFixture()
+        EventEntity payoutPaidOutEvent = aQueuePaymentEventFixture()
                 .withEventType("PAYOUT_PAID_OUT")
                 .withEventData(gsonBuilder.create()
                         .toJson(Map.of(
@@ -71,8 +71,8 @@ public class PayoutEntityFactoryTest {
 
     @Test
     public void shouldDigestStateFromEvents() {
-        Event payoutCreatedEvent = aQueuePaymentEventFixture().withEventType("PAYOUT_CREATED").toEntity();
-        Event payoutPaidOutEvent = aQueuePaymentEventFixture().withEventType("PAYOUT_PAID").toEntity();
+        EventEntity payoutCreatedEvent = aQueuePaymentEventFixture().withEventType("PAYOUT_CREATED").toEntity();
+        EventEntity payoutPaidOutEvent = aQueuePaymentEventFixture().withEventType("PAYOUT_PAID").toEntity();
         EventDigest eventDigest = EventDigest.fromEventList(List.of(payoutPaidOutEvent, payoutCreatedEvent));
         PayoutEntity payoutEntity = payoutEntityFactory.create(eventDigest);
 
