@@ -1183,6 +1183,7 @@ components:
           - UNEXPECTED_ATTRIBUTE
           - ACCOUNT_DISABLED
           - RECURRING_CARD_PAYMENTS_NOT_ALLOWED
+          - IDEMPOTENCY_KEY_USED
           example: GENERIC
         message:
           type: array
