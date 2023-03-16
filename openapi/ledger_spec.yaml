@@ -1067,7 +1067,7 @@ components:
         events:
           type: array
           items:
-            $ref: '#/components/schemas/EventDto'
+            $ref: '#/components/schemas/Event'
     AgreementSearchResponse:
       type: object
       properties:
@@ -1168,7 +1168,7 @@ components:
           items:
             type: string
             example: example error message
-    EventDto:
+    Event:
       type: object
       properties:
         data:

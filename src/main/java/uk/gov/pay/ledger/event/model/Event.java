@@ -16,9 +16,9 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class EventDto {
+public class Event {
 
-    private static final Logger logger = LoggerFactory.getLogger(EventDto.class);
+    private static final Logger logger = LoggerFactory.getLogger(Event.class);
     
     private final String resourceExternalId;
     @Schema(example = "AGREEMENT")
@@ -32,13 +32,13 @@ public class EventDto {
     private final String serviceId;
     private final Map<String, Object> data;
 
-    public EventDto(String resourceExternalId,
-                    ResourceType resourceType,
-                    String eventType,
-                    ZonedDateTime timestamp,
-                    Boolean live,
-                    String serviceId,
-                    Map<String, Object> data) {
+    public Event(String resourceExternalId,
+                 ResourceType resourceType,
+                 String eventType,
+                 ZonedDateTime timestamp,
+                 Boolean live,
+                 String serviceId,
+                 Map<String, Object> data) {
         this.resourceExternalId = resourceExternalId;
         this.resourceType = resourceType;
         this.eventType = eventType;
@@ -48,9 +48,9 @@ public class EventDto {
         this.data = data;
     }
 
-    public static EventDto from(EventEntity event, ObjectMapper objectMapper) {
+    public static Event from(EventEntity event, ObjectMapper objectMapper) {
         try {
-            return new EventDto(
+            return new Event(
                     event.getResourceExternalId(),
                     event.getResourceType(),
                     event.getEventType(),
