@@ -2,7 +2,7 @@ package uk.gov.pay.ledger.event.service;
 
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.model.EventEntity;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 

@@ -12,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.event.model.EventEntity;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.queue.eventprocessor.AgreementEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.ChildTransactionEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PaymentEventProcessor;

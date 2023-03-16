@@ -1,7 +1,7 @@
 package uk.gov.pay.ledger.queue.eventprocessor;
 
 import com.google.inject.Inject;
-import uk.gov.pay.ledger.event.model.EventEntity;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.payout.service.PayoutService;
 

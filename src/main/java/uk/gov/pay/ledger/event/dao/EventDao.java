@@ -11,7 +11,7 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.jdbi.v3.sqlobject.transaction.Transaction;
 import uk.gov.pay.ledger.event.dao.mapper.EventMapper;
 import uk.gov.pay.ledger.event.dao.mapper.EventTickerMapper;
-import uk.gov.pay.ledger.event.model.EventEntity;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventTicker;
 
 import java.time.ZonedDateTime;

@@ -1,10 +1,11 @@
-package uk.gov.pay.ledger.event.model;
+package uk.gov.pay.ledger.event.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
+import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
 
 import java.time.ZonedDateTime;
