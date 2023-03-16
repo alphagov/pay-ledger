@@ -12,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.queue.eventprocessor.AgreementEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.ChildTransactionEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.PaymentEventProcessor;
@@ -59,42 +59,42 @@ class EventDigestHandlerTest {
 
     @Test
     void shouldProcessPaymentEvent() {
-        Event event = anEventFixture().withResourceType(PAYMENT).toEntity();
+        EventEntity event = anEventFixture().withResourceType(PAYMENT).toEntity();
         eventDigestHandler.processEvent(event, true);
         verify(mockPaymentEventProcessor).process(event, true);
     }
 
     @Test
     void shouldProcessRefundEvent() {
-        Event event = anEventFixture().withResourceType(REFUND).toEntity();
+        EventEntity event = anEventFixture().withResourceType(REFUND).toEntity();
         eventDigestHandler.processEvent(event, true);
         verify(mockChildTransactionEventProcessor).process(event, true);
     }
 
     @Test
     void shouldProcessDisputeEvent() {
-        Event event = anEventFixture().withResourceType(DISPUTE).toEntity();
+        EventEntity event = anEventFixture().withResourceType(DISPUTE).toEntity();
         eventDigestHandler.processEvent(event, true);
         verify(mockChildTransactionEventProcessor).process(event, true);
     }
 
     @Test
     void shouldProcessPayoutEvent() {
-        Event event = anEventFixture().withResourceType(PAYOUT).toEntity();
+        EventEntity event = anEventFixture().withResourceType(PAYOUT).toEntity();
         eventDigestHandler.processEvent(event, true);
         verify(mockPayoutEventProcessor).process(event, true);
     }
 
     @Test
     void shouldProcessAgreementEvent() {
-        Event event = anEventFixture().withResourceType(AGREEMENT).toEntity();
+        EventEntity event = anEventFixture().withResourceType(AGREEMENT).toEntity();
         eventDigestHandler.processEvent(event, true);
         verify(mockAgreementEventProcessor).process(event, true);
     }
 
     @Test
     void shouldProcessPaymentInstrumentEvent() {
-        Event event = anEventFixture().withResourceType(PAYMENT_INSTRUMENT).toEntity();
+        EventEntity event = anEventFixture().withResourceType(PAYMENT_INSTRUMENT).toEntity();
         eventDigestHandler.processEvent(event, true);
         verify(mockPaymentInstrumentEventProcessor).process(event, true);
     }
@@ -104,7 +104,7 @@ class EventDigestHandlerTest {
         Logger root = (Logger) LoggerFactory.getLogger(EventDigestHandler.class);
         root.addAppender(mockAppender);
 
-        Event event = anEventFixture().withResourceType(SERVICE).toEntity();
+        EventEntity event = anEventFixture().withResourceType(SERVICE).toEntity();
 
         assertThrows(RuntimeException.class, () -> eventDigestHandler.processEvent(event, true));
 

@@ -4,12 +4,12 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
 import java.time.ZonedDateTime;
 
-public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFixture, Event> {
+public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFixture, EventEntity> {
     private String sqsMessageId;
     private ResourceType resourceType = ResourceType.REFUND;
     private String serviceId;
@@ -102,8 +102,8 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
     }
 
     @Override
-    public Event toEntity() {
-        return new Event(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, false);
+    public EventEntity toEntity() {
+        return new EventEntity(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, parentResourceExternalId, eventDate, eventType, eventData, false);
     }
 
     public String getSqsMessageId() {

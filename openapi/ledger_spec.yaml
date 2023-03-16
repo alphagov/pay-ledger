@@ -250,28 +250,6 @@ paths:
       summary: Get list of events between a date/time range
       tags:
       - Events
-  /v1/event/{eventId}:
-    get:
-      operationId: getEvent
-      parameters:
-      - in: path
-        name: eventId
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Event'
-          description: OK
-        "404":
-          description: Not found
-      summary: Find event by ID (id of event table)
-      tags:
-      - Events
   /v1/payout:
     get:
       operationId: search_1
@@ -1089,7 +1067,7 @@ components:
         events:
           type: array
           items:
-            $ref: '#/components/schemas/EventDto'
+            $ref: '#/components/schemas/Event'
     AgreementSearchResponse:
       type: object
       properties:
@@ -1193,8 +1171,17 @@ components:
     Event:
       type: object
       properties:
-        event_data:
-          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: object
+            example: "{\"live\": false, \"moto\": false, \"amount\": 1000, \"source\"\
+              : \"CARD_API\", \"language\": \"en\", \"reference\": \"my payment reference\"\
+              , \"return_url\": \"https://www.payments.service.gov.uk\", \"description\"\
+              : \"my payment\", \"delayed_capture\": false, \"payment_provider\":\
+              \ \"sandbox\", \"gateway_account_id\": \"3\", \"credential_external_id\"\
+              : \"ddb294481de146c09598c8cce0461af9\", \"save_payment_instrument_to_agreement\"\
+              : false}\""
           example: "{\"live\": false, \"moto\": false, \"amount\": 1000, \"source\"\
             : \"CARD_API\", \"language\": \"en\", \"reference\": \"my payment reference\"\
             , \"return_url\": \"https://www.payments.service.gov.uk\", \"description\"\
@@ -1202,63 +1189,21 @@ components:
             sandbox\", \"gateway_account_id\": \"3\", \"credential_external_id\":\
             \ \"ddb294481de146c09598c8cce0461af9\", \"save_payment_instrument_to_agreement\"\
             : false}\""
-        event_date:
-          type: string
-          format: date-time
         event_type:
           type: string
-          example: PAYMENT_CREATED
+          example: CREATED
         live:
           type: boolean
-          example: true
-        parent_resource_external_id:
-          type: string
-          default: "null"
-          example: l40ajdf0923uojlkfjsldkjfl2
-        reproject_domain_object:
-          type: boolean
-          default: false
           example: true
         resource_external_id:
           type: string
           example: 58na2dr7rv7h6h53bef1l0soep
         resource_type:
           type: string
-          enum:
-          - agreement
-          - payment
-          - refund
-          - service
-          - card_payment
-          - payout
-          - dispute
-          - payment_instrument
-          example: payment
-        service_id:
-          type: string
-          example: ea2d6673b23d4ff7ad88a1fd3c7ab0f6
-        sqs_message_id:
-          type: string
-          example: fe689579-63af-40bf-a783-23de97134b5f
-    EventDto:
-      type: object
-      properties:
-        data:
-          type: object
-          additionalProperties:
-            type: object
-        event_type:
-          type: string
-          example: CREATED
-        live:
-          type: boolean
-        resource_external_id:
-          type: string
-        resource_type:
-          type: string
           example: AGREEMENT
         service_id:
           type: string
+          example: ea2d6673b23d4ff7ad88a1fd3c7ab0f6
         timestamp:
           type: string
           format: date-time

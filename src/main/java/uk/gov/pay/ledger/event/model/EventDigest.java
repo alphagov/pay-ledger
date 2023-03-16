@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.event.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.exception.EmptyEventsException;
 import uk.gov.pay.ledger.util.JsonParser;
 
@@ -49,7 +50,7 @@ public class EventDigest {
         this.eventCreatedDate = eventCreatedDate;
     }
 
-    public static EventDigest fromEventList(List<Event> events) {
+    public static EventDigest fromEventList(List<EventEntity> events) {
         var eventPayload = buildEventAggregate(events);
 
         var latestEvent = events.stream()
@@ -57,14 +58,14 @@ public class EventDigest {
                 .orElseThrow(() -> new EmptyEventsException("No events found"));
 
         var latestSalientEventType = events.stream()
-                .map(Event::getEventType)
+                .map(EventEntity::getEventType)
                 .map(SalientEventType::from)
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElse(null);
 
         var earliestDate = events.stream()
-                .map(Event::getEventDate)
+                .map(EventEntity::getEventDate)
                 .min(ZonedDateTime::compareTo)
                 .orElseThrow();
 
@@ -73,7 +74,7 @@ public class EventDigest {
 
         Boolean isLive = events.stream()
                 .filter(event -> event.getLive() != null)
-                .map(Event::getLive)
+                .map(EventEntity::getLive)
                 .findFirst()
                 .orElse(null);
 
@@ -91,25 +92,25 @@ public class EventDigest {
         );
     }
 
-    private static String deriveServiceId(List<Event> events) {
+    private static String deriveServiceId(List<EventEntity> events) {
         return events.stream()
                 .filter(event -> isNotEmpty(event.getServiceId()))
-                .map(Event::getServiceId)
+                .map(EventEntity::getServiceId)
                 .findFirst()
                 .orElse(null);
     }
 
-    private static String deriveParentResourceExternalId(List<Event> events) {
+    private static String deriveParentResourceExternalId(List<EventEntity> events) {
         return events.stream()
                 .filter(event -> isNotEmpty(event.getParentResourceExternalId()))
-                .map(Event::getParentResourceExternalId)
+                .map(EventEntity::getParentResourceExternalId)
                 .findFirst()
                 .orElse(null);
     }
 
-    private static Map<String, Object> buildEventAggregate(List<Event> events) {
+    private static Map<String, Object> buildEventAggregate(List<EventEntity> events) {
         return events.stream()
-                .map(Event::getEventData)
+                .map(EventEntity::getEventData)
                 .map(JsonParser::jsonStringToMap)
                 .flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (later, earlier) -> later));

@@ -13,7 +13,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
@@ -102,9 +102,9 @@ public class DisputeLostEventQueueConsumerIT {
                 () -> !eventDao.findEventsForExternalIds(Set.of(resourceExternalId)).isEmpty()
         );
 
-        List<Event> events = eventDao.findEventsForExternalIds(Set.of(resourceExternalId));
+        List<EventEntity> events = eventDao.findEventsForExternalIds(Set.of(resourceExternalId));
         assertThat(events.isEmpty(), is(false));
-        Event event = events.get(0);
+        EventEntity event = events.get(0);
         assertThat(event.getEventType(), is("DISPUTE_LOST"));
         assertThat(event.getEventDate(), is(disputeCreated));
         assertThat(event.getResourceType(), is(DISPUTE));

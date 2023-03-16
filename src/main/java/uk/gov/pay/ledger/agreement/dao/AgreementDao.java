@@ -7,7 +7,7 @@ import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.ledger.agreement.entity.AgreementEntity;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
 import uk.gov.pay.ledger.event.dao.mapper.EventMapper;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -148,7 +148,7 @@ public class AgreementDao {
     }
 
     // Includes events for all associated payment instruments, including old payment instruments that have been replaced.
-    public List<Event> findAssociatedEvents(String agreementExternalId) {
+    public List<EventEntity> findAssociatedEvents(String agreementExternalId) {
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(SELECT_ASSOCIATED_EVENTS);
             query.bind("externalId", agreementExternalId);

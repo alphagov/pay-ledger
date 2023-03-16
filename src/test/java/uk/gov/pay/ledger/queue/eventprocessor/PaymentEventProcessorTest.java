@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -50,13 +50,13 @@ class PaymentEventProcessorTest {
     @Test
     void shouldReprojectRefundTransactionsWhenPaymentHasRefunds() {
         String paymentExternalId = "payment-external-id";
-        Event event = anEventFixture().withResourceType(PAYMENT)
+        EventEntity event = anEventFixture().withResourceType(PAYMENT)
                 .withResourceExternalId(paymentExternalId)
                 .withEventType("ADMIN_MANUALLY_DID_AN_UPDATE")
                 .withEventData("{\"reference\": \"payment-ref\"}")
                 .toEntity();
 
-        Event previousEvent = anEventFixture().withResourceType(PAYMENT)
+        EventEntity previousEvent = anEventFixture().withResourceType(PAYMENT)
                 .withEventType("USER_APPROVED_FOR_CAPTURE")
                 .toEntity();
 
@@ -77,13 +77,13 @@ class PaymentEventProcessorTest {
     @Test
     void shouldNotQueryForRefundsIfPaymentHasntBeenInSuccessState() {
         String paymentExternalId = "payment-external-id";
-        Event event = anEventFixture().withResourceType(PAYMENT)
+        EventEntity event = anEventFixture().withResourceType(PAYMENT)
                 .withResourceExternalId(paymentExternalId)
                 .withEventType("ADMIN_MANUALLY_DID_AN_UPDATE")
                 .withEventData("{\"reference\": \"payment-ref\"}")
                 .toEntity();
 
-        Event previousEvent = anEventFixture().withResourceType(PAYMENT)
+        EventEntity previousEvent = anEventFixture().withResourceType(PAYMENT)
                 .withEventType("PAYMENT_STARTED")
                 .toEntity();
 
@@ -99,13 +99,13 @@ class PaymentEventProcessorTest {
     @Test
     void shouldNotQueryForRefundsIfNoEventData() {
         String paymentExternalId = "payment-external-id";
-        Event event = anEventFixture().withResourceType(PAYMENT)
+        EventEntity event = anEventFixture().withResourceType(PAYMENT)
                 .withResourceExternalId(paymentExternalId)
                 .withEventType("ADMIN_MANUALLY_DID_AN_UPDATE")
                 .withEventData("{}")
                 .toEntity();
 
-        Event previousEvent = anEventFixture().withResourceType(PAYMENT)
+        EventEntity previousEvent = anEventFixture().withResourceType(PAYMENT)
                 .withEventType("USER_APPROVED_FOR_CAPTURE")
                 .toEntity();
 
@@ -121,12 +121,12 @@ class PaymentEventProcessorTest {
     @Test
     void shouldProjectTransactionSummary() {
         String paymentExternalId = "payment-external-id";
-        Event event = anEventFixture().withResourceType(PAYMENT)
+        EventEntity event = anEventFixture().withResourceType(PAYMENT)
                 .withResourceExternalId(paymentExternalId)
                 .withEventType("PAYMENT_CREATED")
                 .toEntity();
 
-        List<Event> events = List.of(event);
+        List<EventEntity> events = List.of(event);
         TransactionEntity transactionEntity = aTransactionFixture().toEntity();
 
         when(eventService.getEventsForResource(event.getResourceExternalId())).thenReturn(events);
@@ -139,7 +139,7 @@ class PaymentEventProcessorTest {
     @Test
     void shouldNotProjectTransactionSummaryForAReprojectionEvent() {
         String refundExternalId = "refund-external-id";
-        Event event = anEventFixture().withResourceType(PAYMENT)
+        EventEntity event = anEventFixture().withResourceType(PAYMENT)
                 .withResourceExternalId(refundExternalId)
                 .withEventType("PAYMENT_CREATED")
                 .withIsReprojectDomainObject(true)
@@ -154,7 +154,7 @@ class PaymentEventProcessorTest {
     @Test
     void shouldNotProjectTransactionSummaryForAnExistingEvent() {
         String refundExternalId = "refund-external-id";
-        Event event = anEventFixture().withResourceType(PAYMENT)
+        EventEntity event = anEventFixture().withResourceType(PAYMENT)
                 .withResourceExternalId(refundExternalId)
                 .withEventType("PAYMENT_CREATED")
                 .withIsReprojectDomainObject(false)
@@ -168,7 +168,7 @@ class PaymentEventProcessorTest {
 
     @Test
     void shouldReprojectTransactionMetadataIfReprojectEvent() {
-        Event event = anEventFixture()
+        EventEntity event = anEventFixture()
                 .withResourceType(PAYMENT)
                 .withIsReprojectDomainObject(true)
                 .toEntity();

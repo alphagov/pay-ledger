@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.agreement.service.AgreementService;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.service.EventService;
 
 public class PaymentInstrumentEventProcessor extends EventProcessor {
@@ -19,7 +19,7 @@ public class PaymentInstrumentEventProcessor extends EventProcessor {
     }
 
     @Override
-    public void process(Event event, boolean isANewEvent) {
+    public void process(EventEntity event, boolean isANewEvent) {
         agreementService.upsertPaymentInstrumentFor(eventService.getEventDigestForResource(event));
     }
 }

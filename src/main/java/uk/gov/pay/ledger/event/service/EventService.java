@@ -2,7 +2,7 @@ package uk.gov.pay.ledger.event.service;
 
 import com.google.inject.Inject;
 import uk.gov.pay.ledger.event.dao.EventDao;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 
@@ -18,15 +18,15 @@ public class EventService {
     }
 
     public EventDigest getEventDigestForResource(String resourceExternalId) {
-        List<Event> events = getEventsForResource(resourceExternalId);
+        List<EventEntity> events = getEventsForResource(resourceExternalId);
         return EventDigest.fromEventList(events);
     }
 
-    public List<Event> getEventsForResource(String resourceExternalId) {
+    public List<EventEntity> getEventsForResource(String resourceExternalId) {
         return eventDao.getEventsByResourceExternalId(resourceExternalId);
     }
 
-    public CreateEventResponse createIfDoesNotExist(Event event) {
+    public CreateEventResponse createIfDoesNotExist(EventEntity event) {
         try {
             Optional<Long> status = eventDao.insertEventIfDoesNotExistWithResourceTypeId(event);
             return new CreateEventResponse(status);
@@ -35,7 +35,7 @@ public class EventService {
         }
     }
 
-    public EventDigest getEventDigestForResource(Event event) {
+    public EventDigest getEventDigestForResource(EventEntity event) {
         return getEventDigestForResource(event.getResourceExternalId());
     }
 }

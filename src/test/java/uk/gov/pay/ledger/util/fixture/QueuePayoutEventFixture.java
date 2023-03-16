@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
 import java.time.ZonedDateTime;
@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.pay.ledger.event.model.ResourceType.PAYOUT;
 
-public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFixture, Event> {
+public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFixture, EventEntity> {
     private String sqsMessageId;
     private String serviceId;
     private Boolean live;
@@ -87,8 +87,8 @@ public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFix
     }
 
     @Override
-    public Event toEntity() {
-        return new Event(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, EMPTY, eventDate, eventType, eventData, false);
+    public EventEntity toEntity() {
+        return new EventEntity(0L, sqsMessageId, serviceId, live, resourceType, resourceExternalId, EMPTY, eventDate, eventType, eventData, false);
     }
 
     @Override

@@ -6,7 +6,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.pay.ledger.gatewayaccountmetadata.service.GatewayAccountMetadataService;
 import uk.gov.service.payments.commons.model.Source;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
@@ -49,7 +49,7 @@ class TransactionMetadataServiceTest {
 
         when(mockTransactionDao.findTransactionByExternalId(externalId)).thenReturn(Optional.of(transaction));
 
-        Event paymentCreatedEvent = aQueuePaymentEventFixture()
+        EventEntity paymentCreatedEvent = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
                 .withEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withResourceType(PAYMENT)
@@ -79,7 +79,7 @@ class TransactionMetadataServiceTest {
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.STARTED).toEntity();
         service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao, mockGatewayAccountMetadataService);
 
-        Event paymentCreatedEvent = aQueuePaymentEventFixture()
+        EventEntity paymentCreatedEvent = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
                 .withEventType(SalientEventType.CAPTURE_SUBMITTED.name())
                 .withResourceType(PAYMENT)
@@ -100,12 +100,12 @@ class TransactionMetadataServiceTest {
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.STARTED).toEntity();
         service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao, mockGatewayAccountMetadataService);
 
-        Event event = aQueuePaymentEventFixture()
+        EventEntity event = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
                 .withEventType("ADMIN_TRIGGERED_REPROJECTION")
                 .toEntity();
 
-        Event previousEvent = aQueuePaymentEventFixture().withResourceType(PAYMENT)
+        EventEntity previousEvent = aQueuePaymentEventFixture().withResourceType(PAYMENT)
                 .withEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withResourceType(PAYMENT)
                 .withSource(Source.CARD_API)
@@ -135,7 +135,7 @@ class TransactionMetadataServiceTest {
         TransactionEntity transaction = aTransactionFixture().withState(TransactionState.STARTED).toEntity();
         service = new TransactionMetadataService(mockMetadataKeyDao, mockTransactionMetadataDao, mockTransactionDao, mockGatewayAccountMetadataService);
 
-        Event event = aQueuePaymentEventFixture()
+        EventEntity event = aQueuePaymentEventFixture()
                 .withResourceExternalId(externalId)
                 .toEntity();
 

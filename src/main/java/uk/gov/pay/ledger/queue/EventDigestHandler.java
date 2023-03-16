@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.queue;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.queue.eventprocessor.AgreementEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.ChildTransactionEventProcessor;
 import uk.gov.pay.ledger.queue.eventprocessor.EventProcessor;
@@ -35,7 +35,7 @@ public class EventDigestHandler {
         this.paymentInstrumentEventProcessor = paymentInstrumentEventProcessor;
     }
 
-    public EventProcessor processorFor(Event event) {
+    public EventProcessor processorFor(EventEntity event) {
         switch (event.getResourceType()) {
             case PAYMENT:
                 return paymentEventProcessor;
@@ -58,7 +58,7 @@ public class EventDigestHandler {
         }
     }
 
-    public void processEvent(Event event, boolean isANewEvent) {
+    public void processEvent(EventEntity event, boolean isANewEvent) {
         processorFor(event).process(event, isANewEvent);
     }
 }

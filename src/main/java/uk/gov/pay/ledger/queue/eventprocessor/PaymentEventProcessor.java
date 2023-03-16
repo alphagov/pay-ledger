@@ -1,7 +1,7 @@
 package uk.gov.pay.ledger.queue.eventprocessor;
 
 import com.google.inject.Inject;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.event.service.EventService;
@@ -41,8 +41,8 @@ public class PaymentEventProcessor extends EventProcessor {
 
 
     @Override
-    public void process(Event event, boolean isANewEvent) {
-        List<Event> events = eventService.getEventsForResource(event.getResourceExternalId());
+    public void process(EventEntity event, boolean isANewEvent) {
+        List<EventEntity> events = eventService.getEventsForResource(event.getResourceExternalId());
         EventDigest paymentEventDigest = EventDigest.fromEventList(events);
 
         TransactionEntity transactionEntity = transactionService.upsertTransactionFor(paymentEventDigest);
@@ -75,7 +75,7 @@ public class PaymentEventProcessor extends EventProcessor {
         }
     }
 
-    private boolean hasSuccessEvent(List<Event> events) {
+    private boolean hasSuccessEvent(List<EventEntity> events) {
         return events.stream().map(event -> SalientEventType.from(event.getEventType()))
                 .flatMap(Optional::stream)
                 .anyMatch(salientEventType -> fromEventType(salientEventType) == TransactionState.SUCCESS);

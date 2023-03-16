@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.payout.service.PayoutService;
@@ -31,7 +31,7 @@ class PayoutEventProcessorTest {
 
     @Test
     void shouldUpsertPayout() {
-        Event event = anEventFixture().withResourceType(PAYOUT).toEntity();
+        EventEntity event = anEventFixture().withResourceType(PAYOUT).toEntity();
         var eventDigest = EventDigest.fromEventList(List.of(anEventFixture().toEntity()));
         when(mockEventService.getEventDigestForResource(event)).thenReturn(eventDigest);
 

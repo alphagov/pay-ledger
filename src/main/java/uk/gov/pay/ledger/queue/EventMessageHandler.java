@@ -1,14 +1,13 @@
 package uk.gov.pay.ledger.queue;
 
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import io.sentry.Sentry;
 import org.jdbi.v3.core.Jdbi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.app.LedgerConfig;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
@@ -81,7 +80,7 @@ public class EventMessageHandler {
     }
 
     private void processSingleMessage(EventMessage message) throws QueueException {
-        Event event = message.getEvent();
+        EventEntity event = message.getEvent();
 
         CreateEventResponse response;
 

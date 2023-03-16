@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.SnsConfig;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
@@ -96,7 +96,7 @@ class EventMessageHandlerTest {
 
     @Test
     void shouldMarkMessageAsProcessed_WhenEventIsProcessedSuccessfully() throws QueueException {
-        Event event = aQueuePaymentEventFixture().toEntity();
+        EventEntity event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(eventMessage.getQueueMessageReceiptHandle()).thenReturn(Optional.of("a-valid-recipient-handle"));
         when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
@@ -116,7 +116,7 @@ class EventMessageHandlerTest {
         root.addAppender(mockAppender);
 
         String eventType = "AN_EVENT_TYPE";
-        Event event = aQueuePaymentEventFixture()
+        EventEntity event = aQueuePaymentEventFixture()
                 .withIsReprojectDomainObject(true)
                 .withEventType(eventType)
                 .toEntity();
@@ -136,7 +136,7 @@ class EventMessageHandlerTest {
 
     @Test
     void shouldScheduleMessageForRetry_WhenEventIsNotProcessedSuccessfully() throws QueueException {
-        Event event = aQueuePaymentEventFixture().toEntity();
+        EventEntity event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(eventMessage.getQueueMessageId()).thenReturn(Optional.of("a-valid-queue-message-id"));
         when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
@@ -149,7 +149,7 @@ class EventMessageHandlerTest {
 
     @Test
     void shouldNotScheduleMessageForRetryGivenNoSQSQueueMessage_WhenEventIsNotProcessedSuccessfully() throws QueueException {
-        Event event = aQueuePaymentEventFixture().toEntity();
+        EventEntity event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(eventMessage.getQueueMessageId()).thenReturn(null);
         when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
@@ -164,7 +164,7 @@ class EventMessageHandlerTest {
     void shouldPublishCardPaymentMessageWhenSnsEnabled() throws Exception {
         String messageBody = "{ \"foo\": \"bar\"}";
 
-        Event event = aQueuePaymentEventFixture().toEntity();
+        EventEntity event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(eventMessage.getRawMessageBody()).thenReturn(messageBody);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
@@ -180,7 +180,7 @@ class EventMessageHandlerTest {
     void shouldPublishDisputeMessageWhenSnsEnabled() throws Exception {;
         String messageBody = "{ \"foo\": \"bar\"}";
 
-        Event event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
+        EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(eventMessage.getRawMessageBody()).thenReturn(messageBody);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
@@ -194,7 +194,7 @@ class EventMessageHandlerTest {
 
     @Test
     void shouldNotTryToPublishMessagesWhenSnsNotEnabled() throws QueueException {
-        Event event = aQueuePaymentEventFixture().toEntity();
+        EventEntity event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
         when(snsConfig.isSnsEnabled()).thenReturn(false);
@@ -206,7 +206,7 @@ class EventMessageHandlerTest {
 
     @Test
     void shouldNotTryToPublishWhenPublishCardPaymentEventsToSnsDisabled() throws QueueException {
-        Event event = aQueuePaymentEventFixture().toEntity();
+        EventEntity event = aQueuePaymentEventFixture().toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
         when(snsConfig.isSnsEnabled()).thenReturn(true);
@@ -219,7 +219,7 @@ class EventMessageHandlerTest {
 
     @Test
     void shouldNotTryToPublishWhenPublishCardPaymentDisputeEventsToSnsDisabled() throws QueueException {
-        Event event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
+        EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
         when(snsConfig.isSnsEnabled()).thenReturn(true);

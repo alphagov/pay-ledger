@@ -1,20 +1,20 @@
 package uk.gov.pay.ledger.agreement.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.pay.ledger.event.model.EventDto;
+import uk.gov.pay.ledger.event.model.Event;
 
 import java.util.List;
 
 public class AgreementEventsResponse {
 
     @JsonProperty("events")
-    private final List<EventDto> events;
+    private final List<Event> events;
     
-    public AgreementEventsResponse(List<EventDto> events) {
+    public AgreementEventsResponse(List<Event> events) {
         this.events = events;
     }
     
-    public List<EventDto> getEvents() {
+    public List<Event> getEvents() {
         return events;
     }
     

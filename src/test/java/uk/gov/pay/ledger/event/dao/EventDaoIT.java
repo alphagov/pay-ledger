@@ -5,7 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventTicker;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
@@ -63,7 +63,7 @@ public class EventDaoIT {
         eventDao.insertEventWithResourceTypeId(paymentCreatedEvent.toEntity());
         eventDao.insertEventWithResourceTypeId(paymentSucceededEvent.toEntity());
 
-        List<Event> events = eventDao.getEventsByResourceExternalId(resourceExternalId);
+        List<EventEntity> events = eventDao.getEventsByResourceExternalId(resourceExternalId);
         assertThat(events, hasSize(2));
         events.forEach(event -> assertThat(event.getEventData(), is(eventData)));
 
@@ -77,7 +77,7 @@ public class EventDaoIT {
 
     @Test
     public void shouldInsertEvent() throws IOException {
-        Event event = anEventFixture()
+        EventEntity event = anEventFixture()
                 .withEventDate(CREATED_AT)
                 .withParentResourceExternalId("parent-resource-id")
                 .toEntity();
@@ -97,7 +97,7 @@ public class EventDaoIT {
 
     @Test
     public void shouldInsertNotExistingEvent() throws IOException {
-        Event event = anEventFixture()
+        EventEntity event = anEventFixture()
                 .withEventDate(CREATED_AT)
                 .toEntity();
 
@@ -117,10 +117,10 @@ public class EventDaoIT {
 
     @Test
     public void shouldInsertDuplicateEventWithDifferentTimestamp() {
-        Event event = anEventFixture()
+        EventEntity event = anEventFixture()
                 .insert(rule.getJdbi())
                 .toEntity();
-        Event duplicateEvent = anEventFixture()
+        EventEntity duplicateEvent = anEventFixture()
                 .from(event)
                 .withEventDate(CREATED_AT)
                 .toEntity();
@@ -137,11 +137,11 @@ public class EventDaoIT {
 
     @Test
     public void shouldNotInsertDuplicateEvent() throws IOException {
-        Event event = anEventFixture()
+        EventEntity event = anEventFixture()
                 .withEventDate(CREATED_AT)
                 .insert(rule.getJdbi())
                 .toEntity();
-        Event duplicateEvent = anEventFixture()
+        EventEntity duplicateEvent = anEventFixture()
                 .from(event)
                 .withSQSMessageId(RandomStringUtils.randomAlphanumeric(50))
                 .withEventDate(CREATED_AT)
@@ -166,13 +166,13 @@ public class EventDaoIT {
 
     @Test
     public void shouldFindEvent() {
-        Event event = anEventFixture()
+        EventEntity event = anEventFixture()
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        Optional<Event> optionalEvent = eventDao.getById(event.getId());
+        Optional<EventEntity> optionalEvent = eventDao.getById(event.getId());
         assertThat(optionalEvent.isPresent(), is(true));
-        Event retrievedEvent = optionalEvent.get();
+        EventEntity retrievedEvent = optionalEvent.get();
         assertThat(retrievedEvent.getId(), is(event.getId()));
         assertThat(retrievedEvent.getResourceExternalId(), is(event.getResourceExternalId()));
         assertThat(retrievedEvent.getResourceType().name(), is(event.getResourceType().name()));
@@ -186,25 +186,25 @@ public class EventDaoIT {
     public void shouldGetAllEventsForResourceExternalIdInDescendingDateOrder() {
         final String resourceExternalId = "resourceExternalId";
 
-        Event earliestEvent = anEventFixture()
+        EventEntity earliestEvent = anEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(ZonedDateTime.now().minusHours(4))
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        Event latestEvent = anEventFixture()
+        EventEntity latestEvent = anEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(ZonedDateTime.now().minusHours(1))
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        Event middleEvent = anEventFixture()
+        EventEntity middleEvent = anEventFixture()
                 .withResourceExternalId(resourceExternalId)
                 .withEventDate(ZonedDateTime.now().minusHours(2))
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        List<Event> events = eventDao.getEventsByResourceExternalId(resourceExternalId);
+        List<EventEntity> events = eventDao.getEventsByResourceExternalId(resourceExternalId);
 
         assertThat(events.size(), is(3));
         assertThat(events.get(0).getId(), is(latestEvent.getId()));
@@ -214,18 +214,18 @@ public class EventDaoIT {
 
     @Test
     public void shouldGetEmptyListWhenNoEventsWithResourceExternalId() {
-        List<Event> events = eventDao.getEventsByResourceExternalId("no_events_for_this_id");
+        List<EventEntity> events = eventDao.getEventsByResourceExternalId("no_events_for_this_id");
 
         assertThat(events.size(), is(0));
     }
 
     @Test
     public void findEventsForExternalIdsShouldFilterEventsByMultipleExternalIds() {
-        Event event1 = anEventFixture()
+        EventEntity event1 = anEventFixture()
                 .withResourceExternalId("external-id-1")
                 .insert(rule.getJdbi())
                 .toEntity();
-        Event event2 = anEventFixture()
+        EventEntity event2 = anEventFixture()
                 .withResourceExternalId("external-id-2")
                 .withEventDate(event1.getEventDate().plusDays(1))
                 .insert(rule.getJdbi())
@@ -235,7 +235,7 @@ public class EventDaoIT {
                 .withEventDate(event2.getEventDate().plusDays(1))
                 .insert(rule.getJdbi());
 
-        List<Event> eventList = eventDao.findEventsForExternalIds(Set.of("external-id-1", "external-id-2"));
+        List<EventEntity> eventList = eventDao.findEventsForExternalIds(Set.of("external-id-1", "external-id-2"));
 
         assertThat(eventList.size(), is(2));
 
@@ -245,7 +245,7 @@ public class EventDaoIT {
 
     @Test
     public void findEventsForExternalIds_ShouldReturnEmptyListIfNoRecordsFound() {
-        List<Event> eventList = eventDao.findEventsForExternalIds(Set.of("some-ext-id-1", "some-ext-id-2"));
+        List<EventEntity> eventList = eventDao.findEventsForExternalIds(Set.of("some-ext-id-1", "some-ext-id-2"));
         assertThat(eventList.size(), is(0));
     }
 
@@ -259,12 +259,12 @@ public class EventDaoIT {
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        Event event1 = anEventFixture()
+        EventEntity event1 = anEventFixture()
                 .withResourceExternalId("external-id-1")
                 .withEventType("PAYMENT_CREATED")
                 .insert(rule.getJdbi())
                 .toEntity();
-        Event event2 = anEventFixture()
+        EventEntity event2 = anEventFixture()
                 .withResourceExternalId("external-id-1")
                 .withEventDate(event1.getEventDate().minusDays(1))
                 .insert(rule.getJdbi())

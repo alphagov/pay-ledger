@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
@@ -31,25 +31,6 @@ public class EventResourceIT {
     public void setUp() {
         databaseTestHelper = DatabaseTestHelper.aDatabaseTestHelper(rule.getJdbi());
         databaseTestHelper.truncateAllData();
-    }
-
-    @Test
-    public void shouldGetEventFromDB() {
-        Event event = anEventFixture()
-                .insert(rule.getJdbi())
-                .toEntity();
-
-        given().port(port)
-                .contentType(JSON)
-                .get("/v1/event/" + event.getId())
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON)
-                .body("resource_external_id", is(event.getResourceExternalId()))
-                .body("resource_type", is(event.getResourceType().name().toLowerCase()))
-                .body("sqs_message_id", is(event.getSqsMessageId()))
-                .body("event_type", is(event.getEventType()))
-                .body("event_data", is(event.getEventData()));
     }
 
     @Test
@@ -122,7 +103,7 @@ public class EventResourceIT {
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        Event event = anEventFixture()
+        EventEntity event = anEventFixture()
                 .withResourceExternalId("an-external-id")
                 .insert(rule.getJdbi())
                 .toEntity();

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
@@ -31,24 +32,24 @@ public class TransactionEntityFactoryTest {
 
     @Test
     public void fromShouldConvertEventDigestToTransactionEntity() {
-        Event paymentCreatedEvent = aQueuePaymentEventFixture()
+        EventEntity paymentCreatedEvent = aQueuePaymentEventFixture()
                 .withLive(true)
                 .withEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withDefaultEventDataForEventType(SalientEventType.PAYMENT_CREATED.name())
                 .withResourceType(ResourceType.PAYMENT)
                 .withSource(Source.CARD_API)
                 .toEntity();
-        Event paymentDetailsEvent = aQueuePaymentEventFixture()
+        EventEntity paymentDetailsEvent = aQueuePaymentEventFixture()
                 .withEventType("PAYMENT_DETAILS_ENTERED")
                 .withDefaultEventDataForEventType("PAYMENT_DETAILS_ENTERED")
                 .withResourceType(ResourceType.PAYMENT)
                 .toEntity();
-        Event captureConfirmedEvent = aQueuePaymentEventFixture()
+        EventEntity captureConfirmedEvent = aQueuePaymentEventFixture()
                 .withEventType("CAPTURE_CONFIRMED")
                 .withEventData("{\"net_amount\": 55, \"total_amount\": 105, \"fee\": 33}")
                 .withResourceType(ResourceType.PAYMENT)
                 .toEntity();
-        Event paymentIncludedInPayoutEvent = aQueuePaymentEventFixture()
+        EventEntity paymentIncludedInPayoutEvent = aQueuePaymentEventFixture()
                 .withEventType("PAYMENT_INCLUDED_IN_PAYOUT")
                 .withEventData("{\"gateway_payout_id\": \"payout-id\"}")
                 .withResourceType(ResourceType.PAYMENT)
@@ -99,14 +100,14 @@ public class TransactionEntityFactoryTest {
     @Test
     public void fromShouldConvertEventDigestToTransactionForChildResource() throws IOException {
         String parentResourceExternalId = "parent-resource-external-id";
-        Event refundCreatedEvent = aQueuePaymentEventFixture()
+        EventEntity refundCreatedEvent = aQueuePaymentEventFixture()
                 .withEventType("REFUND_CREATED_BY_USER")
                 .withResourceExternalId("resource-external-id")
                 .withParentResourceExternalId(parentResourceExternalId)
                 .withResourceType(ResourceType.REFUND)
                 .withEventData("{\"refunded_by\": \"refunded-by-id\", \"amount\": 1000}")
                 .toEntity();
-        Event refundSubmittedEvent = aQueuePaymentEventFixture()
+        EventEntity refundSubmittedEvent = aQueuePaymentEventFixture()
                 .withEventType("REFUND_SUBMITTED")
                 .withResourceExternalId("resource-external-id")
                 .withParentResourceExternalId(parentResourceExternalId)
@@ -129,10 +130,10 @@ public class TransactionEntityFactoryTest {
 
     @Test
     public void create_ShouldCorrectlySetStateForMostRecentSalientEventType() {
-        Event paymentCreatedEvent = aQueuePaymentEventFixture().withEventType("PAYMENT_CREATED").toEntity();
-        Event nonSalientEvent = aQueuePaymentEventFixture().withEventType("NON_STATE_TRANSITION_EVENT").toEntity();
-        Event paymentStartedEvent = aQueuePaymentEventFixture().withEventType("PAYMENT_STARTED").toEntity();
-        Event secondNonSalientEvent = aQueuePaymentEventFixture().withEventType("SECOND_NON_STATE_TRANSITION_EVENT").toEntity();
+        EventEntity paymentCreatedEvent = aQueuePaymentEventFixture().withEventType("PAYMENT_CREATED").toEntity();
+        EventEntity nonSalientEvent = aQueuePaymentEventFixture().withEventType("NON_STATE_TRANSITION_EVENT").toEntity();
+        EventEntity paymentStartedEvent = aQueuePaymentEventFixture().withEventType("PAYMENT_STARTED").toEntity();
+        EventEntity secondNonSalientEvent = aQueuePaymentEventFixture().withEventType("SECOND_NON_STATE_TRANSITION_EVENT").toEntity();
 
         EventDigest eventDigest = EventDigest.fromEventList(List.of(secondNonSalientEvent, paymentStartedEvent, nonSalientEvent, paymentCreatedEvent));
         TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
@@ -142,7 +143,7 @@ public class TransactionEntityFactoryTest {
 
     @Test
     public void create_ShouldSetUndefinedStateForNoSalientEventTypes() {
-        Event paymentDetailsEntered = aQueuePaymentEventFixture().withEventType("PAYMENT_DETAILS_ENTERED").toEntity();
+        EventEntity paymentDetailsEntered = aQueuePaymentEventFixture().withEventType("PAYMENT_DETAILS_ENTERED").toEntity();
 
         EventDigest eventDigest = EventDigest.fromEventList(List.of(paymentDetailsEntered));
         TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
@@ -152,7 +153,7 @@ public class TransactionEntityFactoryTest {
 
     @Test
     public void createWithNoSourceParameter_ShouldHandleNullValueCorrectly() {
-        Event paymentCreatedEvent = aQueuePaymentEventFixture()
+        EventEntity paymentCreatedEvent = aQueuePaymentEventFixture()
                 .withEventType("PAYMENT_CREATED")
                 .withEventData("{\"amount\":50}")
                 .toEntity();
