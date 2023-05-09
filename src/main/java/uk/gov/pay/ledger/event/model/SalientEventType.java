@@ -59,7 +59,8 @@ public enum SalientEventType {
     AGREEMENT_CREATED,
     AGREEMENT_SET_UP,
     AGREEMENT_CANCELLED_BY_SERVICE,
-    AGREEMENT_CANCELLED_BY_USER;
+    AGREEMENT_CANCELLED_BY_USER,
+    AGREEMENT_INACTIVATED;
 
     public static Optional<SalientEventType> from(String eventName) {
         return Arrays.stream(SalientEventType.values())

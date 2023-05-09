@@ -74,6 +74,7 @@ paths:
           enum:
           - CREATED
           - ACTIVE
+          - INACTIVE
           - CANCELLED
           - EXPIRED
       - description: Limit the results to exact matches for the given reference
@@ -1057,6 +1058,7 @@ components:
           enum:
           - CREATED
           - ACTIVE
+          - INACTIVE
           - CANCELLED
           - EXPIRED
         user_identifier:
