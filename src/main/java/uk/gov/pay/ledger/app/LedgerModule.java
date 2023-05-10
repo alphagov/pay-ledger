@@ -11,8 +11,11 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.SnsClientBuilder;
 import uk.gov.pay.ledger.agreement.dao.AgreementDao;
 import uk.gov.pay.ledger.agreement.dao.PaymentInstrumentDao;
 import uk.gov.pay.ledger.event.dao.EventDao;
@@ -166,10 +169,24 @@ public class LedgerModule extends AbstractModule {
 
     @Provides
     public SnsClient snsClient(LedgerConfig ledgerConfig) {
-        return SnsClient
+        SnsClientBuilder clientBuilder = SnsClient
                 .builder()
-                .region(Region.of(ledgerConfig.getSnsConfig().getRegion()))
-                .build();
+                .region(Region.of(ledgerConfig.getSnsConfig().getRegion()));
+
+        if (ledgerConfig.getSnsConfig().isNonStandardServiceEndpoint()) {
+            clientBuilder
+                    .endpointOverride(ledgerConfig.getSnsConfig().getEndpoint())
+                    .credentialsProvider(
+                            StaticCredentialsProvider.create(
+                                    AwsBasicCredentials.create(
+                                            ledgerConfig.getSnsConfig().getAccessKey(),
+                                            ledgerConfig.getSnsConfig().getSecretKey()
+                                    )
+                            )
+                    );
+        }
+
+        return clientBuilder.build();
     }
 
     @Provides
