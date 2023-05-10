@@ -68,4 +68,26 @@ class AgreementsFactoryTest {
         assertThat(entity.getCardholderName(), is("Joe D"));
         assertThat(entity.getAddressLine1(), is("An address line 1"));
     }
+
+    @Test
+    public void shouldConvertAgreementInactivatedEventDigestToAgreementEntity() {
+        var event = aQueuePaymentEventFixture()
+                .withEventType("AGREEMENT_INACTIVATED")
+                .withResourceType(ResourceType.AGREEMENT)
+                .withEventData(gsonBuilder.create()
+                        .toJson(Map.of(
+                                "reason", "expired_card",
+                                "payment_instrument_external_id", "a-valid-payment-instrument-external-id"
+                        ))
+                )
+                .toEntity();
+        var eventDigest = EventDigest.fromEventList(List.of(event));
+        var entity = agreementEntityFactory.create(eventDigest);
+
+        assertThat(entity.getServiceId(), is(event.getServiceId()));
+        assertThat(entity.getLive(), is(entity.getLive()));
+        assertThat(entity.getCreatedDate(), is(event.getEventDate()));
+        assertThat(entity.getEventCount(), is(1));
+        assertThat(entity.getStatus(), is(AgreementStatus.INACTIVE));
+    }
 }

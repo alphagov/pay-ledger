@@ -15,7 +15,8 @@ public class AgreementsFactory {
                     Map.entry(SalientEventType.AGREEMENT_CREATED, AgreementStatus.CREATED),
                     Map.entry(SalientEventType.AGREEMENT_SET_UP, AgreementStatus.ACTIVE),
                     Map.entry(SalientEventType.AGREEMENT_CANCELLED_BY_SERVICE, AgreementStatus.CANCELLED),
-                    Map.entry(SalientEventType.AGREEMENT_CANCELLED_BY_USER, AgreementStatus.CANCELLED)
+                    Map.entry(SalientEventType.AGREEMENT_CANCELLED_BY_USER, AgreementStatus.CANCELLED),
+                    Map.entry(SalientEventType.AGREEMENT_INACTIVATED, AgreementStatus.INACTIVE)
             );
 
     private final ObjectMapper objectMapper;
