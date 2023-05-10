@@ -65,6 +65,10 @@ queueMessageReceiverConfig:
 
 snsConfig:
   snsEnabled: ${SNS_ENABLED:-false}
+  nonStandardServiceEndpoint: ${AWS_SNS_NON_STANDARD_SERVICE_ENDPOINT:-false}
+  endpoint: ${AWS_SNS_ENDPOINT:-}
+  secretKey: ${AWS_SECRET_KEY}
+  accessKey: ${AWS_ACCESS_KEY}
   region: ${AWS_SNS_REGION:-eu-west-1}
   cardPaymentEventsTopicArn: ${SNS_TOPIC_CARD_PAYMENT_EVENTS_ARN}
 
