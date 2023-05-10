@@ -27,18 +27,36 @@ and background processing.
 | `DB_NAME`       | `ledger` | Name of the database                                                                         |
 | `DB_SSL_OPTION` | -        | Indicates whether the connection to the database should be secured with SSL (eg. `ssl=true`) |
 
+### AWS Credentials Configuration
+
+| Variable                                       | Default | Purpose                                                                                                                     |
+|------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------|
+| `AWS_ACCESS_KEY`                               | -       | Access key. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` or `AWS_SNS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
+| `AWS_SECRET_KEY`                               | -       | Secret key. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` or `AWS_SNS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
+
 ### SQS configuration
 
-| Variable                                       | Default | Purpose                                                                                                   |
-|------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------|
-| `AWS_SQS_REGION`                               | -       | SQS region                                                                                                |
-| `AWS_SQS_PAYMENT_EVENT_QUEUE_URL`              | -       | SQS payment event queue URL                                                                               |
-| `AWS_SQS_MESSAGE_MAXIMUM_WAIT_TIME_IN_SECONDS` | `20`    | Maximum wait time for long poll message requests to queue                                                 |
-| `AWS_SQS_MESSAGE_MAXIMUM_BATCH_SIZE`           | `10`    | Maximum number of messages that should be received in an individual message batch                         |
-| `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT`        | `false` | Set to true to use a non standard (eg: `http://my-own-sqs-endpoint`) SQS endpoint                         |
-| `AWS_SQS_ENDPOINT`                             | -       | URL that is the entry point for SQS. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
-| `AWS_SECRET_KEY`                               | -       | Secret key. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true`                          |
-| `AWS_ACCESS_KEY`                               | -       | Access key. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true`                          |
+| Variable                                       | Default | Purpose                                                                                                    |
+|------------------------------------------------|---------|------------------------------------------------------------------------------------------------------------|
+| `AWS_SQS_REGION`                               | -       | SQS region                                                                                                 |
+| `AWS_SQS_PAYMENT_EVENT_QUEUE_URL`              | -       | SQS payment event queue URL                                                                                |
+| `AWS_SQS_MESSAGE_MAXIMUM_WAIT_TIME_IN_SECONDS` | `20`    | Maximum wait time for long poll message requests to queue                                                  |
+| `AWS_SQS_MESSAGE_MAXIMUM_BATCH_SIZE`           | `10`    | Maximum number of messages that should be received in an individual message batch                          |
+| `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT`        | `false` | Set to true to use a non standard (eg: `http://my-own-sqs-endpoint`) SQS endpoint                          |
+| `AWS_SQS_ENDPOINT`                             | -       | URL that is the API endpoint for SQS. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
+
+### SNS Configuration
+
+| Variable                                       | Default | Purpose                                                                                                    |
+|------------------------------------------------|---------|------------------------------------------------------------------------------------------------------------|
+| `SNS_ENABLED`                                  | `false` | Set to true to send events to SNS                                                                          |
+| `AWS_SNS_REGION`                               | -       | SNS region                                                                                                 |
+| `AWS_SNS_NON_STANDARD_SERVICE_ENDPOINT`        | `false` | Set to true to use a non standard (eg: `http://my-own-sns-endpoint`) SNS endpoint                          |
+| `AWS_SNS_ENDPOINT`                             | -       | URL that is the API endpoint for SNS. Only required when `AWS_SNS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
+| `PUBLISH_CARD_PAYMENT_EVENTS_TO_SNS`           | `false` | Set to true to publish card payment events to the card payment events SNS topic                            |
+| `PUBLISH_CARD_PAYMENT_DISPUTE_EVENTS_TO_SNS`   | `false` | Set to true to publish card payment dispute events to the card payment dispute events SNS topic            |
+| `SNS_TOPIC_CARD_PAYMENT_EVENTS_ARN`            | -       | ARN of the SNS topic for card payment events                                                               |
+| `SNS_TOPIC_CARD_PAYMENT_DISPUTE_EVENTS_ARN`    | -       | ARN of the SNS topic for card payment dispute events                                                       |
 
 ### Background processing configuration
 
