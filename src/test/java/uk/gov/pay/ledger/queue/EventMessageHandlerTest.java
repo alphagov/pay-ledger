@@ -41,6 +41,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
+import static uk.gov.service.payments.logging.LoggingKeys.LEDGER_EVENT_TYPE;
 
 @ExtendWith(MockitoExtension.class)
 class EventMessageHandlerTest {
@@ -131,7 +132,7 @@ class EventMessageHandlerTest {
 
         verify(mockAppender, times(1)).doAppend(loggingEventArgumentCaptor.capture());
         assertThat(loggingEventArgumentCaptor.getValue().getArgumentArray(), hasItemInArray(kv("reproject_domain_object_event", true)));
-        assertThat(loggingEventArgumentCaptor.getValue().getArgumentArray(), hasItemInArray(kv("event_type", eventType)));
+        assertThat(loggingEventArgumentCaptor.getValue().getArgumentArray(), hasItemInArray(kv(LEDGER_EVENT_TYPE, eventType)));
     }
 
     @Test

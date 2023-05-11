@@ -12,7 +12,6 @@ import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.eventpublisher.EventPublisher;
-import uk.gov.pay.ledger.eventpublisher.TopicName;
 import uk.gov.service.payments.commons.queue.exception.QueueException;
 
 import java.time.ZonedDateTime;
@@ -20,9 +19,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.String.format;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 import static uk.gov.pay.ledger.event.model.response.CreateEventResponse.CreateEventState.INSERTED;
 import static uk.gov.pay.ledger.event.model.response.CreateEventResponse.ignoredEventResponse;
+import static uk.gov.pay.ledger.eventpublisher.TopicName.CARD_PAYMENT_DISPUTE_EVENTS;
+import static uk.gov.pay.ledger.eventpublisher.TopicName.CARD_PAYMENT_EVENTS;
+import static uk.gov.service.payments.logging.LoggingKeys.LEDGER_EVENT_TYPE;
+import static uk.gov.service.payments.logging.LoggingKeys.RESOURCE_EXTERNAL_ID;
+import static uk.gov.service.payments.logging.LoggingKeys.SQS_MESSAGE_ID;
 
 public class EventMessageHandler {
 
@@ -62,8 +67,9 @@ public class EventMessageHandler {
             } catch (Exception e) {
                 Sentry.captureException(e);
                 LOGGER.warn("Error during handling the event message",
-                        kv("sqs_message_id", message.getQueueMessageId()),
-                        kv("resource_external_id", message.getEvent().getResourceExternalId()),
+                        kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
+                        kv(RESOURCE_EXTERNAL_ID, message.getEvent().getResourceExternalId()),
+                        kv(LEDGER_EVENT_TYPE, message.getEvent().getEventType()),
                         kv("error", e.getMessage())
                 );
             }
@@ -100,22 +106,32 @@ public class EventMessageHandler {
                     if (ledgerConfig.getSnsConfig().isPublishCardPaymentDisputeEventsToSns()) {
                         eventPublisher.publishMessageToTopic(
                                 message.getRawMessageBody(),
-                                TopicName.CARD_PAYMENT_DISPUTE_EVENTS
+                                CARD_PAYMENT_DISPUTE_EVENTS
                         );
+                        LOGGER.info(format("Published message to SNS topic"),
+                                kv("sns_topic", CARD_PAYMENT_DISPUTE_EVENTS),
+                                kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
+                                kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
+                                kv(LEDGER_EVENT_TYPE, event.getEventType()));
                     }
                 } else {
                     if (ledgerConfig.getSnsConfig().isPublishCardPaymentEventsToSns()) {
                         eventPublisher.publishMessageToTopic(
                                 message.getRawMessageBody(),
-                                TopicName.CARD_PAYMENT_EVENTS
+                                CARD_PAYMENT_EVENTS
                         );
+                        LOGGER.info(format("Published message to SNS topic"),
+                                kv("sns_topic", CARD_PAYMENT_EVENTS),
+                                kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
+                                kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
+                                kv(LEDGER_EVENT_TYPE, event.getEventType()));
                     }
                 }
             } catch (Exception e) {
                 LOGGER.warn("Failed to publish event for message",
-                        kv("sqs_message_id", message.getQueueMessageId()),
-                        kv("resource_external_id", event.getResourceExternalId()),
-                        kv("event_type", event.getEventType()),
+                        kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
+                        kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
+                        kv(LEDGER_EVENT_TYPE, event.getEventType()),
                         kv("error", e.getMessage()));
             }
         }
@@ -129,10 +145,10 @@ public class EventMessageHandler {
             }
             metricRegistry.histogram("event-message-handler.ingest-lag-microseconds").update(ingestLag);
             var loggingArgs = new ArrayList<>(List.of(
-                    kv("sqs_message_id", message.getQueueMessageId()),
-                    kv("resource_external_id", event.getResourceExternalId()),
+                    kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
+                    kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
+                    kv(LEDGER_EVENT_TYPE, event.getEventType()),
                     kv("state", response.getState()),
-                    kv("event_type", event.getEventType()),
                     kv("ingest_lag_micro_seconds", ingestLag)));
 
             if (event.isReprojectDomainObject()) {
@@ -144,13 +160,14 @@ public class EventMessageHandler {
             if (message.getQueueMessageId().isPresent()) {
                 eventQueue.scheduleMessageForRetry(message);
                 LOGGER.warn("The event message has been scheduled for retry.",
-                        kv("sqs_message_id", message.getQueueMessageId()),
-                        kv("resource_external_id", message.getEvent().getResourceExternalId()),
+                        kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
+                        kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
+                        kv(LEDGER_EVENT_TYPE, event.getEventType()),
                         kv("state", response.getState()),
                         kv("error", response.getErrorMessage()));
             } else {
                 LOGGER.warn("Create event response was unsuccessful.",
-                        kv("resource_external_id", message.getEvent().getResourceExternalId()),
+                        kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
                         kv("state", response.getState()),
                         kv("error", response.getErrorMessage()));
             }
