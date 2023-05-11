@@ -14,7 +14,7 @@
         <jackson.version>2.15.0</jackson.version>
         <testcontainers.version>1.18.0</testcontainers.version>
         <postgresql.version>42.6.0</postgresql.version>
-        <pay-java-commons.version>1.0.20230509124715</pay-java-commons.version>
+        <pay-java-commons.version>1.0.20230511100444</pay-java-commons.version>
         <junit5.version>5.9.2</junit5.version>
         <surefire.version>3.0.0</surefire.version>
         <guice.version>5.1.0</guice.version>
