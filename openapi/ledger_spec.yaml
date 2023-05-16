@@ -76,7 +76,6 @@ paths:
           - ACTIVE
           - INACTIVE
           - CANCELLED
-          - EXPIRED
       - description: Limit the results to exact matches for the given reference
         example: true
         in: query
@@ -1060,7 +1059,6 @@ components:
           - ACTIVE
           - INACTIVE
           - CANCELLED
-          - EXPIRED
         user_identifier:
           type: string
     AgreementEventsResponse:
