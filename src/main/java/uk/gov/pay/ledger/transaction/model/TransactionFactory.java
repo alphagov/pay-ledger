@@ -127,6 +127,7 @@ public class TransactionFactory {
                     .withAuthorisationMode(authorisationMode)
                     .withAgreementId(entity.getAgreementId())
                     .withDisputed(safeGetAsBoolean(transactionDetails, "disputed", false))
+                    .withCanRetry(safeGetAsBoolean(transactionDetails, "canRetry", null))
                     .build();
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());

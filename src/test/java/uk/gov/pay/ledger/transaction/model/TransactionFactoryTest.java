@@ -10,8 +10,6 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.service.payments.commons.model.AuthorisationMode;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -55,6 +53,7 @@ public class TransactionFactoryTest {
     private String cardExpiryDate = "10/27";
     private String walletType = "APPLE_PAY";
     private ZonedDateTime paidOutDate = ZonedDateTime.parse("2017-09-19T08:46:01.123456Z");
+    private Boolean canRetry = false;
 
     @BeforeEach
     public void setUp() {
@@ -85,6 +84,7 @@ public class TransactionFactoryTest {
         fullTransactionDetails.addProperty("wallet", walletType);
         fullTransactionDetails.addProperty("authorisation_mode", "moto_api");
         fullTransactionDetails.addProperty("disputed", true);
+        fullTransactionDetails.addProperty("canRetry", false);
 
         var payoutObject = aPayoutEntity()
                 .withPaidOutDate(paidOutDate)
@@ -194,6 +194,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getSettlementSummary().getSettledDate(), is(Optional.empty()));
         assertThat(payment.getAuthorisationMode(), is(AuthorisationMode.WEB));
         assertThat(payment.getDisputed(), is(false));
+        assertThat(payment.getCanRetry(), is(nullValue()));
     }
 
     @Test
@@ -395,5 +396,6 @@ public class TransactionFactoryTest {
         assertThat(payment.getWalletType(), is(walletType));
         assertThat(payment.getAuthorisationMode(), is(AuthorisationMode.MOTO_API));
         assertThat(payment.getDisputed(), is(true));
+        assertThat(payment.getCanRetry(), is(Boolean.FALSE));
     }
 }
