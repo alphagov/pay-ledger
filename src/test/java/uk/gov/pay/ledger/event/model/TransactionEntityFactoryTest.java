@@ -95,6 +95,7 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionDetails.get("corporate_surcharge").getAsInt(), is(5));
         assertThat(transactionDetails.get("gateway_transaction_id").getAsString(), is(eventDigest.getEventAggregate().get("gateway_transaction_id")));
         assertThat(transactionDetails.get("external_metadata").getAsJsonObject().get("key").getAsString(), is("value"));
+        assertThat(transactionDetails.get("canRetry"), is(nullValue()));
     }
 
     @Test
@@ -149,6 +150,21 @@ public class TransactionEntityFactoryTest {
         TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
 
         assertThat(transactionEntity.getState().toString(), is("UNDEFINED"));
+    }
+
+    @Test
+    public void create_ShouldSetCanRetryForTransactionRejectedSalientEventTypesWhenPresent() {
+        EventEntity transactionRejected = aQueuePaymentEventFixture()
+                .withEventType("AUTHORISATION_REJECTED")
+                .withEventData("{\"canRetry\":false}")
+                .toEntity();
+
+        EventDigest eventDigest = EventDigest.fromEventList(List.of(transactionRejected));
+        TransactionEntity transactionEntity = transactionEntityFactory.create(eventDigest);
+
+        assertThat(transactionEntity.getState().toString(), is("FAILED_REJECTED"));
+        JsonObject transactionDetails = JsonParser.parseString(transactionEntity.getTransactionDetails()).getAsJsonObject();
+        assertThat(transactionDetails.get("canRetry").getAsBoolean(), is(false));
     }
 
     @Test
