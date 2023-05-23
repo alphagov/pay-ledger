@@ -184,8 +184,7 @@ public class TransactionView {
                     .withAgreementId(payment.getAgreementId())
                     .withDisputed(payment.getDisputed());
             if (payment.getState() != null) {
-                paymentBuilder = paymentBuilder
-                        .withState(ExternalTransactionState.from(payment.getState(), statusVersion));
+                paymentBuilder = paymentBuilder.withState(ExternalTransactionState.from(payment.getState(), statusVersion, payment.getCanRetry()));
             }
             return paymentBuilder.build();
         }

@@ -1281,6 +1281,12 @@ components:
     ExternalTransactionState:
       type: object
       properties:
+        can_retry:
+          type: boolean
+          description: Only applicable for failed recurring payments. Default value
+            is null
+          example: true
+          nullable: true
         code:
           type: string
           example: P0030

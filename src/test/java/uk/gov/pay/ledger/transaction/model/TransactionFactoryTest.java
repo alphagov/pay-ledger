@@ -84,7 +84,7 @@ public class TransactionFactoryTest {
         fullTransactionDetails.addProperty("wallet", walletType);
         fullTransactionDetails.addProperty("authorisation_mode", "moto_api");
         fullTransactionDetails.addProperty("disputed", true);
-        fullTransactionDetails.addProperty("canRetry", false);
+        fullTransactionDetails.addProperty("can_retry", false);
 
         var payoutObject = aPayoutEntity()
                 .withPaidOutDate(paidOutDate)
