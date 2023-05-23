@@ -596,8 +596,6 @@ public class TransactionResourceIT {
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
 
-        Map<String, Object> map = databaseTestHelper.getTransaction(transactionFixture.getExternalId());
-
         given().port(port)
                 .contentType(JSON)
                 .accept(JSON)
