@@ -13,18 +13,26 @@ public class ExternalTransactionState {
     private final boolean finished;
     private final String code;
     private final String message;
+    private final Boolean canRetry;
 
     public static ExternalTransactionState from(TransactionState state, int statusVersion) {
         String status = statusVersion == 2 ? state.getStatus() : state.getOldStatus();
         return new ExternalTransactionState(status, state.isFinished(),
-                state.getCode(), state.getMessage());
+                state.getCode(), state.getMessage(), null);
     }
 
-    private ExternalTransactionState(String value, boolean finished, String code, String message) {
+    public static ExternalTransactionState from(TransactionState state, int statusVersion, Boolean canRetry) {
+        String status = statusVersion == 2 ? state.getStatus() : state.getOldStatus();
+        return new ExternalTransactionState(status, state.isFinished(),
+                state.getCode(), state.getMessage(), canRetry);
+    }
+
+    private ExternalTransactionState(String value, boolean finished, String code, String message, Boolean canRetry) {
         this.value = value;
         this.finished = finished;
         this.code = code;
         this.message = message;
+        this.canRetry = canRetry;
     }
 
     @Schema(example = "cancelled")
@@ -47,6 +55,11 @@ public class ExternalTransactionState {
         return message;
     }
 
+    @Schema(example = "true", nullable = true, description = "Only applicable for failed recurring payments. Default value is null")
+    public Boolean getCanRetry() {
+        return canRetry;
+    }
+
     @Override
     public String toString() {
         return "ExternalTransactionState{" +
@@ -54,6 +67,7 @@ public class ExternalTransactionState {
                 ", finished=" + finished +
                 ", code='" + code + '\'' +
                 ", message='" + message + '\'' +
+                (canRetry != null ? ", can_retry=" + canRetry : "") +
                 '}';
     }
 }

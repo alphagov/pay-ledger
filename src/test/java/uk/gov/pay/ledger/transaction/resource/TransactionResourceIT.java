@@ -13,11 +13,13 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
+import uk.gov.service.payments.commons.model.AuthorisationMode;
 import uk.gov.service.payments.commons.model.Source;
 
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -25,10 +27,11 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.DISPUTE;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.REFUND;
 import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_REFERENCE_NUMBER;
@@ -94,6 +97,7 @@ public class TransactionResourceIT {
         results.forEach(result ->
                 assertThat(result.get("event_data").toString(), containsString(format("\"reference\": \"%s\"", REDACTED_REFERENCE_NUMBER))));
     }
+
     @Test
     public void shouldGetTransaction() {
         var gatewayPayoutId = "payout-id";
@@ -579,5 +583,65 @@ public class TransactionResourceIT {
                 .body("payment_details.email", is(parentTransactionEntity.getEmail()))
                 .body("payment_details.transaction_type", is("PAYMENT"))
                 .body("payment_details.card_details.card_type", is("credit"));
+    }
+
+    @Test
+    public void shouldGetFailedTransactionWithCanRetry() {
+        transactionFixture = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.FAILED_REJECTED)
+                .withCanRetry(false)
+                .withAuthorisationMode(AuthorisationMode.AGREEMENT)
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+
+        Map<String, Object> map = databaseTestHelper.getTransaction(transactionFixture.getExternalId());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("gateway_account_id", is(transactionFixture.getGatewayAccountId()))
+                .body("gateway_transaction_id", is(transactionFixture.getGatewayTransactionId()))
+                .body("state.can_retry", is(false))
+                .body("authorisation_mode", is("agreement"));
+    }
+
+    @Test
+    public void shouldGetTransactionsWithRightExternalState() {
+
+        TransactionFixture cancelledTransaction = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withGatewayAccountId("123")
+                .withDefaultTransactionDetails()
+                .withState(TransactionState.FAILED_CANCELLED)
+                .insert(rule.getJdbi());
+        TransactionFixture rejectedTransaction = aTransactionFixture()
+                .withGatewayAccountId("123")
+                .withState(TransactionState.FAILED_REJECTED)
+                .withCanRetry(false)
+                .withAuthorisationMode(AuthorisationMode.AGREEMENT)
+                .withDefaultCardDetails()
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction" +
+                        "?account_id=123"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("page", is(1))
+                .body("results[0].transaction_id", is(rejectedTransaction.getExternalId()))
+                .body("results[1].transaction_id", is(cancelledTransaction.getExternalId()))
+                .body("results[0].state.can_retry", is(false))
+                .body("results[1].state.can_retry", is(nullValue()));
     }
 }

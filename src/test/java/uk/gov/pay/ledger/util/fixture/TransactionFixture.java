@@ -80,6 +80,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String agreementId;
     private Boolean disputed;
     private AuthorisationMode authorisationMode = AuthorisationMode.WEB;
+    private Boolean canRetry;
 
     private TransactionFixture() {
     }
@@ -353,6 +354,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withCanRetry(Boolean canRetry) {
+        this.canRetry = canRetry;
+        return this;
+    }
+
     public TransactionFixture withAuthorisationMode(AuthorisationMode authorisationMode) {
         this.authorisationMode = authorisationMode;
         return this;
@@ -506,6 +512,9 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 });
         Optional.ofNullable(disputed).ifPresent(
                 disputed -> transactionDetails.addProperty("disputed", disputed)
+        );
+        Optional.ofNullable(canRetry).ifPresent(
+                canRetry -> transactionDetails.addProperty("can_retry", canRetry)
         );
         return transactionDetails;
     }
