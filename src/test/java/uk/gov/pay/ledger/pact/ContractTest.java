@@ -648,6 +648,22 @@ public abstract class ContractTest {
                 .insert(app.getJdbi());
     }
 
+    @State("a recurring card payment with rejected state and can_retry equal to true exists")
+    public void aRecurringCardPaymentWithRejectedStateExists(Map<String, String> params) {
+        String accountId = params.get("account_id");
+        String agreementId = params.get("agreement_id");
+
+        TransactionFixture.aTransactionFixture()
+                .withGatewayAccountId(accountId)
+                .withAgreementId(agreementId)
+                .withAuthorisationMode(AuthorisationMode.AGREEMENT)
+                .withState(TransactionState.FAILED_REJECTED)
+                .withCanRetry(true)
+                .withDefaultTransactionDetails()
+                .withDefaultCardDetails()
+                .insert(app.getJdbi());
+    }
+
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
                                           String externalId, Long amount,
                                           String reference, String description,
