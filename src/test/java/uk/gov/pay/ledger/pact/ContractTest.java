@@ -652,8 +652,10 @@ public abstract class ContractTest {
     public void aRecurringCardPaymentWithRejectedStateExists(Map<String, String> params) {
         String accountId = params.get("account_id");
         String agreementId = params.get("agreement_id");
+        String transactionExternalId = params.get("charge_id");
 
         TransactionFixture.aTransactionFixture()
+                .withExternalId(transactionExternalId)
                 .withGatewayAccountId(accountId)
                 .withAgreementId(agreementId)
                 .withAuthorisationMode(AuthorisationMode.AGREEMENT)
