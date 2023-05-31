@@ -178,7 +178,7 @@ class EventMessageHandlerTest {
     }
 
     @Test
-    void shouldPublishDisputeMessageWhenSnsEnabled() throws Exception {;
+    void shouldPublishDisputeMessageWhenSnsEnabled() throws Exception {
         String messageBody = "{ \"foo\": \"bar\"}";
 
         EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
@@ -191,6 +191,20 @@ class EventMessageHandlerTest {
         eventMessageHandler.handle();
 
         verify(eventPublisher).publishMessageToTopic(messageBody, TopicName.CARD_PAYMENT_DISPUTE_EVENTS);
+    }
+
+    @Test
+    void shouldNotPublishAgreementEventsToSNS() throws Exception {
+        String messageBody = "{ \"foo\": \"bar\"}";
+
+        EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.AGREEMENT).toEntity();
+        when(eventMessage.getEvent()).thenReturn(event);
+        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+        when(snsConfig.isSnsEnabled()).thenReturn(true);
+
+        eventMessageHandler.handle();
+
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
