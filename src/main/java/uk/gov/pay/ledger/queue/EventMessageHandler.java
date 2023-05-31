@@ -19,8 +19,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.String.format;
 import static net.logstash.logback.argument.StructuredArguments.kv;
+import static uk.gov.pay.ledger.event.model.ResourceType.DISPUTE;
+import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT;
+import static uk.gov.pay.ledger.event.model.ResourceType.REFUND;
 import static uk.gov.pay.ledger.event.model.response.CreateEventResponse.CreateEventState.INSERTED;
 import static uk.gov.pay.ledger.event.model.response.CreateEventResponse.ignoredEventResponse;
 import static uk.gov.pay.ledger.eventpublisher.TopicName.CARD_PAYMENT_DISPUTE_EVENTS;
@@ -78,7 +80,7 @@ public class EventMessageHandler {
 
     // provides a transactional guarantee, if any of the events fail to process, none of the events will be persisted
     public void processEventBatch(List<EventMessage> messages) throws QueueException {
-       jdbi.useTransaction(handle -> {
+        jdbi.useTransaction(handle -> {
             for (EventMessage message : messages) {
                 processSingleMessage(message);
             }
@@ -99,28 +101,24 @@ public class EventMessageHandler {
             response = eventService.createIfDoesNotExist(event);
         }
 
-
         if (ledgerConfig.getSnsConfig().isSnsEnabled()) {
             try {
-                if (message.getEvent().getResourceType() == ResourceType.DISPUTE) {
+                ResourceType resourceType = message.getEvent().getResourceType();
+                if (resourceType == DISPUTE) {
                     if (ledgerConfig.getSnsConfig().isPublishCardPaymentDisputeEventsToSns()) {
-                        eventPublisher.publishMessageToTopic(
-                                message.getRawMessageBody(),
-                                CARD_PAYMENT_DISPUTE_EVENTS
-                        );
-                        LOGGER.info(format("Published message to SNS topic"),
+                        eventPublisher.publishMessageToTopic(message.getRawMessageBody(), CARD_PAYMENT_DISPUTE_EVENTS);
+                        LOGGER.info("Published message to SNS topic",
                                 kv("sns_topic", CARD_PAYMENT_DISPUTE_EVENTS),
                                 kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
                                 kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
                                 kv(LEDGER_EVENT_TYPE, event.getEventType()));
                     }
                 } else {
-                    if (ledgerConfig.getSnsConfig().isPublishCardPaymentEventsToSns()) {
-                        eventPublisher.publishMessageToTopic(
-                                message.getRawMessageBody(),
-                                CARD_PAYMENT_EVENTS
-                        );
-                        LOGGER.info(format("Published message to SNS topic"),
+                    if ((resourceType == PAYMENT || resourceType == REFUND)
+                            && ledgerConfig.getSnsConfig().isPublishCardPaymentEventsToSns()) {
+
+                        eventPublisher.publishMessageToTopic(message.getRawMessageBody(), CARD_PAYMENT_EVENTS);
+                        LOGGER.info("Published message to SNS topic",
                                 kv("sns_topic", CARD_PAYMENT_EVENTS),
                                 kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
                                 kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
