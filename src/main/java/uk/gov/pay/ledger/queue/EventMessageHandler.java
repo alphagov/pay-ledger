@@ -101,38 +101,7 @@ public class EventMessageHandler {
             response = eventService.createIfDoesNotExist(event);
         }
 
-        if (ledgerConfig.getSnsConfig().isSnsEnabled()) {
-            try {
-                ResourceType resourceType = message.getEvent().getResourceType();
-                if (resourceType == DISPUTE) {
-                    if (ledgerConfig.getSnsConfig().isPublishCardPaymentDisputeEventsToSns()) {
-                        eventPublisher.publishMessageToTopic(message.getRawMessageBody(), CARD_PAYMENT_DISPUTE_EVENTS);
-                        LOGGER.info("Published message to SNS topic",
-                                kv("sns_topic", CARD_PAYMENT_DISPUTE_EVENTS),
-                                kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
-                                kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
-                                kv(LEDGER_EVENT_TYPE, event.getEventType()));
-                    }
-                } else {
-                    if ((resourceType == PAYMENT || resourceType == REFUND)
-                            && ledgerConfig.getSnsConfig().isPublishCardPaymentEventsToSns()) {
-
-                        eventPublisher.publishMessageToTopic(message.getRawMessageBody(), CARD_PAYMENT_EVENTS);
-                        LOGGER.info("Published message to SNS topic",
-                                kv("sns_topic", CARD_PAYMENT_EVENTS),
-                                kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
-                                kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
-                                kv(LEDGER_EVENT_TYPE, event.getEventType()));
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.warn("Failed to publish event for message",
-                        kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
-                        kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
-                        kv(LEDGER_EVENT_TYPE, event.getEventType()),
-                        kv("error", e.getMessage()));
-            }
-        }
+        publishEventToSNS(message, event);
 
         final long ingestLag = event.getEventDate().until(ZonedDateTime.now(), ChronoUnit.MICROS);
 
@@ -168,6 +137,41 @@ public class EventMessageHandler {
                         kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
                         kv("state", response.getState()),
                         kv("error", response.getErrorMessage()));
+            }
+        }
+    }
+
+    private void publishEventToSNS(EventMessage message, EventEntity event) {
+        if (ledgerConfig.getSnsConfig().isSnsEnabled()) {
+            try {
+                ResourceType resourceType = message.getEvent().getResourceType();
+                if (resourceType == DISPUTE) {
+                    if (ledgerConfig.getSnsConfig().isPublishCardPaymentDisputeEventsToSns()) {
+                        eventPublisher.publishMessageToTopic(message.getRawMessageBody(), CARD_PAYMENT_DISPUTE_EVENTS);
+                        LOGGER.info("Published message to SNS topic",
+                                kv("sns_topic", CARD_PAYMENT_DISPUTE_EVENTS),
+                                kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
+                                kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
+                                kv(LEDGER_EVENT_TYPE, event.getEventType()));
+                    }
+                } else {
+                    if ((resourceType == PAYMENT || resourceType == REFUND)
+                            && ledgerConfig.getSnsConfig().isPublishCardPaymentEventsToSns()) {
+
+                        eventPublisher.publishMessageToTopic(message.getRawMessageBody(), CARD_PAYMENT_EVENTS);
+                        LOGGER.info("Published message to SNS topic",
+                                kv("sns_topic", CARD_PAYMENT_EVENTS),
+                                kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
+                                kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
+                                kv(LEDGER_EVENT_TYPE, event.getEventType()));
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Failed to publish event for message",
+                        kv(SQS_MESSAGE_ID, message.getQueueMessageId()),
+                        kv(RESOURCE_EXTERNAL_ID, event.getResourceExternalId()),
+                        kv(LEDGER_EVENT_TYPE, event.getEventType()),
+                        kv("error", e.getMessage()));
             }
         }
     }

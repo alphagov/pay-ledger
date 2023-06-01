@@ -9,8 +9,8 @@ import uk.gov.pay.ledger.agreement.entity.AgreementsFactory;
 import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.model.AgreementSearchResponse;
 import uk.gov.pay.ledger.agreement.resource.AgreementSearchParams;
-import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.Event;
+import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.service.EventService;
 import uk.gov.pay.ledger.exception.EmptyEventsException;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
 
 public class AgreementService {
     private final AgreementDao agreementDao;
@@ -66,7 +67,7 @@ public class AgreementService {
         if (isConsistent) {
             EventDigest eventDigest;
             try {
-                eventDigest = eventService.getEventDigestForResource(externalId);
+                eventDigest = eventService.getEventDigestForResourceAndType(externalId, AGREEMENT);
             }
             catch (EmptyEventsException e) {
                 return Optional.empty();

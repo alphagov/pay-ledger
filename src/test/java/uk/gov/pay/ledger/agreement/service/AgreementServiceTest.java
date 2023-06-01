@@ -24,10 +24,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 
 @ExtendWith(MockitoExtension.class)
-public class AgreementServiceTest {
+class AgreementServiceTest {
 
     private static final AgreementDao agreementDao = mock(AgreementDao.class);
     private static final PaymentInstrumentDao paymentInstrumentDao = mock(PaymentInstrumentDao.class);
@@ -38,13 +39,13 @@ public class AgreementServiceTest {
     private AgreementService agreementService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         reset(agreementDao, paymentInstrumentDao, agreementEntityFactory, eventService);
         agreementService = new AgreementService(agreementDao, paymentInstrumentDao, agreementEntityFactory, eventService, objectMapper);
     }
 
     @Test
-    public void findShouldReturnProjectionDirectlyIfConsistentFalse() {
+    void findShouldReturnProjectionDirectlyIfConsistentFalse() {
         var resourceId = "agreement-id";
         var agreement = stubAgreement(resourceId, 1);
         when(agreementDao.findByExternalId(resourceId))
@@ -57,10 +58,10 @@ public class AgreementServiceTest {
     }
 
     @Test
-    public void findShouldReturnProjectionDirectlyIfConsistentTrueButThereAreNoNewEvents() {
+    void findShouldReturnProjectionDirectlyIfConsistentTrueButThereAreNoNewEvents() {
         var resourceId = "agreement-id";
         var agreement = stubAgreement(resourceId, 1);
-        when(eventService.getEventDigestForResource(resourceId))
+        when(eventService.getEventDigestForResourceAndType(resourceId, AGREEMENT))
                 .thenReturn(stubEventDigest(resourceId, 1));
         when(agreementDao.findByExternalId(resourceId))
                 .thenReturn(Optional.of(agreement));
@@ -71,11 +72,11 @@ public class AgreementServiceTest {
     }
 
     @Test
-    public void findShouldReturnNewProjectionIfConsistentTrueAndThereAreNewEvents() {
+    void findShouldReturnNewProjectionIfConsistentTrueAndThereAreNewEvents() {
         var resourceId = "agreement-id";
         var agreement = stubAgreement(resourceId, 1);
         var eventDigest = stubEventDigest(resourceId, 2);
-        when(eventService.getEventDigestForResource(resourceId))
+        when(eventService.getEventDigestForResourceAndType(resourceId, AGREEMENT))
                 .thenReturn(eventDigest);
         when(agreementEntityFactory.create(eventDigest))
                 .thenReturn(agreement);
@@ -86,11 +87,11 @@ public class AgreementServiceTest {
     }
 
     @Test
-    public void findShouldReturnNewProjectionIfConsistentTrueAndThereAreOnlyEventsAndNoProjection() {
+    void findShouldReturnNewProjectionIfConsistentTrueAndThereAreOnlyEventsAndNoProjection() {
         var resourceId = "agreement-id";
         var agreement = stubAgreement(resourceId, 1);
         var eventDigest = stubEventDigest(resourceId, 1);
-        when(eventService.getEventDigestForResource(resourceId))
+        when(eventService.getEventDigestForResourceAndType(resourceId, AGREEMENT))
                 .thenReturn(eventDigest);
         when(agreementEntityFactory.create(eventDigest))
                 .thenReturn(agreement);
@@ -101,9 +102,9 @@ public class AgreementServiceTest {
     }
 
     @Test
-    public void findShouldReturnEmptyValueWhenEventServiceHasNoEvents() {
+    void findShouldReturnEmptyValueWhenEventServiceHasNoEvents() {
         var resourceId = "agreement-id";
-        when(eventService.getEventDigestForResource(resourceId))
+        when(eventService.getEventDigestForResourceAndType(resourceId, AGREEMENT))
                 .thenThrow(EmptyEventsException.class);
 
         var result = agreementService.findAgreementEntity(resourceId, true);
@@ -112,7 +113,7 @@ public class AgreementServiceTest {
     }
 
     @Test
-    public void findShouldApplyFiltersWhenConsistentIsFalse() {
+    void findShouldApplyFiltersWhenConsistentIsFalse() {
         var resourceId = "agreement-id";
         var accountId = "123";
         var serviceId = "service-id";
@@ -135,12 +136,12 @@ public class AgreementServiceTest {
     }
 
     @Test
-    public void findShouldApplyFiltersWhenConsistentIsTrue() {
+    void findShouldApplyFiltersWhenConsistentIsTrue() {
         var resourceId = "agreement-id";
         var accountId = "123";
         var serviceId = "service-id";
         var agreement = stubAgreement(resourceId, 1, accountId, serviceId);
-        when(eventService.getEventDigestForResource(resourceId))
+        when(eventService.getEventDigestForResourceAndType(resourceId, AGREEMENT))
                 .thenReturn(stubEventDigest(resourceId, 1));
         when(agreementDao.findByExternalId(resourceId))
                 .thenReturn(Optional.of(agreement));

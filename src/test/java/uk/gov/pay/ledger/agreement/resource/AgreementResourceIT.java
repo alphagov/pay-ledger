@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.model.CardType;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
@@ -15,7 +16,6 @@ import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
 import javax.ws.rs.core.Response;
-
 import java.time.ZonedDateTime;
 
 import static io.restassured.RestAssured.given;
@@ -23,8 +23,9 @@ import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
-import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.agreement.resource.AgreementSearchParams.DEFAULT_DISPLAY_SIZE;
+import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
+import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 
 class AgreementResourceIT {
     @RegisterExtension
@@ -220,6 +221,7 @@ class AgreementResourceIT {
                 .withResourceExternalId("agreement-id")
                 .withServiceId(serviceId)
                 .withEventType("AGREEMENT_CREATED")
+                .withResourceType(AGREEMENT)
                 .withEventData(
                         new JSONObject()
                                 .put("reference", "event-stream-reference")
@@ -255,6 +257,7 @@ class AgreementResourceIT {
                 .withResourceExternalId("agreement-id")
                 .withServiceId(serviceId)
                 .withEventType("AGREEMENT_CREATED")
+                .withResourceType(AGREEMENT)
                 .withEventData(
                         new JSONObject()
                                 .put("reference", "event-stream-reference")
@@ -267,6 +270,7 @@ class AgreementResourceIT {
                 .withResourceExternalId("agreement-id")
                 .withServiceId(serviceId)
                 .withEventType("AGREEMENT_SET_UP")
+                .withResourceType(AGREEMENT)
                 .withEventData(
                         new JSONObject()
                                 .put("status", "ACTIVE")
@@ -294,6 +298,7 @@ class AgreementResourceIT {
                 .withResourceExternalId("agreement-id")
                 .withServiceId(serviceId)
                 .withEventType("AGREEMENT_CREATED")
+                .withResourceType(AGREEMENT)
                 .withEventData(
                         new JSONObject()
                                 .put("reference", "event-stream-reference")
@@ -380,6 +385,7 @@ class AgreementResourceIT {
                 .withResourceExternalId(agreementId)
                 .withServiceId(serviceId)
                 .withEventType("AGREEMENT_SET_UP")
+                .withResourceType(AGREEMENT)
                 .withEventDate(ZonedDateTime.parse("2007-12-03T13:15:30+00:00[Europe/London]"))
                 .withLive(true)
                 .withEventData(
