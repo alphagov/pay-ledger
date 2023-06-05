@@ -195,8 +195,6 @@ class EventMessageHandlerTest {
 
     @Test
     void shouldNotPublishAgreementEventsToSNS() throws Exception {
-        String messageBody = "{ \"foo\": \"bar\"}";
-
         EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.AGREEMENT).toEntity();
         when(eventMessage.getEvent()).thenReturn(event);
         when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);

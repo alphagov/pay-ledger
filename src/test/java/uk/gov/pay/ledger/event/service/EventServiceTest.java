@@ -1,8 +1,7 @@
 package uk.gov.pay.ledger.event.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.jackson.Jackson;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -12,25 +11,29 @@ import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventDigest;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.event.model.response.CreateEventResponse;
+import uk.gov.pay.ledger.exception.EmptyEventsException;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.ZoneOffset.UTC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
+import static uk.gov.pay.ledger.event.model.ResourceType.PAYMENT;
 
 @ExtendWith(MockitoExtension.class)
-public class EventServiceTest {
+class EventServiceTest {
     @Mock
     EventDao mockEventDao;
-
-    private static ObjectMapper objectMapper = Jackson.newObjectMapper();
 
     private EventService eventService;
 
@@ -42,7 +45,7 @@ public class EventServiceTest {
     private EventEntity event2;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         eventService = new EventService(mockEventDao);
 
         latestEventTime = ZonedDateTime.now().minusHours(1L);
@@ -62,7 +65,7 @@ public class EventServiceTest {
     }
 
     @Test
-    public void getEventDigestForResource_shouldUseFirstEventInListToPopulateEventDigestMetadata() {
+    void getEventDigestForResource_shouldUseFirstEventInListToPopulateEventDigestMetadata() {
         EventDigest eventDigest = eventService.getEventDigestForResource(event1);
 
         assertThat(eventDigest.getMostRecentEventTimestamp(), is(latestEventTime));
@@ -70,7 +73,7 @@ public class EventServiceTest {
     }
 
     @Test
-    public void laterEventsShouldOverrideEarlierEventsInEventDetailsDigest() {
+    void laterEventsShouldOverrideEarlierEventsInEventDetailsDigest() {
         EventDigest eventDigest = eventService.getEventDigestForResource(event1);
 
         assertThat(eventDigest.getEventAggregate().get("description"), is("a payment"));
@@ -78,7 +81,7 @@ public class EventServiceTest {
     }
 
     @Test
-    public void shouldGetCorrectLatestSalientEventType() {
+    void shouldGetCorrectLatestSalientEventType() {
         String eventDetails1 = "{ \"amount\": 1000}";
         EventEntity event1 = EventFixture.anEventFixture()
                 .withEventData(eventDetails1)
@@ -100,7 +103,7 @@ public class EventServiceTest {
     }
 
     @Test
-    public void createIfDoesNotExistReturnsSuccessfulCreatedResponse() {
+    void createIfDoesNotExistReturnsSuccessfulCreatedResponse() {
         when(mockEventDao.insertEventIfDoesNotExistWithResourceTypeId(event)).thenReturn(Optional.of(1L));
 
         CreateEventResponse response = eventService.createIfDoesNotExist(event);
@@ -110,7 +113,7 @@ public class EventServiceTest {
     }
 
     @Test
-    public void createIfDoesNotExistReturnsSuccessfulIgnoredResponse() {
+    void createIfDoesNotExistReturnsSuccessfulIgnoredResponse() {
         when(mockEventDao.insertEventIfDoesNotExistWithResourceTypeId(event)).thenReturn(Optional.empty());
 
         CreateEventResponse response = eventService.createIfDoesNotExist(event);
@@ -120,7 +123,7 @@ public class EventServiceTest {
     }
 
     @Test
-    public void createIfDoesNotExistReturnsNotSuccessfulResponse() {
+    void createIfDoesNotExistReturnsNotSuccessfulResponse() {
         when(mockEventDao.insertEventIfDoesNotExistWithResourceTypeId(event))
                 .thenThrow(new RuntimeException("forced failure"));
 
@@ -129,5 +132,50 @@ public class EventServiceTest {
         assertFalse(response.isSuccessful());
         assertThat(response.getState(), is(CreateEventResponse.CreateEventState.ERROR));
         assertThat(response.getErrorMessage(), is("forced failure"));
+    }
+
+    @Nested
+    class getEventDigestForResourceAndType {
+        @Test
+        void shouldReturnEventDigestForResourceAndResourceTypeCorrectly() {
+            ZonedDateTime eventTime = Instant.now().atZone(UTC);
+            event1 = EventFixture.anEventFixture()
+                    .withEventData("{}")
+                    .withResourceExternalId(resourceExternalId)
+                    .withEventDate(eventTime)
+                    .withEventType("AGREEMENT_SET_UP")
+                    .withResourceType(AGREEMENT)
+                    .toEntity();
+            when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(List.of(event1));
+
+            EventDigest eventDigest = eventService.getEventDigestForResourceAndType(resourceExternalId, AGREEMENT);
+
+            assertThat(eventDigest.getMostRecentEventTimestamp(), is(eventTime));
+            assertThat(eventDigest.getMostRecentSalientEventType().get(), is(SalientEventType.AGREEMENT_SET_UP));
+        }
+
+        @Test
+        void shouldThrowExceptionIfNoEventsAreFoundForResourceExternalId() {
+            when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(List.of());
+
+            assertThrows(EmptyEventsException.class, () ->
+                    eventService.getEventDigestForResourceAndType(resourceExternalId, AGREEMENT));
+        }
+
+        @Test
+        void shouldThrowExceptionIfNoEventsAreFoundForResourceType() {
+            ZonedDateTime eventTime = Instant.now().atZone(UTC);
+            event1 = EventFixture.anEventFixture()
+                    .withEventData("{}")
+                    .withResourceExternalId(resourceExternalId)
+                    .withEventDate(eventTime)
+                    .withEventType("PAYMENT_CREATED")
+                    .withResourceType(PAYMENT)
+                    .toEntity();
+            when(mockEventDao.getEventsByResourceExternalId(resourceExternalId)).thenReturn(List.of(event1));
+
+            assertThrows(EmptyEventsException.class, () ->
+                    eventService.getEventDigestForResourceAndType(resourceExternalId, AGREEMENT));
+        }
     }
 }
