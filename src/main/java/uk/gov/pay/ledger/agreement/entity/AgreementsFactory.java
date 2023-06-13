@@ -35,6 +35,20 @@ public class AgreementsFactory {
         entity.setLive(eventDigest.isLive());
         entity.setEventCount(eventDigest.getEventCount());
         entity.setStatus(getStatus(eventDigest, eventDigest.getResourceExternalId()));
+        eventDigest.getLatestSalientEventType()
+                .ifPresent(salientEventType -> {
+                    if (salientEventType == SalientEventType.AGREEMENT_CANCELLED_BY_USER) {
+                        entity.setCancelledByUserEmail(eventDigest.getEventAggregate().get("user_email").toString());
+                        entity.setCancelledDate(eventDigest.getMostRecentEventTimestamp());
+                    } else if (salientEventType == SalientEventType.AGREEMENT_CANCELLED_BY_SERVICE) {
+                        entity.setCancelledByUserEmail(null);
+                        entity.setCancelledDate(eventDigest.getMostRecentEventTimestamp());
+                    } else {
+                        entity.setCancelledByUserEmail(null);
+                        entity.setCancelledDate(null);
+                    }
+                });
+
         return entity;
     }
 

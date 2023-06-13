@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.model.CardType;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
@@ -16,11 +15,13 @@ import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
 import javax.ws.rs.core.Response;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.pay.ledger.agreement.resource.AgreementSearchParams.DEFAULT_DISPLAY_SIZE;
@@ -477,6 +478,31 @@ class AgreementResourceIT {
                 .get("/v1/agreement/agreement-id/event")
                 .then()
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
+    void shouldGetCancelledByUserAgreementWithEmailAndDate() {
+        var serviceId = "a-valid-service-id";
+        var fixture = AgreementFixture.anAgreementFixture()
+                .withExternalId("a-valid-agreement-id")
+                .withServiceId(serviceId)
+                .withUserIdentifier("a-valid-user-identifier")
+                .withCancelledDate(ZonedDateTime.now(ZoneOffset.UTC))
+                .withCancelledByUserEmail("jdoe@example.org")
+                .withStatus(AgreementStatus.CANCELLED)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("service_id", serviceId)
+                .get("/v1/agreement/a-valid-agreement-id")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("external_id", is(fixture.getExternalId()))
+                .body("user_identifier", is("a-valid-user-identifier"))
+                .body("cancelled_by_user_email", is("jdoe@example.org"))
+                .body("cancelled_date", is(notNullValue()));
     }
 
     private void prepareAgreementsForService(String serviceId, int numberOfAgreements) {

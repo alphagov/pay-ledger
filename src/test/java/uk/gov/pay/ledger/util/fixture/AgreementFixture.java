@@ -23,6 +23,8 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
     private Integer eventCount = 1;
     private String userIdentifier;
+    private ZonedDateTime cancelledDate;
+    private String cancelledByUserEmail;
 
     private AgreementFixture() {
     }
@@ -97,12 +99,23 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
         return this;
     }
 
+    public AgreementFixture withCancelledDate(ZonedDateTime cancelledDate) {
+        this.cancelledDate = cancelledDate;
+        return this;
+    }
+
+    public AgreementFixture withCancelledByUserEmail(String cancelledByUserEmail) {
+        this.cancelledByUserEmail = cancelledByUserEmail;
+        return this;
+    }
+
     @Override
     public AgreementFixture insert(Jdbi jdbi) {
         var sql = "INSERT INTO agreement" +
-                "(id, external_id, gateway_account_id, service_id, reference, description, status, live, created_date, event_count, user_identifier) " +
+                "(id, external_id, gateway_account_id, service_id, reference, description, status, live, created_date, " +
+                "event_count, user_identifier, cancelled_date, cancelled_by_user_email) " +
                 "VALUES " +
-                "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         jdbi.withHandle(h ->
                 h.execute(
@@ -117,7 +130,9 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
                         live,
                         createdDate,
                         eventCount,
-                        userIdentifier
+                        userIdentifier,
+                        cancelledDate,
+                        cancelledByUserEmail
                 )
         );
         return this;
@@ -136,6 +151,8 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
                 createdDate,
                 eventCount,
                 null,
-                userIdentifier);
+                userIdentifier,
+                cancelledDate,
+                cancelledByUserEmail);
     }
 }

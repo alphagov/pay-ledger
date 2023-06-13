@@ -53,7 +53,9 @@ public class AgreementDao {
             "status," +
             "created_date," +
             "event_count," +
-            "user_identifier" +
+            "user_identifier," +
+            "cancelled_date," +
+            "cancelled_by_user_email" +
             ") " +
             "VALUES (" +
             ":externalId, " +
@@ -65,7 +67,9 @@ public class AgreementDao {
             ":status, " +
             ":createdDate, " +
             ":eventCount," +
-            ":userIdentifier" +
+            ":userIdentifier," +
+            ":cancelledDate," +
+            ":cancelledByUserEmail" +
             ") " +
             "ON CONFLICT (external_id) DO UPDATE SET " +
             "external_id = EXCLUDED.external_id, " +
@@ -77,7 +81,9 @@ public class AgreementDao {
             "status = EXCLUDED.status, " +
             "created_date = EXCLUDED.created_date, " +
             "event_count = EXCLUDED.event_count," +
-            "user_identifier = EXCLUDED.user_identifier " +
+            "user_identifier = EXCLUDED.user_identifier, " +
+            "cancelled_date = EXCLUDED.cancelled_date," +
+            "cancelled_by_user_email = EXCLUDED.cancelled_by_user_email " +
             "WHERE EXCLUDED.event_count >= agreement.event_count";
 
     private static final String SEARCH_AGREEMENT =
@@ -85,7 +91,7 @@ public class AgreementDao {
                     ":searchExtraFields " +
                     "ORDER BY a.created_date DESC OFFSET :offset LIMIT :limit";
 
-    private static final String COUNT_AGREEEMENT = "SELECT count(1) " +
+    private static final String COUNT_AGREEMENT = "SELECT count(1) " +
             "FROM agreement a " +
             ":searchExtraFields";
 
@@ -139,7 +145,7 @@ public class AgreementDao {
 
     public Long getTotalForSearch(AgreementSearchParams searchParams) {
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplates(), COUNT_AGREEEMENT));
+            Query query = handle.createQuery(createSearchTemplate(searchParams.getFilterTemplates(), COUNT_AGREEMENT));
             searchParams.getQueryMap().forEach(bindSearchParameter(query));
             return query
                     .mapTo(Long.class)

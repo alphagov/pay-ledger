@@ -1037,6 +1037,11 @@ components:
     Agreement:
       type: object
       properties:
+        cancelled_by_user_email:
+          type: string
+        cancelled_date:
+          type: string
+          format: date-time
         created_date:
           type: string
           format: date-time
