@@ -22,8 +22,14 @@ public class Agreement {
     private ZonedDateTime createdDate;
     private PaymentInstrument paymentInstrument;
     private String userIdentifier;
+    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
+    private ZonedDateTime cancelledDate;
+    private String cancelledByUserEmail;
 
-    public Agreement(String externalId, String serviceId, String reference, String description, AgreementStatus status, Boolean live, ZonedDateTime createdDate, PaymentInstrument paymentInstrument, String userIdentifier) {
+    public Agreement(String externalId, String serviceId, String reference, String description,
+                     AgreementStatus status, Boolean live, ZonedDateTime createdDate,
+                     PaymentInstrument paymentInstrument, String userIdentifier,
+                     ZonedDateTime cancelledDate, String cancelledByUserEmail) {
         this.externalId = externalId;
         this.serviceId = serviceId;
         this.reference = reference;
@@ -33,6 +39,8 @@ public class Agreement {
         this.createdDate = createdDate;
         this.paymentInstrument = paymentInstrument;
         this.userIdentifier = userIdentifier;
+        this.cancelledDate = cancelledDate;
+        this.cancelledByUserEmail = cancelledByUserEmail;
     }
 
     public static Agreement from(AgreementEntity entity) {
@@ -45,7 +53,9 @@ public class Agreement {
                 entity.getLive(),
                 entity.getCreatedDate(),
                 Optional.ofNullable(entity.getPaymentInstrument()).map(PaymentInstrument::from).orElse(null),
-                entity.getUserIdentifier());
+                entity.getUserIdentifier(),
+                entity.getCancelledDate(),
+                entity.getCancelledByUserEmail());
     }
 
     public String getExternalId() {
@@ -82,5 +92,13 @@ public class Agreement {
 
     public String getUserIdentifier() {
         return userIdentifier;
+    }
+
+    public ZonedDateTime getCancelledDate() {
+        return cancelledDate;
+    }
+
+    public String getCancelledByUserEmail() {
+        return cancelledByUserEmail;
     }
 }

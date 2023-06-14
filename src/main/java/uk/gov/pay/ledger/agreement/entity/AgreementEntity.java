@@ -2,7 +2,11 @@ package uk.gov.pay.ledger.agreement.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
+import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
 import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.time.ZonedDateTime;
@@ -21,12 +25,20 @@ public class AgreementEntity {
     private Integer eventCount;
     private PaymentInstrumentEntity paymentInstrument;
     private String userIdentifier;
+    @JsonDeserialize(using = MicrosecondPrecisionDateTimeDeserializer.class)
+    @JsonSerialize(using = MicrosecondPrecisionDateTimeSerializer.class)
+    private ZonedDateTime cancelledDate;
+
+    private String cancelledByUserEmail;
 
     public AgreementEntity() {
 
     }
 
-    public AgreementEntity(String externalId, String gatewayAccountId, String serviceId, String reference, String description, AgreementStatus status, Boolean live, ZonedDateTime createdDate, Integer eventCount, PaymentInstrumentEntity paymentInstrument, String userIdentifier) {
+    public AgreementEntity(String externalId, String gatewayAccountId, String serviceId, String reference,
+                           String description, AgreementStatus status, Boolean live, ZonedDateTime createdDate,
+                           Integer eventCount, PaymentInstrumentEntity paymentInstrument, String userIdentifier,
+                           ZonedDateTime cancelledDate, String cancelledByUserEmail) {
         this.externalId = externalId;
         this.gatewayAccountId = gatewayAccountId;
         this.serviceId = serviceId;
@@ -38,6 +50,8 @@ public class AgreementEntity {
         this.eventCount = eventCount;
         this.paymentInstrument = paymentInstrument;
         this.userIdentifier = userIdentifier;
+        this.cancelledDate = cancelledDate;
+        this.cancelledByUserEmail = cancelledByUserEmail;
     }
 
     public String getExternalId() {
@@ -126,5 +140,21 @@ public class AgreementEntity {
 
     public void setUserIdentifier(String userIdentifier) {
         this.userIdentifier = userIdentifier;
+    }
+
+    public ZonedDateTime getCancelledDate() {
+        return cancelledDate;
+    }
+
+    public String getCancelledByUserEmail() {
+        return cancelledByUserEmail;
+    }
+
+    public void setCancelledDate(ZonedDateTime cancelledDate) {
+        this.cancelledDate = cancelledDate;
+    }
+
+    public void setCancelledByUserEmail(String cancelledByUserEmail) {
+        this.cancelledByUserEmail = cancelledByUserEmail;
     }
 }

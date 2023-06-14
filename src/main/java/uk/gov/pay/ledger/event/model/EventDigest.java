@@ -25,6 +25,7 @@ public class EventDigest {
     private Integer eventCount;
     private Map<String, Object> eventAggregate;
     private final ZonedDateTime eventCreatedDate;
+    private final SalientEventType latestSalientEventType;
 
     private EventDigest(
             String serviceId,
@@ -36,8 +37,8 @@ public class EventDigest {
             String parentResourceExternalId,
             Integer eventCount,
             Map<String, Object> eventAggregate,
-            ZonedDateTime eventCreatedDate
-    ) {
+            ZonedDateTime eventCreatedDate,
+            SalientEventType latestSalientEventType) {
         this.serviceId = serviceId;
         this.live = live;
         this.mostRecentEventTimestamp = mostRecentEventTimestamp;
@@ -48,6 +49,7 @@ public class EventDigest {
         this.eventCount = eventCount;
         this.eventAggregate = eventAggregate;
         this.eventCreatedDate = eventCreatedDate;
+        this.latestSalientEventType = latestSalientEventType;
     }
 
     public static EventDigest fromEventList(List<EventEntity> events) {
@@ -88,7 +90,8 @@ public class EventDigest {
                 parentResourceExternalId,
                 events.size(),
                 eventPayload,
-                earliestDate
+                earliestDate,
+                latestSalientEventType
         );
     }
 
@@ -154,5 +157,9 @@ public class EventDigest {
 
     public ZonedDateTime getEventCreatedDate() {
         return eventCreatedDate;
+    }
+
+    public Optional<SalientEventType> getLatestSalientEventType() {
+        return Optional.ofNullable(latestSalientEventType);
     }
 }

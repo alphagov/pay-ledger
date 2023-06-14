@@ -57,6 +57,8 @@ public class AgreementMapper implements RowMapper<AgreementEntity> {
                 ZonedDateTime.ofInstant(resultSet.getTimestamp("created_date").toInstant(), ZoneOffset.UTC),
                 resultSet.getInt("event_count"),
                 paymentInstrument,
-                resultSet.getString("user_identifier"));
+                resultSet.getString("user_identifier"),
+                resultSet.getTimestamp("cancelled_date") == null ? null : ZonedDateTime.ofInstant(resultSet.getTimestamp("created_date").toInstant(), ZoneOffset.UTC),
+                resultSet.getString("cancelled_by_user_email"));
     }
 }
