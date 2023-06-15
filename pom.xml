@@ -10,7 +10,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>uk.gov.pay.ledger.app.LedgerApp</mainClass>
 
-        <dropwizard.version>2.1.5</dropwizard.version>
+        <dropwizard.version>2.1.6</dropwizard.version>
         <jackson.version>2.15.2</jackson.version>
         <testcontainers.version>1.18.3</testcontainers.version>
         <postgresql.version>42.6.0</postgresql.version>
@@ -30,7 +30,7 @@
     <parent>
         <groupId>io.dropwizard</groupId>
         <artifactId>dropwizard-dependencies</artifactId>
-        <version>2.1.4</version>
+        <version>2.1.6</version>
     </parent>
 
     <dependencyManagement>
@@ -266,6 +266,11 @@
             <groupId>org.exparity</groupId>
             <artifactId>hamcrest-date</artifactId>
             <version>2.0.8</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
