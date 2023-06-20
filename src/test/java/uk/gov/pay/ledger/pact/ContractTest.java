@@ -18,12 +18,14 @@ import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
+import uk.gov.pay.ledger.util.fixture.PaymentInstrumentFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 import uk.gov.service.payments.commons.model.AuthorisationMode;
 import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
@@ -666,6 +668,20 @@ public abstract class ContractTest {
                 .insert(app.getJdbi());
     }
 
+    @State("an agreement with payment instrument exists")
+    public void anAgreementWithPaymentInstrumentExists(Map<String, String> params) {
+        String accountId = Optional.ofNullable(params.get("account_id")).orElse("3456");
+        String serviceId = Optional.ofNullable(params.get("service_id")).orElse("a-service-id");
+        String agreementExternalId = Optional.ofNullable(params.get("agreement_external_id")).orElse("agreement1234567");
+        AgreementFixture.anAgreementFixture()
+                .withGatewayAccountId(accountId)
+                .withExternalId(agreementExternalId)
+                .withServiceId(serviceId)
+                .insert(app.getJdbi());
+        PaymentInstrumentFixture.aPaymentInstrumentFixture("a-payment-instrument-id", agreementExternalId, ZonedDateTime.now())
+                .insert(app.getJdbi());
+    }
+    
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
                                           String externalId, Long amount,
                                           String reference, String description,
