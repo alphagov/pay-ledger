@@ -7,6 +7,7 @@ import au.com.dius.pact.provider.junit.target.TestTarget;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -18,17 +19,20 @@ import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.AgreementFixture;
+import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.PaymentInstrumentFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 import uk.gov.service.payments.commons.model.AuthorisationMode;
 import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
+import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
@@ -680,8 +684,36 @@ public abstract class ContractTest {
                 .insert(app.getJdbi());
         PaymentInstrumentFixture.aPaymentInstrumentFixture("a-payment-instrument-id", agreementExternalId, ZonedDateTime.now())
                 .insert(app.getJdbi());
+
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        EventFixture.anEventFixture()
+                .withResourceExternalId(agreementExternalId)
+                .withServiceId(serviceId)
+                .withEventType("AGREEMENT_CREATED")
+                .withResourceType(AGREEMENT)
+                .withEventDate(now.minusHours(5L))
+                .withEventData(
+                        new JSONObject()
+                                .put("reference", "reference")
+                                .put("status", "CREATED")
+                                .toString()
+                )
+                .insert(app.getJdbi());
+        EventFixture.anEventFixture()
+                .withResourceExternalId(agreementExternalId)
+                .withServiceId(serviceId)
+                .withEventType("AGREEMENT_SET_UP")
+                .withResourceType(AGREEMENT)
+                .withEventDate(now.minusHours(3L))
+                .withLive(true)
+                .withEventData(
+                        new JSONObject()
+                                .put("status", "ACTIVE")
+                                .toString()
+                )
+                .insert(app.getJdbi());
     }
-    
+
     private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
                                           String externalId, Long amount,
                                           String reference, String description,
