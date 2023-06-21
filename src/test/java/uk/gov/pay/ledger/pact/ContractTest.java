@@ -681,6 +681,8 @@ public abstract class ContractTest {
                 .withGatewayAccountId(accountId)
                 .withExternalId(agreementExternalId)
                 .withServiceId(serviceId)
+                .withEventCount(2)
+                .withLive(false)
                 .insert(app.getJdbi());
         PaymentInstrumentFixture.aPaymentInstrumentFixture("a-payment-instrument-id", agreementExternalId, ZonedDateTime.now())
                 .insert(app.getJdbi());
