@@ -616,7 +616,7 @@ public abstract class ContractTest {
 
     @State("3 agreements exist for account")
     public void agreementsExist(Map<String, String> params) {
-        String accountId = params.get("account_id");
+        String accountId = Optional.ofNullable(params.get("account_id")).orElse("3456");
 
         AgreementFixture.anAgreementFixture()
                 .withGatewayAccountId(accountId)
@@ -677,10 +677,13 @@ public abstract class ContractTest {
         String accountId = Optional.ofNullable(params.get("account_id")).orElse("3456");
         String serviceId = Optional.ofNullable(params.get("service_id")).orElse("a-service-id");
         String agreementExternalId = Optional.ofNullable(params.get("agreement_external_id")).orElse("agreement1234567");
+        String reference = Optional.ofNullable(params.get("reference")).orElse("a-reference");
+
         AgreementFixture.anAgreementFixture()
                 .withGatewayAccountId(accountId)
                 .withExternalId(agreementExternalId)
                 .withServiceId(serviceId)
+                .withReference(reference)
                 .withEventCount(2)
                 .withLive(false)
                 .insert(app.getJdbi());
