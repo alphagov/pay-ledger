@@ -33,6 +33,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     private boolean includeMetada = true;
     private boolean reprojectDomainObject;
     private GsonBuilder gsonBuilder = new GsonBuilder();
+    private String gatewayTransactionId = "a-provider-transaction-id";
 
     private QueuePaymentEventFixture() {
     }
@@ -225,6 +226,24 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 break;
             case "GATEWAY_REQUIRES_3DS_AUTHORISATION":
                 eventData = gsonBuilder.create().toJson(Map.of("version_3ds", "1.2.1", "requires_3ds", true));
+                break;
+            case "PAYMENT_DETAILS_TAKEN_FROM_PAYMENT_INSTRUMENT":
+                eventData = gsonBuilder.create()
+                        .toJson(ImmutableMap.builder()
+                                .put("last_digits_card_number", "1234")
+                                .put("first_digits_card_number", "123456")
+                                .put("cardholder_name", "Test")
+                                .put("expiry_date", "11/99")
+                                .put("address_line1", "10 WCB")
+                                .put("address_postcode", "E1 8XX")
+                                .put("address_city", "London")
+                                .put("address_county", "London")
+                                .put("address_country", "UK")
+                                .put("card_type", "DEBIT")
+                                .put("card_brand", "visa")
+                                .put("card_brand_label", "Visa")
+                                .put("gateway_transaction_id", gatewayTransactionId)
+                                .build());
                 break;
             default:
                 eventData = gsonBuilder.create().toJson(Map.of("event_data", "event_data"));
