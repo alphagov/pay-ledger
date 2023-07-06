@@ -1167,6 +1167,7 @@ components:
           - ACCOUNT_DISABLED
           - RECURRING_CARD_PAYMENTS_NOT_ALLOWED
           - IDEMPOTENCY_KEY_USED
+          - CARD_NUMBER_IN_PAYMENT_LINK_REFERENCE_REJECTED
           example: GENERIC
         message:
           type: array
