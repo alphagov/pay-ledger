@@ -637,10 +637,12 @@ public abstract class ContractTest {
 
     @State("a recurring card payment exists for agreement")
     public void recurringCardPaymentExistsForAgreement(Map<String, String> params) {
+        String transactionExternalId = Optional.ofNullable(params.get("transaction_external_id")).orElse("transaction_123");
         String accountId = params.get("account_id");
         String agreementId = params.get("agreement_id");
 
         TransactionFixture.aTransactionFixture()
+                .withExternalId(transactionExternalId)
                 .withGatewayAccountId(accountId)
                 .withAgreementId(agreementId)
                 .withAuthorisationMode(AuthorisationMode.AGREEMENT)
