@@ -206,10 +206,23 @@ paths:
               items:
                 $ref: '#/components/schemas/EventMessageDto'
       responses:
-        default:
+        "200":
           content:
-            application/json: {}
-          description: default response
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventTicker'
+          description: OK
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing query parameters
+        "500":
+          description: Invalid parameters or Downstream system error
+      summary: Write a list of events to the ledger database
       tags:
       - Events
   /v1/event/ticker:
@@ -1244,6 +1257,12 @@ components:
         timestamp:
           type: string
           format: date-time
+      required:
+      - event_details
+      - event_type
+      - resource_external_id
+      - resource_type
+      - timestamp
     EventTicker:
       type: object
       properties:

@@ -2,6 +2,8 @@ package uk.gov.pay.ledger.event.resource;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +13,10 @@ import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.queue.EventMessageHandler;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -44,4 +49,95 @@ public class EventResourceTest {
         Response response = resources.target("/v1/event/ticker").request().get();
         assertThat(response.getStatus(), is(400));
     }
+    
+    @Test
+    public void shouldReturn422IfEventTypeNotSuppliedToWriteEventsEndpoint() {
+        var now = ZonedDateTime.now(ZoneOffset.UTC);
+
+        var params = new JSONArray();
+
+        var event = new JSONObject()
+                .put("service_id", "service-Id")
+                .put("resource_type", "agreement")
+                .put("live", false)
+                .put("timestamp", now.toString())
+                .put("event_details", new JSONObject())
+                .put("resource_external_id", "agreement-Id");
+        params.put(event);
+        Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void shouldReturn422IfTimestampNotSuppliedToWriteEventsEndpoint() {
+        var now = ZonedDateTime.now(ZoneOffset.UTC);
+
+        var params = new JSONArray();
+
+        var event = new JSONObject()
+                .put("event_type", "AGREEMENT_CREATED")
+                .put("service_id", "service-Id")
+                .put("resource_type", "agreement")
+                .put("live", false)
+                .put("event_details", new JSONObject())
+                .put("resource_external_id", "agreement-Id");
+        params.put(event);
+        Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void shouldReturn422IfResourceExternalIdNotSuppliedToWriteEventsEndpoint() {
+        var now = ZonedDateTime.now(ZoneOffset.UTC);
+
+        var params = new JSONArray();
+
+        var event = new JSONObject()
+                .put("event_type", "AGREEMENT_CREATED")
+                .put("service_id", "service-Id")
+                .put("resource_type", "agreement")
+                .put("live", false)
+                .put("timestamp", now.toString())
+                .put("event_details", new JSONObject());
+        params.put(event);
+        Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void shouldReturn422IfResourceTypeNotSuppliedToWriteEventsEndpoint() {
+        var now = ZonedDateTime.now(ZoneOffset.UTC);
+
+        var params = new JSONArray();
+
+        var event = new JSONObject()
+                .put("event_type", "AGREEMENT_CREATED")
+                .put("service_id", "service-Id")
+                .put("live", false)
+                .put("timestamp", now.toString())
+                .put("event_details", new JSONObject())
+                .put("resource_external_id", "agreement-Id");
+        params.put(event);
+        Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void shouldReturn422IfEventDetailsNotSuppliedToWriteEventsEndpoint() {
+        var now = ZonedDateTime.now(ZoneOffset.UTC);
+
+        var params = new JSONArray();
+
+        var event = new JSONObject()
+                .put("event_type", "AGREEMENT_CREATED")
+                .put("service_id", "service-Id")
+                .put("resource_type", "agreement")
+                .put("live", false)
+                .put("timestamp", now.toString())
+                .put("resource_external_id", "agreement-Id");
+        params.put(event);
+        Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        assertThat(response.getStatus(), is(422));
+    }
+    
 }

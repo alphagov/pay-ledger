@@ -84,7 +84,8 @@ public class EventResourceIT {
                 .contentType(JSON)
                 .body(params.toString())
                 .post("/v1/event")
-                .then();
+                .then()
+                .statusCode(422);
 
         // assert no events are persisted
         var eventsResult = databaseTestHelper.getEventsByExternalId("a-valid-external-id");
