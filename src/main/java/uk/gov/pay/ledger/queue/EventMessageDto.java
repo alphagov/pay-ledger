@@ -11,6 +11,7 @@ import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
 
+import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,19 +22,24 @@ public class EventMessageDto {
 
     private Boolean live;
 
+    @NotNull
     @JsonDeserialize(using = MicrosecondPrecisionDateTimeDeserializer.class)
     private ZonedDateTime timestamp;
 
+    @NotNull
     @JsonProperty("resource_external_id")
     private String externalId;
 
     @JsonProperty("parent_resource_external_id")
     private String parentExternalId;
 
+    @NotNull
     public String eventType;
 
+    @NotNull
     public ResourceType resourceType;
 
+    @NotNull
     @JsonProperty("event_details")
     private JsonNode eventData;
 

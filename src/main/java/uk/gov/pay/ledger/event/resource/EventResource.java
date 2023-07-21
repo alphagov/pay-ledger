@@ -19,6 +19,7 @@ import uk.gov.pay.ledger.queue.EventMessageDto;
 import uk.gov.pay.ledger.queue.EventMessageHandler;
 import uk.gov.service.payments.commons.queue.exception.QueueException;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -48,9 +49,19 @@ public class EventResource {
         this.eventMessageHandler = eventMessageHandler;
     }
 
+    
     @POST
     @Timed
-    public Response writeEvent(List<EventMessageDto> events) throws QueueException {
+    @Operation(
+            operationId = "writeEvent",
+            summary = "Write a list of events to the ledger database",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EventTicker.class)))),
+                    @ApiResponse(responseCode = "422", description = "Missing query parameters", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Invalid parameters or Downstream system error")
+            }
+    )
+    public Response writeEvent(@Valid List<EventMessageDto> events) throws QueueException {
         try {
             eventMessageHandler.processEventBatch(events
                     .stream()

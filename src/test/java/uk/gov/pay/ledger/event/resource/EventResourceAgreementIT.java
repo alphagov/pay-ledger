@@ -30,11 +30,11 @@ public class EventResourceAgreementIT {
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private Integer port = rule.getAppRule().getLocalPort();
-
     private DatabaseTestHelper databaseTestHelper;
-
     private final EventDao eventDao = rule.getJdbi().onDemand(EventDao.class);
     private final AgreementDao agreementDao = new AgreementDao(rule.getJdbi());
+    private final String serviceId = "service-id";
+    private final String agreementId = "agreement-id";
 
     @BeforeEach
     public void setUp() {
@@ -44,18 +44,9 @@ public class EventResourceAgreementIT {
 
     @Test
     public void shouldWriteCancelledEvent() {
-        var serviceId = "service-id";
-        var agreementId = "agreement-id";
         var now = ZonedDateTime.now(ZoneOffset.UTC);
-
-        var agreementEvent = EventFixture.anEventFixture()
-                .withResourceExternalId(agreementId)
-                .withServiceId(serviceId)
-                .withResourceType(ResourceType.AGREEMENT)
-                .withEventType("CREATED")
-                .withEventData("{\"data\": \"Event 1\"}");
-        eventDao.insertEventWithResourceTypeId(agreementEvent.toEntity());
-
+        insertAgreementCreatedEventFixture();
+        
         var params = new JSONArray();
         var event = new JSONObject()
                 .put("event_type", "AGREEMENT_CANCELLED_BY_USER")
@@ -85,4 +76,45 @@ public class EventResourceAgreementIT {
         assertThat(agreementEntity.getCancelledByUserEmail(), is("jdoe@example.org"));
         assertThat(agreementEntity.getCancelledDate(), is(ZonedDateTimeMatchers.within(1, ChronoUnit.SECONDS, now)));
     }
+
+    @Test
+    public void shouldNotWriteEventIfAMandatoryFieldIsNotPresent() {
+        var now = ZonedDateTime.now(ZoneOffset.UTC);
+
+        insertAgreementCreatedEventFixture();
+
+        var params = new JSONArray();
+        //event missing eventType
+        var event = new JSONObject()
+                .put("service_id", serviceId)
+                .put("resource_type", "agreement")
+                .put("live", false)
+                .put("timestamp", now.toString())
+                .put("event_details", new JSONObject()
+                        .put("user_email", "jdoe@example.org")
+                        .put("cancelled_date", now.toString()))
+                .put("resource_external_id", agreementId);
+        params.put(event);
+
+        given().port(port)
+                .contentType(JSON)
+                .body(params.toString())
+                .post("/v1/event")
+                .then()
+                .statusCode(422);
+
+        var results = databaseTestHelper.getEventsByExternalId(agreementId);
+        assertThat(results.size(), is(1));
+    }
+    
+    private void insertAgreementCreatedEventFixture() {
+        var agreementEvent = EventFixture.anEventFixture()
+                .withResourceExternalId(agreementId)
+                .withServiceId(serviceId)
+                .withResourceType(ResourceType.AGREEMENT)
+                .withEventType("CREATED")
+                .withEventData("{\"data\": \"Event 1\"}");
+        eventDao.insertEventWithResourceTypeId(agreementEvent.toEntity());
+    }
+    
 }
