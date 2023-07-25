@@ -11,7 +11,12 @@ import io.dropwizard.jdbi3.bundles.JdbiExceptionsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.dropwizard.DropwizardExports;
+import io.prometheus.client.exporter.MetricsServlet;
 import org.jdbi.v3.core.Jdbi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.agreement.model.Agreement;
 import uk.gov.pay.ledger.agreement.resource.AgreementResource;
 import uk.gov.pay.ledger.event.resource.EventResource;
@@ -27,15 +32,20 @@ import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
 import uk.gov.pay.ledger.report.resource.PerformanceReportResource;
 import uk.gov.pay.ledger.report.resource.ReportResource;
 import uk.gov.pay.ledger.transaction.resource.TransactionResource;
+import uk.gov.service.payments.commons.utils.prometheus.PrometheusDefaultLabelSampleBuilder;
 import uk.gov.service.payments.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
 import uk.gov.service.payments.logging.LoggingFilter;
 import uk.gov.service.payments.logging.LogstashConsoleAppenderFactory;
+
+import java.net.URI;
 
 import static java.util.EnumSet.of;
 import static javax.servlet.DispatcherType.REQUEST;
 
 public class LedgerApp extends Application<LedgerConfig> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LedgerApp.class);
+    
     public static void main(String[] args) throws Exception {
         new LedgerApp().run(args);
     }
@@ -62,6 +72,8 @@ public class LedgerApp extends Application<LedgerConfig> {
 
     @Override
     public void run(LedgerConfig config, Environment environment) {
+        config.getEcsContainerMetadataUriV4().ifPresent(uri -> initialisePrometheusMetrics(environment, uri));
+        
         JdbiFactory jdbiFactory = new JdbiFactory();
         final Jdbi jdbi = jdbiFactory.build(environment, config.getDataSourceFactory(), "postgresql");
 
@@ -90,4 +102,10 @@ public class LedgerApp extends Application<LedgerConfig> {
         environment.jersey().register(injector.getInstance(PayoutResource.class));
     }
 
+    private void initialisePrometheusMetrics(Environment environment, URI ecsContainerMetadataUri) {
+        LOGGER.info("Initialising prometheus metrics.");
+        CollectorRegistry collectorRegistry = new CollectorRegistry();
+        collectorRegistry.register(new DropwizardExports(environment.metrics(), new PrometheusDefaultLabelSampleBuilder(ecsContainerMetadataUri)));
+        environment.admin().addServlet("prometheusMetrics", new MetricsServlet(collectorRegistry)).addMapping("/metrics");
+    }
 }
