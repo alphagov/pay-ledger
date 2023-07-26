@@ -10,6 +10,8 @@ import uk.gov.pay.ledger.app.config.SqsConfig;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.net.URI;
+import java.util.Optional;
 
 public class LedgerConfig extends Configuration {
     @Valid
@@ -42,6 +44,9 @@ public class LedgerConfig extends Configuration {
     @JsonProperty("reportingConfig")
     private ReportingConfig reportingConfig;
 
+    @JsonProperty("ecsContainerMetadataUriV4")
+    private URI ecsContainerMetadataUriV4;
+
     public SqsConfig getSqsConfig() {
         return sqsConfig;
     }
@@ -56,5 +61,9 @@ public class LedgerConfig extends Configuration {
 
     public ReportingConfig getReportingConfig() {
         return reportingConfig;
+    }
+
+    public Optional<URI> getEcsContainerMetadataUriV4() {
+        return Optional.ofNullable(ecsContainerMetadataUriV4);
     }
 }
