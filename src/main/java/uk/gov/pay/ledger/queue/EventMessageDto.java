@@ -39,7 +39,6 @@ public class EventMessageDto {
     @NotNull(message = "Field [resource_type] cannot be null")
     public ResourceType resourceType;
 
-    @NotNull(message = "Field [event_details] cannot be null")
     @JsonProperty("event_details")
     private JsonNode eventData;
 

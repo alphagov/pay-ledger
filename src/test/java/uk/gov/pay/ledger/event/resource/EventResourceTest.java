@@ -128,25 +128,6 @@ public class EventResourceTest {
     }
 
     @Test
-    public void shouldReturn422IfEventDetailsNotSuppliedToWriteEventsEndpoint() {
-        var now = ZonedDateTime.now(ZoneOffset.UTC);
-
-        var params = new JSONArray();
-
-        var event = new JSONObject()
-                .put("event_type", "AGREEMENT_CREATED")
-                .put("service_id", "service-Id")
-                .put("resource_type", "agreement")
-                .put("live", false)
-                .put("timestamp", now.toString())
-                .put("resource_external_id", "agreement-Id");
-        params.put(event);
-        Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
-        assertThat(response.readEntity(String.class), containsString("Field [event_details] cannot be null"));
-        assertThat(response.getStatus(), is(422));
-    }
-
-    @Test
     public void shouldReturn422AndTwoMessagesIfEventTypeAndTimestampNotSuppliedToWriteEventsEndpoint() {
         var now = ZonedDateTime.now(ZoneOffset.UTC);
 
