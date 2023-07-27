@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
@@ -84,7 +85,9 @@ public class EventResourceIT {
                 .contentType(JSON)
                 .body(params.toString())
                 .post("/v1/event")
-                .then();
+                .then()
+                .statusCode(422)
+                .body("message", contains("Field [resource_external_id] cannot be null"));
 
         // assert no events are persisted
         var eventsResult = databaseTestHelper.getEventsByExternalId("a-valid-external-id");
