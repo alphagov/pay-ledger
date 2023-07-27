@@ -1258,7 +1258,6 @@ components:
           type: string
           format: date-time
       required:
-      - event_details
       - event_type
       - resource_external_id
       - resource_type
