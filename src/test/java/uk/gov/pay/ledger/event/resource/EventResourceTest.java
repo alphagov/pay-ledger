@@ -19,6 +19,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -65,6 +66,7 @@ public class EventResourceTest {
                 .put("resource_external_id", "agreement-Id");
         params.put(event);
         Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        assertThat(response.readEntity(String.class), containsString("Field [event_type] cannot be null"));
         assertThat(response.getStatus(), is(422));
     }
 
@@ -83,6 +85,7 @@ public class EventResourceTest {
                 .put("resource_external_id", "agreement-Id");
         params.put(event);
         Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        assertThat(response.readEntity(String.class), containsString("Field [timestamp] cannot be null"));
         assertThat(response.getStatus(), is(422));
     }
 
@@ -101,6 +104,7 @@ public class EventResourceTest {
                 .put("event_details", new JSONObject());
         params.put(event);
         Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        assertThat(response.readEntity(String.class), containsString("Field [resource_external_id] cannot be null"));
         assertThat(response.getStatus(), is(422));
     }
 
@@ -119,6 +123,7 @@ public class EventResourceTest {
                 .put("resource_external_id", "agreement-Id");
         params.put(event);
         Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        assertThat(response.readEntity(String.class), containsString("Field [resource_type] cannot be null"));
         assertThat(response.getStatus(), is(422));
     }
 
@@ -137,6 +142,27 @@ public class EventResourceTest {
                 .put("resource_external_id", "agreement-Id");
         params.put(event);
         Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        assertThat(response.readEntity(String.class), containsString("Field [event_details] cannot be null"));
+        assertThat(response.getStatus(), is(422));
+    }
+
+    @Test
+    public void shouldReturn422AndTwoMessagesIfEventTypeAndTimestampNotSuppliedToWriteEventsEndpoint() {
+        var now = ZonedDateTime.now(ZoneOffset.UTC);
+
+        var params = new JSONArray();
+
+        var event = new JSONObject()
+                .put("service_id", "service-Id")
+                .put("resource_type", "agreement")
+                .put("live", false)
+                .put("event_details", new JSONObject())
+                .put("resource_external_id", "agreement-Id");
+        params.put(event);
+        Response response = resources.target("/v1/event").request().post(Entity.json(params.toString()));
+        String responseString = response.readEntity(String.class);
+        assertThat(responseString, containsString("Field [event_type] cannot be null"));
+        assertThat(responseString, containsString("Field [timestamp] cannot be null"));
         assertThat(response.getStatus(), is(422));
     }
     

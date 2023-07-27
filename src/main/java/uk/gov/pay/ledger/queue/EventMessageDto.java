@@ -22,24 +22,24 @@ public class EventMessageDto {
 
     private Boolean live;
 
-    @NotNull
+    @NotNull(message = "Field [timestamp] cannot be null")
     @JsonDeserialize(using = MicrosecondPrecisionDateTimeDeserializer.class)
     private ZonedDateTime timestamp;
 
-    @NotNull
+    @NotNull(message = "Field [resource_external_id] cannot be null")
     @JsonProperty("resource_external_id")
     private String externalId;
 
     @JsonProperty("parent_resource_external_id")
     private String parentExternalId;
 
-    @NotNull
+    @NotNull(message = "Field [event_type] cannot be null")
     public String eventType;
 
-    @NotNull
+    @NotNull(message = "Field [resource_type] cannot be null")
     public ResourceType resourceType;
 
-    @NotNull
+    @NotNull(message = "Field [event_details] cannot be null")
     @JsonProperty("event_details")
     private JsonNode eventData;
 
