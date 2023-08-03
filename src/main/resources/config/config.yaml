@@ -2,6 +2,9 @@ server:
   applicationConnectors:
     - type: http
       port: ${PORT:-8080}
+  adminConnectors:
+    - type: http
+      port: ${ADMIN_PORT:-0}
   requestLog:
     appenders:
       - type: console

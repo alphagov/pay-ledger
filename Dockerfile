@@ -16,8 +16,10 @@ RUN wget -qO - https://s3.amazonaws.com/rds-downloads/rds-ca-2019-root.pem      
 RUN ["apk", "add", "--no-cache", "bash"]
 
 ENV PORT 8080
+ENV ADMIN_PORT 8081
 
 EXPOSE 8080
+EXPOSE 8081
 
 WORKDIR /app
 
