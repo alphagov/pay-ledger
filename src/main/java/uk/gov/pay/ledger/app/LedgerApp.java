@@ -44,13 +44,13 @@ import static javax.servlet.DispatcherType.REQUEST;
 public class LedgerApp extends Application<LedgerConfig> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LedgerApp.class);
-    
+
     public static void main(String[] args) throws Exception {
         new LedgerApp().run(args);
     }
 
     @Override
-    public void initialize(Bootstrap<LedgerConfig> bootstrap){
+    public void initialize(Bootstrap<LedgerConfig> bootstrap) {
         bootstrap.setConfigurationSourceProvider(
                 new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
                         new EnvironmentVariableSubstitutor(false))
@@ -71,8 +71,14 @@ public class LedgerApp extends Application<LedgerConfig> {
 
     @Override
     public void run(LedgerConfig config, Environment environment) {
-        config.getEcsContainerMetadataUriV4().ifPresent(uri -> initialisePrometheusMetrics(environment, uri));
-        
+        LOGGER.info("Initialising prometheus metrics.");
+        CollectorRegistry collectorRegistry = CollectorRegistry.defaultRegistry;
+        config.getEcsContainerMetadataUriV4().ifPresentOrElse(
+                uri -> collectorRegistry.register(new DropwizardExports(environment.metrics(), new PrometheusDefaultLabelSampleBuilder(uri))),
+                () -> collectorRegistry.register(new DropwizardExports(environment.metrics()))
+        );
+        environment.admin().addServlet("prometheusMetrics", new MetricsServlet(collectorRegistry)).addMapping("/metrics");
+
         JdbiFactory jdbiFactory = new JdbiFactory();
         final Jdbi jdbi = jdbiFactory.build(environment, config.getDataSourceFactory(), "postgresql");
 
@@ -94,17 +100,10 @@ public class LedgerApp extends Application<LedgerConfig> {
         environment.jersey().register(new JerseyViolationExceptionMapper());
         environment.healthChecks().register("sqsQueue", injector.getInstance(SQSHealthCheck.class));
 
-        if(config.getQueueMessageReceiverConfig().isBackgroundProcessingEnabled()) {
+        if (config.getQueueMessageReceiverConfig().isBackgroundProcessingEnabled()) {
             environment.lifecycle().manage(injector.getInstance(QueueMessageReceiver.class));
         }
 
         environment.jersey().register(injector.getInstance(PayoutResource.class));
-    }
-
-    private void initialisePrometheusMetrics(Environment environment, URI ecsContainerMetadataUri) {
-        LOGGER.info("Initialising prometheus metrics.");
-        CollectorRegistry collectorRegistry = new CollectorRegistry();
-        collectorRegistry.register(new DropwizardExports(environment.metrics(), new PrometheusDefaultLabelSampleBuilder(ecsContainerMetadataUri)));
-        environment.admin().addServlet("prometheusMetrics", new MetricsServlet(collectorRegistry)).addMapping("/metrics");
     }
 }
