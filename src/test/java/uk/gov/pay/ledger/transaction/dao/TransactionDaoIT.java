@@ -1,29 +1,35 @@
 package uk.gov.pay.ledger.transaction.dao;
 
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.app.LedgerConfig;
-import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
+import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.time.ZonedDateTime.parse;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
 import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_REFERENCE_NUMBER;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
@@ -84,7 +90,7 @@ class TransactionDaoIT {
 
     @Test
     void shouldRetrieveTransactionByExternalIdAndGatewayAccount() {
-        ZonedDateTime paidOutDate = ZonedDateTime.parse("2019-12-12T10:00:00Z");
+        ZonedDateTime paidOutDate = parse("2019-12-12T10:00:00Z");
         String payOutId = randomAlphanumeric(20);
 
         TransactionFixture fixture = aTransactionFixture()
@@ -113,7 +119,7 @@ class TransactionDaoIT {
 
     @Test
     void shouldRetrieveTransactionWithPayoutDateByExternalIdAndNoGatewayAccount() {
-        ZonedDateTime paidOutDate = ZonedDateTime.parse("2019-12-12T10:00:00Z");
+        ZonedDateTime paidOutDate = parse("2019-12-12T10:00:00Z");
         String payOutId = randomAlphanumeric(20);
 
         TransactionFixture fixture = aTransactionFixture()
@@ -169,7 +175,7 @@ class TransactionDaoIT {
     @Test
     void shouldRetrieveTransactionByExternalIdAndGatewayAccountId() {
         String payOutId = randomAlphanumeric(20);
-        ZonedDateTime paidOutDate = ZonedDateTime.parse("2019-12-12T10:00:00Z");
+        ZonedDateTime paidOutDate = parse("2019-12-12T10:00:00Z");
 
         TransactionFixture fixture = aTransactionFixture()
                 .withDefaultCardDetails()
@@ -284,7 +290,7 @@ class TransactionDaoIT {
     @Test
     void shouldFilterTransactionByExternalIdOrParentExternalIdAndGatewayAccountId() {
         String payOutId = randomAlphanumeric(20);
-        ZonedDateTime paidOutDate = ZonedDateTime.parse("2019-12-12T10:00:00Z");
+        ZonedDateTime paidOutDate = parse("2019-12-12T10:00:00Z");
 
         TransactionEntity transaction1 = aTransactionFixture()
                 .withState(TransactionState.CREATED)
@@ -406,7 +412,7 @@ class TransactionDaoIT {
     @Test
     void findTransactionByParentId_shouldFilterByParentExternalId() {
         String payOutId = randomAlphanumeric(20);
-        ZonedDateTime paidOutDate = ZonedDateTime.parse("2019-12-12T10:00:00Z");
+        ZonedDateTime paidOutDate = parse("2019-12-12T10:00:00Z");
 
         TransactionEntity transaction1 = aTransactionFixture()
                 .withState(TransactionState.CREATED)
@@ -446,5 +452,57 @@ class TransactionDaoIT {
         var sourceArray = Arrays.stream(Source.values()).map(Enum::toString).collect(Collectors.toList());
         transactionDao.getSourceTypeValues().forEach(x -> assertThat(sourceArray.contains(x), is(true)));
         sourceArray.forEach(x -> assertThat(transactionDao.getSourceTypeValues().contains(x), is(true)));
+    }
+
+    @Nested
+    @DisplayName("TestFindTransactionsForRedaction")
+    class TestFindTransactionsForRedaction {
+
+        @Test
+        void shouldReturnTransactionsCorrectlyForDateRangesAndNumberOfTransactions() {
+            TransactionEntity transactionToReturnToDelete1 = aTransactionFixture()
+                    .withCreatedDate(parse("2016-01-01T00:00:00Z"))
+                    .insert(rule.getJdbi())
+                    .toEntity();
+            TransactionEntity transactionToReturnToDelete2 = aTransactionFixture()
+                    .withCreatedDate(parse("2016-01-01T01:00:00Z"))
+                    .insert(rule.getJdbi())
+                    .toEntity();
+            TransactionEntity transactionEligibleForSearchButNotReturnedDueToLimit = aTransactionFixture()
+                    .withCreatedDate(parse("2016-01-01T02:00:00Z"))
+                    .insert(rule.getJdbi())
+                    .toEntity();
+
+            TransactionEntity transactionToExclude1 = aTransactionFixture()
+                    .withCreatedDate(parse("2016-01-02T00:00:00Z"))
+                    .insert(rule.getJdbi())
+                    .toEntity();
+            TransactionEntity transactionToExclude2 = aTransactionFixture()
+                    .withCreatedDate(parse("2016-01-03T00:00:00Z"))
+                    .insert(rule.getJdbi())
+                    .toEntity();
+
+            List<TransactionEntity> transactionsForRedaction = transactionDao.findTransactionsForRedaction(
+                    parse("2015-12-31T00:00:00Z"),
+                    parse("2016-01-02T00:00:00Z"),
+                    2
+            );
+
+            List<String> transactionIdsReturned = transactionsForRedaction
+                    .stream()
+                    .map(TransactionEntity::getExternalId)
+                    .collect(Collectors.toList());
+
+            assertThat(transactionsForRedaction.size(), is(2));
+            assertThat(transactionIdsReturned, hasItems(
+                    transactionToReturnToDelete1.getExternalId(),
+                    transactionToReturnToDelete2.getExternalId())
+            );
+            assertThat(transactionIdsReturned, not(hasItems(
+                    transactionEligibleForSearchButNotReturnedDueToLimit.getExternalId(),
+                    transactionToExclude1.getExternalId(),
+                    transactionToExclude2.getExternalId())
+            ));
+        }
     }
 }

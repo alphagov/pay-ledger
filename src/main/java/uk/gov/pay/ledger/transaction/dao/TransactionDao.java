@@ -26,63 +26,68 @@ public class TransactionDao {
 
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID =
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
-            "LEFT OUTER JOIN payout po on " +
-            "t.gateway_payout_id = po.gateway_payout_id " +
-            ":payoutJoinOnGatewayIdField " +
-            "WHERE t.external_id = :externalId " +
-            "AND (:gatewayAccountId is NULL OR t.gateway_account_id = :gatewayAccountId)";
+                    "LEFT OUTER JOIN payout po on " +
+                    "t.gateway_payout_id = po.gateway_payout_id " +
+                    ":payoutJoinOnGatewayIdField " +
+                    "WHERE t.external_id = :externalId " +
+                    "AND (:gatewayAccountId is NULL OR t.gateway_account_id = :gatewayAccountId)";
 
     private static final String FIND_TRANSACTION_BY_EXTERNAL_ID_AND_GATEWAY_ACCOUNT_ID =
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
-            "LEFT OUTER JOIN payout po on " +
-            "t.gateway_payout_id = po.gateway_payout_id " +
-            "AND po.gateway_account_id = :gatewayAccountId " +
-            "WHERE t.external_id = :externalId " +
-            "AND t.gateway_account_id = :gatewayAccountId " +
-            "AND (:transactionType::transaction_type is NULL OR type = :transactionType::transaction_type) " +
-            "AND (:parentExternalId is NULL OR t.parent_external_id = :parentExternalId)";
+                    "LEFT OUTER JOIN payout po on " +
+                    "t.gateway_payout_id = po.gateway_payout_id " +
+                    "AND po.gateway_account_id = :gatewayAccountId " +
+                    "WHERE t.external_id = :externalId " +
+                    "AND t.gateway_account_id = :gatewayAccountId " +
+                    "AND (:transactionType::transaction_type is NULL OR type = :transactionType::transaction_type) " +
+                    "AND (:parentExternalId is NULL OR t.parent_external_id = :parentExternalId)";
 
     private static final String FIND_TRANSACTIONS_BY_EXTERNAL_OR_PARENT_ID_AND_GATEWAY_ACCOUNT_ID =
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
-            "LEFT OUTER JOIN payout po on " +
-            "t.gateway_payout_id = po.gateway_payout_id " +
-            "AND po.gateway_account_id = :gatewayAccountId " +
-            "WHERE (t.external_id = :externalId or t.parent_external_id = :externalId) " +
-            "AND t.gateway_account_id = :gatewayAccountId";
+                    "LEFT OUTER JOIN payout po on " +
+                    "t.gateway_payout_id = po.gateway_payout_id " +
+                    "AND po.gateway_account_id = :gatewayAccountId " +
+                    "WHERE (t.external_id = :externalId or t.parent_external_id = :externalId) " +
+                    "AND t.gateway_account_id = :gatewayAccountId";
 
     private static final String FIND_TRANSACTIONS_BY_PARENT_EXT_ID_AND_GATEWAY_ACCOUNT_ID =
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
-            "LEFT OUTER JOIN payout po on " +
-            "t.gateway_payout_id = po.gateway_payout_id " +
-            ":payoutJoinOnGatewayIdField " +
-            "WHERE t.parent_external_id = :parentExternalId " +
-            "AND t.gateway_account_id = :gatewayAccountId " +
-            "AND (:transactionType::transaction_type is NULL OR type = :transactionType::transaction_type)";
+                    "LEFT OUTER JOIN payout po on " +
+                    "t.gateway_payout_id = po.gateway_payout_id " +
+                    ":payoutJoinOnGatewayIdField " +
+                    "WHERE t.parent_external_id = :parentExternalId " +
+                    "AND t.gateway_account_id = :gatewayAccountId " +
+                    "AND (:transactionType::transaction_type is NULL OR type = :transactionType::transaction_type)";
 
     private static final String FIND_TRANSACTIONS_BY_PARENT_EXT_ID =
             "SELECT t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
-            "LEFT OUTER JOIN payout po on " +
-            "t.gateway_payout_id = po.gateway_payout_id " +
-            "WHERE t.parent_external_id = :parentExternalId";
+                    "LEFT OUTER JOIN payout po on " +
+                    "t.gateway_payout_id = po.gateway_payout_id " +
+                    "WHERE t.parent_external_id = :parentExternalId";
 
     private static final String SEARCH_TRANSACTIONS =
             "SELECT :distinctClauseWhenSearchingByMetadataValue t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
-            " :transactionMetadataJoin " +
-            " LEFT OUTER JOIN payout po on " +
-            "t.gateway_payout_id = po.gateway_payout_id " +
-            ":payoutJoinOnGatewayIdField " +
-            ":searchExtraFields " +
-            "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
+                    " :transactionMetadataJoin " +
+                    " LEFT OUTER JOIN payout po on " +
+                    "t.gateway_payout_id = po.gateway_payout_id " +
+                    ":payoutJoinOnGatewayIdField " +
+                    ":searchExtraFields " +
+                    "ORDER BY t.created_date DESC OFFSET :offset LIMIT :limit";
 
     private static final String SEARCH_TRANSACTIONS_CURSOR =
             "SELECT :distinctClauseWhenSearchingByMetadataValue t.*, po.paid_out_date AS paid_out_date FROM transaction t " +
-            " :transactionMetadataJoin " +
-            "LEFT OUTER JOIN payout po on " +
-            "t.gateway_payout_id = po.gateway_payout_id " +
-            ":payoutJoinOnGatewayIdField " +
-            ":searchExtraFields " +
-            ":cursorFields " +
-            "ORDER BY t.created_date DESC, t.id DESC LIMIT :limit";
+                    " :transactionMetadataJoin " +
+                    "LEFT OUTER JOIN payout po on " +
+                    "t.gateway_payout_id = po.gateway_payout_id " +
+                    ":payoutJoinOnGatewayIdField " +
+                    ":searchExtraFields " +
+                    ":cursorFields " +
+                    "ORDER BY t.created_date DESC, t.id DESC LIMIT :limit";
+
+    private static final String SEARCH_TRANSACTIONS_FOR_REDACTION =
+            "SELECT t.* FROM transaction t " +
+                    " WHERE t.created_date >= :dateOfLastProcessedTransaction AND t.created_date < :redactTransactionsUpToDate  " +
+                    "ORDER BY t.created_date ASC LIMIT :limit";
 
     private static final String COUNT_TRANSACTIONS = "SELECT count(:distinctClauseWhenSearchingByMetadataValue t.id) " +
             "FROM transaction t " +
@@ -283,9 +288,9 @@ public class TransactionDao {
     public List<TransactionEntity> findTransactionByParentId(String parentExternalId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery(FIND_TRANSACTIONS_BY_PARENT_EXT_ID)
-                    .bind("parentExternalId", parentExternalId)
-                    .map(new TransactionMapper())
-                    .stream().collect(Collectors.toList())
+                        .bind("parentExternalId", parentExternalId)
+                        .map(new TransactionMapper())
+                        .stream().collect(Collectors.toList())
         );
     }
 
@@ -357,6 +362,21 @@ public class TransactionDao {
         });
     }
 
+    public List<TransactionEntity> findTransactionsForRedaction(ZonedDateTime dateOfLastProcessedTransaction,
+                                                                ZonedDateTime redactTransactionsUpToDate,
+                                                                int noOfTransactionsToReturn) {
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(SEARCH_TRANSACTIONS_FOR_REDACTION);
+            query.bind("dateOfLastProcessedTransaction", dateOfLastProcessedTransaction);
+            query.bind("redactTransactionsUpToDate", redactTransactionsUpToDate);
+            query.bind("limit", noOfTransactionsToReturn);
+
+            return query
+                    .map(new TransactionMapper())
+                    .list();
+        });
+    }
+
     private String createSearchTemplate(TransactionSearchParams searchParams, String baseQueryString) {
         String searchClauseTemplate = String.join(" AND ", searchParams.getFilterTemplates());
         searchClauseTemplate = StringUtils.isNotBlank(searchClauseTemplate) ?
@@ -365,7 +385,7 @@ public class TransactionDao {
         baseQueryString = baseQueryString
                 .replace(":payoutJoinOnGatewayIdField",
                         (searchParams.getAccountIds() != null && !searchParams.getAccountIds().isEmpty())
-                        ? SEARCH_CLAUSE_TRANSACTIONS_WITH_PAYOUT : "");
+                                ? SEARCH_CLAUSE_TRANSACTIONS_WITH_PAYOUT : "");
 
         baseQueryString = baseQueryString
                 .replace(":transactionMetadataJoin",
