@@ -213,6 +213,18 @@ public class TransactionDao {
                     "agreement_id = EXCLUDED.agreement_id " +
                     "WHERE EXCLUDED.event_count >= transaction.event_count;";
 
+    private static final String REDACT_PII_FROM_TRANSACTIONS =
+            "UPDATE transaction t " +
+                    "set reference = '<REDACTED>'," +
+                    "  cardholder_name = (case when cardholder_name IS NOT NULL then '<REDACTED>' end), " +
+                    "  email = (case when email IS NOT NULL then '<REDACTED>' end), " +
+                    "  transaction_details = JSONB_SET(" +
+                    "                              JSONB_SET(transaction_details, '{address_line1}','\"<REDACTED>\"', false), " +
+                    "                              '{address_line2}','\"<REDACTED>\"', false" +
+                    "                        )" +
+                    "                         -'{reference,cardholder_name,email}'::text[]" +
+                    " WHERE t.external_id = :externalId";
+
     private static final String GET_SOURCE_TYPE_ENUM_VALUES =
             "SELECT " +
                     "pg_enum.enumlabel " +
@@ -375,6 +387,13 @@ public class TransactionDao {
                     .map(new TransactionMapper())
                     .list();
         });
+    }
+
+    public void redactPIIFromTransaction(String transactionExternalId) {
+        jdbi.withHandle(handle ->
+                handle.createUpdate(REDACT_PII_FROM_TRANSACTIONS)
+                        .bind("externalId", transactionExternalId)
+                        .execute());
     }
 
     private String createSearchTemplate(TransactionSearchParams searchParams, String baseQueryString) {

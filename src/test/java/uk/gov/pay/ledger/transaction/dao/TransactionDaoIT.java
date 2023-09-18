@@ -1,6 +1,11 @@
 package uk.gov.pay.ledger.transaction.dao;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonObject;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,7 +19,6 @@ import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +45,7 @@ class TransactionDaoIT {
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
     private TransactionDao transactionDao = new TransactionDao(rule.getJdbi(), mock(LedgerConfig.class));
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void shouldInsertTransaction() {
@@ -455,8 +460,8 @@ class TransactionDaoIT {
     }
 
     @Nested
-    @DisplayName("TestFindTransactionsForRedaction")
-    class TestFindTransactionsForRedaction {
+    @DisplayName("FindTransactionsForRedaction")
+    class TestTransactionsForRedaction {
 
         @Test
         void shouldReturnTransactionsCorrectlyForDateRangesAndNumberOfTransactions() {
@@ -503,6 +508,93 @@ class TransactionDaoIT {
                     transactionToExclude1.getExternalId(),
                     transactionToExclude2.getExternalId())
             ));
+        }
+    }
+
+    @Nested
+    @DisplayName("RedactPIIFromTransaction")
+    class TestRedactPIIFromTransaction {
+
+        @Test
+        void shouldRedactAllPIIFromTransactionCorrectly() throws JsonProcessingException {
+
+            JsonObject transactionDetails1 = new JsonObject();
+            transactionDetails1.addProperty("reference", "ref-1");
+            transactionDetails1.addProperty("cardholder_name", "Joe B");
+            transactionDetails1.addProperty("email", "test@email.com");
+            transactionDetails1.addProperty("address_line1", "line 1");
+            transactionDetails1.addProperty("address_line2", "line 2");
+
+            TransactionEntity transactionToRedact = aTransactionFixture()
+                    .withReference("ref-1")
+                    .withEmail("test@email.com")
+                    .withCardholderName("Joe B")
+                    .withTransactionDetails(transactionDetails1.toString())
+                    .insert(rule.getJdbi())
+                    .toEntity();
+
+            JsonObject transactionDetails2 = new JsonObject();
+            transactionDetails2.addProperty("reference", "ref-2");
+            transactionDetails2.addProperty("cardholder_name", "Jane D");
+            transactionDetails2.addProperty("email", "test2@email.com");
+            TransactionEntity transactionThatShouldNotBeRedacted = aTransactionFixture()
+                    .withReference("ref-2")
+                    .withEmail("test2@email.com")
+                    .withCardholderName("Jane D")
+                    .withTransactionDetails(transactionDetails2.toString())
+                    .insert(rule.getJdbi())
+                    .toEntity();
+
+            transactionDao.redactPIIFromTransaction(transactionToRedact.getExternalId());
+
+            TransactionEntity transactionEntityRedacted = transactionDao.findTransactionByExternalId(transactionToRedact.getExternalId()).get();
+
+            assertThat(transactionEntityRedacted.getReference(), is("<REDACTED>"));
+            assertThat(transactionEntityRedacted.getCardholderName(), is("<REDACTED>"));
+            assertThat(transactionEntityRedacted.getEmail(), is("<REDACTED>"));
+
+            JsonNode jsonNode = objectMapper.readTree(transactionEntityRedacted.getTransactionDetails());
+
+            assertThat(jsonNode.get("reference"), is(Matchers.nullValue()));
+            assertThat(jsonNode.get("cardholder_name"), is(nullValue()));
+            assertThat(jsonNode.get("email"), is(nullValue()));
+            assertThat(jsonNode.get("address_line1").asText(), is("<REDACTED>"));
+            assertThat(jsonNode.get("address_line2").asText(), is("<REDACTED>"));
+
+            TransactionEntity transactionEntityNotRedacted = transactionDao.findTransactionByExternalId(transactionThatShouldNotBeRedacted.getExternalId()).get();
+            assertThat(transactionEntityNotRedacted.getReference(), is("ref-2"));
+            assertThat(transactionEntityNotRedacted.getCardholderName(), is("Jane D"));
+            assertThat(transactionEntityNotRedacted.getEmail(), is("test2@email.com"));
+        }
+
+        @Test
+        void shouldNotReplaceNonMandatoryFieldsWithARedactedStringWhenBlank() throws JsonProcessingException {
+            JsonObject transactionDetails1 = new JsonObject();
+            transactionDetails1.addProperty("reference", "ref-1");
+
+            TransactionEntity transactionToRedact = aTransactionFixture()
+                    .withReference("ref-1")
+                    .withEmail(null)
+                    .withCardholderName(null)
+                    .withTransactionDetails(transactionDetails1.toString())
+                    .insert(rule.getJdbi())
+                    .toEntity();
+
+            transactionDao.redactPIIFromTransaction(transactionToRedact.getExternalId());
+
+            TransactionEntity transactionEntity = transactionDao.findTransactionByExternalId(transactionToRedact.getExternalId()).get();
+
+            assertThat(transactionEntity.getReference(), is("<REDACTED>"));
+            assertThat(transactionEntity.getCardholderName(), is(nullValue()));
+            assertThat(transactionEntity.getEmail(), is(nullValue()));
+
+            JsonNode jsonNode = objectMapper.readTree(transactionEntity.getTransactionDetails());
+
+            assertThat(jsonNode.get("reference"), is(nullValue()));
+            assertThat(jsonNode.get("cardholder_name"), is(nullValue()));
+            assertThat(jsonNode.get("email"), is(nullValue()));
+            assertThat(jsonNode.get("address_line1"), is(nullValue()));
+            assertThat(jsonNode.get("address_line2"), is(nullValue()));
         }
     }
 }
