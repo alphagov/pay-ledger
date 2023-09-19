@@ -33,9 +33,9 @@ public interface EventDao {
     Optional<EventEntity> getById(@Bind("eventId") Long eventId);
 
     @SqlUpdate("INSERT INTO event(sqs_message_id, service_id, live, resource_type_id, resource_external_id, parent_resource_external_id, " +
-                "event_date, event_type, event_data) " +
+            "event_date, event_type, event_data) " +
             "VALUES (:sqsMessageId, :serviceId, :live, :resourceTypeId, :resourceExternalId, :parentResourceExternalId, " +
-                ":eventDate, :eventType, CAST(:eventData as jsonb))")
+            ":eventDate, :eventType, CAST(:eventData as jsonb))")
     @GetGeneratedKeys
     Long insert(@BindBean EventEntity event, @Bind("resourceTypeId") int resourceTypeId);
 
@@ -89,4 +89,7 @@ public interface EventDao {
     @SqlUpdate("UPDATE event SET event_data = jsonb_set(event_data, '{reference}', '\"" + REDACTED_REFERENCE_NUMBER + "\"', false) " +
             "WHERE resource_external_id = :resourceExternalId")
     void redactReference(@Bind("resourceExternalId") String resourceExternalId);
+
+    @SqlUpdate("DELETE from event WHERE resource_external_id IN (<transactionIds>)")
+    int deleteEventsForTransactions(@BindList("transactionIds") List<String> transactionIds);
 }
