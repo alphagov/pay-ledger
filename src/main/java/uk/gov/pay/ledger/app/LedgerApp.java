@@ -70,7 +70,6 @@ public class LedgerApp extends Application<LedgerConfig> {
 
     @Override
     public void run(LedgerConfig config, Environment environment) {
-        LOGGER.info("Initialising prometheus metrics.");
         CollectorRegistry collectorRegistry = CollectorRegistry.defaultRegistry;
         collectorRegistry.register(new DropwizardExports(environment.metrics()));
         environment.admin().addServlet("prometheusMetrics", new MetricsServlet(collectorRegistry)).addMapping("/metrics");
