@@ -31,7 +31,6 @@ import uk.gov.pay.ledger.queue.managed.QueueMessageReceiver;
 import uk.gov.pay.ledger.report.resource.PerformanceReportResource;
 import uk.gov.pay.ledger.report.resource.ReportResource;
 import uk.gov.pay.ledger.transaction.resource.TransactionResource;
-import uk.gov.service.payments.commons.utils.prometheus.PrometheusDefaultLabelSampleBuilder;
 import uk.gov.service.payments.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
 import uk.gov.service.payments.logging.LoggingFilter;
 import uk.gov.service.payments.logging.LogstashConsoleAppenderFactory;
@@ -71,8 +70,11 @@ public class LedgerApp extends Application<LedgerConfig> {
 
     @Override
     public void run(LedgerConfig config, Environment environment) {
-        config.getEcsContainerMetadataUriV4().ifPresent(uri -> initialisePrometheusMetrics(environment, uri));
-        
+        LOGGER.info("Initialising prometheus metrics.");
+        CollectorRegistry collectorRegistry = CollectorRegistry.defaultRegistry;
+        collectorRegistry.register(new DropwizardExports(environment.metrics()));
+        environment.admin().addServlet("prometheusMetrics", new MetricsServlet(collectorRegistry)).addMapping("/metrics");
+
         JdbiFactory jdbiFactory = new JdbiFactory();
         final Jdbi jdbi = jdbiFactory.build(environment, config.getDataSourceFactory(), "postgresql");
 
@@ -99,12 +101,5 @@ public class LedgerApp extends Application<LedgerConfig> {
         }
 
         environment.jersey().register(injector.getInstance(PayoutResource.class));
-    }
-
-    private void initialisePrometheusMetrics(Environment environment, URI ecsContainerMetadataUri) {
-        LOGGER.info("Initialising prometheus metrics.");
-        CollectorRegistry collectorRegistry = new CollectorRegistry();
-        collectorRegistry.register(new DropwizardExports(environment.metrics(), new PrometheusDefaultLabelSampleBuilder(ecsContainerMetadataUri)));
-        environment.admin().addServlet("prometheusMetrics", new MetricsServlet(collectorRegistry)).addMapping("/metrics");
     }
 }
