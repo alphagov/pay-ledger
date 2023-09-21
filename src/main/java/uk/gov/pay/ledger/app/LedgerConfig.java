@@ -3,6 +3,7 @@ package uk.gov.pay.ledger.app;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
+import uk.gov.pay.ledger.app.config.ExpungeOrRedactHistoricalDataConfig;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.app.config.ReportingConfig;
 import uk.gov.pay.ledger.app.config.SnsConfig;
@@ -46,6 +47,9 @@ public class LedgerConfig extends Configuration {
 
     @JsonProperty("ecsContainerMetadataUriV4")
     private URI ecsContainerMetadataUriV4;
+    
+    @JsonProperty("expungeOrRedactHistoricalDataConfig")
+    private ExpungeOrRedactHistoricalDataConfig expungeOrRedactHistoricalDataConfig;
 
     public SqsConfig getSqsConfig() {
         return sqsConfig;
@@ -65,5 +69,9 @@ public class LedgerConfig extends Configuration {
 
     public Optional<URI> getEcsContainerMetadataUriV4() {
         return Optional.ofNullable(ecsContainerMetadataUriV4);
+    }
+
+    public ExpungeOrRedactHistoricalDataConfig getExpungeOrRedactHistoricalDataConfig() {
+        return expungeOrRedactHistoricalDataConfig;
     }
 }
