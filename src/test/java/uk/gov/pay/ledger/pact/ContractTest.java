@@ -281,6 +281,21 @@ public abstract class ContractTest {
                 .insert(app.getJdbi());
     }
 
+    @State("a transaction with wallet type APPLE_PAY exists")
+    public void createTransactionWithWalletTypeApplePay(Map<String, String> params) {
+        String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
+
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withState(TransactionState.CAPTURABLE)
+                .withDelayedCapture(true)
+                .withAmount(100L)
+                .withDefaultTransactionDetails()
+                .insert(app.getJdbi());
+    }
+
     @State("a transaction with 3ds version exists")
     public void createTransactionWithVersion3ds(Map<String, String> params) {
         String transactionExternalId = params.get("charge_id");
