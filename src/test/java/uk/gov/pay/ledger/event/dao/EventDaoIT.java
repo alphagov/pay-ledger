@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.event.dao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.event.entity.EventEntity;
@@ -18,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.time.ZonedDateTime.parse;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -27,12 +30,12 @@ import static uk.gov.pay.ledger.util.ZonedDateTimeTimestampMatcher.isDate;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
-public class EventDaoIT {
+class EventDaoIT {
 
     @RegisterExtension
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
-    private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
+    private static final ZonedDateTime CREATED_AT = parse("2019-06-07T08:46:01.123456Z");
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private EventDao eventDao;
@@ -40,7 +43,7 @@ public class EventDaoIT {
     private DatabaseTestHelper dbHelper;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         eventDao = rule.getJdbi().onDemand(EventDao.class);
         resourceTypeDao = rule.getJdbi().onDemand(ResourceTypeDao.class);
         dbHelper = aDatabaseTestHelper(rule.getJdbi());
@@ -48,7 +51,7 @@ public class EventDaoIT {
     }
 
     @Test
-    public void shouldRedactReference() {
+    void shouldRedactReference() {
         String resourceExternalId = "52pfbqbta";
         String eventData = "{\"address\": \"Silicon Valley\", \"reference\": \"4242424242424242\"}";
         var paymentCreatedEvent = anEventFixture()
@@ -76,7 +79,7 @@ public class EventDaoIT {
     }
 
     @Test
-    public void shouldInsertEvent() throws IOException {
+    void shouldInsertEvent() throws IOException {
         EventEntity event = anEventFixture()
                 .withEventDate(CREATED_AT)
                 .withParentResourceExternalId("parent-resource-id")
@@ -96,7 +99,7 @@ public class EventDaoIT {
     }
 
     @Test
-    public void shouldInsertNotExistingEvent() throws IOException {
+    void shouldInsertNotExistingEvent() throws IOException {
         EventEntity event = anEventFixture()
                 .withEventDate(CREATED_AT)
                 .toEntity();
@@ -116,7 +119,7 @@ public class EventDaoIT {
     }
 
     @Test
-    public void shouldInsertDuplicateEventWithDifferentTimestamp() {
+    void shouldInsertDuplicateEventWithDifferentTimestamp() {
         EventEntity event = anEventFixture()
                 .insert(rule.getJdbi())
                 .toEntity();
@@ -136,7 +139,7 @@ public class EventDaoIT {
     }
 
     @Test
-    public void shouldNotInsertDuplicateEvent() throws IOException {
+    void shouldNotInsertDuplicateEvent() throws IOException {
         EventEntity event = anEventFixture()
                 .withEventDate(CREATED_AT)
                 .insert(rule.getJdbi())
@@ -165,7 +168,7 @@ public class EventDaoIT {
     }
 
     @Test
-    public void shouldFindEvent() {
+    void shouldFindEvent() {
         EventEntity event = anEventFixture()
                 .insert(rule.getJdbi())
                 .toEntity();
@@ -183,7 +186,7 @@ public class EventDaoIT {
     }
 
     @Test
-    public void shouldGetAllEventsForResourceExternalIdInDescendingDateOrder() {
+    void shouldGetAllEventsForResourceExternalIdInDescendingDateOrder() {
         final String resourceExternalId = "resourceExternalId";
 
         EventEntity earliestEvent = anEventFixture()
@@ -213,14 +216,14 @@ public class EventDaoIT {
     }
 
     @Test
-    public void shouldGetEmptyListWhenNoEventsWithResourceExternalId() {
+    void shouldGetEmptyListWhenNoEventsWithResourceExternalId() {
         List<EventEntity> events = eventDao.getEventsByResourceExternalId("no_events_for_this_id");
 
         assertThat(events.size(), is(0));
     }
 
     @Test
-    public void findEventsForExternalIdsShouldFilterEventsByMultipleExternalIds() {
+    void findEventsForExternalIdsShouldFilterEventsByMultipleExternalIds() {
         EventEntity event1 = anEventFixture()
                 .withResourceExternalId("external-id-1")
                 .insert(rule.getJdbi())
@@ -244,13 +247,13 @@ public class EventDaoIT {
     }
 
     @Test
-    public void findEventsForExternalIds_ShouldReturnEmptyListIfNoRecordsFound() {
+    void findEventsForExternalIds_ShouldReturnEmptyListIfNoRecordsFound() {
         List<EventEntity> eventList = eventDao.findEventsForExternalIds(Set.of("some-ext-id-1", "some-ext-id-2"));
         assertThat(eventList.size(), is(0));
     }
 
     @Test
-    public void findEventsTickerFromDate_ShouldGetAllEventsFromDateSpecified() {
+    void findEventsTickerFromDate_ShouldGetAllEventsFromDateSpecified() {
         aTransactionFixture()
                 .withExternalId("external-id-1")
                 .withGatewayAccountId("100")
@@ -286,4 +289,54 @@ public class EventDaoIT {
         assertThat(eventTickers.get(0).getAmount(), is(200L));
     }
 
+    @Nested
+    @DisplayName("DeleteEventsForTransactions")
+    class TestDeleteEventsForTransactions {
+        @Test
+        void shouldDeleteEventsForListOfTransactionIDs() {
+            EventEntity event1 = anEventFixture()
+                    .withResourceExternalId("external-id-1")
+                    .withEventType("PAYMENT_CREATED")
+                    .insert(rule.getJdbi())
+                    .toEntity();
+            EventEntity event2 = anEventFixture()
+                    .withResourceExternalId("external-id-1")
+                    .withEventDate(event1.getEventDate().minusDays(1))
+                    .insert(rule.getJdbi())
+                    .toEntity();
+            EventEntity event3 = anEventFixture()
+                    .withResourceExternalId("external-id-2")
+                    .withEventDate(event1.getEventDate().minusDays(1))
+                    .insert(rule.getJdbi())
+                    .toEntity();
+
+            int noOfEventsRemoved = eventDao.deleteEventsForTransactions(List.of("external-id-1", "external-id-2"));
+
+            assertThat(noOfEventsRemoved, is(3));
+
+            List<EventEntity> noOfEventsStillInDatabase = eventDao.findEventsForExternalIds(Set.of("external-id-1", "external-id-2"));
+            assertThat(noOfEventsStillInDatabase.size(), is(0));
+        }
+
+        @Test
+        void shouldNotDeleteEventsNotMatchingTransactionIds() {
+            EventEntity event1 = anEventFixture()
+                    .withResourceExternalId("external-id-1")
+                    .withEventType("PAYMENT_CREATED")
+                    .insert(rule.getJdbi())
+                    .toEntity();
+            EventEntity event2 = anEventFixture()
+                    .withResourceExternalId("external-id-2")
+                    .withEventDate(event1.getEventDate().minusDays(1))
+                    .insert(rule.getJdbi())
+                    .toEntity();
+
+            int noOfEventsRemoved = eventDao.deleteEventsForTransactions(List.of("some-tx-id"));
+
+            assertThat(noOfEventsRemoved, is(0));
+
+            List<EventEntity> eventsNotRemoved = eventDao.findEventsForExternalIds(Set.of("external-id-1", "external-id-2"));
+            assertThat(eventsNotRemoved.size(), is(2));
+        }
+    }
 }
