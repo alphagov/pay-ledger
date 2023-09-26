@@ -441,4 +441,13 @@ public class TransactionDao {
                 .collect(Collectors.toList()));
     }
 
+    public Optional<ZonedDateTime> getCreatedDateOfFirstTransaction() {
+        String query = "select min(created_date) from transaction";
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(query)
+                        .mapTo(ZonedDateTime.class)
+                        .findFirst()
+        );
+    }
 }

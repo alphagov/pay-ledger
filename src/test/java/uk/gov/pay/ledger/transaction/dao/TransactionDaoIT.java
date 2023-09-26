@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,14 +16,17 @@ import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
+import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.parse;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -36,6 +40,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
 import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_REFERENCE_NUMBER;
+import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
@@ -46,6 +51,13 @@ class TransactionDaoIT {
 
     private TransactionDao transactionDao = new TransactionDao(rule.getJdbi(), mock(LedgerConfig.class));
     private ObjectMapper objectMapper = new ObjectMapper();
+
+    private DatabaseTestHelper databaseTestHelper = aDatabaseTestHelper(rule.getJdbi());
+
+    @BeforeEach
+    public void setUp() {
+        databaseTestHelper.truncateAllData();
+    }
 
     @Test
     void shouldInsertTransaction() {
@@ -595,6 +607,33 @@ class TransactionDaoIT {
             assertThat(jsonNode.get("email"), is(nullValue()));
             assertThat(jsonNode.get("address_line1"), is(nullValue()));
             assertThat(jsonNode.get("address_line2"), is(nullValue()));
+        }
+    }
+
+    @Nested
+    @DisplayName("CreatedDateOfFirstTransaction")
+    class TestCreatedDateOfFirstTransaction {
+
+        @Test
+        void shouldReturnTheDateOfFirstTransactionCorrectly() {
+            aTransactionFixture().withCreatedDate(parse("2016-01-02T00:00:01Z"))
+                    .insert(rule.getJdbi());
+            aTransactionFixture().withCreatedDate(parse("2019-01-03T00:00:00Z"))
+                    .insert(rule.getJdbi());
+            aTransactionFixture().withCreatedDate(parse("2023-01-03T00:00:00Z"))
+                    .insert(rule.getJdbi());
+
+            Optional<ZonedDateTime> mayBeCreatedDateOfFirstTransaction = transactionDao.getCreatedDateOfFirstTransaction();
+
+            assertThat(mayBeCreatedDateOfFirstTransaction.isPresent(), is(true));
+            assertThat(mayBeCreatedDateOfFirstTransaction.get().withZoneSameInstant(UTC).toString(), is("2016-01-02T00:00:01Z"));
+        }
+
+        @Test
+        void shouldReturnEmptyOptionalIfThereAreNoTransactions() {
+            Optional<ZonedDateTime> mayBeCreatedDateOfFirstTransaction = transactionDao.getCreatedDateOfFirstTransaction();
+
+            assertThat(mayBeCreatedDateOfFirstTransaction.isPresent(), is(false));
         }
     }
 }
