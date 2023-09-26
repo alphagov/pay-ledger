@@ -1,4 +1,4 @@
-package uk.gov.pay.ledger.expunge.service;
+package uk.gov.pay.ledger.expungeorredact.service;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;

@@ -40,7 +40,8 @@ public class DatabaseTestHelper {
                         "TRUNCATE TABLE transaction CASCADE;" +
                         "TRUNCATE TABLE gateway_account_metadata CASCADE;" +
                         "TRUNCATE TABLE agreement CASCADE;" +
-                        "TRUNCATE TABLE payment_instrument CASCADE;"
+                        "TRUNCATE TABLE payment_instrument CASCADE;" +
+                        "TRUNCATE TABLE transaction_redaction_info"
         ).execute());
     }
 
