@@ -631,6 +631,16 @@ paths:
       summary: Get transaction summary for query params
       tags:
       - Reports
+  /v1/tasks/expunge-or-redact-historical-data:
+    post:
+      operationId: expungeOrRedactData
+      responses:
+        "200":
+          description: OK
+      summary: Redacts/Removes historical data based on `expungeOrRedactHistoricalDataConfig`.
+        Currently redacts PII from transactions and deletes related transaction events
+      tags:
+      - Tasks
   /v1/transaction:
     get:
       operationId: search transactions

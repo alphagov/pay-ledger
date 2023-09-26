@@ -58,6 +58,15 @@ and background processing.
 | `SNS_TOPIC_CARD_PAYMENT_EVENTS_ARN`            | -       | ARN of the SNS topic for card payment events                                                               |
 | `SNS_TOPIC_CARD_PAYMENT_DISPUTE_EVENTS_ARN`    | -       | ARN of the SNS topic for card payment dispute events                                                       |
 
+### Expunge/Redact historic data configuration
+
+| Variable                                         | Default  | Purpose                                                                         |
+|--------------------------------------------------|----------|---------------------------------------------------------------------------------|
+| `EXPUNG_AND_REDACT_HISTORICAL_DATA_ENABLED`      | `false`  | Set to true to enable redacting PII from transactions and remove related events |
+| `EXPUNGE_OR_REDACT_DATA_OLDER_THAN_DAYS`         | `2555`   | Minimum age of transactions in days that need to be redacted/expunged           |
+| `EXPUNGE_NO_OF_TRANSACTIONS_PER_TASK_RUN`        | `2500`   | Number of transactions to redact per task run                                   |
+
+
 ### Background processing configuration
 
 The background receiver will process all events that have been published to the SQS
