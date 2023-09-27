@@ -159,6 +159,36 @@ class ExpungeOrRedactServiceTest {
     }
 
     @Test
+    void redactOrDeleteDataShouldReturnWhenNoOfTransactionsFoundToRedactIsLessThanTheConfiguredNoOfTransactionsToRedact() {
+        when(mockExpungeOrRedactHistoricalDataConfig.isExpungeAndRedactHistoricalDataEnabled()).thenReturn(true);
+        when(mockExpungeOrRedactHistoricalDataConfig.getNoOfTransactionsToRedact()).thenReturn(999999);
+        when(mockExpungeOrRedactHistoricalDataConfig.getExpungeOrRedactDataOlderThanDays()).thenReturn(1);
+
+        TransactionEntity transactionEntity1 = aTransactionFixture().toEntity();
+        TransactionEntity transactionEntity2 = aTransactionFixture().toEntity();
+        when(mockTransactionDao.findTransactionsForRedaction(any(), any(), anyInt())).thenReturn(
+                List.of(transactionEntity1, transactionEntity2),
+                List.of() // returns empty list for subsequent calls
+        );
+
+        when(mockTransactionRedactionInfoDao.getCreatedDateOfLastProcessedTransaction()).thenReturn(parse("2020-01-01T10:15:30Z"));
+
+        expungeOrRedactService.redactOrDeleteData();
+
+        verify(mockTransactionDao).findTransactionsForRedaction(
+                parse("2020-01-01T10:15:30Z"),
+                parse(SYSTEM_INSTANT).minus(1, DAYS),
+                500);
+
+        verify(mockTransactionDao, times(2)).redactPIIFromTransaction(any());
+        verify(mockEventDao).deleteEventsForTransactions(List.of(transactionEntity1.getExternalId(), transactionEntity2.getExternalId()));
+        verify(mockTransactionRedactionInfoDao).update(transactionEntity2.getCreatedDate());
+
+        verifyNoMoreInteractions(mockTransactionDao);
+        verifyNoMoreInteractions(mockTransactionRedactionInfoDao);
+    }
+
+    @Test
     void shouldUseCreatedDateOfFirstTransactionWhenInfoIsNotAvailableInTransactionRedactionInfo() {
         when(mockExpungeOrRedactHistoricalDataConfig.isExpungeAndRedactHistoricalDataEnabled()).thenReturn(true);
         when(mockExpungeOrRedactHistoricalDataConfig.getNoOfTransactionsToRedact()).thenReturn(100);
