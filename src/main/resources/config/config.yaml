@@ -97,6 +97,6 @@ reportingConfig:
 ecsContainerMetadataUriV4: ${ECS_CONTAINER_METADATA_URI_V4:-}
 
 expungeOrRedactHistoricalDataConfig:
-  expungeAndRedactHistoricalDataEnabled: ${EXPUNG_AND_REDACT_HISTORICAL_DATA_ENABLED:-false}
+  expungeAndRedactHistoricalDataEnabled: ${EXPUNGE_AND_REDACT_HISTORICAL_DATA_ENABLED:-false}
   expungeOrRedactDataOlderThanDays: ${EXPUNGE_OR_REDACT_DATA_OLDER_THAN_DAYS:-2555}
   noOfTransactionsToRedact: ${EXPUNGE_NO_OF_TRANSACTIONS_PER_TASK_RUN:-2500}
