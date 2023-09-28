@@ -215,14 +215,15 @@ public class TransactionDao {
 
     private static final String REDACT_PII_FROM_TRANSACTIONS =
             "UPDATE transaction t " +
-                    "set reference = '<REDACTED>'," +
-                    "  cardholder_name = (case when cardholder_name IS NOT NULL then '<REDACTED>' end), " +
-                    "  email = (case when email IS NOT NULL then '<REDACTED>' end), " +
+                    "set reference = '<DELETED>'," +
+                    "  description = '<DELETED>', " +
+                    "  cardholder_name = (case when cardholder_name IS NOT NULL then '<DELETED>' end), " +
+                    "  email = (case when email IS NOT NULL then '<DELETED>' end), " +
                     "  transaction_details = JSONB_SET(" +
-                    "                              JSONB_SET(transaction_details, '{address_line1}','\"<REDACTED>\"', false), " +
-                    "                              '{address_line2}','\"<REDACTED>\"', false" +
+                    "                              JSONB_SET(transaction_details, '{address_line1}','\"<DELETED>\"', false), " +
+                    "                              '{address_line2}','\"<DELETED>\"', false" +
                     "                        )" +
-                    "                         -'{reference,cardholder_name,email}'::text[]" +
+                    "                         -'{reference,cardholder_name,email,description}'::text[]" +
                     " WHERE t.external_id = :externalId";
 
     private static final String GET_SOURCE_TYPE_ENUM_VALUES =

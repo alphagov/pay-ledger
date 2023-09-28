@@ -537,6 +537,7 @@ class TransactionDaoIT {
                 .withReference("ref-1")
                 .withEmail("test@email.com")
                 .withCardholderName("Joe B")
+                .withDescription("Desc 1")
                 .withTransactionDetails(transactionDetails1.toString())
                 .insert(rule.getJdbi())
                 .toEntity();
@@ -549,6 +550,7 @@ class TransactionDaoIT {
                 .withReference("ref-2")
                 .withEmail("test2@email.com")
                 .withCardholderName("Jane D")
+                .withDescription("Tx not redacted")
                 .withTransactionDetails(transactionDetails2.toString())
                 .insert(rule.getJdbi())
                 .toEntity();
@@ -557,22 +559,24 @@ class TransactionDaoIT {
 
         TransactionEntity transactionEntityRedacted = transactionDao.findTransactionByExternalId(transactionToRedact.getExternalId()).get();
 
-        assertThat(transactionEntityRedacted.getReference(), is("<REDACTED>"));
-        assertThat(transactionEntityRedacted.getCardholderName(), is("<REDACTED>"));
-        assertThat(transactionEntityRedacted.getEmail(), is("<REDACTED>"));
+        assertThat(transactionEntityRedacted.getReference(), is("<DELETED>"));
+        assertThat(transactionEntityRedacted.getCardholderName(), is("<DELETED>"));
+        assertThat(transactionEntityRedacted.getEmail(), is("<DELETED>"));
+        assertThat(transactionEntityRedacted.getDescription(), is("<DELETED>"));
 
         JsonNode jsonNode = objectMapper.readTree(transactionEntityRedacted.getTransactionDetails());
 
         assertThat(jsonNode.get("reference"), is(Matchers.nullValue()));
         assertThat(jsonNode.get("cardholder_name"), is(nullValue()));
         assertThat(jsonNode.get("email"), is(nullValue()));
-        assertThat(jsonNode.get("address_line1").asText(), is("<REDACTED>"));
-        assertThat(jsonNode.get("address_line2").asText(), is("<REDACTED>"));
+        assertThat(jsonNode.get("address_line1").asText(), is("<DELETED>"));
+        assertThat(jsonNode.get("address_line2").asText(), is("<DELETED>"));
 
         TransactionEntity transactionEntityNotRedacted = transactionDao.findTransactionByExternalId(transactionThatShouldNotBeRedacted.getExternalId()).get();
         assertThat(transactionEntityNotRedacted.getReference(), is("ref-2"));
         assertThat(transactionEntityNotRedacted.getCardholderName(), is("Jane D"));
         assertThat(transactionEntityNotRedacted.getEmail(), is("test2@email.com"));
+        assertThat(transactionEntityNotRedacted.getDescription(), is("Tx not redacted"));
     }
 
     @Test
@@ -582,6 +586,7 @@ class TransactionDaoIT {
 
         TransactionEntity transactionToRedact = aTransactionFixture()
                 .withReference("ref-1")
+                .withDescription("test description")
                 .withEmail(null)
                 .withCardholderName(null)
                 .withTransactionDetails(transactionDetails1.toString())
@@ -592,13 +597,15 @@ class TransactionDaoIT {
 
         TransactionEntity transactionEntity = transactionDao.findTransactionByExternalId(transactionToRedact.getExternalId()).get();
 
-        assertThat(transactionEntity.getReference(), is("<REDACTED>"));
+        assertThat(transactionEntity.getReference(), is("<DELETED>"));
+        assertThat(transactionEntity.getDescription(), is("<DELETED>"));
         assertThat(transactionEntity.getCardholderName(), is(nullValue()));
         assertThat(transactionEntity.getEmail(), is(nullValue()));
 
         JsonNode jsonNode = objectMapper.readTree(transactionEntity.getTransactionDetails());
 
         assertThat(jsonNode.get("reference"), is(nullValue()));
+        assertThat(jsonNode.get("description"), is(nullValue()));
         assertThat(jsonNode.get("cardholder_name"), is(nullValue()));
         assertThat(jsonNode.get("email"), is(nullValue()));
         assertThat(jsonNode.get("address_line1"), is(nullValue()));
