@@ -47,7 +47,7 @@ public class LedgerConfig extends Configuration {
 
     @JsonProperty("ecsContainerMetadataUriV4")
     private URI ecsContainerMetadataUriV4;
-    
+
     @JsonProperty("expungeOrRedactHistoricalDataConfig")
     private ExpungeOrRedactHistoricalDataConfig expungeOrRedactHistoricalDataConfig;
 

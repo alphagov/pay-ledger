@@ -21,6 +21,7 @@ import uk.gov.pay.ledger.agreement.resource.AgreementResource;
 import uk.gov.pay.ledger.event.resource.EventResource;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.exception.JerseyViolationExceptionMapper;
+import uk.gov.pay.ledger.expungeorredact.resource.ExpungeOrRedactResource;
 import uk.gov.pay.ledger.filters.LoggingMDCRequestFilter;
 import uk.gov.pay.ledger.filters.LoggingMDCResponseFilter;
 import uk.gov.pay.ledger.healthcheck.DependentResourceWaitCommand;
@@ -34,8 +35,6 @@ import uk.gov.pay.ledger.transaction.resource.TransactionResource;
 import uk.gov.service.payments.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
 import uk.gov.service.payments.logging.LoggingFilter;
 import uk.gov.service.payments.logging.LogstashConsoleAppenderFactory;
-
-import java.net.URI;
 
 import static java.util.EnumSet.of;
 import static javax.servlet.DispatcherType.REQUEST;
@@ -85,6 +84,7 @@ public class LedgerApp extends Application<LedgerConfig> {
         environment.jersey().register(injector.getInstance(PerformanceReportResource.class));
         environment.jersey().register(injector.getInstance(AgreementResource.class));
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
+        environment.jersey().register(injector.getInstance(ExpungeOrRedactResource.class));
 
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
