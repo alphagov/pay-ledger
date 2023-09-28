@@ -523,117 +523,107 @@ class TransactionDaoIT {
         }
     }
 
-    @Nested
-    @DisplayName("RedactPIIFromTransaction")
-    class TestRedactPIIFromTransaction {
+    @Test
+    void redactPIIFromTransaction_shouldRedactAllPIIFromTransactionCorrectly() throws JsonProcessingException {
 
-        @Test
-        void shouldRedactAllPIIFromTransactionCorrectly() throws JsonProcessingException {
+        JsonObject transactionDetails1 = new JsonObject();
+        transactionDetails1.addProperty("reference", "ref-1");
+        transactionDetails1.addProperty("cardholder_name", "Joe B");
+        transactionDetails1.addProperty("email", "test@email.com");
+        transactionDetails1.addProperty("address_line1", "line 1");
+        transactionDetails1.addProperty("address_line2", "line 2");
 
-            JsonObject transactionDetails1 = new JsonObject();
-            transactionDetails1.addProperty("reference", "ref-1");
-            transactionDetails1.addProperty("cardholder_name", "Joe B");
-            transactionDetails1.addProperty("email", "test@email.com");
-            transactionDetails1.addProperty("address_line1", "line 1");
-            transactionDetails1.addProperty("address_line2", "line 2");
+        TransactionEntity transactionToRedact = aTransactionFixture()
+                .withReference("ref-1")
+                .withEmail("test@email.com")
+                .withCardholderName("Joe B")
+                .withTransactionDetails(transactionDetails1.toString())
+                .insert(rule.getJdbi())
+                .toEntity();
 
-            TransactionEntity transactionToRedact = aTransactionFixture()
-                    .withReference("ref-1")
-                    .withEmail("test@email.com")
-                    .withCardholderName("Joe B")
-                    .withTransactionDetails(transactionDetails1.toString())
-                    .insert(rule.getJdbi())
-                    .toEntity();
+        JsonObject transactionDetails2 = new JsonObject();
+        transactionDetails2.addProperty("reference", "ref-2");
+        transactionDetails2.addProperty("cardholder_name", "Jane D");
+        transactionDetails2.addProperty("email", "test2@email.com");
+        TransactionEntity transactionThatShouldNotBeRedacted = aTransactionFixture()
+                .withReference("ref-2")
+                .withEmail("test2@email.com")
+                .withCardholderName("Jane D")
+                .withTransactionDetails(transactionDetails2.toString())
+                .insert(rule.getJdbi())
+                .toEntity();
 
-            JsonObject transactionDetails2 = new JsonObject();
-            transactionDetails2.addProperty("reference", "ref-2");
-            transactionDetails2.addProperty("cardholder_name", "Jane D");
-            transactionDetails2.addProperty("email", "test2@email.com");
-            TransactionEntity transactionThatShouldNotBeRedacted = aTransactionFixture()
-                    .withReference("ref-2")
-                    .withEmail("test2@email.com")
-                    .withCardholderName("Jane D")
-                    .withTransactionDetails(transactionDetails2.toString())
-                    .insert(rule.getJdbi())
-                    .toEntity();
+        transactionDao.redactPIIFromTransaction(transactionToRedact.getExternalId());
 
-            transactionDao.redactPIIFromTransaction(transactionToRedact.getExternalId());
+        TransactionEntity transactionEntityRedacted = transactionDao.findTransactionByExternalId(transactionToRedact.getExternalId()).get();
 
-            TransactionEntity transactionEntityRedacted = transactionDao.findTransactionByExternalId(transactionToRedact.getExternalId()).get();
+        assertThat(transactionEntityRedacted.getReference(), is("<REDACTED>"));
+        assertThat(transactionEntityRedacted.getCardholderName(), is("<REDACTED>"));
+        assertThat(transactionEntityRedacted.getEmail(), is("<REDACTED>"));
 
-            assertThat(transactionEntityRedacted.getReference(), is("<REDACTED>"));
-            assertThat(transactionEntityRedacted.getCardholderName(), is("<REDACTED>"));
-            assertThat(transactionEntityRedacted.getEmail(), is("<REDACTED>"));
+        JsonNode jsonNode = objectMapper.readTree(transactionEntityRedacted.getTransactionDetails());
 
-            JsonNode jsonNode = objectMapper.readTree(transactionEntityRedacted.getTransactionDetails());
+        assertThat(jsonNode.get("reference"), is(Matchers.nullValue()));
+        assertThat(jsonNode.get("cardholder_name"), is(nullValue()));
+        assertThat(jsonNode.get("email"), is(nullValue()));
+        assertThat(jsonNode.get("address_line1").asText(), is("<REDACTED>"));
+        assertThat(jsonNode.get("address_line2").asText(), is("<REDACTED>"));
 
-            assertThat(jsonNode.get("reference"), is(Matchers.nullValue()));
-            assertThat(jsonNode.get("cardholder_name"), is(nullValue()));
-            assertThat(jsonNode.get("email"), is(nullValue()));
-            assertThat(jsonNode.get("address_line1").asText(), is("<REDACTED>"));
-            assertThat(jsonNode.get("address_line2").asText(), is("<REDACTED>"));
-
-            TransactionEntity transactionEntityNotRedacted = transactionDao.findTransactionByExternalId(transactionThatShouldNotBeRedacted.getExternalId()).get();
-            assertThat(transactionEntityNotRedacted.getReference(), is("ref-2"));
-            assertThat(transactionEntityNotRedacted.getCardholderName(), is("Jane D"));
-            assertThat(transactionEntityNotRedacted.getEmail(), is("test2@email.com"));
-        }
-
-        @Test
-        void shouldNotReplaceNonMandatoryFieldsWithARedactedStringWhenBlank() throws JsonProcessingException {
-            JsonObject transactionDetails1 = new JsonObject();
-            transactionDetails1.addProperty("reference", "ref-1");
-
-            TransactionEntity transactionToRedact = aTransactionFixture()
-                    .withReference("ref-1")
-                    .withEmail(null)
-                    .withCardholderName(null)
-                    .withTransactionDetails(transactionDetails1.toString())
-                    .insert(rule.getJdbi())
-                    .toEntity();
-
-            transactionDao.redactPIIFromTransaction(transactionToRedact.getExternalId());
-
-            TransactionEntity transactionEntity = transactionDao.findTransactionByExternalId(transactionToRedact.getExternalId()).get();
-
-            assertThat(transactionEntity.getReference(), is("<REDACTED>"));
-            assertThat(transactionEntity.getCardholderName(), is(nullValue()));
-            assertThat(transactionEntity.getEmail(), is(nullValue()));
-
-            JsonNode jsonNode = objectMapper.readTree(transactionEntity.getTransactionDetails());
-
-            assertThat(jsonNode.get("reference"), is(nullValue()));
-            assertThat(jsonNode.get("cardholder_name"), is(nullValue()));
-            assertThat(jsonNode.get("email"), is(nullValue()));
-            assertThat(jsonNode.get("address_line1"), is(nullValue()));
-            assertThat(jsonNode.get("address_line2"), is(nullValue()));
-        }
+        TransactionEntity transactionEntityNotRedacted = transactionDao.findTransactionByExternalId(transactionThatShouldNotBeRedacted.getExternalId()).get();
+        assertThat(transactionEntityNotRedacted.getReference(), is("ref-2"));
+        assertThat(transactionEntityNotRedacted.getCardholderName(), is("Jane D"));
+        assertThat(transactionEntityNotRedacted.getEmail(), is("test2@email.com"));
     }
 
-    @Nested
-    @DisplayName("CreatedDateOfFirstTransaction")
-    class TestCreatedDateOfFirstTransaction {
+    @Test
+    void redactPIIFromTransaction_shouldNotReplaceNonMandatoryFieldsWithARedactedStringWhenBlank() throws JsonProcessingException {
+        JsonObject transactionDetails1 = new JsonObject();
+        transactionDetails1.addProperty("reference", "ref-1");
 
-        @Test
-        void shouldReturnTheDateOfFirstTransactionCorrectly() {
-            aTransactionFixture().withCreatedDate(parse("2016-01-02T00:00:01Z"))
-                    .insert(rule.getJdbi());
-            aTransactionFixture().withCreatedDate(parse("2019-01-03T00:00:00Z"))
-                    .insert(rule.getJdbi());
-            aTransactionFixture().withCreatedDate(parse("2023-01-03T00:00:00Z"))
-                    .insert(rule.getJdbi());
+        TransactionEntity transactionToRedact = aTransactionFixture()
+                .withReference("ref-1")
+                .withEmail(null)
+                .withCardholderName(null)
+                .withTransactionDetails(transactionDetails1.toString())
+                .insert(rule.getJdbi())
+                .toEntity();
 
-            Optional<ZonedDateTime> mayBeCreatedDateOfFirstTransaction = transactionDao.getCreatedDateOfFirstTransaction();
+        transactionDao.redactPIIFromTransaction(transactionToRedact.getExternalId());
 
-            assertThat(mayBeCreatedDateOfFirstTransaction.isPresent(), is(true));
-            assertThat(mayBeCreatedDateOfFirstTransaction.get().withZoneSameInstant(UTC).toString(), is("2016-01-02T00:00:01Z"));
-        }
+        TransactionEntity transactionEntity = transactionDao.findTransactionByExternalId(transactionToRedact.getExternalId()).get();
 
-        @Test
-        void shouldReturnEmptyOptionalIfThereAreNoTransactions() {
-            Optional<ZonedDateTime> mayBeCreatedDateOfFirstTransaction = transactionDao.getCreatedDateOfFirstTransaction();
+        assertThat(transactionEntity.getReference(), is("<REDACTED>"));
+        assertThat(transactionEntity.getCardholderName(), is(nullValue()));
+        assertThat(transactionEntity.getEmail(), is(nullValue()));
 
-            assertThat(mayBeCreatedDateOfFirstTransaction.isPresent(), is(false));
-        }
+        JsonNode jsonNode = objectMapper.readTree(transactionEntity.getTransactionDetails());
+
+        assertThat(jsonNode.get("reference"), is(nullValue()));
+        assertThat(jsonNode.get("cardholder_name"), is(nullValue()));
+        assertThat(jsonNode.get("email"), is(nullValue()));
+        assertThat(jsonNode.get("address_line1"), is(nullValue()));
+        assertThat(jsonNode.get("address_line2"), is(nullValue()));
+    }
+
+    @Test
+    void getCreatedDateOfFirstTransaction_shouldReturnTheDateOfFirstTransactionCorrectly() {
+        aTransactionFixture().withCreatedDate(parse("2016-01-02T00:00:01Z"))
+                .insert(rule.getJdbi());
+        aTransactionFixture().withCreatedDate(parse("2019-01-03T00:00:00Z"))
+                .insert(rule.getJdbi());
+        aTransactionFixture().withCreatedDate(parse("2023-01-03T00:00:00Z"))
+                .insert(rule.getJdbi());
+
+        Optional<ZonedDateTime> mayBeCreatedDateOfFirstTransaction = transactionDao.getCreatedDateOfFirstTransaction();
+
+        assertThat(mayBeCreatedDateOfFirstTransaction.isPresent(), is(true));
+        assertThat(mayBeCreatedDateOfFirstTransaction.get().withZoneSameInstant(UTC).toString(), is("2016-01-02T00:00:01Z"));
+    }
+
+    @Test
+    void getCreatedDateOfFirstTransaction_shouldReturnEmptyOptionalIfThereAreNoTransactions() {
+        Optional<ZonedDateTime> mayBeCreatedDateOfFirstTransaction = transactionDao.getCreatedDateOfFirstTransaction();
+
+        assertThat(mayBeCreatedDateOfFirstTransaction.isPresent(), is(false));
     }
 }
