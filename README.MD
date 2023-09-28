@@ -60,11 +60,11 @@ and background processing.
 
 ### Expunge/Redact historic data configuration
 
-| Variable                                         | Default  | Purpose                                                                         |
-|--------------------------------------------------|----------|---------------------------------------------------------------------------------|
-| `EXPUNG_AND_REDACT_HISTORICAL_DATA_ENABLED`      | `false`  | Set to true to enable redacting PII from transactions and remove related events |
-| `EXPUNGE_OR_REDACT_DATA_OLDER_THAN_DAYS`         | `2555`   | Minimum age of transactions in days that need to be redacted/expunged           |
-| `EXPUNGE_NO_OF_TRANSACTIONS_PER_TASK_RUN`        | `2500`   | Number of transactions to redact per task run                                   |
+| Variable                                     | Default          | Purpose                                                                         |
+|----------------------------------------------|------------------|---------------------------------------------------------------------------------|
+| `EXPUNGE_AND_REDACT_HISTORICAL_DATA_ENABLED` | `false`          | Set to true to enable redacting PII from transactions and remove related events |
+| `EXPUNGE_OR_REDACT_DATA_OLDER_THAN_DAYS`     | `2555` (7 years) | Minimum age of transactions in days that need to be redacted/expunged           |
+| `EXPUNGE_NO_OF_TRANSACTIONS_PER_TASK_RUN`    | `2500`           | Number of transactions to redact per task run                                   |
 
 
 ### Background processing configuration
