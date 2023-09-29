@@ -477,21 +477,21 @@ class TransactionDaoIT {
 
         @Test
         void shouldReturnTransactionsCorrectlyForDateRangesAndNumberOfTransactions() {
+            TransactionEntity transactionMatchingStartRangeOfSearchAndToExclude = aTransactionFixture()
+                    .withCreatedDate(parse("2015-12-31T00:00:00Z"))
+                    .insert(rule.getJdbi())
+                    .toEntity();
             TransactionEntity transactionToReturnToDelete1 = aTransactionFixture()
                     .withCreatedDate(parse("2016-01-01T00:00:00Z"))
                     .insert(rule.getJdbi())
                     .toEntity();
-            TransactionEntity transactionToReturnToDelete2 = aTransactionFixture()
-                    .withCreatedDate(parse("2016-01-01T01:00:00Z"))
-                    .insert(rule.getJdbi())
-                    .toEntity();
-            TransactionEntity transactionEligibleForSearchButNotReturnedDueToLimit = aTransactionFixture()
-                    .withCreatedDate(parse("2016-01-01T02:00:00Z"))
+            TransactionEntity transactionMatchingEndDateOfSearchAndToReturn = aTransactionFixture()
+                    .withCreatedDate(parse("2016-01-02T00:00:00Z"))
                     .insert(rule.getJdbi())
                     .toEntity();
 
             TransactionEntity transactionToExclude1 = aTransactionFixture()
-                    .withCreatedDate(parse("2016-01-02T00:00:00Z"))
+                    .withCreatedDate(parse("2016-01-02T00:00:01Z"))
                     .insert(rule.getJdbi())
                     .toEntity();
             TransactionEntity transactionToExclude2 = aTransactionFixture()
@@ -513,10 +513,10 @@ class TransactionDaoIT {
             assertThat(transactionsForRedaction.size(), is(2));
             assertThat(transactionIdsReturned, hasItems(
                     transactionToReturnToDelete1.getExternalId(),
-                    transactionToReturnToDelete2.getExternalId())
+                    transactionMatchingEndDateOfSearchAndToReturn.getExternalId())
             );
             assertThat(transactionIdsReturned, not(hasItems(
-                    transactionEligibleForSearchButNotReturnedDueToLimit.getExternalId(),
+                    transactionMatchingStartRangeOfSearchAndToExclude.getExternalId(),
                     transactionToExclude1.getExternalId(),
                     transactionToExclude2.getExternalId())
             ));

@@ -13,12 +13,12 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import javax.inject.Inject;
 import java.time.Clock;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.min;
 import static java.time.ZoneOffset.UTC;
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Optional.ofNullable;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 import static uk.gov.service.payments.logging.LoggingKeys.RESOURCE_EXTERNAL_ID;
@@ -110,6 +110,7 @@ public class ExpungeOrRedactService {
             createdDateOfLastProcessedTransaction = transactionsForRedaction
                     .stream().map(TransactionEntity::getCreatedDate)
                     .max(ZonedDateTime::compareTo).get();
+            transactionRedactionInfoDao.update(createdDateOfLastProcessedTransaction);
         }
 
         LOGGER.info("Completed redacting PII from transactions",
@@ -118,27 +119,24 @@ public class ExpungeOrRedactService {
 
         noOfTransactionsRedactedMetric.observe(noOfTxsProcessed);
         noOfEventsDeletedRedactedMetric.observe(noOfEventsDeleted);
-
-        if (noOfTxsProcessed > 0) {
-            transactionRedactionInfoDao.update(createdDateOfLastProcessedTransaction);
-        }
     }
 
     private ZonedDateTime getRedactTransactionsUpToDate() {
         return clock.instant()
-                .minus(expungeOrRedactHistoricalDataConfig.getExpungeOrRedactDataOlderThanDays(), ChronoUnit.DAYS)
+                .minus(expungeOrRedactHistoricalDataConfig.getExpungeOrRedactDataOlderThanDays(), DAYS)
                 .atZone(UTC);
     }
 
     private ZonedDateTime getCreatedDateOfLastProcessedTransaction() {
         return ofNullable(transactionRedactionInfoDao.getCreatedDateOfLastProcessedTransaction())
-                .orElseGet(this::getCreatedDateOfFirstTransaction)
+                .orElseGet(this::getDayBeforeCreatedDateOfFirstTransaction)
                 .withZoneSameInstant(UTC);
     }
 
-    private ZonedDateTime getCreatedDateOfFirstTransaction() {
+    private ZonedDateTime getDayBeforeCreatedDateOfFirstTransaction() {
         ZonedDateTime dateOfFirstTransaction = transactionDao.getCreatedDateOfFirstTransaction()
-                .orElseGet(this::getRedactTransactionsUpToDate);
+                .orElseGet(this::getRedactTransactionsUpToDate)
+                .minus(1, DAYS);
 
         transactionRedactionInfoDao.insert(dateOfFirstTransaction);
 

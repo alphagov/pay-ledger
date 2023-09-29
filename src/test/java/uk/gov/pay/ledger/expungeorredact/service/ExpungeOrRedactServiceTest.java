@@ -22,6 +22,8 @@ import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -215,12 +217,13 @@ class ExpungeOrRedactServiceTest {
         when(mockExpungeOrRedactHistoricalDataConfig.getExpungeOrRedactDataOlderThanDays()).thenReturn(1);
 
         when(mockTransactionRedactionInfoDao.getCreatedDateOfLastProcessedTransaction()).thenReturn(null);
-        when(mockTransactionDao.getCreatedDateOfFirstTransaction()).thenReturn(Optional.of(parse("2020-01-01T10:15:30Z")));
+        ZonedDateTime dateOfFirstTransaction = parse("2020-01-01T10:15:30Z");
+        when(mockTransactionDao.getCreatedDateOfFirstTransaction()).thenReturn(Optional.of(dateOfFirstTransaction));
 
         expungeOrRedactService.redactOrDeleteData();
 
         verify(mockTransactionDao).getCreatedDateOfFirstTransaction();
-        verify(mockTransactionRedactionInfoDao).insert(parse("2020-01-01T10:15:30Z"));
+        verify(mockTransactionRedactionInfoDao).insert(dateOfFirstTransaction.minus(1, DAYS));
     }
 
     @Test
@@ -235,7 +238,7 @@ class ExpungeOrRedactServiceTest {
         expungeOrRedactService.redactOrDeleteData();
 
         verify(mockTransactionDao).getCreatedDateOfFirstTransaction();
-        verify(mockTransactionRedactionInfoDao).insert(parse("2022-03-02T10:15:30Z"));
+        verify(mockTransactionRedactionInfoDao).insert(parse("2022-03-01T10:15:30Z"));
     }
 
 }
