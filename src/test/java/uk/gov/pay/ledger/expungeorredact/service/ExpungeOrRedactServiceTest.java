@@ -107,6 +107,9 @@ class ExpungeOrRedactServiceTest {
 
     @Test
     void shouldNotRedactPIIFromTransactionsWhenNoTransactionsFound() {
+        Double initialNoOfTxsRedactedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted_sum")).orElse(0.0);
+        Double initialNoOfTxEventsRemovedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted_sum")).orElse(0.0);
+
         when(mockExpungeOrRedactHistoricalDataConfig.isExpungeAndRedactHistoricalDataEnabled()).thenReturn(true);
         when(mockExpungeOrRedactHistoricalDataConfig.getNoOfTransactionsToRedact()).thenReturn(100);
         when(mockExpungeOrRedactHistoricalDataConfig.getExpungeOrRedactDataOlderThanDays()).thenReturn(1);
@@ -127,10 +130,19 @@ class ExpungeOrRedactServiceTest {
         verifyNoMoreInteractions(mockTransactionDao);
         verifyNoMoreInteractions(mockTransactionRedactionInfoDao);
         verifyNoInteractions(mockEventDao);
+
+        Double noOfTxsRedactedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted_sum")).orElse(0.0);
+        assertThat(noOfTxsRedactedMetric, is(initialNoOfTxsRedactedMetric));
+
+        Double noOfEventsDeletedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted_sum")).orElse(0.0);
+        assertThat(noOfEventsDeletedMetric, is(initialNoOfTxEventsRemovedMetric));
     }
 
     @Test
     void shouldRedactPIIFromTransactionsAndDeleteEvents() {
+        Double initialNoOfTxsRedactedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted_sum")).orElse(0.0);
+        Double initialNoOfTxEventsRemovedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted_sum")).orElse(0.0);
+
         when(mockExpungeOrRedactHistoricalDataConfig.isExpungeAndRedactHistoricalDataEnabled()).thenReturn(true);
         when(mockExpungeOrRedactHistoricalDataConfig.getNoOfTransactionsToRedact()).thenReturn(100);
         when(mockExpungeOrRedactHistoricalDataConfig.getExpungeOrRedactDataOlderThanDays()).thenReturn(1);
@@ -140,8 +152,10 @@ class ExpungeOrRedactServiceTest {
         TransactionEntity transactionEntity1 = aTransactionFixture().toEntity();
         TransactionEntity transactionEntity2 = aTransactionFixture().toEntity();
         when(mockTransactionDao.findTransactionsForRedaction(any(), any(), anyInt())).thenReturn(
-                List.of(transactionEntity1, transactionEntity2)
+                List.of(transactionEntity1, transactionEntity2),
+                List.of()
         );
+        when(mockEventDao.deleteEventsForTransactions(any())).thenReturn(20);
 
         expungeOrRedactService.redactOrDeleteData();
 
@@ -156,6 +170,12 @@ class ExpungeOrRedactServiceTest {
 
         verifyNoMoreInteractions(mockTransactionDao);
         verifyNoMoreInteractions(mockTransactionRedactionInfoDao);
+
+        Double noOfTxsRedactedMetric = collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted_sum");
+        assertThat(noOfTxsRedactedMetric, is(initialNoOfTxsRedactedMetric + 2));
+
+        Double noOfEventsDeletedMetric = collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted_sum");
+        assertThat(noOfEventsDeletedMetric, is(initialNoOfTxEventsRemovedMetric + 20));
     }
 
     @Test

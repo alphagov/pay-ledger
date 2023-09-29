@@ -37,6 +37,17 @@ public class ExpungeOrRedactService {
     private static final Histogram duration = Histogram.build()
             .name("expunge_and_redact_historical_data_job_duration_seconds")
             .help("Duration of expunge and redact historical data job in seconds")
+            .unit("seconds")
+            .register();
+
+    private static final Histogram noOfTransactionsRedactedMetric = Histogram.build()
+            .name("expunge_and_redact_historical_data_job_no_of_transactions_redacted")
+            .help("Number of transactions redacted")
+            .register();
+
+    private static final Histogram noOfEventsDeletedRedactedMetric = Histogram.build()
+            .name("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted")
+            .help("Number of transaction events deleted")
             .register();
 
     @Inject
@@ -85,7 +96,7 @@ public class ExpungeOrRedactService {
 
             transactionsForRedaction.forEach(transactionEntity -> {
                 transactionDao.redactPIIFromTransaction(transactionEntity.getExternalId());
-                LOGGER.info("Redacted PII from transaction [{}]", kv(RESOURCE_EXTERNAL_ID, transactionEntity.getExternalId()));
+                LOGGER.info("Redacted PII from transaction", kv(RESOURCE_EXTERNAL_ID, transactionEntity.getExternalId()));
             });
 
             List<String> transactionExternalIds = transactionsForRedaction
@@ -94,16 +105,19 @@ public class ExpungeOrRedactService {
                     .collect(Collectors.toList());
 
             noOfEventsDeleted += eventDao.deleteEventsForTransactions(transactionExternalIds);
-            noOfTxsProcessed += noOfTxsToFetch;
+            noOfTxsProcessed += transactionsForRedaction.size();
 
             createdDateOfLastProcessedTransaction = transactionsForRedaction
                     .stream().map(TransactionEntity::getCreatedDate)
                     .max(ZonedDateTime::compareTo).get();
         }
 
-        LOGGER.info("Redacted PII from transactions [{}, {}]",
+        LOGGER.info("Completed redacting PII from transactions",
                 kv("no_of_transactions_redacted", noOfTxsProcessed),
                 kv("no_of_events_deleted", noOfEventsDeleted));
+
+        noOfTransactionsRedactedMetric.observe(noOfTxsProcessed);
+        noOfEventsDeletedRedactedMetric.observe(noOfEventsDeleted);
 
         if (noOfTxsProcessed > 0) {
             transactionRedactionInfoDao.update(createdDateOfLastProcessedTransaction);

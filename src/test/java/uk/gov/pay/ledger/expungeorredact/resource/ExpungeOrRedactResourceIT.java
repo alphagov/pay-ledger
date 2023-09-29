@@ -135,9 +135,10 @@ class ExpungeOrRedactResourceIT {
         Arrays.stream(transactionEntities)
                 .forEach(transactionEntity -> {
                     Map<String, Object> transaction = databaseTestHelper.getTransaction(transactionEntity.getExternalId());
-                    assertThat(transaction.get("reference"), is("<REDACTED>"));
-                    assertThat(transaction.get("cardholder_name"), is("<REDACTED>"));
-                    assertThat(transaction.get("email"), is("<REDACTED>"));
+                    assertThat(transaction.get("reference"), is("<DELETED>"));
+                    assertThat(transaction.get("cardholder_name"), is("<DELETED>"));
+                    assertThat(transaction.get("email"), is("<DELETED>"));
+                    assertThat(transaction.get("description"), is("<DELETED>"));
 
                     List<Map<String, Object>> event = databaseTestHelper.getEventsByExternalId(transactionEntity.getExternalId());
                     assertThat(event.size(), is(0));
