@@ -86,7 +86,7 @@ public class TransactionDao {
 
     private static final String SEARCH_TRANSACTIONS_FOR_REDACTION =
             "SELECT t.* FROM transaction t " +
-                    " WHERE t.created_date >= :dateOfLastProcessedTransaction AND t.created_date < :redactTransactionsUpToDate  " +
+                    " WHERE t.created_date > :dateOfLastProcessedTransaction AND t.created_date <= :redactTransactionsUpToDate  " +
                     "ORDER BY t.created_date ASC LIMIT :limit";
 
     private static final String COUNT_TRANSACTIONS = "SELECT count(:distinctClauseWhenSearchingByMetadataValue t.id) " +
