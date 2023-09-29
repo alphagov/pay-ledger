@@ -129,11 +129,11 @@ public class ExpungeOrRedactService {
 
     private ZonedDateTime getCreatedDateOfLastProcessedTransaction() {
         return ofNullable(transactionRedactionInfoDao.getCreatedDateOfLastProcessedTransaction())
-                .orElseGet(this::getDateBeforeCreatedDateOfFirstTransaction)
+                .orElseGet(this::getDayBeforeCreatedDateOfFirstTransaction)
                 .withZoneSameInstant(UTC);
     }
 
-    private ZonedDateTime getDateBeforeCreatedDateOfFirstTransaction() {
+    private ZonedDateTime getDayBeforeCreatedDateOfFirstTransaction() {
         ZonedDateTime dateOfFirstTransaction = transactionDao.getCreatedDateOfFirstTransaction()
                 .orElseGet(this::getRedactTransactionsUpToDate)
                 .minus(1, DAYS);
