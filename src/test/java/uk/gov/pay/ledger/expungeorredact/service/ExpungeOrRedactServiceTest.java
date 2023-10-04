@@ -109,8 +109,8 @@ class ExpungeOrRedactServiceTest {
 
     @Test
     void shouldNotRedactPIIFromTransactionsWhenNoTransactionsFound() {
-        Double initialNoOfTxsRedactedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted_sum")).orElse(0.0);
-        Double initialNoOfTxEventsRemovedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted_sum")).orElse(0.0);
+        Double initialNoOfTxsRedactedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted")).orElse(0.0);
+        Double initialNoOfTxEventsRemovedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted")).orElse(0.0);
 
         when(mockExpungeOrRedactHistoricalDataConfig.isExpungeAndRedactHistoricalDataEnabled()).thenReturn(true);
         when(mockExpungeOrRedactHistoricalDataConfig.getNoOfTransactionsToRedact()).thenReturn(100);
@@ -133,17 +133,17 @@ class ExpungeOrRedactServiceTest {
         verifyNoMoreInteractions(mockTransactionRedactionInfoDao);
         verifyNoInteractions(mockEventDao);
 
-        Double noOfTxsRedactedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted_sum")).orElse(0.0);
+        Double noOfTxsRedactedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted")).orElse(0.0);
         assertThat(noOfTxsRedactedMetric, is(initialNoOfTxsRedactedMetric));
 
-        Double noOfEventsDeletedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted_sum")).orElse(0.0);
+        Double noOfEventsDeletedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted")).orElse(0.0);
         assertThat(noOfEventsDeletedMetric, is(initialNoOfTxEventsRemovedMetric));
     }
 
     @Test
     void shouldRedactPIIFromTransactionsAndDeleteEvents() {
-        Double initialNoOfTxsRedactedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted_sum")).orElse(0.0);
-        Double initialNoOfTxEventsRemovedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted_sum")).orElse(0.0);
+        Double initialNoOfTxsRedactedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted")).orElse(0.0);
+        Double initialNoOfTxEventsRemovedMetric = Optional.ofNullable(collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted")).orElse(0.0);
 
         when(mockExpungeOrRedactHistoricalDataConfig.isExpungeAndRedactHistoricalDataEnabled()).thenReturn(true);
         when(mockExpungeOrRedactHistoricalDataConfig.getNoOfTransactionsToRedact()).thenReturn(100);
@@ -173,10 +173,10 @@ class ExpungeOrRedactServiceTest {
         verifyNoMoreInteractions(mockTransactionDao);
         verifyNoMoreInteractions(mockTransactionRedactionInfoDao);
 
-        Double noOfTxsRedactedMetric = collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted_sum");
+        Double noOfTxsRedactedMetric = collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transactions_redacted");
         assertThat(noOfTxsRedactedMetric, is(initialNoOfTxsRedactedMetric + 2));
 
-        Double noOfEventsDeletedMetric = collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted_sum");
+        Double noOfEventsDeletedMetric = collectorRegistry.getSampleValue("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted");
         assertThat(noOfEventsDeletedMetric, is(initialNoOfTxEventsRemovedMetric + 20));
     }
 
