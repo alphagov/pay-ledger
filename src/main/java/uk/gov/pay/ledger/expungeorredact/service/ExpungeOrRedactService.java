@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.expungeorredact.service;
 
+import io.prometheus.client.Gauge;
 import io.prometheus.client.Histogram;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +41,12 @@ public class ExpungeOrRedactService {
             .unit("seconds")
             .register();
 
-    private static final Histogram noOfTransactionsRedactedMetric = Histogram.build()
+    private static final Gauge noOfTransactionsRedactedMetric = Gauge.build()
             .name("expunge_and_redact_historical_data_job_no_of_transactions_redacted")
             .help("Number of transactions redacted")
             .register();
 
-    private static final Histogram noOfEventsDeletedRedactedMetric = Histogram.build()
+    private static final Gauge noOfEventsDeletedRedactedMetric = Gauge.build()
             .name("expunge_and_redact_historical_data_job_no_of_transaction_events_deleted")
             .help("Number of transaction events deleted")
             .register();
@@ -117,8 +118,8 @@ public class ExpungeOrRedactService {
                 kv("no_of_transactions_redacted", noOfTxsProcessed),
                 kv("no_of_events_deleted", noOfEventsDeleted));
 
-        noOfTransactionsRedactedMetric.observe(noOfTxsProcessed);
-        noOfEventsDeletedRedactedMetric.observe(noOfEventsDeleted);
+        noOfTransactionsRedactedMetric.set(noOfTxsProcessed);
+        noOfEventsDeletedRedactedMetric.set(noOfEventsDeleted);
     }
 
     private ZonedDateTime getRedactTransactionsUpToDate() {
