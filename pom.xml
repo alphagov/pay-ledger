@@ -11,7 +11,7 @@
         <mainClass>uk.gov.pay.ledger.app.LedgerApp</mainClass>
 
         <dropwizard.version>2.1.9</dropwizard.version>
-        <jackson.version>2.15.2</jackson.version>
+        <jackson.version>2.15.3</jackson.version>
         <testcontainers.version>1.19.1</testcontainers.version>
         <postgresql.version>42.6.0</postgresql.version>
         <pay-java-commons.version>1.0.20231017121422</pay-java-commons.version>
