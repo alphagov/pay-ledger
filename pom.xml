@@ -20,7 +20,7 @@
         <surefire.version>3.2.1</surefire.version>
         <guice.version>5.1.0</guice.version>
         <rest-assured.version>5.3.2</rest-assured.version>
-        <swaggger-version>2.2.17</swaggger-version>
+        <swaggger-version>2.2.18</swaggger-version>
         <PACT_BROKER_URL/>
         <PACT_BROKER_USERNAME/>
         <PACT_BROKER_PASSWORD/>
