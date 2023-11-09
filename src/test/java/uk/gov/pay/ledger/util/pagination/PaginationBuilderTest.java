@@ -160,7 +160,6 @@ public class PaginationBuilderTest {
                     .withTotalCount(120L)
                     .withCount(9L)
                     .buildResponse();
-            System.out.println(builder.getSelfLink().toString());
             assertThat(builder.getSelfLink().toString().contains(value.toString()), is(true));
             assertDoesNotThrow(builder::getSelfLink);
         }
