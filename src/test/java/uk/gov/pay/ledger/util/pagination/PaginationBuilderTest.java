@@ -13,10 +13,13 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.MessageFormat;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ExtendWith(MockitoExtension.class)
 public class PaginationBuilderTest {
@@ -137,5 +140,29 @@ public class PaginationBuilderTest {
                 .withCount(9L);
         builder = builder.buildResponse();
         assertThat(builder.getNextLink(), is(nullValue()));
+    }
+    
+    @Test
+    public void shouldGenerateSelfLinkWithOnlyPrescribedSpecialCharactersURLEncoded(){
+        Map<String, Object> valuesForReferenceParameter = Map.of(
+                "{ref", "reference=%7Bref",
+                "[ref", "reference=%5Bref",
+                "r{e{f}{", "reference=r%7Be%7Bf%7D%7B",
+                "ref=", "reference=ref=",
+                "ref&", "reference=ref&",
+                "ref@", "reference=ref%40"
+        );
+        for (Map.Entry<String, Object> entry : valuesForReferenceParameter.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            transactionSearchParams.setReference(key);
+            PaginationBuilder builder = new PaginationBuilder(transactionSearchParams, mockedUriInfo)
+                    .withTotalCount(120L)
+                    .withCount(9L)
+                    .buildResponse();
+            System.out.println(builder.getSelfLink().toString());
+            assertThat(builder.getSelfLink().toString().contains(value.toString()), is(true));
+            assertDoesNotThrow(builder::getSelfLink);
+        }
     }
 }

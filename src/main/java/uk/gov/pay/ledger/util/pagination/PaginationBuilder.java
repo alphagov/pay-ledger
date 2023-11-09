@@ -7,6 +7,8 @@ import uk.gov.pay.ledger.common.search.SearchParams;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -122,6 +124,7 @@ public class PaginationBuilder {
     }
 
     private String uriWithParams(String queryParams) {
+        queryParams = URLEncoder.encode(queryParams, StandardCharsets.UTF_8).replace("%3D", "=").replace("%26","&");
         URI uri = uriInfo.getBaseUriBuilder()
                 .replacePath(uriInfo.getPath())
                 .replaceQuery(queryParams)
