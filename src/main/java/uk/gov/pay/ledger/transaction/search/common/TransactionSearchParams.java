@@ -506,9 +506,8 @@ public class TransactionSearchParams extends SearchParams {
         }
         queries.add("page=" + forPage);
         queries.add("display_size=" + getDisplaySize());
-
-
-        return String.join("&", queries);
+        
+        return encodeParam(String.join("&", queries));
     }
 
     public Long getOffset() {

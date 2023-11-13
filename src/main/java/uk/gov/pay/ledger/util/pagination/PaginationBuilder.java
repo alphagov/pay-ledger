@@ -124,7 +124,6 @@ public class PaginationBuilder {
     }
 
     private String uriWithParams(String queryParams) {
-        queryParams = URLEncoder.encode(queryParams, StandardCharsets.UTF_8).replace("%3D", "=").replace("%26","&");
         URI uri = uriInfo.getBaseUriBuilder()
                 .replacePath(uriInfo.getPath())
                 .replaceQuery(queryParams)

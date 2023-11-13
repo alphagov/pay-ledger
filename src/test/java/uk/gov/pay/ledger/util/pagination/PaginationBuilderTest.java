@@ -3,6 +3,8 @@ package uk.gov.pay.ledger.util.pagination;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +22,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class PaginationBuilderTest {
@@ -142,26 +145,16 @@ public class PaginationBuilderTest {
         assertThat(builder.getNextLink(), is(nullValue()));
     }
     
-    @Test
-    public void shouldGenerateSelfLinkWithOnlyPrescribedSpecialCharactersURLEncoded(){
-        Map<String, Object> valuesForReferenceParameter = Map.of(
-                "{ref", "reference=%7Bref",
-                "[ref", "reference=%5Bref",
-                "r{e{f}{", "reference=r%7Be%7Bf%7D%7B",
-                "ref=", "reference=ref=",
-                "ref&", "reference=ref&",
-                "ref@", "reference=ref%40"
-        );
-        for (Map.Entry<String, Object> entry : valuesForReferenceParameter.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            transactionSearchParams.setReference(key);
-            PaginationBuilder builder = new PaginationBuilder(transactionSearchParams, mockedUriInfo)
-                    .withTotalCount(120L)
-                    .withCount(9L)
-                    .buildResponse();
-            assertThat(builder.getSelfLink().toString().contains(value.toString()), is(true));
-            assertDoesNotThrow(builder::getSelfLink);
-        }
+    @ParameterizedTest
+    @CsvSource({"{foo , %7Bfoo", "[foo , %5Bfoo", "f{o{o}{ , f%7Bo%7Bo%7D%7B", "foo&, foo&", "foo@ , foo%40", "foo=bar&baz=quux , foo=bar&baz=quux", "foo bar , foo+bar"})
+    public void shouldGenerateSelfLinkWithOnlyPrescribedSpecialCharactersURLEncoded(String key, String value){
+        transactionSearchParams.setReference(key);
+        PaginationBuilder builder = new PaginationBuilder(transactionSearchParams, mockedUriInfo)
+                .withTotalCount(120L)
+                .withCount(9L)
+                .buildResponse();
+        String expectedSelfLink = String.format("reference=%s&page=1&display_size=500'}", value);
+        assertEquals(builder.getSelfLink().toString().substring(42), expectedSelfLink);
+        assertDoesNotThrow(builder::getSelfLink);
     }
 }

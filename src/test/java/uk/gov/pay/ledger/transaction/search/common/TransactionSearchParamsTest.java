@@ -2,6 +2,8 @@ package uk.gov.pay.ledger.transaction.search.common;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -132,9 +134,9 @@ public class TransactionSearchParamsTest {
     }
 
     @Test
-    public void getsQueryParamStringWhenNotEmptyFromDate() {
+    public void getsURLEncodedQueryParamStringWhenNotEmptyFromDate() {
         transactionSearchParams.setFromDate("2018-09-22T10:14:16.067Z");
-        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("from_date=2018-09-22T10:14:16.067Z"));
+        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("from_date=2018-09-22T10%3A14%3A16.067Z"));
     }
 
     @Test
@@ -144,9 +146,9 @@ public class TransactionSearchParamsTest {
     }
 
     @Test
-    public void getsQueryParamStringWhenNotEmptyToDate() {
+    public void getsURLEncodedQueryParamStringWhenNotEmptyToDate() {
         transactionSearchParams.setToDate("2018-09-22T10:14:16.067Z");
-        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("to_date=2018-09-22T10:14:16.067Z"));
+        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("to_date=2018-09-22T10%3A14%3A16.067Z"));
     }
 
     @Test
@@ -169,5 +171,12 @@ public class TransactionSearchParamsTest {
         transactionSearchParams.setToSettledDate("2020-09-26");
         assertThat(transactionSearchParams.getQueryMap().get("to_settled_date"), is(ZonedDateTime.parse("2020-09-27T00:00:00.000Z")));
         assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("to_settled_date=2020-09-26"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"{foo , %7Bfoo", "[foo , %5Bfoo", "f{o{o}{ , f%7Bo%7Bo%7D%7B", "foo&, foo&", "foo@ , foo%40", "foo=bar&baz=quux , foo=bar&baz=quux", "foo bar , foo+bar"})
+    public void shouldUrlEncodeOnlyPrescribedSpecialCharactersOnly(String key, String value){
+        transactionSearchParams.setReference(key);
+        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString(value));
     }
 }
