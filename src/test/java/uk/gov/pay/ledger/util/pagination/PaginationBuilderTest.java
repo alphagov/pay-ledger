@@ -146,7 +146,7 @@ public class PaginationBuilderTest {
     }
     
     @ParameterizedTest
-    @CsvSource({"{foo , %7Bfoo", "[foo , %5Bfoo", "f{o{o}{ , f%7Bo%7Bo%7D%7B", "foo&, foo&", "foo@ , foo%40", "foo=bar&baz=quux , foo=bar&baz=quux", "foo bar , foo+bar"})
+    @CsvSource({"?, %3F", "{ , %7B", "[ , %5B", "f{o{o}{ , f%7Bo%7Bo%7D%7B", "foo&, foo&", "foo@ , foo%40", "foo@@ , foo%40%40", "foo=bar&baz=quux , foo=bar&baz=quux", "foo bar , foo+bar"})
     public void shouldGenerateSelfLinkWithOnlyPrescribedSpecialCharactersURLEncoded(String key, String value){
         transactionSearchParams.setReference(key);
         PaginationBuilder builder = new PaginationBuilder(transactionSearchParams, mockedUriInfo)

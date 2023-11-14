@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -174,9 +175,10 @@ public class TransactionSearchParamsTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"{foo , %7Bfoo", "[foo , %5Bfoo", "f{o{o}{ , f%7Bo%7Bo%7D%7B", "foo&, foo&", "foo@ , foo%40", "foo=bar&baz=quux , foo=bar&baz=quux", "foo bar , foo+bar"})
+    @CsvSource({"?, %3F", "{ , %7B", "[ , %5B", "f{o{o}{ , f%7Bo%7Bo%7D%7B", "foo&, foo&", "foo@ , foo%40", "foo@@ , foo%40%40", "foo=bar&baz=quux , foo=bar&baz=quux", "foo bar , foo+bar"})
     public void shouldUrlEncodeOnlyPrescribedSpecialCharactersOnly(String key, String value){
         transactionSearchParams.setReference(key);
-        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString(value));
+        String expectedSelfLink = String.format("reference=%s&page=1&display_size=500", value);
+        Assertions.assertEquals(transactionSearchParams.buildQueryParamString(1L), expectedSelfLink);
     }
 }
