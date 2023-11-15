@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,6 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TransactionSearchParamsTest {
 
@@ -175,10 +175,19 @@ public class TransactionSearchParamsTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"?, %3F", "{ , %7B", "[ , %5B", "f{o{o}{ , f%7Bo%7Bo%7D%7B", "foo&, foo&", "foo@ , foo%40", "foo@@ , foo%40%40", "foo=bar&baz=quux , foo=bar&baz=quux", "foo bar , foo+bar"})
+    @CsvSource({"?, %3F", 
+            "{ , %7B", 
+            "[ , %5B", 
+            "f{o{o}{ , f%7Bo%7Bo%7D%7B", 
+            "foo&, foo%26", 
+            "foo@ , foo%40", 
+            "foo@@ , foo%40%40", 
+            "foo=bar&baz=quux , foo%3Dbar%26baz%3Dquux", 
+            "foo bar , foo+bar"
+    })
     public void shouldUrlEncodeOnlyPrescribedSpecialCharactersOnly(String key, String value){
         transactionSearchParams.setReference(key);
-        String expectedSelfLink = String.format("reference=%s&page=1&display_size=500", value);
-        Assertions.assertEquals(transactionSearchParams.buildQueryParamString(1L), expectedSelfLink);
+        String expectedSelfLink = "reference=" + value + "&page=1&display_size=500";
+        assertEquals(transactionSearchParams.buildQueryParamString(1L), expectedSelfLink);
     }
 }

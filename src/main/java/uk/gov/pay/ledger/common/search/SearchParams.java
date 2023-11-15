@@ -20,8 +20,4 @@ public abstract class SearchParams {
     protected boolean isSet(CommaDelimitedSetParameter commaDelimitedSetParameter) {
         return commaDelimitedSetParameter != null && commaDelimitedSetParameter.isNotEmpty();
     }
-
-    public String encodeParam(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("%3D", "=").replace("%26","&");
-    }
 }

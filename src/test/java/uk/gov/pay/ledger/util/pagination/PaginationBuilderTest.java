@@ -3,8 +3,6 @@ package uk.gov.pay.ledger.util.pagination;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,14 +13,10 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.MessageFormat;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class PaginationBuilderTest {
@@ -143,18 +137,5 @@ public class PaginationBuilderTest {
                 .withCount(9L);
         builder = builder.buildResponse();
         assertThat(builder.getNextLink(), is(nullValue()));
-    }
-    
-    @ParameterizedTest
-    @CsvSource({"?, %3F", "{ , %7B", "[ , %5B", "f{o{o}{ , f%7Bo%7Bo%7D%7B", "foo&, foo&", "foo@ , foo%40", "foo@@ , foo%40%40", "foo=bar&baz=quux , foo=bar&baz=quux", "foo bar , foo+bar"})
-    public void shouldGenerateSelfLinkWithOnlyPrescribedSpecialCharactersURLEncoded(String key, String value){
-        transactionSearchParams.setReference(key);
-        PaginationBuilder builder = new PaginationBuilder(transactionSearchParams, mockedUriInfo)
-                .withTotalCount(120L)
-                .withCount(9L)
-                .buildResponse();
-        String expectedSelfLink = String.format("reference=%s&page=1&display_size=500'}", value);
-        assertEquals(builder.getSelfLink().toString().substring(42), expectedSelfLink);
-        assertDoesNotThrow(builder::getSelfLink);
     }
 }

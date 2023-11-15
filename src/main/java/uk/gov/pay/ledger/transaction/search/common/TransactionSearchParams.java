@@ -9,6 +9,8 @@ import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -447,67 +449,65 @@ public class TransactionSearchParams extends SearchParams {
         List<String> queries = new ArrayList<>();
 
         if (accountIds != null && !accountIds.isEmpty()) {
-            queries.add(GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + String.join(",", accountIds));
+            queries.add(GATEWAY_ACCOUNT_EXTERNAL_FIELD + "=" + URLEncoder.encode(String.join(",", accountIds), StandardCharsets.UTF_8));
         }
         if (isNotBlank(fromDate)) {
-            queries.add(FROM_DATE_FIELD + "=" + fromDate);
+            queries.add(FROM_DATE_FIELD + "=" + URLEncoder.encode(fromDate, StandardCharsets.UTF_8));
         }
         if (isNotBlank(toDate)) {
-            queries.add(TO_DATE_FIELD + "=" + toDate);
+            queries.add(TO_DATE_FIELD + "=" + URLEncoder.encode(toDate, StandardCharsets.UTF_8));
         }
-
         if (isNotBlank(email)) {
-            queries.add(EMAIL_FIELD + "=" + email);
+            queries.add(EMAIL_FIELD + "=" + URLEncoder.encode(email, StandardCharsets.UTF_8));
         }
         if (isNotBlank(reference)) {
-            queries.add(REFERENCE_FIELD + "=" + reference);
+            queries.add(REFERENCE_FIELD + "=" + URLEncoder.encode(reference, StandardCharsets.UTF_8));
         }
         if (isNotBlank(cardHolderName)) {
-            queries.add(CARDHOLDER_NAME_FIELD + "=" + cardHolderName);
+            queries.add(CARDHOLDER_NAME_FIELD + "=" + URLEncoder.encode(cardHolderName, StandardCharsets.UTF_8));
         }
         if (isNotBlank(firstDigitsCardNumber)) {
-            queries.add(FIRST_DIGITS_CARD_NUMBER_FIELD + "=" + firstDigitsCardNumber);
+            queries.add(FIRST_DIGITS_CARD_NUMBER_FIELD + "=" + URLEncoder.encode(firstDigitsCardNumber, StandardCharsets.UTF_8));
         }
         if (isNotBlank(lastDigitsCardNumber)) {
-            queries.add(LAST_DIGITS_CARD_NUMBER_FIELD + "=" + lastDigitsCardNumber);
+            queries.add(LAST_DIGITS_CARD_NUMBER_FIELD + "=" + URLEncoder.encode(lastDigitsCardNumber, StandardCharsets.UTF_8));
         }
         if (isSet(paymentStates)) {
-            queries.add(PAYMENT_STATES_FIELD + "=" + paymentStates.getRawString());
+            queries.add(PAYMENT_STATES_FIELD + "=" + URLEncoder.encode(paymentStates.getRawString(), StandardCharsets.UTF_8));
         }
         if (refundStates != null && refundStates.isNotEmpty()) {
-            queries.add(REFUND_STATES_FIELD + "=" + refundStates.getRawString());
+            queries.add(REFUND_STATES_FIELD + "=" + URLEncoder.encode(refundStates.getRawString(), StandardCharsets.UTF_8));
         }
         if (isSet(disputeStates)) {
-            queries.add(DISPUTE_STATES_FIELD + "=" + disputeStates.getRawString());
+            queries.add(DISPUTE_STATES_FIELD + "=" + URLEncoder.encode(disputeStates.getRawString(), StandardCharsets.UTF_8));
         }
         if (cardBrands != null && cardBrands.isNotEmpty()) {
-            queries.add(CARD_BRAND_FIELD + "=" + cardBrands.getRawString());
+            queries.add(CARD_BRAND_FIELD + "=" + URLEncoder.encode(cardBrands.getRawString(), StandardCharsets.UTF_8));
         }
         if (isNotBlank(state)) {
-            queries.add(STATE_FIELD + "=" + state);
+            queries.add(STATE_FIELD + "=" + URLEncoder.encode(state, StandardCharsets.UTF_8));
         }
         if (transactionType != null) {
-            queries.add(TRANSACTION_TYPE_FIELD + "=" + transactionType);
+            queries.add(TRANSACTION_TYPE_FIELD + "=" + URLEncoder.encode(String.valueOf(transactionType), StandardCharsets.UTF_8) );
         }
         if (isNotBlank(gatewayPayoutId)) {
-            queries.add(GATEWAY_PAYOUT_ID + "=" + gatewayPayoutId);
+            queries.add(GATEWAY_PAYOUT_ID + "=" + URLEncoder.encode(gatewayPayoutId, StandardCharsets.UTF_8));
         }
         if (isNotBlank(fromSettledDate)) {
-            queries.add(FROM_SETTLED_DATE_FIELD + "=" + fromSettledDate);
+            queries.add(FROM_SETTLED_DATE_FIELD + "=" + URLEncoder.encode(fromSettledDate, StandardCharsets.UTF_8));
         }
         if (isNotBlank(toSettledDate)) {
-            queries.add(TO_SETTLED_DATE_FIELD + "=" + toSettledDate);
+            queries.add(TO_SETTLED_DATE_FIELD + "=" + URLEncoder.encode(toSettledDate, StandardCharsets.UTF_8));
         }
         if (isNotBlank(metadataValue)) {
-            queries.add(METADATA_VALUE + "=" + metadataValue);
+            queries.add(METADATA_VALUE + "=" + URLEncoder.encode(metadataValue, StandardCharsets.UTF_8));
         }
         if (isNotBlank(agreementId)) {
-            queries.add(AGREEMENT_ID_FIELD + "=" + agreementId);
+            queries.add(AGREEMENT_ID_FIELD + "=" + URLEncoder.encode(agreementId, StandardCharsets.UTF_8));
         }
         queries.add("page=" + forPage);
         queries.add("display_size=" + getDisplaySize());
-        
-        return encodeParam(String.join("&", queries));
+        return String.join("&", queries);
     }
 
     public Long getOffset() {
