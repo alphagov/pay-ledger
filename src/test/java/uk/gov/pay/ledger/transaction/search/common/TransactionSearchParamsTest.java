@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -129,6 +130,14 @@ public class TransactionSearchParamsTest {
     }
 
     @Test
+    public void getsQueryParamStringWhenNotEmptyWithMultipleUrlEncodedAccountIds(){
+        List<String> accountIds = List.of("1","2","3");
+        transactionSearchParams.setAccountIds(accountIds);
+        String result = "account_id=1%2C2%2C3&page=1&display_size=500";
+        assertEquals(transactionSearchParams.buildQueryParamString(1L), result);
+    }
+
+    @Test
     public void getsEmptyQueryParamStringWhenEmptyFromDate() {
         transactionSearchParams.setFromDate("");
         assertThat(transactionSearchParams.buildQueryParamString(1L), not(containsString("from_date")));
@@ -183,7 +192,8 @@ public class TransactionSearchParamsTest {
             "foo@ , foo%40", 
             "foo@@ , foo%40%40", 
             "foo=bar&baz=quux , foo%3Dbar%26baz%3Dquux", 
-            "foo bar , foo+bar"
+            "foo bar , foo+bar",
+            "% , %25"
     })
     public void shouldUrlEncodeOnlyPrescribedSpecialCharactersOnly(String key, String value){
         transactionSearchParams.setReference(key);

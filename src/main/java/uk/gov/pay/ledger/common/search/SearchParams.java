@@ -2,9 +2,6 @@ package uk.gov.pay.ledger.common.search;
 
 import uk.gov.pay.ledger.util.CommaDelimitedSetParameter;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 public abstract class SearchParams {
 
     public abstract String buildQueryParamString(Long forPage);

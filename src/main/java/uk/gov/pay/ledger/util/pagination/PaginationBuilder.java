@@ -7,8 +7,6 @@ import uk.gov.pay.ledger.common.search.SearchParams;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
