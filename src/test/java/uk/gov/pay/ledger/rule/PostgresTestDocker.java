@@ -23,7 +23,7 @@ public class PostgresTestDocker {
             if (POSTGRES_CONTAINER == null) {
                 logger.info("Creating Postgres Container");
 
-                POSTGRES_CONTAINER = new PostgreSQLContainer<>("postgres:11.16")
+                POSTGRES_CONTAINER = new PostgreSQLContainer<>("postgres:15.2")
                         .withUsername(DB_USERNAME)
                         .withPassword(DB_PASSWORD);
 
