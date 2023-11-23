@@ -268,7 +268,7 @@ public class QueueMessageReceiverIT {
         final String gatewayAccountId = "test_accountId";
         aQueuePaymentEventFixture()
                 .withResourceExternalId(resourceExternalId)
-                .withEventDate(CREATED_AT)
+                .withEventDate(CREATED_AT.minusSeconds(1))
                 .withEventType("AUTHORISATION_REJECTED")
                 .withEventData(format("{\"gateway_account_id\":\"%s\"}", gatewayAccountId))
                 .insert(rule.getSqsClient());
