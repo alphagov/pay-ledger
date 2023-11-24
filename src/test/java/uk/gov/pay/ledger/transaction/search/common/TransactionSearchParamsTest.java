@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -195,7 +194,7 @@ public class TransactionSearchParamsTest {
             "foo bar , foo+bar",
             "% , %25"
     })
-    public void shouldUrlEncodeOnlyPrescribedSpecialCharactersOnly(String key, String value){
+    public void shouldUrlEncodePrescribedSpecialCharactersOnly(String key, String value){
         transactionSearchParams.setReference(key);
         String expectedSelfLink = "reference=" + value + "&page=1&display_size=500";
         assertEquals(transactionSearchParams.buildQueryParamString(1L), expectedSelfLink);
