@@ -204,7 +204,7 @@ public class TransactionResourceIT {
             "% , %25",
             "%7B, %257B"
     })
-    public void shouldReturnTransactionSearchResponseObjectForExistingTransactionWithUrlEncodedReference(String rawValue, String encodedValue) {
+    public void shouldReturnTransactionSearchResponseObjectForExistingTransactionWhenReferenceIsUrlEncoded(String rawValue, String encodedValue) {
         transactionFixture = aTransactionFixture()
                 .withReference(rawValue);
         transactionFixture.insert(rule.getJdbi());
@@ -222,6 +222,25 @@ public class TransactionResourceIT {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("results[0].reference", is(rawValue));
+    }
+    
+    @Test
+    public void shouldReturnAllTransactionSearchResponseObjectsForMultipleAccountIds() {
+        for (int i = 1; i <= 3; i++) {
+            transactionFixture = aTransactionFixture()
+                    .withGatewayAccountId(Integer.toString(i));
+            transactionFixture.insert(rule.getJdbi());
+        }
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?account_id=1,2,3")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("results[0].gateway_account_id", is("3"))
+                .body("results[1].gateway_account_id", is("2"))
+                .body("results[2].gateway_account_id", is("1"));
     }
 
     @Test
