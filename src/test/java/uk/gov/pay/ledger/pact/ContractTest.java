@@ -30,6 +30,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.time.ZonedDateTime.parse;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
@@ -78,7 +79,7 @@ public abstract class ContractTest {
                 .withDefaultCardDetails()
                 .withVersion3ds("2.1.0")
                 .withDefaultTransactionDetails()
-                .withCreatedDate(ZonedDateTime.parse("2018-09-22T10:13:16.067Z"))
+                .withCreatedDate(parse("2018-09-22T10:13:16.067Z"))
                 .insert(app.getJdbi());
     }
 
@@ -131,7 +132,7 @@ public abstract class ContractTest {
         transactionDetails.addProperty("gateway_account_id", gatewayAccountId);
 
         createDisputeTransaction("dispute-transaction", gatewayAccountId, transactionExternalId, transactionDetails.toString(),
-                TransactionState.NEEDS_RESPONSE, null, 1000L, null, null);
+                TransactionState.NEEDS_RESPONSE, null, 1000L, null, null, parse("2022-05-20T19:05:00Z"));
     }
 
     @State("refund transactions exists for a gateway account")
@@ -399,9 +400,9 @@ public abstract class ContractTest {
         transactionDetails.add("payment_details", paymentDetails);
 
         createDisputeTransaction(disputeLostExternalId, gatewayAccountId, paymentExternalId, transactionDetails.toString(),
-                TransactionState.LOST, null, 2000L, -3500L, 1500L);
+                TransactionState.LOST, null, 2000L, -3500L, 1500L, parse("2022-05-20T19:05:00Z"));
         createDisputeTransaction(disputeUnderReviewExternalId, gatewayAccountId, paymentExternalId2, transactionDetails.toString(),
-                TransactionState.UNDER_REVIEW, null, 1000L, null, null);
+                TransactionState.UNDER_REVIEW, null, 1000L, null, null, parse("2022-05-19T19:05:00Z"));
     }
 
     @State("a payment with success state exists")
@@ -438,9 +439,9 @@ public abstract class ContractTest {
                 .withGatewayTransactionId("gateway-transaction-id")
                 .withCardholderName("J Doe")
                 .withEmail(email)
-                .withCreatedDate(ZonedDateTime.parse(createdDate))
-                .withCaptureSubmittedDate(ZonedDateTime.parse(createdDate).plusMinutes(20L))
-                .withCapturedDate(ZonedDateTime.parse(createdDate).plusHours(1L))
+                .withCreatedDate(parse(createdDate))
+                .withCaptureSubmittedDate(parse(createdDate).plusMinutes(20L))
+                .withCapturedDate(parse(createdDate).plusHours(1L))
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
@@ -459,7 +460,7 @@ public abstract class ContractTest {
                 .withTransactionType(TransactionType.PAYMENT.name())
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
-                .withCreatedDate(ZonedDateTime.parse("2022-05-10T14:05:00Z"))
+                .withCreatedDate(parse("2022-05-10T14:05:00Z"))
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi()).toEntity();
@@ -467,7 +468,7 @@ public abstract class ContractTest {
         aPayoutFixture()
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withGatewayAccountId(gatewayAccountId)
-                .withPaidOutDate(ZonedDateTime.parse("2022-05-27T19:05:00Z"))
+                .withPaidOutDate(parse("2022-05-27T19:05:00Z"))
                 .build()
                 .insert(app.getJdbi());
 
@@ -484,7 +485,7 @@ public abstract class ContractTest {
         transactionDetails.add("payment_details", paymentDetails);
 
         createDisputeTransaction(transactionId, gatewayAccountId, parentTransactionExternalId, transactionDetails.toString(),
-                TransactionState.LOST, gatewayPayoutId, 1000L, -2500L, 1500L);
+                TransactionState.LOST, gatewayPayoutId, 1000L, -2500L, 1500L, parse("2022-05-20T19:05:00Z"));
     }
 
     @State("a payment with all fields and a corresponding refund exists")
@@ -511,8 +512,8 @@ public abstract class ContractTest {
                 .withGatewayAccountId(gatewayAccountId)
                 .withGatewayPayoutId("payout-id-1")
                 .withAmount(1250L)
-                .withCreatedDate(ZonedDateTime.parse("2020-05-21T12:22:16.067Z"))
-                .withPaidOutDate(ZonedDateTime.parse("2020-05-22T14:22:16.067Z"))
+                .withCreatedDate(parse("2020-05-21T12:22:16.067Z"))
+                .withPaidOutDate(parse("2020-05-22T14:22:16.067Z"))
                 .withState(PayoutState.PAID_OUT)
                 .build()
                 .insert(app.getJdbi());
@@ -521,8 +522,8 @@ public abstract class ContractTest {
                 .withGatewayAccountId(gatewayAccountId)
                 .withGatewayPayoutId("payout-id-2")
                 .withAmount(2345L)
-                .withCreatedDate(ZonedDateTime.parse("2020-05-22T12:22:16.067Z"))
-                .withPaidOutDate(ZonedDateTime.parse("2020-05-23T14:22:16.067Z"))
+                .withCreatedDate(parse("2020-05-22T12:22:16.067Z"))
+                .withPaidOutDate(parse("2020-05-23T14:22:16.067Z"))
                 .withState(PayoutState.PAID_OUT)
                 .build()
                 .insert(app.getJdbi());
@@ -556,15 +557,15 @@ public abstract class ContractTest {
                 .withAmount(1000L)
                 .withState(TransactionState.SUCCESS)
                 .withDefaultCardDetails()
-                .withCreatedDate(ZonedDateTime.parse(createdDate))
-                .withCaptureSubmittedDate(ZonedDateTime.parse(createdDate).plusMinutes(20L))
-                .withCapturedDate(ZonedDateTime.parse(createdDate).plusHours(1L))
+                .withCreatedDate(parse(createdDate))
+                .withCaptureSubmittedDate(parse(createdDate).plusMinutes(20L))
+                .withCapturedDate(parse(createdDate).plusHours(1L))
                 .withGatewayPayoutId(gatewayPayoutId)
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
 
         aPayoutFixture()
-                .withPaidOutDate(ZonedDateTime.parse(settledDate))
+                .withPaidOutDate(parse(settledDate))
                 .withGatewayAccountId(gatewayAccountId)
                 .withGatewayPayoutId(gatewayPayoutId)
                 .build().insert(app.getJdbi());
@@ -606,25 +607,25 @@ public abstract class ContractTest {
         aPayoutFixture()
                 .withGatewayPayoutId(gatewayPayoutId1)
                 .withGatewayAccountId(gatewayAccountId)
-                .withPaidOutDate(ZonedDateTime.parse("2020-09-19T10:15:30Z"))
+                .withPaidOutDate(parse("2020-09-19T10:15:30Z"))
                 .build()
                 .insert(app.getJdbi());
         aPayoutFixture()
                 .withGatewayPayoutId(gatewayPayoutId2)
                 .withGatewayAccountId(gatewayAccountId)
-                .withPaidOutDate(ZonedDateTime.parse("2020-09-18T23:59:59.999Z"))
+                .withPaidOutDate(parse("2020-09-18T23:59:59.999Z"))
                 .build()
                 .insert(app.getJdbi());
         aPayoutFixture()
                 .withGatewayPayoutId(gatewayPayoutId3)
                 .withGatewayAccountId(gatewayAccountId)
-                .withPaidOutDate(ZonedDateTime.parse("2020-09-21T00:00:00Z"))
+                .withPaidOutDate(parse("2020-09-21T00:00:00Z"))
                 .build()
                 .insert(app.getJdbi());
         aPayoutFixture()
                 .withGatewayPayoutId(gatewayPayoutId4)
                 .withGatewayAccountId(gatewayAccountId)
-                .withPaidOutDate(ZonedDateTime.parse("2020-09-19T19:05:00Z"))
+                .withPaidOutDate(parse("2020-09-19T19:05:00Z"))
                 .build()
                 .insert(app.getJdbi());
     }
@@ -749,7 +750,7 @@ public abstract class ContractTest {
                 .withTransactionType(TransactionType.REFUND.name())
                 .withReference(reference)
                 .withDescription(description)
-                .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .withCreatedDate(parse(createdDate))
                 .withDefaultPaymentDetails()
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
@@ -767,7 +768,7 @@ public abstract class ContractTest {
     private void createDisputeTransaction(String transactionExternalId, String gatewayAccountId,
                                           String parentExternalId, String transactionDetails,
                                           TransactionState transactionState, String gatewayPayoutId,
-                                          Long amount, Long netAmount, Long fee) {
+                                          Long amount, Long netAmount, Long fee, ZonedDateTime createdDate) {
         TransactionFixture transactionFixture = aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId)
                 .withExternalId(transactionExternalId)
@@ -777,7 +778,7 @@ public abstract class ContractTest {
                 .withState(transactionState)
                 .withEmail("joe.blogs@example.com")
                 .withCardholderName("Mr Test")
-                .withCreatedDate(ZonedDateTime.parse("2022-05-20T19:05:00Z"))
+                .withCreatedDate(createdDate)
                 .withTransactionDetails(transactionDetails)
                 .withCardBrand("visa")
                 .withLastDigitsCardNumber("4242")
@@ -807,7 +808,7 @@ public abstract class ContractTest {
                 .withTransactionType(TransactionType.PAYMENT.name())
                 .withAmount(amount)
                 .withState(state)
-                .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .withCreatedDate(parse(createdDate))
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi()).toEntity();
     }
@@ -828,7 +829,7 @@ public abstract class ContractTest {
                 .withState(state)
                 .withCardBrand(cardBrand)
                 .withCardBrandLabel(cardBrandLabel)
-                .withCreatedDate(ZonedDateTime.parse(createdDate))
+                .withCreatedDate(parse(createdDate))
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
@@ -853,9 +854,9 @@ public abstract class ContractTest {
                 .withGatewayTransactionId("gateway-transaction-id")
                 .withCardholderName("J Doe")
                 .withEmail("test@example.org")
-                .withCreatedDate(ZonedDateTime.parse(createdDate))
-                .withCaptureSubmittedDate(ZonedDateTime.parse(createdDate).plusMinutes(2L))
-                .withCapturedDate(ZonedDateTime.parse(createdDate).plusHours(1L))
+                .withCreatedDate(parse(createdDate))
+                .withCaptureSubmittedDate(parse(createdDate).plusMinutes(2L))
+                .withCapturedDate(parse(createdDate).plusHours(1L))
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
