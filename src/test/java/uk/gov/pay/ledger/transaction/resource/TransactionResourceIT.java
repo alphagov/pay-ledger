@@ -225,6 +225,32 @@ public class TransactionResourceIT {
     }
     
     @Test
+    public void shouldReturnATransactionSearchResponseObjectBetweenTwoDates() {
+        var fromDate = ZonedDateTime.parse("2023-11-01T00:00:00.000Z");
+        var toDate = ZonedDateTime.parse("2023-12-01T00:00:00.000Z");
+        var dateBetween = ZonedDateTime.parse("2023-11-15T14:52:07.073Z");
+
+        transactionFixture = aTransactionFixture()
+                .withGatewayAccountId("1")
+                .withCreatedDate(dateBetween)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?account_id=1&from_date=" + 
+                        fromDate + 
+                        "&to_date=" + 
+                        toDate + 
+                        "&page=1&display_size=100"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("results[0].created_date", is(dateBetween.toString())).log().all();
+    }
+    
+    @Test
     public void shouldReturnAllTransactionSearchResponseObjectsForMultipleAccountIds() {
         for (int i = 1; i <= 3; i++) {
             transactionFixture = aTransactionFixture()
