@@ -247,7 +247,7 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("results[0].created_date", is(dateBetween.toString())).log().all();
+                .body("results[0].created_date", is(dateBetween.toString()));
     }
     
     @Test
