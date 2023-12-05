@@ -7,6 +7,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
@@ -34,9 +35,9 @@ class QueueMessageReceiverForTransactionIT {
     @ParameterizedTest
     @ValueSource(strings = {
             "true",
-            "false",
-            "null"
+            "false"
     })
+    @NullSource
     void paymentCreatedMessageIsPersistedCorrectly(Boolean moto) throws InterruptedException {
         String resourceExternalId = RandomStringUtils.random(10, true, true);
         boolean live = true;
