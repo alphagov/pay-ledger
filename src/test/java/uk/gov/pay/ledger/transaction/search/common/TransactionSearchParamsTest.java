@@ -2,6 +2,8 @@ package uk.gov.pay.ledger.transaction.search.common;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -10,6 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TransactionSearchParamsTest {
 
@@ -126,15 +129,23 @@ public class TransactionSearchParamsTest {
     }
 
     @Test
+    public void getsQueryParamStringWhenNotEmptyWithMultipleUrlEncodedAccountIds(){
+        List<String> accountIds = List.of("1","2","3");
+        transactionSearchParams.setAccountIds(accountIds);
+        String result = "account_id=1%2C2%2C3&page=1&display_size=500";
+        assertEquals(transactionSearchParams.buildQueryParamString(1L), result);
+    }
+
+    @Test
     public void getsEmptyQueryParamStringWhenEmptyFromDate() {
         transactionSearchParams.setFromDate("");
         assertThat(transactionSearchParams.buildQueryParamString(1L), not(containsString("from_date")));
     }
 
     @Test
-    public void getsQueryParamStringWhenNotEmptyFromDate() {
+    public void getsURLEncodedQueryParamStringWhenNotEmptyFromDate() {
         transactionSearchParams.setFromDate("2018-09-22T10:14:16.067Z");
-        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("from_date=2018-09-22T10:14:16.067Z"));
+        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("from_date=2018-09-22T10%3A14%3A16.067Z"));
     }
 
     @Test
@@ -144,9 +155,9 @@ public class TransactionSearchParamsTest {
     }
 
     @Test
-    public void getsQueryParamStringWhenNotEmptyToDate() {
+    public void getsURLEncodedQueryParamStringWhenNotEmptyToDate() {
         transactionSearchParams.setToDate("2018-09-22T10:14:16.067Z");
-        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("to_date=2018-09-22T10:14:16.067Z"));
+        assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("to_date=2018-09-22T10%3A14%3A16.067Z"));
     }
 
     @Test
@@ -169,5 +180,23 @@ public class TransactionSearchParamsTest {
         transactionSearchParams.setToSettledDate("2020-09-26");
         assertThat(transactionSearchParams.getQueryMap().get("to_settled_date"), is(ZonedDateTime.parse("2020-09-27T00:00:00.000Z")));
         assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("to_settled_date=2020-09-26"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"?, %3F", 
+            "{ , %7B", 
+            "[ , %5B", 
+            "f{o{o}{ , f%7Bo%7Bo%7D%7B", 
+            "foo&, foo%26", 
+            "foo@ , foo%40", 
+            "foo@@ , foo%40%40", 
+            "foo=bar&baz=quux , foo%3Dbar%26baz%3Dquux", 
+            "foo bar , foo+bar",
+            "% , %25"
+    })
+    public void shouldUrlEncodePrescribedSpecialCharactersOnly(String key, String value){
+        transactionSearchParams.setReference(key);
+        String expectedSelfLink = "reference=" + value + "&page=1&display_size=500";
+        assertEquals(transactionSearchParams.buildQueryParamString(1L), expectedSelfLink);
     }
 }

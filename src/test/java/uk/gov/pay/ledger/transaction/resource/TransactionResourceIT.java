@@ -6,6 +6,8 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -19,7 +21,6 @@ import uk.gov.service.payments.commons.model.Source;
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -188,6 +189,84 @@ public class TransactionResourceIT {
                 .body("total", is(0))
                 .body("count", is(0))
                 .body("results.size()", is(0));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"?, %3F",
+            "{ , %7B",
+            "[ , %5B",
+            "f{o{o}{ , f%7Bo%7Bo%7D%7B",
+            "foo&, foo%26",
+            "foo@ , foo%40",
+            "foo@@ , foo%40%40",
+            "foo=bar&baz=quux , foo%3Dbar%26baz%3Dquux",
+            "foo bar , foo+bar",
+            "% , %25",
+            "%7B, %257B"
+    })
+    public void shouldReturnTransactionSearchResponseObjectForExistingTransactionWhenReferenceIsUrlEncoded(String rawValue, String encodedValue) {
+        transactionFixture = aTransactionFixture()
+                .withReference(rawValue);
+        transactionFixture.insert(rule.getJdbi());
+        
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .urlEncodingEnabled(false)
+                .get("/v1/transaction" +
+                        "?reference=" +
+                        encodedValue +
+                        "&account_id=" + transactionFixture.getGatewayAccountId()
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("results[0].reference", is(rawValue));
+    }
+    
+    @Test
+    public void shouldReturnATransactionSearchResponseObjectBetweenTwoDates() {
+        var fromDate = ZonedDateTime.parse("2023-11-01T00:00:00.000Z");
+        var toDate = ZonedDateTime.parse("2023-12-01T00:00:00.000Z");
+        var dateBetween = ZonedDateTime.parse("2023-11-15T14:52:07.073Z");
+
+        transactionFixture = aTransactionFixture()
+                .withGatewayAccountId("1")
+                .withCreatedDate(dateBetween)
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?account_id=1&from_date=" + 
+                        fromDate + 
+                        "&to_date=" + 
+                        toDate + 
+                        "&page=1&display_size=100"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("results[0].created_date", is(dateBetween.toString()));
+    }
+    
+    @Test
+    public void shouldReturnAllTransactionSearchResponseObjectsForMultipleAccountIds() {
+        for (int i = 1; i <= 3; i++) {
+            transactionFixture = aTransactionFixture()
+                    .withGatewayAccountId(Integer.toString(i));
+            transactionFixture.insert(rule.getJdbi());
+        }
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?account_id=1,2,3")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("results[0].gateway_account_id", is("3"))
+                .body("results[1].gateway_account_id", is("2"))
+                .body("results[2].gateway_account_id", is("1"));
     }
 
     @Test
@@ -431,7 +510,7 @@ public class TransactionResourceIT {
     }
 
     @Test
-    public void getTransactionsForTransactionShouldReturnHttpNotFoundIfParentTranscationDoesNotExist() {
+    public void getTransactionsForTransactionShouldReturnHttpNotFoundIfParentTransactionDoesNotExist() {
         given().port(port)
                 .contentType(JSON)
                 .get("/v1/transaction/some-parent-external-id/transaction?gateway_account_id=1")
