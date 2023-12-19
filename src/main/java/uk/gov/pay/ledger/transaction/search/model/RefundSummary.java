@@ -6,10 +6,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
 import java.util.Objects;
+import java.util.Set;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class RefundSummary {
 
+    private static final Set<String> UNSUPPORTED_PAYMENT_PROVIDERS = Set.of("EPDQ", "SMARTPAY");
+ 
     @Schema(example = "unavailable")
     private String status;
 
@@ -31,14 +34,17 @@ public class RefundSummary {
         this.amountSubmitted = amountRefunded;
     }
 
-    public static RefundSummary from(TransactionEntity entity) {
+    public static RefundSummary from(TransactionEntity entity, String paymentProvider) {
         if (entity.getRefundStatus() == null &&
                 entity.getRefundAmountAvailable() == null &&
                 entity.getRefundAmountRefunded() == null) {
             return null;
         }
 
-        return new RefundSummary(entity.getRefundStatus(), entity.getRefundAmountAvailable(), entity.getRefundAmountRefunded());
+        String refundStatus = 
+                paymentProvider != null && UNSUPPORTED_PAYMENT_PROVIDERS.contains(paymentProvider.toUpperCase()) ? 
+                "unavailable" : entity.getRefundStatus(); 
+        return new RefundSummary(refundStatus, entity.getRefundAmountAvailable(), entity.getRefundAmountRefunded());
     }
 
     public String getUserExternalId() {
