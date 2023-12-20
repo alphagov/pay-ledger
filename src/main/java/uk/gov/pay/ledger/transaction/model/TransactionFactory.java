@@ -71,7 +71,8 @@ public class TransactionFactory {
                         });
             }
 
-            RefundSummary refundSummary = RefundSummary.from(entity);
+            String paymentProvider = safeGetAsString(transactionDetails, "payment_provider");
+            RefundSummary refundSummary = RefundSummary.from(entity, paymentProvider);
             PaymentSettlementSummary paymentSettlementSummary = new PaymentSettlementSummary(
                     safeGetAsDate(transactionDetails, "capture_submitted_date"),
                     safeGetAsDate(transactionDetails, "captured_date"),
@@ -105,7 +106,7 @@ public class TransactionFactory {
                     .withExternalId(entity.getExternalId())
                     .withReturnUrl(safeGetAsString(transactionDetails, "return_url"))
                     .withEmail(entity.getEmail())
-                    .withPaymentProvider(safeGetAsString(transactionDetails, "payment_provider"))
+                    .withPaymentProvider(paymentProvider)
                     .withCreatedDate(entity.getCreatedDate())
                     .withCardDetails(cardDetails)
                     .withDelayedCapture(safeGetAsBoolean(transactionDetails, "delayed_capture", false))

@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import io.dropwizard.jackson.Jackson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
@@ -23,7 +25,7 @@ import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixt
 
 public class TransactionFactoryTest {
 
-    private TransactionFactory transactionFactory;
+    private TransactionFactory transactionFactory = new TransactionFactory(Jackson.newObjectMapper());
     private TransactionEntity fullDataObject;
     private TransactionEntity minimalDataObject;
 
@@ -53,10 +55,77 @@ public class TransactionFactoryTest {
     private String cardExpiryDate = "10/27";
     private String walletType = "APPLE_PAY";
     private ZonedDateTime paidOutDate = ZonedDateTime.parse("2017-09-19T08:46:01.123456Z");
-    private Boolean canRetry = false;
 
     @BeforeEach
     public void setUp() {
+        buildFullTransactionDetails();
+        buildFullDataObject();
+        buildMinimalDataObject();
+    }
+
+    private void buildMinimalDataObject() {
+        minimalDataObject = new TransactionEntity.Builder()
+                .withTransactionType("PAYMENT")
+                .withId(id)
+                .withGatewayAccountId(gatewayAccountId)
+                .withServiceId(serviceId)
+                .withLive(live)
+                .withExternalId(externalId)
+                .withAmount(amount)
+                .withReference(reference)
+                .withDescription(description)
+                .withState(state)
+                .withEmail(email)
+                .withCardholderName(cardholderName)
+                .withCreatedDate(createdDate)
+                .withEventCount(eventCount)
+                .withCardBrand(cardBrand)
+                .withLastDigitsCardNumber(lastDigitsCardNumber)
+                .withFirstDigitsCardNumber(firstDigitsCardNumber)
+                .withNetAmount(netAmount)
+                .withTotalAmount(totalAmount)
+                .withRefundStatus(refundStatus)
+                .withRefundAmountRefunded(refundAmountRefunded)
+                .withRefundAmountAvailable(refundAmountAvailable)
+                .build();
+    }
+
+    private void buildFullDataObject() {
+        fullDataObject = getTransactionEntityBuilder(fullTransactionDetails).build();
+    }
+
+    private TransactionEntity.Builder getTransactionEntityBuilder(JsonObject txDetails) {
+        var payoutObject = aPayoutEntity().withPaidOutDate(paidOutDate).build();
+        
+        return new TransactionEntity.Builder()
+                .withTransactionType("PAYMENT")
+                .withId(id)
+                .withGatewayAccountId(gatewayAccountId)
+                .withServiceId(serviceId)
+                .withLive(live)
+                .withExternalId(externalId)
+                .withAmount(amount)
+                .withReference(reference)
+                .withDescription(description)
+                .withState(state)
+                .withEmail(email)
+                .withCardholderName(cardholderName)
+                .withCreatedDate(createdDate)
+                .withTransactionDetails(txDetails.toString())
+                .withEventCount(eventCount)
+                .withCardBrand(cardBrand)
+                .withLastDigitsCardNumber(lastDigitsCardNumber)
+                .withFirstDigitsCardNumber(firstDigitsCardNumber)
+                .withNetAmount(netAmount)
+                .withTotalAmount(totalAmount)
+                .withRefundStatus(refundStatus)
+                .withRefundAmountRefunded(refundAmountRefunded)
+                .withRefundAmountAvailable(refundAmountAvailable)
+                .withFee(fee)
+                .withPayoutEntity(payoutObject);
+    }
+
+    private void buildFullTransactionDetails() {
         JsonObject metadata = new JsonObject();
         metadata.addProperty("ledger_code", 123);
         metadata.addProperty("some_key", "key");
@@ -85,72 +154,21 @@ public class TransactionFactoryTest {
         fullTransactionDetails.addProperty("authorisation_mode", "moto_api");
         fullTransactionDetails.addProperty("disputed", true);
         fullTransactionDetails.addProperty("can_retry", false);
-
-        var payoutObject = aPayoutEntity()
-                .withPaidOutDate(paidOutDate)
-                .build();
-
-        fullDataObject = new TransactionEntity.Builder()
-                .withTransactionType("PAYMENT")
-                .withId(id)
-                .withGatewayAccountId(gatewayAccountId)
-                .withServiceId(serviceId)
-                .withLive(live)
-                .withExternalId(externalId)
-                .withAmount(amount)
-                .withReference(reference)
-                .withDescription(description)
-                .withState(state)
-                .withEmail(email)
-                .withCardholderName(cardholderName)
-                .withCreatedDate(createdDate)
-                .withTransactionDetails(fullTransactionDetails.toString())
-                .withEventCount(eventCount)
-                .withCardBrand(cardBrand)
-                .withLastDigitsCardNumber(lastDigitsCardNumber)
-                .withFirstDigitsCardNumber(firstDigitsCardNumber)
-                .withNetAmount(netAmount)
-                .withTotalAmount(totalAmount)
-                .withRefundStatus(refundStatus)
-                .withRefundAmountRefunded(refundAmountRefunded)
-                .withRefundAmountAvailable(refundAmountAvailable)
-                .withFee(fee)
-                .withPayoutEntity(payoutObject)
-                .build();
-
-        minimalDataObject = new TransactionEntity.Builder()
-                .withTransactionType("PAYMENT")
-                .withId(id)
-                .withGatewayAccountId(gatewayAccountId)
-                .withServiceId(serviceId)
-                .withLive(live)
-                .withExternalId(externalId)
-                .withAmount(amount)
-                .withReference(reference)
-                .withDescription(description)
-                .withState(state)
-                .withEmail(email)
-                .withCardholderName(cardholderName)
-                .withCreatedDate(createdDate)
-                .withEventCount(eventCount)
-                .withCardBrand(cardBrand)
-                .withLastDigitsCardNumber(lastDigitsCardNumber)
-                .withFirstDigitsCardNumber(firstDigitsCardNumber)
-                .withNetAmount(netAmount)
-                .withTotalAmount(totalAmount)
-                .withRefundStatus(refundStatus)
-                .withRefundAmountRefunded(refundAmountRefunded)
-                .withRefundAmountAvailable(refundAmountAvailable)
-                .build();
-
-        transactionFactory = new TransactionFactory(Jackson.newObjectMapper());
     }
 
     @Test
     public void createsPaymentFromTransactionEntityWithFullData() {
         Payment payment = (Payment) transactionFactory.createTransactionEntity(fullDataObject);
-
         assertCorrectPaymentTransactionWithFullData(payment);
+    }
+    
+    @ParameterizedTest
+    @ValueSource(strings = {"epdq","smartpay"})
+    public void refundStatusShouldBeUnavailable(String paymentProvider) {
+        fullTransactionDetails.addProperty("payment_provider", paymentProvider);
+        TransactionEntity transactionEntity = getTransactionEntityBuilder(fullTransactionDetails).build();
+        Payment payment = (Payment) transactionFactory.createTransactionEntity(transactionEntity);
+        assertThat(payment.getRefundSummary().getStatus(), is("unavailable"));
     }
 
     @Test
