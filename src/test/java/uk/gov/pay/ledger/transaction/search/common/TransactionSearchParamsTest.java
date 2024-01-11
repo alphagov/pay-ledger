@@ -1,13 +1,14 @@
 package uk.gov.pay.ledger.transaction.search.common;
 
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import uk.gov.pay.ledger.util.AssertQueryParams;
 
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -131,10 +132,10 @@ public class TransactionSearchParamsTest {
 
     @Test
     public void getsQueryParamStringWhenNotEmptyWithMultipleUrlEncodedAccountIds(){
-        Set<String> accountIds = new LinkedHashSet<>(List.of("1","2","3"));
+        Set<String> accountIds = Set.of("1","2","3");
         transactionSearchParams.setAccountIds(accountIds);
-        String result = "account_id=1%2C2%2C3&page=1&display_size=500";
-        assertEquals(result, transactionSearchParams.buildQueryParamString(1L));
+        var nameValuePairs = URLEncodedUtils.parse(transactionSearchParams.buildQueryParamString(1L), StandardCharsets.UTF_8);
+        AssertQueryParams.assertQueryParams(nameValuePairs, "1", "500", "1","2","3");
     }
 
     @Test

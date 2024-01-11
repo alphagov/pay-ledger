@@ -12,6 +12,7 @@ import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.payout.model.PayoutEntityFactory;
 import uk.gov.pay.ledger.payout.model.PayoutSearchResponse;
 import uk.gov.pay.ledger.payout.search.PayoutSearchParams;
+import uk.gov.pay.ledger.util.AssertQueryParams;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriBuilder;
@@ -130,29 +131,17 @@ public class PayoutServiceTest {
         assertThat(response.getPayoutViewList().size(), is(15));
 
         assertThat(response.getPayoutViewList().get(2).getGatewayAccountId(), is(gatewayAccountId));
-        assertLink(response.getPaginationBuilder().getSelfLink().getHref(), "1", "12346", "12345");
-        assertLink(response.getPaginationBuilder().getFirstLink().getHref(), "1", "12346", "12345");
-        assertLink(response.getPaginationBuilder().getLastLink().getHref(), "2", "12346", "12345");
-        assertLink(response.getPaginationBuilder().getNextLink().getHref(), "2", "12346", "12345");
+        assertLink(response.getPaginationBuilder().getSelfLink().getHref(), "1", "14", "12346", "12345");
+        assertLink(response.getPaginationBuilder().getFirstLink().getHref(), "1", "14",  "12346", "12345");
+        assertLink(response.getPaginationBuilder().getLastLink().getHref(), "2", "14",  "12346", "12345");
+        assertLink(response.getPaginationBuilder().getNextLink().getHref(), "2", "14",  "12346", "12345");
     }
 
-    private void assertLink(String href, String page, String... gatewayAccountIds) throws URISyntaxException {
+    private void assertLink(String href, String page, String displaySize, String... gatewayAccountIds) throws URISyntaxException {
         URI uri = new URI(href);
         List<NameValuePair> params = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
         assertThat(uri.getHost(), is("example.com"));
         assertThat(uri.getPath(), is("/v1/payout"));
-        for (NameValuePair nameValuePair : params) {
-            switch (nameValuePair.getName()) {
-                case "gateway_account_id":
-                    assertThat(Set.of(nameValuePair.getValue().split(",")), hasItems(gatewayAccountIds));
-                    break;
-                case "page":
-                    assertEquals(page, nameValuePair.getValue());
-                    break;
-                case "display_size":
-                    assertEquals("14", nameValuePair.getValue());
-                    break;
-            }
-        }
+        AssertQueryParams.assertQueryParams(params, page, displaySize, gatewayAccountIds);
     }
 }
