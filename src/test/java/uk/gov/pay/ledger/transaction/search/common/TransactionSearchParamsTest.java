@@ -6,6 +6,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.ZonedDateTime;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -129,10 +131,10 @@ public class TransactionSearchParamsTest {
 
     @Test
     public void getsQueryParamStringWhenNotEmptyWithMultipleUrlEncodedAccountIds(){
-        Set<String> accountIds = Set.of("1","2","3");
+        Set<String> accountIds = new LinkedHashSet<>(List.of("1","2","3"));
         transactionSearchParams.setAccountIds(accountIds);
         String result = "account_id=1%2C2%2C3&page=1&display_size=500";
-        assertEquals(transactionSearchParams.buildQueryParamString(1L), result);
+        assertEquals(result, transactionSearchParams.buildQueryParamString(1L));
     }
 
     @Test

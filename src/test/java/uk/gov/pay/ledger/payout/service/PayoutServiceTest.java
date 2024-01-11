@@ -1,7 +1,5 @@
 package uk.gov.pay.ledger.payout.service;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,17 +14,13 @@ import uk.gov.pay.ledger.payout.search.PayoutSearchParams;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -114,9 +108,9 @@ public class PayoutServiceTest {
     }
 
     @Test
-    public void shouldReturnAPaginatedPayoutSearchResponse_withMultipleGatewayAccounts() throws Exception {
+    public void shouldReturnAPaginatedPayoutSearchResponse_withMultipleGatewayAccounts() {
         String gatewayAccountId2 = "12346";
-        Set<String> gatewayAccountIds = Set.of(gatewayAccountId, gatewayAccountId2);
+        Set<String> gatewayAccountIds = new LinkedHashSet<>(List.of(gatewayAccountId, gatewayAccountId2));
         searchParams = new PayoutSearchParams();
         searchParams.setPageNumber(1L);
         searchParams.setDisplaySize(14L);
@@ -130,29 +124,10 @@ public class PayoutServiceTest {
         assertThat(response.getPayoutViewList().size(), is(15));
 
         assertThat(response.getPayoutViewList().get(2).getGatewayAccountId(), is(gatewayAccountId));
-        assertLink(response.getPaginationBuilder().getSelfLink().getHref(), "1", "12346", "12345");
-        assertLink(response.getPaginationBuilder().getFirstLink().getHref(), "1", "12346", "12345");
-        assertLink(response.getPaginationBuilder().getLastLink().getHref(), "2", "12346", "12345");
-        assertLink(response.getPaginationBuilder().getNextLink().getHref(), "2", "12346", "12345");
-    }
-    
-    private void assertLink(String href, String page, String... gatewayAccountIds) throws URISyntaxException {
-        URI uri = new URI(href);
-        List<NameValuePair> params = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
-        assertThat(uri.getHost(), is("example.com"));
-        assertThat(uri.getPath(), is("/v1/payout"));
-        for (NameValuePair nameValuePair : params) {
-            switch (nameValuePair.getName()) {
-                case "gateway_account_id":
-                    assertThat(Set.of(nameValuePair.getValue().split(",")), hasItems(gatewayAccountIds));
-                    break;
-                case "page":
-                    assertEquals(page, nameValuePair.getValue());
-                    break;
-                case "display_size":
-                    assertEquals("14", nameValuePair.getValue());
-                    break;
-            }
-        }
+        assertThat(response.getPaginationBuilder().getSelfLink().getHref(), is("http://example.com/v1/payout?gateway_account_id=12345%2C12346&page=1&display_size=14"));
+        assertThat(response.getPaginationBuilder().getFirstLink().getHref(), is("http://example.com/v1/payout?gateway_account_id=12345%2C12346&page=1&display_size=14"));
+        assertThat(response.getPaginationBuilder().getLastLink().getHref(), is("http://example.com/v1/payout?gateway_account_id=12345%2C12346&page=2&display_size=14"));
+        assertThat(response.getPaginationBuilder().getLastLink().getHref(), is("http://example.com/v1/payout?gateway_account_id=12345%2C12346&page=2&display_size=14"));
+        assertThat(response.getPaginationBuilder().getNextLink().getHref(), is("http://example.com/v1/payout?gateway_account_id=12345%2C12346&page=2&display_size=14"));
     }
 }
