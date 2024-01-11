@@ -6,7 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.ZonedDateTime;
-import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -118,19 +118,18 @@ public class TransactionSearchParamsTest {
 
     @Test
     public void getsEmptyQueryParamStringWhenEmptyAccountId() {
-        transactionSearchParams.setAccountIds(List.of());
         assertThat(transactionSearchParams.buildQueryParamString(1L), not(containsString("account_id")));
     }
 
     @Test
     public void getsQueryParamStringWhenNotEmptyAccountId() {
-        transactionSearchParams.setAccountIds(List.of("xyz"));
+        transactionSearchParams.setAccountIds(Set.of("xyz"));
         assertThat(transactionSearchParams.buildQueryParamString(1L), containsString("account_id=xyz"));
     }
 
     @Test
     public void getsQueryParamStringWhenNotEmptyWithMultipleUrlEncodedAccountIds(){
-        List<String> accountIds = List.of("1","2","3");
+        Set<String> accountIds = Set.of("1","2","3");
         transactionSearchParams.setAccountIds(accountIds);
         String result = "account_id=1%2C2%2C3&page=1&display_size=500";
         assertEquals(transactionSearchParams.buildQueryParamString(1L), result);

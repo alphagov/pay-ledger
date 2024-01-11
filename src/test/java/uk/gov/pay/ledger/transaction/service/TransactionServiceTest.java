@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -77,7 +78,7 @@ public class TransactionServiceTest {
         transactionService = new TransactionService(mockTransactionDao, mockEventDao, transactionEntityFactory,
                 transactionFactory, csvTransactionFactory, objectMapper);
         searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
 
         lenient().when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://app.com"));
         lenient().when(mockUriInfo.getPath()).thenReturn("/v1/transaction");
@@ -153,7 +154,7 @@ public class TransactionServiceTest {
         when(mockTransactionDao.searchTransactions(any(TransactionSearchParams.class))).thenReturn(transactionViewList);
         when(mockTransactionDao.getTotalForSearch(any(TransactionSearchParams.class))).thenReturn(100L);
 
-        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(List.of(gatewayAccountId), searchParams, mockUriInfo);
+        TransactionSearchResponse transactionSearchResponse = transactionService.searchTransactions(Set.of(gatewayAccountId), searchParams, mockUriInfo);
         PaginationBuilder paginationBuilder = transactionSearchResponse.getPaginationBuilder();
 
         assertThat(paginationBuilder.getFirstLink().getHref(), is("http://app.com/v1/transaction?account_id=gateway_account_id&page=1&display_size=10"));

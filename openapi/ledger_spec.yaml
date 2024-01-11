@@ -1154,6 +1154,7 @@ components:
           type: array
           items:
             type: string
+          uniqueItems: true
         rawString:
           type: string
     ErrorResponse:

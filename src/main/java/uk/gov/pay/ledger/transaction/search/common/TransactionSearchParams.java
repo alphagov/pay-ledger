@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -53,7 +54,7 @@ public class TransactionSearchParams extends SearchParams {
 
     int statusVersion;
     private boolean exactReferenceMatch;
-    private List<String> accountIds;
+    private Set<String> accountIds;
     private String email;
     private String reference;
     private String cardHolderName;
@@ -81,8 +82,8 @@ public class TransactionSearchParams extends SearchParams {
     private String gatewayTransactionId;
     private CommaDelimitedSetParameter disputeStates;
 
-    public void setAccountIds(List<String> accountIds) {
-        this.accountIds = List.copyOf(accountIds);
+    public void setAccountIds(Set<String> accountIds) {
+        this.accountIds = Set.copyOf(accountIds);
     }
 
     @QueryParam("email")
@@ -386,7 +387,7 @@ public class TransactionSearchParams extends SearchParams {
                 TransactionState.getStatesForOldStatus(status);
     }
 
-    public List<String> getAccountIds() {
+    public Set<String> getAccountIds() {
         return accountIds;
     }
 

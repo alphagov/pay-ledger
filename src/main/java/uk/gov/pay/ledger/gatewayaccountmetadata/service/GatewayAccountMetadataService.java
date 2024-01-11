@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import uk.gov.pay.ledger.gatewayaccountmetadata.dao.GatewayAccountMetadataDao;
 
 import java.util.List;
+import java.util.Set;
 
 
 public class GatewayAccountMetadataService {
@@ -19,7 +20,7 @@ public class GatewayAccountMetadataService {
         gatewayAccountMetadataDao.upsert(gatewayAcctId, metadataKey);
     }
 
-    public List<String> getKeysForGatewayAccounts(List<String> gatewayAcctIds) {
+    public List<String> getKeysForGatewayAccounts(Set<String> gatewayAcctIds) {
         return gatewayAccountMetadataDao.findMetadataKeysForGatewayAccounts(gatewayAcctIds);
     }
 

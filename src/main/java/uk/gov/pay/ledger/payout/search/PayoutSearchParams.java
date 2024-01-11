@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -24,7 +25,7 @@ public class PayoutSearchParams extends SearchParams {
 
     private long maxDisplaySize = DEFAULT_MAX_DISPLAY_SIZE;
 
-    private List<String> gatewayAccountIds;
+    private Set<String> gatewayAccountIds;
     @QueryParam("state")
     @Parameter(description = "State of payout. allowed values are intransit, paidout, failed")
     private String state;
@@ -33,8 +34,8 @@ public class PayoutSearchParams extends SearchParams {
     private Long displaySize = DEFAULT_DISPLAY_SIZE;
     private Map<String, Object> queryMap;
 
-    public void setGatewayAccountIds(List<String> gatewayAccountIds) {
-        this.gatewayAccountIds = List.copyOf(gatewayAccountIds);
+    public void setGatewayAccountIds(Set<String> gatewayAccountIds) {
+        this.gatewayAccountIds = Set.copyOf(gatewayAccountIds);
     }
 
     public void setState(String state) {
@@ -81,10 +82,6 @@ public class PayoutSearchParams extends SearchParams {
             }
         }
         return queryMap;
-    }
-
-    public List<String> getGatewayAccountIds() {
-        return gatewayAccountIds;
     }
 
     public String getState() {

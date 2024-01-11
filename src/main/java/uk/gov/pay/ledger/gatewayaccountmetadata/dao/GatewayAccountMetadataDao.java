@@ -5,6 +5,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 
 import java.util.List;
+import java.util.Set;
 
 public class GatewayAccountMetadataDao {
 
@@ -33,7 +34,7 @@ public class GatewayAccountMetadataDao {
         );
     }
 
-    public List<String> findMetadataKeysForGatewayAccounts(List<String> gatewayAccountIDs) {
+    public List<String> findMetadataKeysForGatewayAccounts(Set<String> gatewayAccountIDs) {
         return jdbi.withHandle(handle -> {
 
             Query query = handle.createQuery(FIND_METADATA_KEYS);

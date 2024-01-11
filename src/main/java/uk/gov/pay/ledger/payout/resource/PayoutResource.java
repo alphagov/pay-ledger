@@ -21,8 +21,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -65,7 +65,7 @@ public class PayoutResource {
                                                   UriInfo uriInfo) {
         PayoutSearchParams transactionSearchParams = Optional.ofNullable(searchParams)
                 .orElse(new PayoutSearchParams());
-        List<String> gatewayAccountIds = commaSeparatedGatewayAccountIds != null ? commaSeparatedGatewayAccountIds.getParameters() : List.of();
+        Set<String> gatewayAccountIds = commaSeparatedGatewayAccountIds != null ? commaSeparatedGatewayAccountIds.getParameters() : Set.of();
         AccountIdListSupplierManager<PayoutSearchResponse> accountIdSupplierManager =
                 AccountIdListSupplierManager.of(overrideAccountRestriction, gatewayAccountIds);
 

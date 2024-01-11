@@ -1,8 +1,8 @@
 package uk.gov.pay.ledger.transaction.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 import uk.gov.pay.ledger.transaction.search.model.TransactionView;
+import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
 import java.util.List;
 

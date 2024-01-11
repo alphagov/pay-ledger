@@ -1,10 +1,8 @@
 package uk.gov.pay.ledger.payout.dao;
 
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
@@ -13,6 +11,7 @@ import uk.gov.pay.ledger.payout.state.PayoutState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -64,7 +63,7 @@ public class PayoutDaoSearchIT {
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        searchParams.setGatewayAccountIds(List.of(payoutEntity2.getGatewayAccountId()));
+        searchParams.setGatewayAccountIds(Set.of(payoutEntity2.getGatewayAccountId()));
 
         List<PayoutEntity> payoutList = payoutDao.searchPayouts(searchParams);
         assertThat(payoutList.size(), is(1));
@@ -109,7 +108,7 @@ public class PayoutDaoSearchIT {
                     .insert(rule.getJdbi());
         }
 
-        searchParams.setGatewayAccountIds(List.of(gatewayAccountId));
+        searchParams.setGatewayAccountIds(Set.of(gatewayAccountId));
         searchParams.setDisplaySize(10L);
 
         searchParams.setState(PayoutState.PAID_OUT.getStatus());
@@ -132,7 +131,7 @@ public class PayoutDaoSearchIT {
                     .insert(rule.getJdbi());
         }
 
-        searchParams.setGatewayAccountIds(List.of(gatewayAccountId));
+        searchParams.setGatewayAccountIds(Set.of(gatewayAccountId));
         searchParams.setDisplaySize(10L);
         searchParams.setPageNumber(2l);
 
@@ -180,7 +179,7 @@ public class PayoutDaoSearchIT {
                     .insert(rule.getJdbi());
         }
 
-        searchParams.setGatewayAccountIds(List.of(gatewayAccountId1, gatewayAccountId4));
+        searchParams.setGatewayAccountIds(Set.of(gatewayAccountId1, gatewayAccountId4));
         List<PayoutEntity> payoutList = payoutDao.searchPayouts(searchParams);
         assertThat(payoutList.size(), is(10));
         assertThat(payoutList.get(0).getGatewayAccountId(), is(gatewayAccountId4));

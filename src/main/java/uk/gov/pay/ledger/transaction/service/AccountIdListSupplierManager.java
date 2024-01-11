@@ -2,8 +2,8 @@ package uk.gov.pay.ledger.transaction.service;
 
 import uk.gov.pay.ledger.exception.ValidationException;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -12,17 +12,17 @@ import static java.lang.String.format;
 public class AccountIdListSupplierManager<T> {
 
     private final boolean overrideAccountRestriction;
-    private final List<String> gatewayAccountIds;
+    private final Set<String> gatewayAccountIds;
 
     private Supplier<T> privilegedSupplier;
-    private Function<List<String>, T> supplier;
+    private Function<Set<String>, T> supplier;
 
-    public AccountIdListSupplierManager(Boolean overrideAccountRestriction, List<String> gatewayAccountIds) {
+    public AccountIdListSupplierManager(Boolean overrideAccountRestriction, Set<String> gatewayAccountIds) {
         this.overrideAccountRestriction = Optional.ofNullable(overrideAccountRestriction).orElse(false);
-        this.gatewayAccountIds = gatewayAccountIds != null ? gatewayAccountIds : List.of();
+        this.gatewayAccountIds = gatewayAccountIds != null ? gatewayAccountIds : Set.of();
     }
 
-    public static <U> AccountIdListSupplierManager<U> of(Boolean overrideAccountRestriction, List<String> gatewayAccountIds) {
+    public static <U> AccountIdListSupplierManager<U> of(Boolean overrideAccountRestriction, Set<String> gatewayAccountIds) {
         return new AccountIdListSupplierManager<>(overrideAccountRestriction, gatewayAccountIds);
     }
 
@@ -31,7 +31,7 @@ public class AccountIdListSupplierManager<T> {
         return this;
     }
 
-    public AccountIdListSupplierManager<T> withSupplier(Function<List<String>, T> supplier) {
+    public AccountIdListSupplierManager<T> withSupplier(Function<Set<String>, T> supplier) {
         this.supplier = supplier;
         return this;
     }

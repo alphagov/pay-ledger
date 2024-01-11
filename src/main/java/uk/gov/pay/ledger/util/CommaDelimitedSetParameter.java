@@ -1,19 +1,21 @@
 package uk.gov.pay.ledger.util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class CommaDelimitedSetParameter {
-    private List<String> elements;
+    private Set<String> elements;
     private String queryString;
 
     public CommaDelimitedSetParameter(String queryString) {
         this.queryString = queryString;
         elements = isBlank(queryString)
-                ? new ArrayList<>()
-                : List.of(queryString.split(","));
+                ? new HashSet<>()
+                : Set.of(queryString.split(","));
     }
 
     public boolean isNotEmpty() {
@@ -24,7 +26,7 @@ public class CommaDelimitedSetParameter {
         return queryString;
     }
 
-    public List<String> getParameters() {
+    public Set<String> getParameters() {
         return elements;
     }
 }

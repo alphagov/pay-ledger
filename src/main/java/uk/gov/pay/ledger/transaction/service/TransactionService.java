@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -84,10 +85,10 @@ public class TransactionService {
     }
 
     public TransactionSearchResponse searchTransactions(TransactionSearchParams searchParams, UriInfo uriInfo) {
-        return searchTransactions(List.of(), searchParams, uriInfo);
+        return searchTransactions(Set.of(), searchParams, uriInfo);
     }
 
-    public TransactionSearchResponse searchTransactions(List<String> gatewayAccountIds,
+    public TransactionSearchResponse searchTransactions(Set<String> gatewayAccountIds,
                                                         TransactionSearchParams searchParams, UriInfo uriInfo) {
         if (!gatewayAccountIds.isEmpty()) {
             searchParams.setAccountIds(gatewayAccountIds);

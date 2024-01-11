@@ -14,6 +14,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PayoutService {
@@ -32,7 +33,7 @@ public class PayoutService {
         payoutDao.upsert(payoutEntity);
     }
 
-    public PayoutSearchResponse searchPayouts(List<String> gatewayAccountIds, PayoutSearchParams searchParams, UriInfo uriInfo) {
+    public PayoutSearchResponse searchPayouts(Set<String> gatewayAccountIds, PayoutSearchParams searchParams, UriInfo uriInfo) {
         if (!gatewayAccountIds.isEmpty()) {
             searchParams.setGatewayAccountIds(gatewayAccountIds);
         }
@@ -64,6 +65,6 @@ public class PayoutService {
     }
 
     public PayoutSearchResponse searchPayouts(PayoutSearchParams searchParams, UriInfo uriInfo) {
-        return searchPayouts(List.of(), searchParams, uriInfo);
+        return searchPayouts(Set.of(), searchParams, uriInfo);
     }
 }

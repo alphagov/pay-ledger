@@ -10,6 +10,7 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -48,7 +49,7 @@ class GatewayAccountMetadataDaoIT {
         gatewayAccountMetadataDao.upsert(gatewayAccountId2, "test-key-3");
 
         List<String> keysForGatewayAccount =
-                gatewayAccountMetadataDao.findMetadataKeysForGatewayAccounts(List.of(gatewayAccountId1));
+                gatewayAccountMetadataDao.findMetadataKeysForGatewayAccounts(Set.of(gatewayAccountId1));
 
         MatcherAssert.assertThat(keysForGatewayAccount.size(), is(2));
 

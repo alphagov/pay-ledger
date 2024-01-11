@@ -26,6 +26,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.time.ZonedDateTime.now;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -33,11 +34,11 @@ import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aPersistedTransactionList;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TransactionDaoSearchIT {
@@ -74,7 +75,7 @@ public class TransactionDaoSearchIT {
                 .withAgreementId("an-agreement-id")
                 .insert(rule.getJdbi());
 
-        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
+        searchParams.setAccountIds(Set.of(transactionFixture.getGatewayAccountId()));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -112,7 +113,7 @@ public class TransactionDaoSearchIT {
                 .insert(rule.getJdbi());
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -136,7 +137,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setEmail("testemail1");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -163,7 +164,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setExactReferenceMatch(true);
         searchParams.setReference("reference 1");
 
@@ -191,7 +192,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setExactReferenceMatch(false);
         searchParams.setReference("1");
 
@@ -220,7 +221,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setCardHolderName("name1");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -245,7 +246,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setFromDate(now().minusDays(1).minusMinutes(10).toString());
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -268,7 +269,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setToDate(now().minusDays(2).plusMinutes(10).toString());
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -290,7 +291,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setDisplaySize(10L);
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -315,7 +316,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setDisplaySize(2L);
         searchParams.setPageNumber(3L);
 
@@ -347,7 +348,7 @@ public class TransactionDaoSearchIT {
 
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setState("created");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -369,7 +370,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setLastDigitsCardNumber("1234");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -388,7 +389,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setFirstDigitsCardNumber("123456");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -407,7 +408,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setCardBrands(new CommaDelimitedSetParameter("visa,mastercard"));
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -425,7 +426,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setCardBrands(new CommaDelimitedSetParameter("visa"));
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -443,7 +444,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setCardHolderName("smith");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -462,7 +463,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setTransactionType(TransactionType.REFUND);
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
@@ -482,7 +483,7 @@ public class TransactionDaoSearchIT {
                     .insert(rule.getJdbi());
         }
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -503,7 +504,7 @@ public class TransactionDaoSearchIT {
                 .withTransactionType("PAYMENT")
                 .insert(rule.getJdbi());
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -646,7 +647,7 @@ public class TransactionDaoSearchIT {
                 .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
                 .insert(rule.getJdbi());
 
-        searchParams.setAccountIds(List.of("1"));
+        searchParams.setAccountIds(Set.of("1"));
         searchParams.setReference("ref");
         searchParams.setCardHolderName("test");
         searchParams.setEmail("test@example.org");
@@ -689,7 +690,7 @@ public class TransactionDaoSearchIT {
                 .withCreatedDate(now(ZoneOffset.UTC).minusDays(1))
                 .insert(rule.getJdbi());
 
-        searchParams.setAccountIds(List.of("1", "2"));
+        searchParams.setAccountIds(Set.of("1", "2"));
 
         var searchParamsList = List.of("ex-1", "ex-2", "ex-3", "ex-4");
         var doNotIncludeList = List.of("ex-5");
@@ -733,7 +734,7 @@ public class TransactionDaoSearchIT {
                 .withCreatedDate(now(ZoneOffset.UTC).minusDays(6))
                 .insert(rule.getJdbi());
 
-        searchParams.setAccountIds(List.of("1"));
+        searchParams.setAccountIds(Set.of("1"));
         searchParams.setDisplaySize(2L);
 
         List<TransactionEntity> firstPage = transactionDao.cursorTransactionSearch(searchParams, null, null);
@@ -797,7 +798,7 @@ public class TransactionDaoSearchIT {
                 .insert(rule.getJdbi());
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setReference("reference");
         searchParams.setEmail("example.org");
         searchParams.setCardHolderName("smith");
@@ -846,7 +847,7 @@ public class TransactionDaoSearchIT {
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        searchParams.setAccountIds(List.of(transactionFixture.getGatewayAccountId()));
+        searchParams.setAccountIds(Set.of(transactionFixture.getGatewayAccountId()));
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);
 
@@ -1001,7 +1002,7 @@ public class TransactionDaoSearchIT {
         }
 
         TransactionSearchParams searchParams = new TransactionSearchParams();
-        searchParams.setAccountIds(List.of(gatewayAccountId));
+        searchParams.setAccountIds(Set.of(gatewayAccountId));
         searchParams.setAgreementId("agreement-id-1");
 
         List<TransactionEntity> transactionList = transactionDao.searchTransactions(searchParams);

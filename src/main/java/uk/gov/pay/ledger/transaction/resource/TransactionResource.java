@@ -50,6 +50,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
@@ -204,7 +205,7 @@ public class TransactionResource {
         TransactionSearchParams transactionSearchParams = Optional.ofNullable(searchParams)
                 .orElse(new TransactionSearchParams());
         validateSearchParams(transactionSearchParams, commaSeparatedGatewayAccountIds);
-        List<String> gatewayAccountIds = commaSeparatedGatewayAccountIds != null ? commaSeparatedGatewayAccountIds.getParameters() : List.of();
+        Set<String> gatewayAccountIds = commaSeparatedGatewayAccountIds != null ? commaSeparatedGatewayAccountIds.getParameters() : Set.of();
         AccountIdListSupplierManager<TransactionSearchResponse> accountIdSupplierManager =
                 AccountIdListSupplierManager.of(overrideAccountRestriction, gatewayAccountIds);
         return accountIdSupplierManager

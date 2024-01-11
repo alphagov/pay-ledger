@@ -9,6 +9,7 @@ import uk.gov.pay.ledger.transaction.search.model.TransactionView;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.verify;
 public class AccountIdSupplierManagerTest {
 
     @Mock
-    private Function<List<String>, Optional<TransactionView>> supplier;
+    private Function<Set<String>, Optional<TransactionView>> supplier;
 
     @Mock
     private Supplier<Optional<TransactionView>> privilegedSupplier;
@@ -41,17 +42,17 @@ public class AccountIdSupplierManagerTest {
 
     @Test
     public void givenAccountIdProvidedWhenRequiredUsesSupplier() {
-        setUpAndGet(null, List.of("some-id"));
+        setUpAndGet(null, Set.of("some-id"));
 
-        verify(supplier).apply(List.of("some-id"));
+        verify(supplier).apply(Set.of("some-id"));
         verify(privilegedSupplier, never()).get();
     }
 
     @Test
     public void givenAccountIdProvidedWhenNotRequiredUsesSupplier() {
-        setUpAndGet(true, List.of("some-id"));
+        setUpAndGet(true, Set.of("some-id"));
 
-        verify(supplier).apply(List.of("some-id"));
+        verify(supplier).apply(Set.of("some-id"));
         verify(privilegedSupplier, never()).get();
     }
 
@@ -63,7 +64,7 @@ public class AccountIdSupplierManagerTest {
         verify(privilegedSupplier).get();
     }
 
-    private void setUpAndGet(Boolean overrideAccountRestriction, List<String> gatewayAccountId) {
+    private void setUpAndGet(Boolean overrideAccountRestriction, Set<String> gatewayAccountId) {
         new AccountIdListSupplierManager(overrideAccountRestriction, gatewayAccountId)
                 .withPrivilegedSupplier(privilegedSupplier)
                 .withSupplier(supplier)
