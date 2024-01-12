@@ -393,7 +393,7 @@ public class TransactionResourceSearchIT {
         String targetGatewayAccountId2 = "456";
         String targetGatewayAccountId3 = "1337";
 
-        TransactionFixture targetPayment = aTransactionFixture()
+        aTransactionFixture()
                 .withTransactionType("PAYMENT")
                 .withState(TransactionState.SUBMITTED)
                 .withGatewayAccountId(targetGatewayAccountId)
