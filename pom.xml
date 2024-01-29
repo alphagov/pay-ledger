@@ -12,7 +12,7 @@
 
         <dropwizard.version>2.1.11</dropwizard.version>
         <jackson.version>2.16.1</jackson.version>
-        <testcontainers.version>1.19.3</testcontainers.version>
+        <testcontainers.version>1.19.4</testcontainers.version>
         <postgresql.version>42.7.1</postgresql.version>
         <pay-java-commons.version>1.0.20240109102542</pay-java-commons.version>
         <junit5.version>5.10.1</junit5.version>
