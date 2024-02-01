@@ -10,7 +10,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>uk.gov.pay.ledger.app.LedgerApp</mainClass>
 
-        <dropwizard.version>2.1.11</dropwizard.version>
+        <dropwizard.version>2.1.12</dropwizard.version>
         <jackson.version>2.16.1</jackson.version>
         <testcontainers.version>1.19.4</testcontainers.version>
         <postgresql.version>42.7.1</postgresql.version>
