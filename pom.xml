@@ -9,18 +9,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>uk.gov.pay.ledger.app.LedgerApp</mainClass>
-
-        <dropwizard.version>2.1.12</dropwizard.version>
-        <jackson.version>2.16.1</jackson.version>
-        <testcontainers.version>1.19.5</testcontainers.version>
-        <postgresql.version>42.7.2</postgresql.version>
         <pay-java-commons.version>1.0.20240205110547</pay-java-commons.version>
-        <junit5.version>5.10.2</junit5.version>
         <prometheus.version>0.16.0</prometheus.version>
         <surefire.version>3.2.5</surefire.version>
-        <guice.version>5.1.0</guice.version>
-        <rest-assured.version>5.4.0</rest-assured.version>
-        <swaggger-version>2.2.20</swaggger-version>
+        <swagger.version>2.2.20</swagger.version>
         <PACT_BROKER_URL/>
         <PACT_BROKER_USERNAME/>
         <PACT_BROKER_PASSWORD/>
@@ -28,18 +20,33 @@
         <PACT_CONSUMER_TAG/>
     </properties>
 
-    <parent>
-        <groupId>io.dropwizard</groupId>
-        <artifactId>dropwizard-dependencies</artifactId>
-        <version>2.1.12</version>
-    </parent>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>io.dropwizard</groupId>
-                <artifactId>dropwizard-bom</artifactId>
-                <version>${dropwizard.version}</version>
+                <artifactId>dropwizard-dependencies</artifactId>
+                <version>3.0.6</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice-bom</artifactId>
+                <version>5.1.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-bom</artifactId>
+                <version>1.12.661</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>1.19.5</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -47,21 +54,8 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient</artifactId>
-            <version>${prometheus.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_servlet</artifactId>
-            <version>${prometheus.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_dropwizard</artifactId>
-            <version>${prometheus.version}</version>
-        </dependency>
+        <!-- Main dependencies that are imported from one of the BOMs specified
+             in <dependencyManagement> so no explicit versions needed -->
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
@@ -73,11 +67,6 @@
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
@@ -96,9 +85,55 @@
             <artifactId>dropwizard-json-logging</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-csv</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sqs</artifactId>
+        </dependency>
+
+        <!-- Main dependencies that need explicit versions -->
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_servlet</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_dropwizard</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
+            <version>42.7.2</version>
         </dependency>
         <dependency>
             <groupId>uk.gov.service.payments</groupId>
@@ -117,18 +152,13 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.service.payments</groupId>
-            <artifactId>logging</artifactId>
+            <artifactId>logging-dropwizard-3</artifactId>
             <version>${pay-java-commons.version}</version>
         </dependency>
         <dependency>
             <groupId>uk.gov.service.payments</groupId>
             <artifactId>queue</artifactId>
             <version>${pay-java-commons.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-            <version>${guice.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.bundles.repackaged</groupId>
@@ -142,11 +172,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-sqs</artifactId>
-            <version>1.12.656</version>
-        </dependency>
-        <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sns</artifactId>
             <version>2.24.0</version>
@@ -157,42 +182,27 @@
             <version>2.10.1</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-csv</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.dhatim</groupId>
             <artifactId>dropwizard-sentry</artifactId>
             <version>2.1.2-4</version>
         </dependency>
-        <!--test dependencies-->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit5.version}</version>
-            <scope>test</scope>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>${swagger.version}</version>
+            <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+
+        <!-- Test dependencies that are imported from one of the BOMs specified
+             in <dependencyManagement> so no explicit versions needed -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit5.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -200,6 +210,23 @@
             <artifactId>dropwizard-testing</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Test dependencies that need explicit versions -->
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
@@ -215,7 +242,13 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>${rest-assured.version}</version>
+            <version>5.4.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.modules</groupId>
+            <artifactId>dropwizard-testing-junit4</artifactId>
+            <version>3.0.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -223,24 +256,12 @@
             <artifactId>pact-jvm-provider-junit_2.12</artifactId>
             <version>3.6.15</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-lang3</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>au.com.dius</groupId>
             <artifactId>pact-jvm-consumer-junit_2.12</artifactId>
             <version>3.6.15</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-lang3</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>
@@ -267,20 +288,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>${swaggger-version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.exparity</groupId>
             <artifactId>hamcrest-date</artifactId>
             <version>2.0.8</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -436,7 +446,7 @@
             <plugin>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-maven-plugin</artifactId>
-                <version>${swaggger-version}</version>
+                <version>${swagger.version}</version>
                 <configuration>
                     <outputPath>openapi</outputPath>
                     <outputFileName>ledger_spec</outputFileName>

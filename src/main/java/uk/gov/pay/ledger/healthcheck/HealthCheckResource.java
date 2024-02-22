@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.healthcheck;
 import com.codahale.metrics.health.HealthCheck;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.setup.Environment;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

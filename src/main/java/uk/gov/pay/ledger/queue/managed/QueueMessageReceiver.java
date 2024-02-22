@@ -1,8 +1,8 @@
 package uk.gov.pay.ledger.queue.managed;
 
 import com.google.inject.Inject;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.lifecycle.Managed;
-import io.dropwizard.setup.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.app.LedgerConfig;
