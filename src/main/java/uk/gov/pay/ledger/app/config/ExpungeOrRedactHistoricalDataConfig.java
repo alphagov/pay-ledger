@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.app.config;
 
-import io.dropwizard.Configuration;
+
+import io.dropwizard.core.Configuration;
 
 import javax.validation.constraints.NotNull;
 
