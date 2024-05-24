@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>uk.gov.pay.ledger.app.LedgerApp</mainClass>
-        <pay-java-commons.version>1.0.20240522093247</pay-java-commons.version>
+        <pay-java-commons.version>1.0.20240523151942</pay-java-commons.version>
         <prometheus.version>0.16.0</prometheus.version>
         <surefire.version>3.2.5</surefire.version>
         <swagger.version>2.2.22</swagger.version>
@@ -196,6 +196,12 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.jpa</artifactId>
+            <version>2.7.15</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Test dependencies that are imported from one of the BOMs specified
