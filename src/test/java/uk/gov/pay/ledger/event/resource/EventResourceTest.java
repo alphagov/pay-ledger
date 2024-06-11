@@ -17,6 +17,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -53,7 +54,7 @@ public class EventResourceTest {
     
     @Test
     public void shouldReturn422IfEventTypeNotSuppliedToWriteEventsEndpoint() {
-        var now = ZonedDateTime.now(ZoneOffset.UTC);
+        var now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
 
         var params = new JSONArray();
 
@@ -72,7 +73,7 @@ public class EventResourceTest {
 
     @Test
     public void shouldReturn422IfTimestampNotSuppliedToWriteEventsEndpoint() {
-        var now = ZonedDateTime.now(ZoneOffset.UTC);
+        var now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
 
         var params = new JSONArray();
 
@@ -91,7 +92,7 @@ public class EventResourceTest {
 
     @Test
     public void shouldReturn422IfResourceExternalIdNotSuppliedToWriteEventsEndpoint() {
-        var now = ZonedDateTime.now(ZoneOffset.UTC);
+        var now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
 
         var params = new JSONArray();
 
@@ -110,7 +111,7 @@ public class EventResourceTest {
 
     @Test
     public void shouldReturn422IfResourceTypeNotSuppliedToWriteEventsEndpoint() {
-        var now = ZonedDateTime.now(ZoneOffset.UTC);
+        var now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
 
         var params = new JSONArray();
 
@@ -129,7 +130,6 @@ public class EventResourceTest {
 
     @Test
     public void shouldReturn422AndTwoMessagesIfEventTypeAndTimestampNotSuppliedToWriteEventsEndpoint() {
-        var now = ZonedDateTime.now(ZoneOffset.UTC);
 
         var params = new JSONArray();
 

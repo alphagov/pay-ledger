@@ -22,6 +22,7 @@ import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String email = "j.doe@example.org";
     private String cardholderName = "J Doe";
     private JsonElement externalMetadata = null;
-    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
     private String transactionDetails = "{}";
     private Integer eventCount = 1;
     private String cardBrand = "visa";

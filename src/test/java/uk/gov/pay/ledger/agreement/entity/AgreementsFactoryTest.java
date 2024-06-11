@@ -9,6 +9,7 @@ import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -96,7 +97,7 @@ class AgreementsFactoryTest {
 
     @Test
     public void shouldConvertCancelledEventDigestToAgreementEntity() {
-        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
         var event = aQueuePaymentEventFixture()
                 .withEventType("AGREEMENT_CANCELLED_BY_USER")
                 .withResourceType(ResourceType.AGREEMENT)
@@ -128,8 +129,8 @@ class AgreementsFactoryTest {
 
     @Test
     public void shouldNotReturnUSerEmailIfNewerEventOverWritesIt() {
-        var now = ZonedDateTime.now(ZoneOffset.UTC).minusHours(2L);
-        var secondNow = ZonedDateTime.now(ZoneOffset.UTC);
+        var now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS).minusHours(2L);
+        var secondNow = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
         var event1 = aQueuePaymentEventFixture()
                 .withEventType("AGREEMENT_CANCELLED_BY_USER")
                 .withResourceType(ResourceType.AGREEMENT)
@@ -174,9 +175,9 @@ class AgreementsFactoryTest {
 
     @Test
     public void shouldOverwriteLatestCancelledStateByEventDigestWhenThereIsANewerEvent() {
-        var now = ZonedDateTime.now(ZoneOffset.UTC).minusHours(2L);
-        var secondNow = ZonedDateTime.now(ZoneOffset.UTC).minusHours(1L);
-        var thirdNow = ZonedDateTime.now(ZoneOffset.UTC);
+        var now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS).minusHours(2L);
+        var secondNow = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS).minusHours(1L);
+        var thirdNow = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
         var event1 = aQueuePaymentEventFixture()
                 .withEventType("AGREEMENT_CANCELLED_BY_USER")
                 .withResourceType(ResourceType.AGREEMENT)

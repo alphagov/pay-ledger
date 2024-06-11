@@ -44,7 +44,7 @@ public class EventResourceAgreementIT {
 
     @Test
     public void shouldWriteCancelledEvent() {
-        var now = ZonedDateTime.now(ZoneOffset.UTC);
+        var now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
         insertAgreementCreatedEventFixture();
         
         var params = new JSONArray();

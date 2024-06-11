@@ -16,6 +16,7 @@ import uk.gov.pay.ledger.util.fixture.PaymentInstrumentFixture;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -69,7 +70,7 @@ class AgreementDaoIT {
         var paymentInstrumentFixture = PaymentInstrumentFixture.aPaymentInstrumentFixture(
                 paymentInstrumentExternalId,
                 agreementFixture.getExternalId(),
-                ZonedDateTime.now(ZoneOffset.UTC)
+                ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS)
         );
         agreementDao.upsert(agreementFixture.toEntity());
         paymentInstrumentDao.upsert(paymentInstrumentFixture.toEntity());
