@@ -8,6 +8,7 @@ import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.now;
@@ -33,7 +34,7 @@ public class PayoutDaoIT {
 
     @Test
     public void shouldFetchPayout() {
-        var createdDate = now(UTC);
+        var createdDate = now(UTC).truncatedTo(ChronoUnit.MICROS);
         var paidOutDate = createdDate.minusDays(1);
         var id = RandomStringUtils.randomNumeric(4);
         var gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
@@ -70,7 +71,7 @@ public class PayoutDaoIT {
 
     @Test
     public void shouldUpsertNonExistentPayout() {
-        var createdDate = now(UTC);
+        var createdDate = now(UTC).truncatedTo(ChronoUnit.MICROS);
         var paidOutDate = createdDate.minusDays(1);
 
         var payoutEntity = aPayoutEntity()
@@ -99,7 +100,7 @@ public class PayoutDaoIT {
 
     @Test
     public void shouldUpsertExistingPayout() {
-        var createdDate = now(UTC);
+        var createdDate = now(UTC).truncatedTo(ChronoUnit.MICROS);
         var paidOutDate = createdDate.minusDays(1);
         var gatewayAccountId = RandomStringUtils.randomAlphanumeric(10);
 
@@ -138,7 +139,7 @@ public class PayoutDaoIT {
 
     @Test
     public void shouldNotUpsertPayoutIfPayoutConsistsOfFewerEvents() {
-        ZonedDateTime createdDate = now(UTC);
+        ZonedDateTime createdDate = now(UTC).truncatedTo(ChronoUnit.MICROS);
         var payoutEntity = aPayoutEntity()
                 .withAmount(100L)
                 .withGatewayPayoutId(gatewayPayoutId)

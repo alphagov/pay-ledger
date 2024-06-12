@@ -7,6 +7,7 @@ import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.payout.state.PayoutState;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
     private String serviceId;
     private boolean live;
     private Long amount;
-    private ZonedDateTime createdDate = now(UTC);
+    private ZonedDateTime createdDate = now(UTC).truncatedTo(ChronoUnit.MICROS);
     private ZonedDateTime paidOutDate;
     private PayoutState state;
     private Integer eventCount;
@@ -101,8 +102,8 @@ public class PayoutFixture implements DbFixture<PayoutFixture, PayoutEntity> {
         private Long id = RandomUtils.nextLong(1, 99999);
         private String gatewayPayoutId = RandomStringUtils.randomAlphanumeric(10);
         private Long amount = 1000L;
-        private ZonedDateTime createdDate = now(UTC).minusDays(1L);
-        private ZonedDateTime paidOutDate = now(UTC);
+        private ZonedDateTime createdDate = now(UTC).truncatedTo(ChronoUnit.MICROS).minusDays(1L);
+        private ZonedDateTime paidOutDate = now(UTC).truncatedTo(ChronoUnit.MICROS);
         private PayoutState state = PayoutState.PAID_OUT;
         private Integer eventCount = 1;
         private String payoutDetails = "{}";

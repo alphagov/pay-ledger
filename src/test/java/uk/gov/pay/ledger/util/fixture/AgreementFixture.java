@@ -9,6 +9,7 @@ import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEntity> {
 
@@ -20,7 +21,7 @@ public class AgreementFixture implements DbFixture<AgreementFixture, AgreementEn
     private String description = "a description";
     private AgreementStatus status = AgreementStatus.ACTIVE;
     private boolean live = false;
-    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
     private Integer eventCount = 1;
     private String userIdentifier;
     private ZonedDateTime cancelledDate;

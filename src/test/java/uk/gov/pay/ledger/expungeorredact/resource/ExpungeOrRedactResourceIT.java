@@ -20,6 +20,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MICROS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
@@ -51,14 +52,15 @@ class ExpungeOrRedactResourceIT {
 
     @Test
     void shouldRedactTransactionsCorrectlyOnFirstAndSubsequentInvokes() {
+        var now = ZonedDateTime.now(UTC).truncatedTo(MICROS);
         TransactionEntity txToRedactOnFirstRun1 = createTransactionAndEvent("should-redact-on-first-run",
-                Instant.now().minus(30, DAYS).atZone(UTC));
+                now.minusDays(30));
         TransactionEntity txToRedactOnFirstRun2 = createTransactionAndEvent("should-redact-on-first-run",
-                Instant.now().minus(20, DAYS).atZone(UTC));
+                now.minusDays(20));
         TransactionEntity txToRedactOnSubsequentRun1 = createTransactionAndEvent("should-redact-on-second-run",
-                Instant.now().minus(11, DAYS).atZone(UTC));
+                now.minusDays(11));
         TransactionEntity txThatShouldNotBeProcessed = createTransactionAndEvent("should-not-redact-not-older-than-2-days",
-                Instant.now().atZone(UTC));
+                now);
 
         given().port(port)
                 .contentType(JSON)

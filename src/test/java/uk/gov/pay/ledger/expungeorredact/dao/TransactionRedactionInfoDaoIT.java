@@ -8,9 +8,11 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MICROS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
@@ -32,7 +34,7 @@ class TransactionRedactionInfoDaoIT {
 
     @Test
     void shouldCreateAndReturnLastProcessedTransactionCreatedDate() {
-        ZonedDateTime transactionDate = Instant.now().atZone(UTC);
+        ZonedDateTime transactionDate = Instant.now().atZone(UTC).truncatedTo(MICROS);
         transactionRedactionInfoDao.insert(transactionDate);
 
         ZonedDateTime createdDateOfLastProcessedTransaction =
@@ -43,10 +45,10 @@ class TransactionRedactionInfoDaoIT {
 
     @Test
     void shouldUpdateTransactionRedactionInfoCorrectly() {
-        ZonedDateTime transactionDate = Instant.now().atZone(UTC);
+        ZonedDateTime transactionDate = Instant.now().atZone(UTC).truncatedTo(MICROS);
         transactionRedactionInfoDao.insert(transactionDate);
 
-        ZonedDateTime transactionDateToUpdate = Instant.now().plus(10, DAYS).atZone(UTC);
+        ZonedDateTime transactionDateToUpdate = Instant.now().plus(10, DAYS).atZone(UTC).truncatedTo(MICROS);
         transactionRedactionInfoDao.update(transactionDateToUpdate);
 
         ZonedDateTime createdDateOfLastProcessedTransaction =

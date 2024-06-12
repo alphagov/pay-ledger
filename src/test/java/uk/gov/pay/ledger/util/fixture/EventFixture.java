@@ -9,6 +9,7 @@ import uk.gov.pay.ledger.event.model.ResourceType;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class EventFixture implements DbFixture<EventFixture, EventEntity> {
     private Long id = RandomUtils.nextLong(1, 99999);
@@ -18,7 +19,7 @@ public class EventFixture implements DbFixture<EventFixture, EventEntity> {
     private ResourceType resourceType = ResourceType.PAYMENT;
     private String resourceExternalId = RandomStringUtils.randomAlphanumeric(20);
     private String parentResourceExternalId = StringUtils.EMPTY;
-    private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
+    private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
     private String eventType = "PAYMENT_CREATED";
     private String eventData = "{\"event_data\": \"event data\"}";
     private boolean reprojectDomainObject;
