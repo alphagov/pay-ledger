@@ -12,7 +12,7 @@ import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
 import javax.inject.Inject;
-import java.time.Clock;
+import java.time.InstantSource;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +29,7 @@ public class ExpungeOrRedactService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpungeOrRedactService.class);
     private final TransactionRedactionInfoDao transactionRedactionInfoDao;
     private final ExpungeOrRedactHistoricalDataConfig expungeOrRedactHistoricalDataConfig;
-    private final Clock clock;
+    private final InstantSource instantSource;
     private final TransactionDao transactionDao;
     private final EventDao eventDao;
 
@@ -55,12 +55,12 @@ public class ExpungeOrRedactService {
     public ExpungeOrRedactService(TransactionDao transactionDao, EventDao eventDao,
                                   TransactionRedactionInfoDao transactionRedactionInfoDao,
                                   LedgerConfig ledgerConfig,
-                                  Clock clock) {
+                                  InstantSource instantSource) {
         this.transactionDao = transactionDao;
         this.eventDao = eventDao;
         this.transactionRedactionInfoDao = transactionRedactionInfoDao;
         this.expungeOrRedactHistoricalDataConfig = ledgerConfig.getExpungeOrRedactHistoricalDataConfig();
-        this.clock = clock;
+        this.instantSource = instantSource;
     }
 
     public void redactOrDeleteData() {
@@ -123,7 +123,7 @@ public class ExpungeOrRedactService {
     }
 
     private ZonedDateTime getRedactTransactionsUpToDate() {
-        return clock.instant()
+        return instantSource.instant()
                 .minus(expungeOrRedactHistoricalDataConfig.getExpungeOrRedactDataOlderThanDays(), DAYS)
                 .atZone(UTC);
     }

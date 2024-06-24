@@ -20,14 +20,13 @@ import uk.gov.pay.ledger.expungeorredact.dao.TransactionRedactionInfoDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
-import java.time.Clock;
 import java.time.Instant;
+import java.time.InstantSource;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static ch.qos.logback.classic.Level.INFO;
-import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.parse;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -70,13 +69,13 @@ class ExpungeOrRedactServiceTest {
     ExpungeOrRedactService expungeOrRedactService;
 
     String SYSTEM_INSTANT = "2022-03-03T10:15:30Z";
-    Clock clock;
+    InstantSource instantSource;
 
     @BeforeEach
     void setUp() {
-        clock = Clock.fixed(Instant.parse(SYSTEM_INSTANT), UTC);
+        instantSource = InstantSource.fixed(Instant.parse(SYSTEM_INSTANT));
         when(mockLedgerConfig.getExpungeOrRedactHistoricalDataConfig()).thenReturn(mockExpungeOrRedactHistoricalDataConfig);
-        expungeOrRedactService = new ExpungeOrRedactService(mockTransactionDao, mockEventDao, mockTransactionRedactionInfoDao, mockLedgerConfig, clock);
+        expungeOrRedactService = new ExpungeOrRedactService(mockTransactionDao, mockEventDao, mockTransactionRedactionInfoDao, mockLedgerConfig, instantSource);
     }
 
     @Test

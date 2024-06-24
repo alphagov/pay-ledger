@@ -31,7 +31,7 @@ import uk.gov.pay.ledger.transactionmetadata.dao.TransactionMetadataDao;
 import uk.gov.pay.ledger.transactionsummary.dao.TransactionSummaryDao;
 import uk.gov.service.payments.commons.queue.sqs.SqsQueueService;
 
-import java.time.Clock;
+import java.time.InstantSource;
 
 public class LedgerModule extends AbstractModule {
     private final LedgerConfig configuration;
@@ -53,6 +53,7 @@ public class LedgerModule extends AbstractModule {
         bind(LedgerConfig.class).toInstance(configuration);
         bind(Environment.class).toInstance(environment);
         bind(Jdbi.class).toInstance(jdbi);
+        bind(InstantSource.class).toInstance(InstantSource.system());
     }
 
     @Provides
@@ -140,12 +141,6 @@ public class LedgerModule extends AbstractModule {
     @Singleton
     public PaymentInstrumentDao providePaymentInstrumentDao() {
         return new PaymentInstrumentDao(jdbi);
-    }
-
-    @Provides
-    @Singleton
-    public Clock systemUtcClock() {
-        return Clock.systemUTC();
     }
 
     @Provides
