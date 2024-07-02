@@ -101,8 +101,6 @@ public class TransactionResource {
                                    @QueryParam("parent_external_id") String parentTransactionExternalId,
                                    @DefaultValue("2") @QueryParam("status_version") int statusVersion
     ) {
-        LOGGER.info("Get transaction request: {}", transactionExternalId);
-
         AccountIdSupplierManager<Optional<TransactionView>> accountIdSupplierManager =
                 AccountIdSupplierManager.of(overrideAccountRestriction, gatewayAccountId);
 
@@ -235,9 +233,6 @@ public class TransactionResource {
                                                    "Otherwise these transaction states will all be mapped to `failed` status", schema = @Schema(defaultValue = "2"))
                                            @DefaultValue("2") @QueryParam("status_version") int statusVersion,
                                            @Context UriInfo uriInfo) {
-
-        LOGGER.info("Get transaction event: external_id [{}], gateway_account_id [{}]",
-                transactionExternalId, gatewayAccountId);
         return transactionService.findTransactionEvents(transactionExternalId, gatewayAccountId, includeAllEvents, statusVersion);
     }
 
@@ -260,9 +255,6 @@ public class TransactionResource {
             @Parameter(example = "REFUND", description = "The type of transactions to return")
             @QueryParam("transaction_type") TransactionType transactionType
     ) {
-        LOGGER.info("Get transactions for parent transaction: [{}], gateway_account_id [{}]",
-                parentTransactionExternalId, gatewayAccountId);
-
         return transactionService.getTransactions(parentTransactionExternalId, gatewayAccountId, transactionType);
     }
 
