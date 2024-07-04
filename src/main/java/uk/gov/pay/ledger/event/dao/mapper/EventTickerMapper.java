@@ -19,7 +19,7 @@ public class EventTickerMapper implements RowMapper<EventTicker> {
 
     @Override
     public EventTicker map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
-        Boolean isRecurring = Objects.equals(resultSet.getString("authorisation_mode"), AGREEMENT.getName());
+        boolean isRecurring = Objects.equals(resultSet.getString("authorisation_mode"), AGREEMENT.getName());
         return new EventTicker(resultSet.getLong("id"),
                 ResourceType.valueOf(resultSet.getString("type").toUpperCase(Locale.UK)),
                 resultSet.getString("resource_external_id"),

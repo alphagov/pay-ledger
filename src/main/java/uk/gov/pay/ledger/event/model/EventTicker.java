@@ -41,15 +41,15 @@ public class EventTicker {
     @Schema(example = "CARD_API")
     private String source;
     @Schema(example = "true")
-    private Boolean isMoto;
+    private boolean isMoto;
     @Schema(example = "true")
-    private Boolean isRecurring;
+    private boolean isRecurring;
 
     public EventTicker() { }
 
     public EventTicker(Long id, ResourceType resourceType, String resourceExternalId,
                        ZonedDateTime eventDate, String eventType, String cardBrand, String transactionType, String paymentProvider, String gatewayAccountId, Long amount,
-                       String serviceExternalId, String walletType, String source, Boolean isMoto, Boolean isRecurring) {
+                       String serviceExternalId, String walletType, String source, boolean isMoto, boolean isRecurring) {
         this.id = id;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
@@ -146,7 +146,7 @@ public class EventTicker {
 
     public String getSource() { return source; }
     
-    public Boolean getIsMoto() { return isMoto; }
+    public boolean getIsMoto() { return isMoto; }
     
-    public Boolean getIsRecurring() { return isRecurring; }
+    public boolean getIsRecurring() { return isRecurring; }
 }

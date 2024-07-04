@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.EventTicker;
-import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.exception.ErrorResponse;
 import uk.gov.pay.ledger.queue.EventMessage;
 import uk.gov.pay.ledger.queue.EventMessageDto;
@@ -22,7 +21,6 @@ import uk.gov.service.payments.commons.queue.exception.QueueException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -30,17 +28,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static net.logstash.logback.argument.StructuredArguments.e;
 import static net.logstash.logback.argument.StructuredArguments.kv;
-import static uk.gov.pay.ledger.event.model.SalientEventType.USER_APPROVED_FOR_CAPTURE;
-import static uk.gov.pay.ledger.event.model.SalientEventType.USER_APPROVED_FOR_CAPTURE_AWAITING_SERVICE_APPROVAL;
 
 @Path("/v1/event")
 @Produces(APPLICATION_JSON)

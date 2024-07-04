@@ -1,10 +1,7 @@
 package uk.gov.pay.ledger.event.dao;
 
-import org.jdbi.v3.core.statement.DefinedAttributeTemplateEngine;
-import org.jdbi.v3.core.statement.TemplateEngine;
 import org.jdbi.v3.sqlobject.CreateSqlObject;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
-import org.jdbi.v3.sqlobject.config.UseTemplateEngine;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.customizer.BindList;
@@ -18,7 +15,6 @@ import uk.gov.pay.ledger.event.dao.mapper.EventMapper;
 import uk.gov.pay.ledger.event.dao.mapper.EventTickerMapper;
 import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventTicker;
-import uk.gov.pay.ledger.event.model.SalientEventType;
 
 import java.time.ZonedDateTime;
 import java.util.List;
