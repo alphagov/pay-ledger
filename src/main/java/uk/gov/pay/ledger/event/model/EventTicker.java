@@ -34,11 +34,22 @@ public class EventTicker {
     private String gatewayAccountId;
     @Schema(example = "100")
     private Long amount;
+    @Schema(example = "HrMU7UgY7OUM8fgT2bZCTKzvKu")
+    private String serviceExternalId;
+    @Schema(example = "APPLE_PAY")
+    private String walletType;
+    @Schema(example = "CARD_API")
+    private String source;
+    @Schema(example = "true")
+    private Boolean isMoto;
+    @Schema(example = "true")
+    private Boolean isRecurring;
 
     public EventTicker() { }
 
     public EventTicker(Long id, ResourceType resourceType, String resourceExternalId,
-                       ZonedDateTime eventDate, String eventType, String cardBrand, String transactionType, String paymentProvider, String gatewayAccountId, Long amount) {
+                       ZonedDateTime eventDate, String eventType, String cardBrand, String transactionType, String paymentProvider, String gatewayAccountId, Long amount,
+                       String serviceExternalId, String walletType, String source, Boolean isMoto, Boolean isRecurring) {
         this.id = id;
         this.resourceType = resourceType;
         this.resourceExternalId = resourceExternalId;
@@ -49,6 +60,12 @@ public class EventTicker {
         this.paymentProvider = paymentProvider;
         this.gatewayAccountId = gatewayAccountId;
         this.amount = amount;
+        this.serviceExternalId = serviceExternalId;
+        this.walletType = walletType;
+        this.source = source;
+        this.isMoto = isMoto;
+        this.isRecurring = isRecurring;
+        
     }
 
     public Long getId() {
@@ -122,4 +139,14 @@ public class EventTicker {
     public Long getAmount() {
         return amount;
     }
+
+    public String getServiceExternalId() { return serviceExternalId; }
+
+    public String getWalletType() { return walletType; }
+
+    public String getSource() { return source; }
+    
+    public Boolean getIsMoto() { return isMoto; }
+    
+    public Boolean getIsRecurring() { return isRecurring; }
 }

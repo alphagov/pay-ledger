@@ -81,7 +81,8 @@ public interface EventDao {
     List<EventEntity> findEventsForExternalIds(@BindList("externalIds") Set<String> externalIds);
 
     @SqlQuery("SELECT e.id, e.event_type, e.resource_external_id, e.event_date, t.card_brand, t.amount, " +
-            "t.transaction_details->'payment_provider' as payment_provider, t.gateway_account_id, t.type " +
+            "t.transaction_details->>'wallet' as wallet_type, t.transaction_details->>'authorisation_mode' as authorisation_mode, " +
+            "t.transaction_details->>'payment_provider' as payment_provider, t.gateway_account_id, t.source, t.service_id, t.type, t.moto " +
             "FROM event e LEFT JOIN transaction t ON e.resource_external_id = t.external_id " +
             "WHERE (e.event_date between :fromDate AND :toDate) AND t.live ORDER BY e.event_date DESC")
     List<EventTicker> findEventsTickerFromDate(@Bind("fromDate") ZonedDateTime fromDate, @Bind("toDate") ZonedDateTime toDate);
