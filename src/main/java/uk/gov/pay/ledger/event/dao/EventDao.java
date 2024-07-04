@@ -1,18 +1,24 @@
 package uk.gov.pay.ledger.event.dao;
 
+import org.jdbi.v3.core.statement.DefinedAttributeTemplateEngine;
+import org.jdbi.v3.core.statement.TemplateEngine;
 import org.jdbi.v3.sqlobject.CreateSqlObject;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.jdbi.v3.sqlobject.config.UseTemplateEngine;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.customizer.BindList;
+import org.jdbi.v3.sqlobject.customizer.Define;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.jdbi.v3.sqlobject.transaction.Transaction;
+import org.jdbi.v3.stringtemplate4.UseStringTemplateEngine;
 import uk.gov.pay.ledger.event.dao.mapper.EventMapper;
 import uk.gov.pay.ledger.event.dao.mapper.EventTickerMapper;
 import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventTicker;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -80,12 +86,24 @@ public interface EventDao {
             " ORDER BY e.event_date ASC")
     List<EventEntity> findEventsForExternalIds(@BindList("externalIds") Set<String> externalIds);
 
-    @SqlQuery("SELECT e.id, e.event_type, e.resource_external_id, e.event_date, t.card_brand, t.amount, " +
-            "t.transaction_details->>'wallet' as wallet_type, t.transaction_details->>'authorisation_mode' as authorisation_mode, " +
-            "t.transaction_details->>'payment_provider' as payment_provider, t.gateway_account_id, t.source, t.service_id, t.type, t.moto " +
-            "FROM event e LEFT JOIN transaction t ON e.resource_external_id = t.external_id " +
-            "WHERE (e.event_date between :fromDate AND :toDate) AND t.live ORDER BY e.event_date DESC")
-    List<EventTicker> findEventsTickerFromDate(@Bind("fromDate") ZonedDateTime fromDate, @Bind("toDate") ZonedDateTime toDate);
+    @SqlQuery("""
+            SELECT
+            e.id, e.event_type, e.resource_external_id, e.event_date, t.card_brand, t.amount,
+            t.transaction_details->>'wallet' as wallet_type, t.transaction_details->>'authorisation_mode' as authorisation_mode,
+            t.transaction_details->>'payment_provider' as payment_provider, t.gateway_account_id, t.source, t.service_id, t.type, t.moto
+            FROM
+            event e
+            LEFT JOIN transaction t
+            ON e.resource_external_id = t.external_id
+            WHERE (e.event_date between :fromDate AND :toDate)
+            <if(types)>
+            AND e.event_type IN (<eventTypes>)
+            <endif>
+            AND t.live
+            ORDER BY e.event_date DESC
+            """)
+    @UseStringTemplateEngine
+    List<EventTicker> findEventsTickerFromDateAndType(@Bind("fromDate") ZonedDateTime fromDate, @Bind("toDate") ZonedDateTime toDate, @Define("types") boolean filterByType, @BindList(value = "eventTypes", onEmpty = BindList.EmptyHandling.VOID) List<String> eventTypes);
 
     @SqlUpdate("UPDATE event SET event_data = jsonb_set(event_data, '{reference}', '\"" + REDACTED_REFERENCE_NUMBER + "\"', false) " +
             "WHERE resource_external_id = :resourceExternalId")

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.event.model.EventTicker;
+import uk.gov.pay.ledger.event.model.SalientEventType;
 import uk.gov.pay.ledger.exception.ErrorResponse;
 import uk.gov.pay.ledger.queue.EventMessage;
 import uk.gov.pay.ledger.queue.EventMessageDto;
@@ -21,6 +22,7 @@ import uk.gov.service.payments.commons.queue.exception.QueueException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -28,11 +30,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static net.logstash.logback.argument.StructuredArguments.e;
 import static net.logstash.logback.argument.StructuredArguments.kv;
+import static uk.gov.pay.ledger.event.model.SalientEventType.USER_APPROVED_FOR_CAPTURE;
+import static uk.gov.pay.ledger.event.model.SalientEventType.USER_APPROVED_FOR_CAPTURE_AWAITING_SERVICE_APPROVAL;
 
 @Path("/v1/event")
 @Produces(APPLICATION_JSON)
@@ -49,7 +57,7 @@ public class EventResource {
         this.eventMessageHandler = eventMessageHandler;
     }
 
-    
+
     @POST
     @Timed
     @Operation(
@@ -86,7 +94,7 @@ public class EventResource {
     @Timed
     @Operation(
             operationId = "listEvents",
-            summary = "Get list of events between a date/time range",
+            summary = "Get list of events between a date/time range and event type",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EventTicker.class)))),
                     @ApiResponse(responseCode = "422", description = "Missing query parameters", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -96,7 +104,14 @@ public class EventResource {
     public List<EventTicker> eventTickerList(@NotEmpty @Parameter(description = "from date of events to be searched (this date is inclusive).", required = true, example = "\"2015-08-14T12:35:00Z\"")
                                              @QueryParam("from_date") String fromDate,
                                              @NotEmpty @Parameter(description = "to date of events to be searched (this date is exclusive)", required = true, example = "\"2015-08-14T12:35:00Z\"")
-                                             @QueryParam("to_date") String toDate) {
-        return eventDao.findEventsTickerFromDate(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
+                                             @QueryParam("to_date") String toDate,
+                                             @Parameter(description = "event types to find", example = "PAYMENT_CREATED") @QueryParam("event_types") List<String> eventTypes) {
+        boolean filterByType = !eventTypes.isEmpty();
+        return eventDao.findEventsTickerFromDateAndType(
+                ZonedDateTime.parse(fromDate),
+                ZonedDateTime.parse(toDate),
+                filterByType,
+                eventTypes
+        );
     }
 }

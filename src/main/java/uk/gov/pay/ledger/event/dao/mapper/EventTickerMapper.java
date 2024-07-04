@@ -4,7 +4,6 @@ import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.ledger.event.model.EventTicker;
 import uk.gov.pay.ledger.event.model.ResourceType;
-import uk.gov.service.payments.commons.model.AuthorisationMode;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

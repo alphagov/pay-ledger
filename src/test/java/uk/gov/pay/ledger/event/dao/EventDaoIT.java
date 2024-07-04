@@ -16,6 +16,7 @@ import uk.gov.service.payments.commons.model.AuthorisationMode;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -276,17 +277,21 @@ class EventDaoIT {
         EventEntity event2 = anEventFixture()
                 .withResourceExternalId("external-id-1")
                 .withEventDate(event1.getEventDate().minusDays(1))
+                .withEventType("PAYMENT_CREATED")
                 .insert(rule.getJdbi())
                 .toEntity();
         anEventFixture()
                 .withResourceExternalId("external-id-1")
                 .withEventDate(event2.getEventDate().minusDays(1))
+                .withEventType("PAYMENT_CREATED")
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        List<EventTicker> eventTickers = eventDao.findEventsTickerFromDate(
+        List<EventTicker> eventTickers = eventDao.findEventsTickerFromDateAndType(
                 event1.getEventDate().minusHours(1),
-                event1.getEventDate().plusHours(1)
+                event1.getEventDate().plusHours(1),
+                true,
+                List.of("PAYMENT_CREATED")
         );
         assertThat(eventTickers.size(), is(1));
         assertThat(eventTickers.get(0).getGatewayAccountId(), is("100"));
