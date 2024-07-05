@@ -11,10 +11,15 @@ import uk.gov.pay.ledger.util.DatabaseTestHelper;
 
 import javax.ws.rs.core.Response;
 
+import java.util.List;
+
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.CoreMatchers.is;
+import static uk.gov.pay.ledger.event.model.SalientEventType.CANCELLED_BY_EXPIRATION;
+import static uk.gov.pay.ledger.event.model.SalientEventType.PAYMENT_CREATED;
+import static uk.gov.pay.ledger.event.model.SalientEventType.USER_APPROVED_FOR_CAPTURE;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,7 +29,7 @@ public class EventResourceIT {
     @RegisterExtension
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
 
-    private Integer port = rule.getAppRule().getLocalPort();
+    private final Integer port = rule.getAppRule().getLocalPort();
 
     private DatabaseTestHelper databaseTestHelper;
 
@@ -35,7 +40,7 @@ public class EventResourceIT {
     }
 
     @Test
-    public void shouldWriteEvent() {
+    void shouldWriteEvent() {
         var params = new JSONArray();
 
         var event = new JSONObject()
@@ -60,7 +65,7 @@ public class EventResourceIT {
     }
 
     @Test
-    public void shouldWriteNoEventsIfAnyFail() {
+    void shouldWriteNoEventsIfAnyFail() {
         var params = new JSONArray();
 
         var aValidEvent = new JSONObject()
@@ -99,7 +104,7 @@ public class EventResourceIT {
     }
 
     @Test
-    public void shouldGetEvenTicker() {
+    void shouldGetEventTickerOfSearchedTimeFrame() {
         aTransactionFixture()
                 .withExternalId("an-external-id")
                 .withLive(true)
@@ -134,5 +139,43 @@ public class EventResourceIT {
                 .body("[0].resource_external_id", is("an-external-id"))
                 .body("[0].event_type", is("PAYMENT_CREATED"))
                 .body("size()", is(1));
+    }
+
+    @Test
+    void shouldGetEventTickerOfSearchedType() {
+        aTransactionFixture()
+                .withExternalId("an-external-id")
+                .withLive(true)
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        EventEntity event = anEventFixture()
+                .withResourceExternalId("an-external-id")
+                .withEventType(PAYMENT_CREATED.name())
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        anEventFixture()
+                .withResourceExternalId("an-external-id")
+                .withEventType(CANCELLED_BY_EXPIRATION.name())
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        anEventFixture()
+                .withResourceExternalId("an-external-id")
+                .withEventType(USER_APPROVED_FOR_CAPTURE.name())
+                .insert(rule.getJdbi())
+                .toEntity();
+
+        given().port(port)
+                .contentType(JSON)
+                .queryParam("from_date", event.getEventDate().minusMinutes(1).toString())
+                .queryParam("to_date", event.getEventDate().plusMinutes(1).toString())
+                .queryParam("event_types", List.of(PAYMENT_CREATED.name(), CANCELLED_BY_EXPIRATION.name()))
+                .get("/v1/event/ticker")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("size()", is(2));
     }
 }

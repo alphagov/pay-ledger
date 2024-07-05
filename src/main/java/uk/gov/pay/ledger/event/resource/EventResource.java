@@ -49,7 +49,7 @@ public class EventResource {
         this.eventMessageHandler = eventMessageHandler;
     }
 
-    
+
     @POST
     @Timed
     @Operation(
@@ -86,7 +86,7 @@ public class EventResource {
     @Timed
     @Operation(
             operationId = "listEvents",
-            summary = "Get list of events between a date/time range",
+            summary = "Get list of events between a date/time range and event type",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EventTicker.class)))),
                     @ApiResponse(responseCode = "422", description = "Missing query parameters", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -96,7 +96,14 @@ public class EventResource {
     public List<EventTicker> eventTickerList(@NotEmpty @Parameter(description = "from date of events to be searched (this date is inclusive).", required = true, example = "\"2015-08-14T12:35:00Z\"")
                                              @QueryParam("from_date") String fromDate,
                                              @NotEmpty @Parameter(description = "to date of events to be searched (this date is exclusive)", required = true, example = "\"2015-08-14T12:35:00Z\"")
-                                             @QueryParam("to_date") String toDate) {
-        return eventDao.findEventsTickerFromDate(ZonedDateTime.parse(fromDate), ZonedDateTime.parse(toDate));
+                                             @QueryParam("to_date") String toDate,
+                                             @Parameter(description = "event types to find", example = "PAYMENT_CREATED") @QueryParam("event_types") List<String> eventTypes) {
+        boolean filterByType = !eventTypes.isEmpty();
+        return eventDao.findEventsTickerFromDateAndType(
+                ZonedDateTime.parse(fromDate),
+                ZonedDateTime.parse(toDate),
+                filterByType,
+                eventTypes
+        );
     }
 }

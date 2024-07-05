@@ -11,6 +11,7 @@ import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.EventTicker;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
+import uk.gov.service.payments.commons.model.AuthorisationMode;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -259,6 +260,11 @@ class EventDaoIT {
                 .withGatewayAccountId("100")
                 .withAmount(200L)
                 .withLive(true)
+                .withMoto(true)
+                .withSource("CARD_API")
+                .withAuthorisationMode(AuthorisationMode.AGREEMENT)
+                .withServiceId("service-id-event-ticker")
+                .withDefaultTransactionDetails()
                 .insert(rule.getJdbi())
                 .toEntity();
 
@@ -270,22 +276,32 @@ class EventDaoIT {
         EventEntity event2 = anEventFixture()
                 .withResourceExternalId("external-id-1")
                 .withEventDate(event1.getEventDate().minusDays(1))
+                .withEventType("PAYMENT_CREATED")
                 .insert(rule.getJdbi())
                 .toEntity();
         anEventFixture()
                 .withResourceExternalId("external-id-1")
                 .withEventDate(event2.getEventDate().minusDays(1))
+                .withEventType("PAYMENT_CREATED")
                 .insert(rule.getJdbi())
                 .toEntity();
 
-        List<EventTicker> eventTickers = eventDao.findEventsTickerFromDate(
+        List<EventTicker> eventTickers = eventDao.findEventsTickerFromDateAndType(
                 event1.getEventDate().minusHours(1),
-                event1.getEventDate().plusHours(1)
+                event1.getEventDate().plusHours(1),
+                true,
+                List.of("PAYMENT_CREATED")
         );
         assertThat(eventTickers.size(), is(1));
         assertThat(eventTickers.get(0).getGatewayAccountId(), is("100"));
         assertThat(eventTickers.get(0).getResourceExternalId(), is("external-id-1"));
         assertThat(eventTickers.get(0).getEventType(), is("PAYMENT_CREATED"));
+        assertThat(eventTickers.get(0).getServiceExternalId(), is("service-id-event-ticker"));
+        assertThat(eventTickers.get(0).getWalletType(), is("APPLE_PAY"));
+        assertThat(eventTickers.get(0).getPaymentProvider(), is("sandbox"));
+        assertThat(eventTickers.get(0).getSource(), is("CARD_API"));
+        assertThat(eventTickers.get(0).getIsMoto(), is(true));
+        assertThat(eventTickers.get(0).getIsRecurring(), is(true));
         assertThat(eventTickers.get(0).getAmount(), is(200L));
     }
 

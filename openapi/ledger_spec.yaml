@@ -243,6 +243,14 @@ paths:
         required: true
         schema:
           type: string
+      - description: event types to find
+        example: PAYMENT_CREATED
+        in: query
+        name: event_types
+        schema:
+          type: array
+          items:
+            type: string
       responses:
         "200":
           content:
@@ -260,7 +268,7 @@ paths:
           description: Missing query parameters
         "500":
           description: Invalid parameters or Downstream system error
-      summary: Get list of events between a date/time range
+      summary: Get list of events between a date/time range and event type
       tags:
       - Events
   /v1/payout:
@@ -1291,6 +1299,12 @@ components:
         gateway_account_id:
           type: string
           example: "1"
+        is_moto:
+          type: boolean
+          example: true
+        is_recurring:
+          type: boolean
+          example: true
         payment_provider:
           type: string
           example: sandbox
@@ -1309,9 +1323,18 @@ components:
           - dispute
           - payment_instrument
           example: payment
+        service_external_id:
+          type: string
+          example: HrMU7UgY7OUM8fgT2bZCTKzvKu
+        source:
+          type: string
+          example: CARD_API
         transaction_type:
           type: string
           example: PAYMENT
+        wallet_type:
+          type: string
+          example: APPLE_PAY
     ExternalTransactionState:
       type: object
       properties:
