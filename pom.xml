@@ -294,12 +294,6 @@
             <artifactId>testing</artifactId>
             <version>${pay-java-commons.version}</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.spotify</groupId>
-                    <artifactId>docker-client</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
