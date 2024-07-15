@@ -1,10 +1,10 @@
 package uk.gov.pay.ledger.pact.event;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
-import au.com.dius.pact.consumer.MessagePactProviderRule;
-import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.PactVerification;
-import au.com.dius.pact.model.v3.messaging.MessagePact;
+import au.com.dius.pact.consumer.junit.MessagePactProviderRule;
+import au.com.dius.pact.consumer.junit.PactVerification;
+import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.messaging.MessagePact;
 import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Rule;
