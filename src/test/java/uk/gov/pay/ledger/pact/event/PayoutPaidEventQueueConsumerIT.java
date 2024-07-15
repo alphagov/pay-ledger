@@ -1,10 +1,10 @@
 package uk.gov.pay.ledger.pact.event;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
-import au.com.dius.pact.consumer.MessagePactProviderRule;
-import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.PactVerification;
-import au.com.dius.pact.model.v3.messaging.MessagePact;
+import au.com.dius.pact.consumer.junit.MessagePactProviderRule;
+import au.com.dius.pact.consumer.junit.PactVerification;
+import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.messaging.MessagePact;
 import com.google.gson.Gson;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,7 +12,6 @@ import uk.gov.pay.ledger.payout.dao.PayoutDao;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
-import uk.gov.pay.ledger.util.fixture.PayoutFixture;
 import uk.gov.pay.ledger.util.fixture.QueuePayoutEventFixture;
 
 import java.time.ZonedDateTime;
@@ -27,8 +26,6 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.pay.ledger.payout.state.PayoutState.PAID_OUT;
-import static uk.gov.pay.ledger.payout.state.PayoutState.UNDEFINED;
-import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
 
 public class PayoutPaidEventQueueConsumerIT {
     @Rule
