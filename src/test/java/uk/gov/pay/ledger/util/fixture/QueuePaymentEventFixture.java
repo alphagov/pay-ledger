@@ -6,9 +6,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import uk.gov.service.payments.commons.model.Source;
 import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
+import uk.gov.service.payments.commons.model.Source;
 
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -217,6 +217,9 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 break;
             case "USER_EMAIL_COLLECTED":
                 eventData = gsonBuilder.create().toJson(Map.of("email", "test@example.org"));
+                break;
+            case "REQUESTED_3DS_EXEMPTION":
+                eventData = gsonBuilder.create().toJson(Map.of("type", "OPTIMISED"));
                 break;
             case "GATEWAY_3DS_EXEMPTION_RESULT_OBTAINED":
                 eventData = gsonBuilder.create().toJson(Map.of("exemption3ds", "HONOURED"));
