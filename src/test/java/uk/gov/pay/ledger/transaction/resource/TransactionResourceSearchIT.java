@@ -586,7 +586,7 @@ public class TransactionResourceSearchIT {
                 .withTransactionType("PAYMENT")
                 .withGatewayAccountId(gatewayAccountId)
                 .insertTransactionAndTransactionMetadata(rule.getJdbi());
-        List<Transaction> transactionsToExclude = aPersistedTransactionList(gatewayAccountId, 15, rule.getJdbi(), true);
+        aPersistedTransactionList(gatewayAccountId, 15, rule.getJdbi(), true);
 
         given().port(port)
                 .contentType(JSON)
