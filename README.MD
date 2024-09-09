@@ -15,6 +15,7 @@ and background processing.
 
 | Variable | Default | Purpose                           |
 |----------|---------|-----------------------------------|
+| `BIND_HOST` | `127.0.0.1` | The IP address for the application to bind to |
 | `PORT`   | -       | Port on which application listens |
 
 ### Database configuration
