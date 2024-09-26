@@ -1,4 +1,4 @@
---liquibase formatted sql
+--liquibase formatted sql dbms:postgresql splitStatements:false
 
 --changeset uk.gov.pay:create_procedure_check_and_execute
 create or replace procedure check_and_execute(
@@ -7,14 +7,14 @@ create or replace procedure check_and_execute(
     p_expected_no_of_rows_to_update_or_delete numeric
 )
 language plpgsql
-as $$ declare
+as ' declare
     rows_affected INTEGER;
     total_rows INTEGER;
 begin
-    EXECUTE format('SELECT COUNT(*) FROM %I', p_table_name) INTO total_rows;
+    EXECUTE format(''SELECT COUNT(*) FROM %I'', p_table_name) INTO total_rows;
 
     if p_expected_no_of_rows_to_update_or_delete >= total_rows then
-        raise exception 'Failed. Expected no. of rows (%) to update/delete can not be same or more than the total number of rows (%) in the table',
+        raise exception ''Failed. Expected no. of rows (%) to update/delete can not be same or more than the total number of rows (%) in the table'',
             p_expected_no_of_rows_to_update_or_delete,
             total_rows;
     end if;
@@ -23,14 +23,14 @@ begin
     get diagnostics rows_affected = ROW_COUNT;
 
     if rows_affected != p_expected_no_of_rows_to_update_or_delete then
-        raise exception 'Failed. Statement expected to update/delete % rows but updating % rows. Changes not commited.',
+        raise exception ''Failed. Statement expected to update/delete % rows but updating % rows. Changes not commited.'',
             p_expected_no_of_rows_to_update_or_delete,
             rows_affected;
     end if;
 
-    raise notice 'Success. Statement affected % rows. Expected to update/delete LESS THAN or EQUAL to % rows',
+    raise notice ''Success. Statement affected % rows. Expected to update/delete LESS THAN or EQUAL to % rows'',
         rows_affected,
         p_expected_no_of_rows_to_update_or_delete;
-end; $$;
+end; '
 
 --rollback drop procedure check_and_execute;
