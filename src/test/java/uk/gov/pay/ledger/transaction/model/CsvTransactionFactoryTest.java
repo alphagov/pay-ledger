@@ -376,7 +376,7 @@ class CsvTransactionFactoryTest {
     }
 
     @Test
-    void toMapShouldIncludeShouldInclude3DSecureRequired() {
+    void toMapShouldInclude3DSecureRequiredWhenTrue() {
         var transactionEntity = transactionFixture
                 .withTotalAmount(123L)
                 .withVersion3ds("2.0.1")
@@ -401,6 +401,46 @@ class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("MOTO"), is(true));
         assertThat(csvDataMap.get("Payment Provider"), is("sandbox"));
         assertThat(csvDataMap.get("3-D Secure Required"), is(true));
+    }
+
+    @Test
+    void toMapShouldReturnMapWithNullValueFor3DSecureRequiredWhenRequires3dsIsFalse() {
+
+        var transactionEntity = transactionFixture
+                .withTotalAmount(123L)
+                .withVersion3ds("2.0.1")
+                .withRequires3ds(false)
+                .withDefaultTransactionDetails()
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+
+        assertThat(csvDataMap.get("Amount"), is("1.00"));
+        assertThat(csvDataMap.get("GOV.UK Payment ID"), is(transactionEntity.getExternalId()));
+        assertThat(csvDataMap.get("Provider ID"), is(transactionEntity.getGatewayTransactionId()));
+        assertThat(csvDataMap.get("3-D Secure Required"), is(nullValue()));
+    }
+
+    @Test
+    void toMapShouldReturnMapWithNullValueFor3DSecureRequiredWhenRequires3dsIsNull() {
+
+        var transactionEntity = transactionFixture
+                .withTotalAmount(123L)
+                .withVersion3ds("2.0.1")
+                .withRequires3ds(null)
+                .withDefaultTransactionDetails()
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+
+        assertThat(csvDataMap.get("Amount"), is("1.00"));
+        assertThat(csvDataMap.get("GOV.UK Payment ID"), is(transactionEntity.getExternalId()));
+        assertThat(csvDataMap.get("Provider ID"), is(transactionEntity.getGatewayTransactionId()));
+        assertThat(csvDataMap.get("3-D Secure Required"), is(nullValue()));
     }
 
     private void assertPaymentDetails(Map<String, Object> csvDataMap, TransactionEntity transactionEntity) {

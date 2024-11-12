@@ -127,7 +127,8 @@ public class CsvTransactionFactory {
                     result.putAll(getFeeBreakdown(transactionEntity, feeBreakdownNode));
                 }
 
-                result.put(FIELD_3D_SECURE_REQUIRED, safeGetAsBoolean(transactionDetails, "requires_3ds", null));
+                Boolean requires3ds = safeGetAsBoolean(transactionDetails, "requires_3ds", null);
+                result.put(FIELD_3D_SECURE_REQUIRED, Boolean.TRUE.equals(requires3ds) ? true : null);
 
                 Optional<Map<String, Object>> externalMetadata = getExternalMetadata(transactionEntity.getTransactionDetails());
 
