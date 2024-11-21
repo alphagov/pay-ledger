@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.pay.ledger.transaction.model.AuthorisationSummary;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
+import uk.gov.pay.ledger.transaction.model.Exemption;
 import uk.gov.pay.ledger.transaction.model.Dispute;
 import uk.gov.pay.ledger.transaction.model.Payment;
 import uk.gov.pay.ledger.transaction.model.Refund;
@@ -66,6 +67,7 @@ public class TransactionView {
     @Schema(example = "\"2016-01-21T17:15:00Z\"")
     private ZonedDateTime createdDate;
     private CardDetails cardDetails;
+    private Exemption exemption;
     private Boolean delayedCapture;
     @Schema(example = "fd21-1mdknkls1-2121-csdf")
     private String gatewayTransactionId;
@@ -119,6 +121,7 @@ public class TransactionView {
         this.paymentProvider = builder.paymentProvider;
         this.createdDate = builder.createdDate;
         this.cardDetails = builder.cardDetails;
+        this.exemption = builder.exemption;
         this.delayedCapture = builder.delayedCapture;
         this.gatewayTransactionId = builder.gatewayTransactionId;
         this.refundSummary = builder.refundSummary;
@@ -167,6 +170,7 @@ public class TransactionView {
                     .withPaymentProvider(payment.getPaymentProvider())
                     .withCreatedDate(payment.getCreatedDate())
                     .withCardDetails(payment.getCardDetails())
+                    .withExemption(payment.getExemption())
                     .withDelayedCapture(payment.getDelayedCapture())
                     .withGatewayTransactionId(payment.getGatewayTransactionId())
                     .withRefundSummary(payment.getRefundSummary())
@@ -221,6 +225,7 @@ public class TransactionView {
                     .withReference(payment.getReference())
                     .withEmail(payment.getEmail())
                     .withCardDetails(payment.getCardDetails())
+                    .withExemption(payment.getExemption())
                     .withTransactionType(payment.getTransactionType());
 
             disputeBuilder = disputeBuilder.withPaymentDetails(paymentBuilder.build());
@@ -318,6 +323,10 @@ public class TransactionView {
 
     public CardDetails getCardDetails() {
         return cardDetails;
+    }
+
+    public Exemption getExemption() {
+        return exemption;
     }
 
     public Boolean getDelayedCapture() {
@@ -448,6 +457,7 @@ public class TransactionView {
         private String paymentProvider;
         private ZonedDateTime createdDate;
         private CardDetails cardDetails;
+        private Exemption exemption;
         private Boolean delayedCapture;
         private String gatewayTransactionId;
         private RefundSummary refundSummary;
@@ -566,6 +576,11 @@ public class TransactionView {
 
         public Builder withCardDetails(CardDetails cardDetails) {
             this.cardDetails = cardDetails;
+            return this;
+        }
+
+        public Builder withExemption(Exemption exemption) {
+            this.exemption = exemption;
             return this;
         }
 

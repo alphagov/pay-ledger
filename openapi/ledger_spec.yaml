@@ -1335,6 +1335,14 @@ components:
         wallet_type:
           type: string
           example: APPLE_PAY
+    Exemption:
+      type: object
+      properties:
+        requested:
+          type: boolean
+          description: It is set when the exemption has been requested or when we
+            know that it has not been requested.
+          example: true
     ExternalTransactionState:
       type: object
       properties:
@@ -1655,6 +1663,8 @@ components:
         evidence_due_date:
           type: string
           format: date-time
+        exemption:
+          $ref: '#/components/schemas/Exemption'
         fee:
           type: integer
           format: int64
