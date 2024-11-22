@@ -21,6 +21,7 @@ import static uk.gov.pay.ledger.util.JsonParser.safeGetAsBoolean;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsDate;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
+import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_NOT_REQUESTED;
 
 public class TransactionFactory {
 
@@ -57,12 +58,11 @@ public class TransactionFactory {
                     safeGetAsString(transactionDetails, "address_country")
             );
             String cardBrand = safeGetAsString(transactionDetails, "card_brand_label");
-
             CardType cardType = CardType.fromString(safeGetAsString(transactionDetails, "card_type"));
             CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), billingAddress, cardBrand,
                     entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
                     safeGetAsString(transactionDetails, "expiry_date"), cardType);
-
+            
             Map<String, Object> metadata = null;
             if (transactionDetails.has("external_metadata")) {
                 metadata = objectMapper.readValue(
@@ -78,6 +78,13 @@ public class TransactionFactory {
                     safeGetAsDate(transactionDetails, "captured_date"),
                     entity.getPayoutEntity().map(payoutEntity -> payoutEntity.getPaidOutDate()).orElse(null)
             );
+
+            String exemption3ds = safeGetAsString(transactionDetails, "exemption_3ds");
+
+            Exemption exemption = null;
+            if (exemption3ds != null && Exemption3ds.from(exemption3ds) == EXEMPTION_NOT_REQUESTED) {
+                exemption = new Exemption(false);
+            }
 
             AuthorisationSummary authorisationSummary = null;
             if (transactionDetails.has("requires_3ds") || transactionDetails.has("version_3ds")) {
@@ -109,6 +116,7 @@ public class TransactionFactory {
                     .withPaymentProvider(paymentProvider)
                     .withCreatedDate(entity.getCreatedDate())
                     .withCardDetails(cardDetails)
+                    .withExemption(exemption)
                     .withDelayedCapture(safeGetAsBoolean(transactionDetails, "delayed_capture", false))
                     .withExternalMetadata(metadata)
                     .withEventCount(entity.getEventCount())
