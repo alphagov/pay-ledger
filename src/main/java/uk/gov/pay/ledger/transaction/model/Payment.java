@@ -32,6 +32,7 @@ public class Payment extends Transaction {
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private ZonedDateTime createdDate;
     private CardDetails cardDetails;
+    private Exemption exemption;
     private Boolean delayedCapture;
     private Map<String, Object> externalMetaData;
     @JsonIgnore
@@ -75,6 +76,7 @@ public class Payment extends Transaction {
         this.paymentProvider = builder.paymentProvider;
         this.createdDate = builder.createdDate;
         this.cardDetails = builder.cardDetails;
+        this.exemption = builder.exemption;
         this.delayedCapture = builder.delayedCapture;
         this.externalMetaData = builder.externalMetaData;
         this.eventCount = builder.eventCount;
@@ -138,6 +140,10 @@ public class Payment extends Transaction {
 
     public CardDetails getCardDetails() {
         return cardDetails;
+    }
+
+    public Exemption getExemption() {
+        return exemption;
     }
 
     public Boolean getDelayedCapture() {
@@ -229,6 +235,7 @@ public class Payment extends Transaction {
         private String paymentProvider;
         private ZonedDateTime createdDate;
         private CardDetails cardDetails;
+        private Exemption exemption;
         private Boolean delayedCapture;
         private Map<String, Object> externalMetaData;
         private Integer eventCount;
@@ -342,6 +349,11 @@ public class Payment extends Transaction {
 
         public Builder withCardDetails(CardDetails cardDetails) {
             this.cardDetails = cardDetails;
+            return this;
+        }
+
+        public Builder withExemption(Exemption exemption) {
+            this.exemption = exemption;
             return this;
         }
 
