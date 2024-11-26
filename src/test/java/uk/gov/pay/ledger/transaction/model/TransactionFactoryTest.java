@@ -419,6 +419,6 @@ public class TransactionFactoryTest {
         assertThat(payment.getDisputed(), is(true));
         assertThat(payment.getCanRetry(), is(Boolean.FALSE));
         assertThat(payment.getExemption(), notNullValue());
-        assertThat(payment.getExemption().getRequested(), is(Boolean.FALSE));
+        assertThat(payment.getExemption().isRequested(), is(Boolean.FALSE));
     }
 }
