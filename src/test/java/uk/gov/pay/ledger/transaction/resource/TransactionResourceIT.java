@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.model.Exemption3ds;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.DatabaseTestHelper;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
@@ -33,6 +34,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.isNull;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.DISPUTE;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.REFUND;
 import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_REFERENCE_NUMBER;
@@ -126,6 +128,7 @@ public class TransactionResourceIT {
                 .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
                 .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
                 .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
+                .body("exemption", nullValue())
                 .body("live", is(Boolean.TRUE))
                 .body("wallet_type", is("APPLE_PAY"))
                 .body("source", is(String.valueOf(Source.CARD_API)))
@@ -720,5 +723,73 @@ public class TransactionResourceIT {
                 .body("results[1].transaction_id", is(cancelledTransaction.getExternalId()))
                 .body("results[0].state.can_retry", is(false))
                 .body("results[1].state.can_retry", is(nullValue()));
+    }
+
+    @Test
+    public void shouldGetTransactionWithExemptionNotRequested() {
+        var gatewayPayoutId = "payout-id";
+
+        transactionFixture = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withLive(Boolean.TRUE)
+                .withSource(String.valueOf(Source.CARD_API))
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withExemption(false)
+                .withDefaultTransactionDetails();
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("transaction_id", is(transactionFixture.getExternalId()))
+                .body("service_id", is(transactionFixture.getServiceId()))
+                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
+                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
+                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
+                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
+                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
+                .body("exemption.requested", is(Boolean.FALSE))
+                .body("live", is(Boolean.TRUE))
+                .body("wallet_type", is("APPLE_PAY"))
+                .body("source", is(String.valueOf(Source.CARD_API)))
+                .body("gateway_payout_id", is(gatewayPayoutId))
+                .body("authorisation_mode", is("web"));
+    }
+
+    @Test
+    public void shouldGetTransactionWithExemptionRequested() {
+        var gatewayPayoutId = "payout-id";
+
+        transactionFixture = aTransactionFixture()
+                .withDefaultCardDetails()
+                .withLive(Boolean.TRUE)
+                .withSource(String.valueOf(Source.CARD_API))
+                .withGatewayPayoutId(gatewayPayoutId)
+                .withExemption(true)
+                .withDefaultTransactionDetails();
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("transaction_id", is(transactionFixture.getExternalId()))
+                .body("service_id", is(transactionFixture.getServiceId()))
+                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
+                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
+                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
+                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
+                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
+                .body("exemption.requested", is(Boolean.TRUE))
+                .body("live", is(Boolean.TRUE))
+                .body("wallet_type", is("APPLE_PAY"))
+                .body("source", is(String.valueOf(Source.CARD_API)))
+                .body("gateway_payout_id", is(gatewayPayoutId))
+                .body("authorisation_mode", is("web"));
     }
 }

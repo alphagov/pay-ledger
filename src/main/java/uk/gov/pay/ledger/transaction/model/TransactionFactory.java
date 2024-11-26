@@ -22,6 +22,7 @@ import static uk.gov.pay.ledger.util.JsonParser.safeGetAsDate;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
 import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_NOT_REQUESTED;
+import static uk.gov.pay.ledger.transaction.model.Exemption3dsRequested.OPTIMISED;
 
 public class TransactionFactory {
 
@@ -80,10 +81,14 @@ public class TransactionFactory {
             );
 
             String exemption3ds = safeGetAsString(transactionDetails, "exemption_3ds");
+            String exemption_3ds_requested = safeGetAsString(transactionDetails, "exemption_3ds_requested");
 
             Exemption exemption = null;
             if (exemption3ds != null && Exemption3ds.from(exemption3ds) == EXEMPTION_NOT_REQUESTED) {
                 exemption = new Exemption(false);
+            }
+            if (exemption3ds == null && Exemption3dsRequested.from(exemption_3ds_requested) == OPTIMISED) {
+                exemption = new Exemption(true);
             }
 
             AuthorisationSummary authorisationSummary = null;
