@@ -523,7 +523,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 });
         Optional.ofNullable(exemption).ifPresent(
             exemption -> {
-                if(exemption.getRequested()) {
+                if(exemption.isRequested()) {
                     transactionDetails.addProperty("exemption_3ds_requested", Exemption3dsRequested.OPTIMISED.name());
                 }
                 else {
@@ -696,7 +696,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     }
 
     public TransactionFixture withExemption(boolean requested) {
-        this.exemption = new Exemption(requested);
+        this.exemption = new Exemption(requested, null, null);
         return this;
     }
 

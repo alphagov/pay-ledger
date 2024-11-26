@@ -1339,11 +1339,18 @@ components:
     Exemption:
       type: object
       properties:
+        outcome:
+          $ref: '#/components/schemas/Outcome'
         requested:
           type: boolean
-          description: It is set when the exemption has been requested or when we
-            know that it has not been requested.
+          description: Flag indicating whether 3ds exemption was requested for the
+            payment.
           example: true
+        type:
+          type: string
+          description: Indicating the type of the 3ds exemption was requested for
+            the payment if applicable.
+          example: corporate
     ExternalTransactionState:
       type: object
       properties:
@@ -1390,6 +1397,22 @@ components:
           type: integer
           format: int64
           example: 2022
+    Outcome:
+      type: object
+      description: Object containing information about the outcome of the 3ds exemption
+        request
+      example: honoured
+      properties:
+        result:
+          type: string
+          description: Indicating the result if 3ds exemption was requested for the
+            payment.
+          enum:
+          - not requested
+          - honoured
+          - rejected
+          - out of scope
+          example: honoured
     PaginationBuilder:
       type: object
       properties:

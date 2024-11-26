@@ -22,7 +22,11 @@ import static uk.gov.pay.ledger.util.JsonParser.safeGetAsDate;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
 import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_NOT_REQUESTED;
+import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_HONOURED;
+import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_REJECTED;
+import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_OUT_OF_SCOPE;
 import static uk.gov.pay.ledger.transaction.model.Exemption3dsRequested.OPTIMISED;
+import static uk.gov.pay.ledger.transaction.model.Exemption3dsRequested.CORPORATE;
 
 public class TransactionFactory {
 
@@ -81,14 +85,48 @@ public class TransactionFactory {
             );
 
             String exemption3ds = safeGetAsString(transactionDetails, "exemption_3ds");
-            String exemption_3ds_requested = safeGetAsString(transactionDetails, "exemption_3ds_requested");
+            String exemption3dsRequested = safeGetAsString(transactionDetails, "exemption_3ds_requested");
 
             Exemption exemption = null;
-            if (exemption3ds != null && Exemption3ds.from(exemption3ds) == EXEMPTION_NOT_REQUESTED) {
-                exemption = new Exemption(false);
-            }
-            if (exemption3ds == null && Exemption3dsRequested.from(exemption_3ds_requested) == OPTIMISED) {
-                exemption = new Exemption(true);
+
+            if(exemption3ds == null) {
+                if (exemption3dsRequested == null) {
+                    exemption = null;
+                } else {
+                    switch (Exemption3dsRequested.from(exemption3dsRequested)) {
+                        case CORPORATE:
+                            exemption = new Exemption(true, "corporate", null);
+                            break;
+                        case OPTIMISED:
+                            exemption = new Exemption(true, null, null);
+                            break;
+                    }
+                }
+            } else {
+                if (Exemption3ds.from(exemption3ds) == EXEMPTION_NOT_REQUESTED) {
+                    exemption = new Exemption(false, null, null);
+                } else {
+                    String type = null;
+                    if (Exemption3dsRequested.from(exemption3dsRequested) == OPTIMISED || exemption3dsRequested == null) {
+                        type = null;
+                    } else if (Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE) {
+                        type = "corporate";
+                    }
+
+                    switch (Exemption3ds.from(exemption3ds)) {
+                        case EXEMPTION_HONOURED:
+                            exemption = new Exemption(true, type, EXEMPTION_HONOURED.toString());
+                            break;
+                        case EXEMPTION_REJECTED:
+                            exemption = new Exemption(true, type, EXEMPTION_REJECTED.toString());
+                            break;
+                        case EXEMPTION_OUT_OF_SCOPE:
+                            exemption = new Exemption(true, type, EXEMPTION_OUT_OF_SCOPE.toString());
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
 
             AuthorisationSummary authorisationSummary = null;
