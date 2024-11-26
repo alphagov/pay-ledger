@@ -12,6 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
+import uk.gov.pay.ledger.transaction.model.Exemption;
+import uk.gov.pay.ledger.transaction.model.Exemption3ds;
+import uk.gov.pay.ledger.transaction.model.Exemption3dsRequested;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
@@ -55,6 +58,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String lastDigitsCardNumber;
     private String firstDigitsCardNumber;
     private CardDetails cardDetails;
+    private Exemption exemption;
     private Boolean delayedCapture = false;
     private String returnUrl = "https://example.org/transactions";
     private String paymentProvider = "sandbox";
@@ -290,6 +294,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withExemption(Exemption exemption) {
+        this.exemption = exemption;
+        return this;
+    }
+
     public TransactionFixture withDelayedCapture(Boolean delayedCapture) {
         this.delayedCapture = delayedCapture;
         return this;
@@ -512,6 +521,15 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 transactionDetails.addProperty("address_country", ba.getAddressCountry());
                             });
                 });
+        Optional.ofNullable(exemption).ifPresent(
+            exemption -> {
+                if(exemption.getRequested()) {
+                    transactionDetails.addProperty("exemption_3ds_requested", Exemption3dsRequested.OPTIMISED.name());
+                }
+                else {
+                    transactionDetails.addProperty("exemption_3ds", Exemption3ds.EXEMPTION_NOT_REQUESTED.name());
+                }
+            });
         Optional.ofNullable(version3ds).ifPresent(
                 version -> {
                     transactionDetails.addProperty("version_3ds", version);
@@ -618,6 +636,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return cardDetails;
     }
 
+    public Exemption getExemption() {
+        return exemption;
+    }
+
     public Boolean getDelayedCapture() {
         return delayedCapture;
     }
@@ -673,6 +695,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this.withDefaultCardDetails(true);
     }
 
+    public TransactionFixture withExemption(boolean requested) {
+        this.exemption = new Exemption(requested);
+        return this;
+    }
 
     public TransactionFixture withCorporateCardSurcharge(long value) {
         this.corporateCardSurcharge = value;
