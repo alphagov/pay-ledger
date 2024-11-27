@@ -67,7 +67,7 @@ public class TransactionFactory {
             CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), billingAddress, cardBrand,
                     entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
                     safeGetAsString(transactionDetails, "expiry_date"), cardType);
-            
+
             Map<String, Object> metadata = null;
             if (transactionDetails.has("external_metadata")) {
                 metadata = objectMapper.readValue(
@@ -172,18 +172,18 @@ public class TransactionFactory {
                 if (Exemption3dsRequested.from(exemption3dsRequested) == OPTIMISED || exemption3dsRequested == null) {
                     type = null;
                 } else if (Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE) {
-                    type = "corporate";
+                    type = CORPORATE.toString();
                 }
 
                 switch (Exemption3ds.from(exemption3ds)) {
                     case EXEMPTION_HONOURED:
-                        exemption = new Exemption(true, type, EXEMPTION_HONOURED.toString());
+                        exemption = new Exemption(true, type, EXEMPTION_HONOURED.name());
                         break;
                     case EXEMPTION_REJECTED:
-                        exemption = new Exemption(true, type, EXEMPTION_REJECTED.toString());
+                        exemption = new Exemption(true, type, EXEMPTION_REJECTED.name());
                         break;
                     case EXEMPTION_OUT_OF_SCOPE:
-                        exemption = new Exemption(true, type, EXEMPTION_OUT_OF_SCOPE.toString());
+                        exemption = new Exemption(true, type, EXEMPTION_OUT_OF_SCOPE.name());
                         break;
                     default:
                         break;
