@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.model.Exemption.Outcome;
 import uk.gov.pay.ledger.transaction.search.model.PaymentSettlementSummary;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
@@ -150,7 +151,6 @@ public class TransactionFactory {
 
     private Exemption getExemption(String exemption3ds, String exemption3dsRequested) {
         Exemption exemption = null;
-
         if(exemption3ds == null) {
             if (exemption3dsRequested == null) {
                 exemption = null;
@@ -165,32 +165,30 @@ public class TransactionFactory {
                 }
             }
         } else {
-            if (Exemption3ds.from(exemption3ds) == EXEMPTION_NOT_REQUESTED) {
-                exemption = new Exemption(false, null, null);
-            } else {
-                String type = null;
-                if (Exemption3dsRequested.from(exemption3dsRequested) == OPTIMISED || exemption3dsRequested == null) {
-                    type = null;
-                } else if (Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE) {
-                    type = CORPORATE.toString();
-                }
-
-                switch (Exemption3ds.from(exemption3ds)) {
-                    case EXEMPTION_HONOURED:
-                        exemption = new Exemption(true, type, EXEMPTION_HONOURED.name());
-                        break;
-                    case EXEMPTION_REJECTED:
-                        exemption = new Exemption(true, type, EXEMPTION_REJECTED.name());
-                        break;
-                    case EXEMPTION_OUT_OF_SCOPE:
-                        exemption = new Exemption(true, type, EXEMPTION_OUT_OF_SCOPE.name());
-                        break;
-                    default:
-                        break;
-                }
+            boolean requested = Exemption3ds.from(exemption3ds) != EXEMPTION_NOT_REQUESTED;
+            String type = null;
+            if (Exemption3dsRequested.from(exemption3dsRequested) == OPTIMISED || exemption3dsRequested == null) {
+                type = null;
+            } else if (Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE) {
+                type = CORPORATE.toString();
             }
+            Outcome outcome = getOutcome(exemption3ds);
+            exemption = new Exemption(requested, type, outcome);
         }
         return exemption;
+    }
+
+    private Outcome getOutcome(String exemption3ds){
+        if (exemption3ds == null) {
+            return null;
+        }
+
+        return switch (Exemption3ds.from(exemption3ds)) {
+            case EXEMPTION_HONOURED -> new Outcome(EXEMPTION_HONOURED);
+            case EXEMPTION_REJECTED -> new Outcome(EXEMPTION_REJECTED);
+            case EXEMPTION_OUT_OF_SCOPE -> new Outcome(EXEMPTION_OUT_OF_SCOPE);
+            default -> null;
+        };
     }
 
     private Transaction createRefund(TransactionEntity entity) {
