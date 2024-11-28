@@ -936,7 +936,7 @@ public class TransactionResourceIT {
                 .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
                 .body("exemption.requested", is(Boolean.TRUE))
                 .body("exemption.type", is(Exemption3dsRequested.CORPORATE.toString()))
-                .body("exemption.outcome.size()", is(0))
+                .body("exemption.outcome", nullValue())
                 .body("live", is(Boolean.TRUE))
                 .body("wallet_type", is("APPLE_PAY"))
                 .body("source", is(String.valueOf(Source.CARD_API)))
