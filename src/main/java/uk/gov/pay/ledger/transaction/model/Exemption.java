@@ -62,13 +62,10 @@ public class Exemption {
     @Schema(description = "Object containing information about the outcome of the 3ds exemption request", example = "honoured")
     private final Outcome outcome;
 
-
-    public Exemption(boolean requested, String type, String result) {
+    public Exemption(boolean requested, String type, Outcome outcome) {
         this.requested = requested;
         this.type = type;
-        this.outcome = (result != null && Exemption3ds.from(result) != null) ?
-            new Outcome(Exemption3ds.from(result)) :
-            null;
+        this.outcome = outcome;
     }
 
     @JsonProperty("requested")
