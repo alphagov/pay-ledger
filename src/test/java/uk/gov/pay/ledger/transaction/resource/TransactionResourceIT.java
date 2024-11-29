@@ -731,51 +731,21 @@ public class TransactionResourceIT {
                 .body("results[1].state.can_retry", is(nullValue()));
     }
 
-    @Test
-    public void shouldGetTransactionWithExemptionNotRequested() {
+    private TransactionFixture createTransactionFixtureWithExemption(Exemption3ds exemption3ds, Exemption3dsRequested exemption3dsRequested) {
         var gatewayPayoutId = "payout-id";
-
-        transactionFixture = aTransactionFixture()
+        return aTransactionFixture()
                 .withDefaultCardDetails()
                 .withLive(Boolean.TRUE)
                 .withSource(String.valueOf(Source.CARD_API))
                 .withGatewayPayoutId(gatewayPayoutId)
-                .withExemption3ds(Exemption3ds.EXEMPTION_NOT_REQUESTED)
+                .withExemption3ds(exemption3ds)
+                .withExemption3dsRequested(exemption3dsRequested)
                 .withDefaultTransactionDetails();
-        transactionFixture.insert(rule.getJdbi());
-
-        given().port(port)
-                .contentType(JSON)
-                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON)
-                .body("transaction_id", is(transactionFixture.getExternalId()))
-                .body("service_id", is(transactionFixture.getServiceId()))
-                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
-                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
-                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
-                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
-                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
-                .body("exemption.requested", is(Boolean.FALSE))
-                .body("live", is(Boolean.TRUE))
-                .body("wallet_type", is("APPLE_PAY"))
-                .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId))
-                .body("authorisation_mode", is("web"));
     }
 
     @Test
-    public void shouldGetTransactionWithExemptionRequested() {
-        var gatewayPayoutId = "payout-id";
-
-        transactionFixture = aTransactionFixture()
-                .withDefaultCardDetails()
-                .withLive(Boolean.TRUE)
-                .withSource(String.valueOf(Source.CARD_API))
-                .withGatewayPayoutId(gatewayPayoutId)
-                .withExemption3dsRequested(Exemption3dsRequested.OPTIMISED)
-                .withDefaultTransactionDetails();
+    public void shouldGetTransactionWithNoExemptionInformation() {
+        transactionFixture = createTransactionFixtureWithExemption(null, null);
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -784,33 +754,40 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("transaction_id", is(transactionFixture.getExternalId()))
-                .body("service_id", is(transactionFixture.getServiceId()))
-                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
-                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
-                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
-                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
-                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
-                .body("exemption.requested", is(Boolean.TRUE))
-                .body("live", is(Boolean.TRUE))
-                .body("wallet_type", is("APPLE_PAY"))
-                .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId))
-                .body("authorisation_mode", is("web"));
+                .body("exemption", nullValue());
+    }
+
+    @Test
+    public void shouldGetTransactionWithExemptionNotRequested() {
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_NOT_REQUESTED, null);
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("exemption.requested", is(Boolean.FALSE));
+    }
+
+    @Test
+    public void shouldGetTransactionWithExemptionRequestedButNoOutcomeYet() {
+        transactionFixture = createTransactionFixtureWithExemption(null, Exemption3dsRequested.OPTIMISED);
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("exemption.requested", is(Boolean.TRUE));
     }
 
     @Test
     public void shouldGetTransactionWithExemptiondHonoured() {
-        var gatewayPayoutId = "payout-id";
-
-        transactionFixture = aTransactionFixture()
-                .withDefaultCardDetails()
-                .withLive(Boolean.TRUE)
-                .withSource(String.valueOf(Source.CARD_API))
-                .withGatewayPayoutId(gatewayPayoutId)
-                .withExemption3ds(Exemption3ds.EXEMPTION_HONOURED)
-                .withExemption3dsRequested(Exemption3dsRequested.OPTIMISED)
-                .withDefaultTransactionDetails();
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_HONOURED, null);
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -819,34 +796,28 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("transaction_id", is(transactionFixture.getExternalId()))
-                .body("service_id", is(transactionFixture.getServiceId()))
-                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
-                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
-                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
-                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
-                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
                 .body("exemption.requested", is(Boolean.TRUE))
-                .body("exemption.outcome.result", is(EXEMPTION_HONOURED.toString()))
-                .body("live", is(Boolean.TRUE))
-                .body("wallet_type", is("APPLE_PAY"))
-                .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId))
-                .body("authorisation_mode", is("web"));
+                .body("exemption.outcome.result", is(EXEMPTION_HONOURED.toString()));
+    }
+
+    @Test
+    public void shouldGetTransactionWithOptimisedExemptiondHonoured() {
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_HONOURED, Exemption3dsRequested.OPTIMISED);
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("exemption.requested", is(Boolean.TRUE))
+                .body("exemption.outcome.result", is(EXEMPTION_HONOURED.toString()));
     }
 
     @Test
     public void shouldGetTransactionWithExemptionRejected() {
-        var gatewayPayoutId = "payout-id";
-
-        transactionFixture = aTransactionFixture()
-                .withDefaultCardDetails()
-                .withLive(Boolean.TRUE)
-                .withSource(String.valueOf(Source.CARD_API))
-                .withGatewayPayoutId(gatewayPayoutId)
-                .withExemption3ds(Exemption3ds.EXEMPTION_REJECTED)
-                .withExemption3dsRequested(Exemption3dsRequested.OPTIMISED)
-                .withDefaultTransactionDetails();
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_REJECTED, null);
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -855,34 +826,28 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("transaction_id", is(transactionFixture.getExternalId()))
-                .body("service_id", is(transactionFixture.getServiceId()))
-                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
-                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
-                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
-                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
-                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
                 .body("exemption.requested", is(Boolean.TRUE))
-                .body("exemption.outcome.result", is(EXEMPTION_REJECTED.toString()))
-                .body("live", is(Boolean.TRUE))
-                .body("wallet_type", is("APPLE_PAY"))
-                .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId))
-                .body("authorisation_mode", is("web"));
+                .body("exemption.outcome.result", is(EXEMPTION_REJECTED.toString()));
+    }
+
+    @Test
+    public void shouldGetTransactionWithOptimisedExemptionRejected() {
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_REJECTED, Exemption3dsRequested.OPTIMISED);
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("exemption.requested", is(Boolean.TRUE))
+                .body("exemption.outcome.result", is(EXEMPTION_REJECTED.toString()));
     }
 
     @Test
     public void shouldGetTransactionWithExemptionOutOfScope() {
-        var gatewayPayoutId = "payout-id";
-
-        transactionFixture = aTransactionFixture()
-                .withDefaultCardDetails()
-                .withLive(Boolean.TRUE)
-                .withSource(String.valueOf(Source.CARD_API))
-                .withGatewayPayoutId(gatewayPayoutId)
-                .withExemption3ds(Exemption3ds.EXEMPTION_OUT_OF_SCOPE)
-                .withExemption3dsRequested(Exemption3dsRequested.OPTIMISED)
-                .withDefaultTransactionDetails();
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_OUT_OF_SCOPE, null);
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -891,34 +856,29 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("transaction_id", is(transactionFixture.getExternalId()))
-                .body("service_id", is(transactionFixture.getServiceId()))
-                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
-                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
-                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
-                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
-                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
                 .body("exemption.requested", is(Boolean.TRUE))
-                .body("exemption.outcome.result", is(EXEMPTION_OUT_OF_SCOPE.toString()))
-                .body("live", is(Boolean.TRUE))
-                .body("wallet_type", is("APPLE_PAY"))
-                .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId))
-                .body("authorisation_mode", is("web"));
+                .body("exemption.outcome.result", is(EXEMPTION_OUT_OF_SCOPE.toString()));
+    }
+
+
+    @Test
+    public void shouldGetTransactionWithOptimisedExemptionOutOfScope() {
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_OUT_OF_SCOPE, Exemption3dsRequested.OPTIMISED);
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("exemption.requested", is(Boolean.TRUE))
+                .body("exemption.outcome.result", is(EXEMPTION_OUT_OF_SCOPE.toString()));
     }
 
     @Test
     public void shouldGetTransactionWithCorporateExemptionRequested() {
-        var gatewayPayoutId = "payout-id";
-
-        transactionFixture = aTransactionFixture()
-                .withDefaultCardDetails()
-                .withLive(Boolean.TRUE)
-                .withSource(String.valueOf(Source.CARD_API))
-                .withGatewayPayoutId(gatewayPayoutId)
-                .withExemption3ds(null)
-                .withExemption3dsRequested(Exemption3dsRequested.CORPORATE)
-                .withDefaultTransactionDetails();
+        transactionFixture = createTransactionFixtureWithExemption(null, Exemption3dsRequested.CORPORATE);
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -927,35 +887,14 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("transaction_id", is(transactionFixture.getExternalId()))
-                .body("service_id", is(transactionFixture.getServiceId()))
-                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
-                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
-                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
-                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
-                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
                 .body("exemption.requested", is(Boolean.TRUE))
                 .body("exemption.type", is(Exemption3dsRequested.CORPORATE.toString()))
-                .body("exemption.outcome", nullValue())
-                .body("live", is(Boolean.TRUE))
-                .body("wallet_type", is("APPLE_PAY"))
-                .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId))
-                .body("authorisation_mode", is("web"));
+                .body("exemption.outcome", nullValue());
     }
 
     @Test
     public void shouldGetTransactionWithCorporateExemptionHonoured() {
-        var gatewayPayoutId = "payout-id";
-
-        transactionFixture = aTransactionFixture()
-                .withDefaultCardDetails()
-                .withLive(Boolean.TRUE)
-                .withSource(String.valueOf(Source.CARD_API))
-                .withGatewayPayoutId(gatewayPayoutId)
-                .withExemption3ds(EXEMPTION_HONOURED)
-                .withExemption3dsRequested(Exemption3dsRequested.CORPORATE)
-                .withDefaultTransactionDetails();
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_HONOURED, Exemption3dsRequested.CORPORATE);
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -964,35 +903,14 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("transaction_id", is(transactionFixture.getExternalId()))
-                .body("service_id", is(transactionFixture.getServiceId()))
-                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
-                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
-                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
-                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
-                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
                 .body("exemption.requested", is(Boolean.TRUE))
                 .body("exemption.type", is(Exemption3dsRequested.CORPORATE.toString()))
-                .body("exemption.outcome.result", is(EXEMPTION_HONOURED.toString()))
-                .body("live", is(Boolean.TRUE))
-                .body("wallet_type", is("APPLE_PAY"))
-                .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId))
-                .body("authorisation_mode", is("web"));
+                .body("exemption.outcome.result", is(EXEMPTION_HONOURED.toString()));
     }
 
         @Test
     public void shouldGetTransactionWithCorporateExemptionRejected() {
-        var gatewayPayoutId = "payout-id";
-
-        transactionFixture = aTransactionFixture()
-                .withDefaultCardDetails()
-                .withLive(Boolean.TRUE)
-                .withSource(String.valueOf(Source.CARD_API))
-                .withGatewayPayoutId(gatewayPayoutId)
-                .withExemption3ds(EXEMPTION_REJECTED)
-                .withExemption3dsRequested(Exemption3dsRequested.CORPORATE)
-                .withDefaultTransactionDetails();
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_REJECTED, Exemption3dsRequested.CORPORATE);
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -1001,35 +919,14 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("transaction_id", is(transactionFixture.getExternalId()))
-                .body("service_id", is(transactionFixture.getServiceId()))
-                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
-                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
-                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
-                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
-                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
                 .body("exemption.requested", is(Boolean.TRUE))
                 .body("exemption.type", is(Exemption3dsRequested.CORPORATE.toString()))
-                .body("exemption.outcome.result", is(EXEMPTION_REJECTED.toString()))
-                .body("live", is(Boolean.TRUE))
-                .body("wallet_type", is("APPLE_PAY"))
-                .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId))
-                .body("authorisation_mode", is("web"));
+                .body("exemption.outcome.result", is(EXEMPTION_REJECTED.toString()));
     }
 
     @Test
     public void shouldGetTransactionWithCorporateExemptionOutOfScope() {
-        var gatewayPayoutId = "payout-id";
-
-        transactionFixture = aTransactionFixture()
-                .withDefaultCardDetails()
-                .withLive(Boolean.TRUE)
-                .withSource(String.valueOf(Source.CARD_API))
-                .withGatewayPayoutId(gatewayPayoutId)
-                .withExemption3ds(EXEMPTION_OUT_OF_SCOPE)
-                .withExemption3dsRequested(Exemption3dsRequested.CORPORATE)
-                .withDefaultTransactionDetails();
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_OUT_OF_SCOPE, Exemption3dsRequested.CORPORATE);
         transactionFixture.insert(rule.getJdbi());
 
         given().port(port)
@@ -1038,20 +935,8 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("transaction_id", is(transactionFixture.getExternalId()))
-                .body("service_id", is(transactionFixture.getServiceId()))
-                .body("credential_external_id", is(transactionFixture.getCredentialExternalId()))
-                .body("card_details.cardholder_name", is(transactionFixture.getCardDetails().getCardHolderName()))
-                .body("card_details.expiry_date", is(transactionFixture.getCardDetails().getExpiryDate()))
-                .body("card_details.card_type", is(transactionFixture.getCardDetails().getCardType().toString().toLowerCase()))
-                .body("card_details.billing_address.line1", is(transactionFixture.getCardDetails().getBillingAddress().getAddressLine1()))
                 .body("exemption.requested", is(Boolean.TRUE))
                 .body("exemption.type", is(Exemption3dsRequested.CORPORATE.toString()))
-                .body("exemption.outcome.result", is(EXEMPTION_OUT_OF_SCOPE.toString()))
-                .body("live", is(Boolean.TRUE))
-                .body("wallet_type", is("APPLE_PAY"))
-                .body("source", is(String.valueOf(Source.CARD_API)))
-                .body("gateway_payout_id", is(gatewayPayoutId))
-                .body("authorisation_mode", is("web"));
+                .body("exemption.outcome.result", is(EXEMPTION_OUT_OF_SCOPE.toString()));
     }
 }
