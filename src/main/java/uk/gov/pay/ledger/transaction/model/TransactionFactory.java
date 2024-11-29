@@ -26,7 +26,6 @@ import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_NOT_REQ
 import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_HONOURED;
 import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_REJECTED;
 import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_OUT_OF_SCOPE;
-import static uk.gov.pay.ledger.transaction.model.Exemption3dsRequested.OPTIMISED;
 import static uk.gov.pay.ledger.transaction.model.Exemption3dsRequested.CORPORATE;
 
 public class TransactionFactory {
