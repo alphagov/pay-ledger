@@ -87,7 +87,7 @@ public class TransactionFactory {
             String exemption3ds = safeGetAsString(transactionDetails, "exemption_3ds");
             String exemption3dsRequested = safeGetAsString(transactionDetails, "exemption_3ds_requested");
 
-            Exemption exemption = createExemption(exemption3ds, exemption3dsRequested);
+            Exemption exemption = createExemption(Exemption3ds.from(exemption3ds), Exemption3dsRequested.from(exemption3dsRequested));
 
             AuthorisationSummary authorisationSummary = null;
             if (transactionDetails.has("requires_3ds") || transactionDetails.has("version_3ds")) {
@@ -148,18 +148,18 @@ public class TransactionFactory {
         return null;
     }
 
-    private Exemption createExemption(String exemption3ds, String exemption3dsRequested) {
+    private Exemption createExemption(Exemption3ds exemption3ds, Exemption3dsRequested exemption3dsRequested) {
         Exemption exemption = null;
         if(exemption3ds != null) {
-            boolean requested = Exemption3ds.from(exemption3ds) != EXEMPTION_NOT_REQUESTED;
+            boolean requested = exemption3ds != EXEMPTION_NOT_REQUESTED;
             String type = null;
-           if (Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE) {
+           if (exemption3dsRequested == CORPORATE) {
                 type = CORPORATE.toString();
             }
             Outcome outcome = getOutcome(exemption3ds);
             exemption = new Exemption(requested, type, outcome);
         } else if (exemption3dsRequested != null) {
-                exemption = switch (Exemption3dsRequested.from(exemption3dsRequested)) {
+                exemption = switch (exemption3dsRequested) {
                     case CORPORATE -> new Exemption(true, "corporate", null);
                     case OPTIMISED -> new Exemption(true, null, null);
                 };
@@ -167,12 +167,12 @@ public class TransactionFactory {
         return exemption;
     }
 
-    private Outcome getOutcome(String exemption3ds){
+    private Outcome getOutcome(Exemption3ds exemption3ds){
         if (exemption3ds == null) {
             return null;
         }
 
-        return switch (Exemption3ds.from(exemption3ds)) {
+        return switch (exemption3ds) {
             case EXEMPTION_HONOURED -> new Outcome(EXEMPTION_HONOURED);
             case EXEMPTION_REJECTED -> new Outcome(EXEMPTION_REJECTED);
             case EXEMPTION_OUT_OF_SCOPE -> new Outcome(EXEMPTION_OUT_OF_SCOPE);
