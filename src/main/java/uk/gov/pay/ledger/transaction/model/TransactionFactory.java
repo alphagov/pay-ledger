@@ -155,14 +155,10 @@ public class TransactionFactory {
             if (exemption3dsRequested == null) {
                 exemption = null;
             } else {
-                switch (Exemption3dsRequested.from(exemption3dsRequested)) {
-                    case CORPORATE:
-                        exemption = new Exemption(true, "corporate", null);
-                        break;
-                    case OPTIMISED:
-                        exemption = new Exemption(true, null, null);
-                        break;
-                }
+                exemption = switch (Exemption3dsRequested.from(exemption3dsRequested)) {
+                    case CORPORATE -> new Exemption(true, "corporate", null);
+                    case OPTIMISED -> new Exemption(true, null, null);
+                };
             }
         } else {
             boolean requested = Exemption3ds.from(exemption3ds) != EXEMPTION_NOT_REQUESTED;
