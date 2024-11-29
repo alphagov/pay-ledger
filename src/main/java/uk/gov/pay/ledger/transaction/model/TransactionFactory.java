@@ -151,25 +151,19 @@ public class TransactionFactory {
 
     private Exemption createExemption(String exemption3ds, String exemption3dsRequested) {
         Exemption exemption = null;
-        if(exemption3ds == null) {
-            if (exemption3dsRequested == null) {
-                exemption = null;
-            } else {
-                exemption = switch (Exemption3dsRequested.from(exemption3dsRequested)) {
-                    case CORPORATE -> new Exemption(true, "corporate", null);
-                    case OPTIMISED -> new Exemption(true, null, null);
-                };
-            }
-        } else {
+        if(exemption3ds != null) {
             boolean requested = Exemption3ds.from(exemption3ds) != EXEMPTION_NOT_REQUESTED;
             String type = null;
-            if (Exemption3dsRequested.from(exemption3dsRequested) == OPTIMISED || exemption3dsRequested == null) {
-                type = null;
-            } else if (Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE) {
+           if (Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE) {
                 type = CORPORATE.toString();
             }
             Outcome outcome = getOutcome(exemption3ds);
             exemption = new Exemption(requested, type, outcome);
+        } else if (exemption3dsRequested != null) {
+                exemption = switch (Exemption3dsRequested.from(exemption3dsRequested)) {
+                    case CORPORATE -> new Exemption(true, "corporate", null);
+                    case OPTIMISED -> new Exemption(true, null, null);
+                };
         }
         return exemption;
     }
