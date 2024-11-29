@@ -88,7 +88,7 @@ public class TransactionFactory {
             String exemption3ds = safeGetAsString(transactionDetails, "exemption_3ds");
             String exemption3dsRequested = safeGetAsString(transactionDetails, "exemption_3ds_requested");
 
-            Exemption exemption = getExemption(exemption3ds, exemption3dsRequested);
+            Exemption exemption = createExemption(exemption3ds, exemption3dsRequested);
 
             AuthorisationSummary authorisationSummary = null;
             if (transactionDetails.has("requires_3ds") || transactionDetails.has("version_3ds")) {
@@ -149,7 +149,7 @@ public class TransactionFactory {
         return null;
     }
 
-    private Exemption getExemption(String exemption3ds, String exemption3dsRequested) {
+    private Exemption createExemption(String exemption3ds, String exemption3dsRequested) {
         Exemption exemption = null;
         if(exemption3ds == null) {
             if (exemption3dsRequested == null) {
