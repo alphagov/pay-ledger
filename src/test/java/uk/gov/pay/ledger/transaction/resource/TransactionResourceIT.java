@@ -768,6 +768,38 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
+                .body("exemption.type", nullValue())
+                .body("exemption.requested", is(Boolean.FALSE));
+    }
+
+
+    @Test
+    public void shouldGetTransactionWithExemptionNotRequestedAndNoTypeEvenWithExemption3dsRequestedCorporate() {
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_NOT_REQUESTED, Exemption3dsRequested.CORPORATE);
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("exemption.type", nullValue())
+                .body("exemption.requested", is(Boolean.FALSE));
+    }
+
+    @Test
+    public void shouldGetTransactionWithExemptionNotRequestedAndNoTypeEvenWithExemption3dsRequestedOptimised() {
+        transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_NOT_REQUESTED, Exemption3dsRequested.OPTIMISED);
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("exemption.type", nullValue())
                 .body("exemption.requested", is(Boolean.FALSE));
     }
 
