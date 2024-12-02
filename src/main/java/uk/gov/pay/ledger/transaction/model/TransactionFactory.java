@@ -156,7 +156,7 @@ public class TransactionFactory {
            if (Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE) {
                 type = CORPORATE.toString();
             }
-            Outcome outcome = getOutcome(exemption3ds);
+            Outcome outcome = createOutcome(exemption3ds);
             exemption = new Exemption(requested, type, outcome);
         } else if (exemption3dsRequested != null) {
                 exemption = switch (Exemption3dsRequested.from(exemption3dsRequested)) {
@@ -167,7 +167,7 @@ public class TransactionFactory {
         return exemption;
     }
 
-    private Outcome getOutcome(String exemption3ds){
+    private Outcome createOutcome(String exemption3ds){
         if (exemption3ds == null) {
             return null;
         }
