@@ -54,6 +54,7 @@ public class TransactionFactoryTest {
     private Long fee = 66L;
     private String cardExpiryDate = "10/27";
     private String walletType = "APPLE_PAY";
+    private String exemption3ds = "EXEMPTION_NOT_REQUESTED";
     private ZonedDateTime paidOutDate = ZonedDateTime.parse("2017-09-19T08:46:01.123456Z");
 
     @BeforeEach
@@ -154,6 +155,7 @@ public class TransactionFactoryTest {
         fullTransactionDetails.addProperty("authorisation_mode", "moto_api");
         fullTransactionDetails.addProperty("disputed", true);
         fullTransactionDetails.addProperty("can_retry", false);
+        fullTransactionDetails.addProperty("exemption_3ds", exemption3ds);
     }
 
     @Test
@@ -213,6 +215,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getAuthorisationMode(), is(AuthorisationMode.WEB));
         assertThat(payment.getDisputed(), is(false));
         assertThat(payment.getCanRetry(), is(nullValue()));
+        assertThat(payment.getExemption(), is(nullValue()));
     }
 
     @Test
@@ -415,5 +418,7 @@ public class TransactionFactoryTest {
         assertThat(payment.getAuthorisationMode(), is(AuthorisationMode.MOTO_API));
         assertThat(payment.getDisputed(), is(true));
         assertThat(payment.getCanRetry(), is(Boolean.FALSE));
+        assertThat(payment.getExemption(), notNullValue());
+        assertThat(payment.getExemption().isRequested(), is(Boolean.FALSE));
     }
 }

@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
+import uk.gov.pay.ledger.transaction.model.Exemption.Outcome;
 import uk.gov.pay.ledger.transaction.search.model.PaymentSettlementSummary;
 import uk.gov.pay.ledger.transaction.search.model.RefundSummary;
 import uk.gov.pay.ledger.transaction.search.model.SettlementSummary;
@@ -21,6 +22,11 @@ import static uk.gov.pay.ledger.util.JsonParser.safeGetAsBoolean;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsDate;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
+import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_NOT_REQUESTED;
+import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_HONOURED;
+import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_REJECTED;
+import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_OUT_OF_SCOPE;
+import static uk.gov.pay.ledger.transaction.model.Exemption3dsRequested.CORPORATE;
 
 public class TransactionFactory {
 
@@ -57,7 +63,6 @@ public class TransactionFactory {
                     safeGetAsString(transactionDetails, "address_country")
             );
             String cardBrand = safeGetAsString(transactionDetails, "card_brand_label");
-
             CardType cardType = CardType.fromString(safeGetAsString(transactionDetails, "card_type"));
             CardDetails cardDetails = CardDetails.from(entity.getCardholderName(), billingAddress, cardBrand,
                     entity.getLastDigitsCardNumber(), entity.getFirstDigitsCardNumber(),
@@ -78,6 +83,11 @@ public class TransactionFactory {
                     safeGetAsDate(transactionDetails, "captured_date"),
                     entity.getPayoutEntity().map(payoutEntity -> payoutEntity.getPaidOutDate()).orElse(null)
             );
+
+            String exemption3ds = safeGetAsString(transactionDetails, "exemption_3ds");
+            String exemption3dsRequested = safeGetAsString(transactionDetails, "exemption_3ds_requested");
+
+            Exemption exemption = createExemption(exemption3ds, exemption3dsRequested);
 
             AuthorisationSummary authorisationSummary = null;
             if (transactionDetails.has("requires_3ds") || transactionDetails.has("version_3ds")) {
@@ -109,6 +119,7 @@ public class TransactionFactory {
                     .withPaymentProvider(paymentProvider)
                     .withCreatedDate(entity.getCreatedDate())
                     .withCardDetails(cardDetails)
+                    .withExemption(exemption)
                     .withDelayedCapture(safeGetAsBoolean(transactionDetails, "delayed_capture", false))
                     .withExternalMetadata(metadata)
                     .withEventCount(entity.getEventCount())
@@ -135,6 +146,38 @@ public class TransactionFactory {
         }
 
         return null;
+    }
+
+    private Exemption createExemption(String exemption3ds, String exemption3dsRequested) {
+        Exemption exemption = null;
+        if(exemption3ds != null) {
+            boolean requested = Exemption3ds.from(exemption3ds) != EXEMPTION_NOT_REQUESTED;
+            String type = null;
+           if (exemption3dsRequested != null && Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE && requested) {
+                type = CORPORATE.toString();
+            }
+            Outcome outcome = createOutcome(exemption3ds);
+            exemption = new Exemption(requested, type, outcome);
+        } else if (exemption3dsRequested != null) {
+                exemption = switch (Exemption3dsRequested.from(exemption3dsRequested)) {
+                    case CORPORATE -> new Exemption(true, "corporate", null);
+                    case OPTIMISED -> new Exemption(true, null, null);
+                };
+        }
+        return exemption;
+    }
+
+    private Outcome createOutcome(String exemption3ds){
+        if (exemption3ds == null) {
+            return null;
+        }
+
+        return switch (Exemption3ds.from(exemption3ds)) {
+            case EXEMPTION_HONOURED -> new Outcome(EXEMPTION_HONOURED);
+            case EXEMPTION_REJECTED -> new Outcome(EXEMPTION_REJECTED);
+            case EXEMPTION_OUT_OF_SCOPE -> new Outcome(EXEMPTION_OUT_OF_SCOPE);
+            default -> null;
+        };
     }
 
     private Transaction createRefund(TransactionEntity entity) {

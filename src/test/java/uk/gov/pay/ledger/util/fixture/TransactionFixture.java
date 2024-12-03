@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 import uk.gov.pay.ledger.transaction.model.Address;
 import uk.gov.pay.ledger.transaction.model.CardDetails;
+import uk.gov.pay.ledger.transaction.model.Exemption3ds;
+import uk.gov.pay.ledger.transaction.model.Exemption3dsRequested;
 import uk.gov.pay.ledger.transaction.model.Transaction;
 import uk.gov.pay.ledger.transaction.model.TransactionFactory;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
@@ -54,6 +56,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String language = "en";
     private String lastDigitsCardNumber;
     private String firstDigitsCardNumber;
+    private Exemption3dsRequested exemption3dsRequested = null;
+    private Exemption3ds exemption3ds = null;
     private CardDetails cardDetails;
     private Boolean delayedCapture = false;
     private String returnUrl = "https://example.org/transactions";
@@ -290,6 +294,16 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withExemption3ds(Exemption3ds exemption3ds) {
+        this.exemption3ds = exemption3ds;
+        return this;
+    }
+
+    public TransactionFixture withExemption3dsRequested(Exemption3dsRequested exemption3dsRequested) {
+        this.exemption3dsRequested = exemption3dsRequested;
+        return this;
+    }
+
     public TransactionFixture withDelayedCapture(Boolean delayedCapture) {
         this.delayedCapture = delayedCapture;
         return this;
@@ -512,6 +526,12 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 transactionDetails.addProperty("address_country", ba.getAddressCountry());
                             });
                 });
+        if(exemption3dsRequested != null) {
+            transactionDetails.addProperty("exemption_3ds_requested", exemption3dsRequested.name());
+        }
+        if(exemption3ds != null) {
+            transactionDetails.addProperty("exemption_3ds", exemption3ds.name());
+        }
         Optional.ofNullable(version3ds).ifPresent(
                 version -> {
                     transactionDetails.addProperty("version_3ds", version);
@@ -672,7 +692,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     public TransactionFixture withDefaultCardDetails() {
         return this.withDefaultCardDetails(true);
     }
-
 
     public TransactionFixture withCorporateCardSurcharge(long value) {
         this.corporateCardSurcharge = value;
