@@ -22,6 +22,6 @@ public enum Exemption3ds {
 
     public static Exemption3ds from(String exemption3ds) {
         return stream(values()).filter(v -> v.name().equals(exemption3ds)).findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("Invalid exemption3ds value: " + exemption3ds));
     }
 }

@@ -153,7 +153,7 @@ public class TransactionFactory {
         if(exemption3ds != null) {
             boolean requested = Exemption3ds.from(exemption3ds) != EXEMPTION_NOT_REQUESTED;
             String type = null;
-           if (Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE && requested) {
+           if (exemption3dsRequested != null && Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE && requested) {
                 type = CORPORATE.toString();
             }
             Outcome outcome = createOutcome(exemption3ds);
