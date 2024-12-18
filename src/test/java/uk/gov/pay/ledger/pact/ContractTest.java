@@ -34,6 +34,8 @@ import static java.time.ZonedDateTime.parse;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static uk.gov.pay.ledger.event.model.ResourceType.AGREEMENT;
+import static uk.gov.pay.ledger.transaction.model.Exemption3ds.EXEMPTION_HONOURED;
+import static uk.gov.pay.ledger.transaction.model.Exemption3dsRequested.CORPORATE;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
@@ -262,6 +264,29 @@ public abstract class ContractTest {
                 .withAmount(100L)
                 .withFee(5L)
                 .withNetAmount(95L)
+                .withDefaultTransactionDetails()
+                .insert(app.getJdbi());
+    }
+
+    @State("a transaction with honoured corporate exemption exists")
+    public void createTransactionWith3dsExemption(Map<String, String> params) {
+        String transactionExternalId = params.get("charge_id");
+        String gatewayAccountId = params.get("account_id");
+
+        if (isBlank(transactionExternalId)) {
+            transactionExternalId = "ch_123abc456xyz";
+        }
+        if (isBlank(gatewayAccountId)) {
+            gatewayAccountId = "123456";
+        }
+
+        aTransactionFixture()
+                .withExternalId(transactionExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withState(TransactionState.SUCCESS)
+                .withAmount(100L)
+                .withExemption3ds(EXEMPTION_HONOURED)
+                .withExemption3dsRequested(CORPORATE)
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
     }
