@@ -530,7 +530,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
             transactionDetails.addProperty("exemption_3ds_requested", exemption3dsRequested.name());
         }
         if(exemption3ds != null) {
-            transactionDetails.addProperty("exemption_3ds", exemption3ds.name());
+            transactionDetails.addProperty("exemption3ds", exemption3ds.name());
         }
         Optional.ofNullable(version3ds).ifPresent(
                 version -> {
