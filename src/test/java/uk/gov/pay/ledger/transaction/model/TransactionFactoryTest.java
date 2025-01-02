@@ -155,7 +155,7 @@ public class TransactionFactoryTest {
         fullTransactionDetails.addProperty("authorisation_mode", "moto_api");
         fullTransactionDetails.addProperty("disputed", true);
         fullTransactionDetails.addProperty("can_retry", false);
-        fullTransactionDetails.addProperty("exemption3ds", exemption3ds);
+        fullTransactionDetails.addProperty("exemption_3ds", exemption3ds);
     }
 
     @Test
