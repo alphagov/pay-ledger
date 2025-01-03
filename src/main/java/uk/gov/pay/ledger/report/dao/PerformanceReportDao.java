@@ -6,7 +6,7 @@ import uk.gov.pay.ledger.report.entity.PerformanceReportEntity;
 import uk.gov.pay.ledger.report.mapper.PerformanceReportEntityMapper;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.ZonedDateTime;
 
 public class PerformanceReportDao {

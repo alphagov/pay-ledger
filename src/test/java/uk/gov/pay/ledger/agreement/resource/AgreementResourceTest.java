@@ -13,7 +13,7 @@ import uk.gov.pay.ledger.agreement.service.AgreementService;
 import uk.gov.pay.ledger.exception.BadRequestExceptionMapper;
 import uk.gov.pay.ledger.exception.JerseyViolationExceptionMapper;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 import java.util.Optional;

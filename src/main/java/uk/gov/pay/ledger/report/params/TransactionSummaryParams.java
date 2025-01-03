@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.report.params;
 import io.swagger.v3.oas.annotations.Parameter;
 import uk.gov.service.payments.commons.validation.ValidDate;
 
-import javax.ws.rs.QueryParam;
+import jakarta.ws.rs.QueryParam;
 import java.util.Objects;
 
 public class TransactionSummaryParams {

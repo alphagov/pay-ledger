@@ -29,9 +29,9 @@ import uk.gov.pay.ledger.util.fixture.EventFixture;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;

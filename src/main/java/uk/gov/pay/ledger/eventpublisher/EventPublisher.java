@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.eventpublisher;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class EventPublisher {
     private final SnsClient snsClient;

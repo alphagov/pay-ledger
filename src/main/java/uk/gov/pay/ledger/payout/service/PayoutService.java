@@ -10,9 +10,9 @@ import uk.gov.pay.ledger.payout.model.PayoutView;
 import uk.gov.pay.ledger.payout.search.PayoutSearchParams;
 import uk.gov.pay.ledger.util.pagination.PaginationBuilder;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.stream.Collectors;
 

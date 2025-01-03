@@ -1,16 +1,16 @@
 package uk.gov.pay.ledger.exception;
 
 import io.dropwizard.jersey.validation.JerseyViolationException;
+import jakarta.validation.ConstraintViolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.service.payments.commons.model.ErrorIdentifier;
 
-import javax.validation.ConstraintViolation;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
 import java.util.stream.Collectors;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.jetty.http.HttpStatus.UNPROCESSABLE_ENTITY_422;
 
 public class JerseyViolationExceptionMapper implements ExceptionMapper<JerseyViolationException> {

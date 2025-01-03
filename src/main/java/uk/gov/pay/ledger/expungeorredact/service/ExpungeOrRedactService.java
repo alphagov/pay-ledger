@@ -11,7 +11,7 @@ import uk.gov.pay.ledger.expungeorredact.dao.TransactionRedactionInfoDao;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
 import uk.gov.pay.ledger.transaction.entity.TransactionEntity;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.InstantSource;
 import java.time.ZonedDateTime;
 import java.util.List;

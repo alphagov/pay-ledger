@@ -6,10 +6,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import uk.gov.pay.ledger.common.search.SearchParams;
 import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.QueryParam;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.QueryParam;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
