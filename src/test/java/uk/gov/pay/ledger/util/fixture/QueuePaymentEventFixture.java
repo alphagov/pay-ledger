@@ -30,7 +30,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     private String credentialExternalId = "a-credentials-external-id";
     private Source source;
     private Map<String, Object> metadata = new HashMap<>();
-    private boolean includeMetada = true;
+    private boolean includeMetadata = true;
     private boolean reprojectDomainObject;
     private GsonBuilder gsonBuilder = new GsonBuilder();
     private String gatewayTransactionId = "a-provider-transaction-id";
@@ -102,8 +102,8 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
         return this;
     }
 
-    public QueuePaymentEventFixture includeMetadata(boolean includeMetada) {
-        this.includeMetada = includeMetada;
+    public QueuePaymentEventFixture includeMetadata(boolean includeMetadata) {
+        this.includeMetadata = includeMetadata;
         return this;
     }
 
@@ -116,7 +116,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
     public QueuePaymentEventFixture withDefaultEventDataForEventType(String eventType) {
         switch (eventType) {
             case "PAYMENT_CREATED":
-                if (metadata.isEmpty() && includeMetada) {
+                if (metadata.isEmpty() && includeMetadata) {
                     metadata.put("key", "value");
                 }
                 eventData = gsonBuilder.create()
@@ -229,6 +229,9 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 break;
             case "GATEWAY_REQUIRES_3DS_AUTHORISATION":
                 eventData = gsonBuilder.create().toJson(Map.of("version_3ds", "1.2.1", "requires_3ds", true));
+                break;
+            case "GATEWAY_DOES_NOT_REQUIRE_3DS_AUTHORISATION":
+                eventData = gsonBuilder.create().toJson(Map.of("requires_3ds", false));
                 break;
             case "PAYMENT_DETAILS_TAKEN_FROM_PAYMENT_INSTRUMENT":
                 eventData = gsonBuilder.create()
