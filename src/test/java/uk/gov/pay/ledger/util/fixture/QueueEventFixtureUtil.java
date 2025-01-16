@@ -82,7 +82,7 @@ public class QueueEventFixtureUtil {
                             } else if (value.isBoolean()) {
                                 dslJsonBody.booleanType(e.getKey(), value.getAsBoolean());
                             } else {
-                                dslJsonBody.stringType(e.getKey(), value.getAsString());
+                                dslJsonBody.stringValue(e.getKey(), value.getAsString());
                             }
                         } else if (e.getValue().isJsonArray()) {
                             // We're currently only adding a single example from an array to the pact, and then in the
@@ -98,7 +98,7 @@ public class QueueEventFixtureUtil {
                                     } else if (value.isBoolean()) {
                                         arrayEntryExample.booleanType(a.getKey(), value.getAsBoolean());
                                     } else {
-                                        arrayEntryExample.stringType(a.getKey(), value.getAsString());
+                                        arrayEntryExample.stringValue(a.getKey(), value.getAsString());
                                     }
                                 });
                             } else {

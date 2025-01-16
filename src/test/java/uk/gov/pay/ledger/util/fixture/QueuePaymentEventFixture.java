@@ -222,7 +222,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 eventData = gsonBuilder.create().toJson(Map.of("exemption_3ds_requested", "OPTIMISED"));
                 break;
             case "GATEWAY_3DS_EXEMPTION_RESULT_OBTAINED":
-                eventData = gsonBuilder.create().toJson(Map.of("exemption3ds", "HONOURED"));
+                eventData = gsonBuilder.create().toJson(Map.of("exemption3ds", "EXEMPTION_HONOURED"));
                 break;
             case "GATEWAY_3DS_INFO_OBTAINED":
                 eventData = gsonBuilder.create().toJson(Map.of("version_3ds", "2.1.0"));
