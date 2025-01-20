@@ -60,7 +60,7 @@ public class QueuePayoutEventFixture implements QueueFixture<QueuePayoutEventFix
             case "PAYOUT_PAID":
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
-                                .put("paid_out_date", "2020-05-13T18:50:00.000000Z")
+                                .put("paid_out_date", "2020-05-13T18:45:33.000000Z")
                                 .put("gateway_status", "paid")
                                 .build());
                 break;

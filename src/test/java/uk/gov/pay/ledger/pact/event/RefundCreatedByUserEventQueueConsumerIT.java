@@ -47,7 +47,7 @@ public class RefundCreatedByUserEventQueueConsumerIT {
     private QueueRefundEventFixture refundFixture = aQueueRefundEventFixture()
             .withResourceType(ResourceType.REFUND)
             .withEventType("REFUND_CREATED_BY_USER")
-            .withRefundedBy("a_user_id")
+            .withRefundedBy("user_external_id")
             .withUserEmail("test@example.com")
             .withDefaultEventDataForEventType("REFUND_CREATED_BY_USER");
 

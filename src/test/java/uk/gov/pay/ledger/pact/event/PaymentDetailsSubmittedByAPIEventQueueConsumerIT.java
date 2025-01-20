@@ -82,8 +82,8 @@ public class PaymentDetailsSubmittedByAPIEventQueueConsumerIT {
         assertThat(transaction.get().getCardBrand(), is("visa"));
         assertThat(transaction.get().getFirstDigitsCardNumber(), is("424242"));
         assertThat(transaction.get().getLastDigitsCardNumber(), is("4242"));
-        assertThat(transaction.get().getCardholderName(), is("J citizen"));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"11/21\""));
+        assertThat(transaction.get().getCardholderName(), is("Mr Test"));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"12/99\""));
     }
 
     private void setupTransaction(TransactionDao transactionDao) {

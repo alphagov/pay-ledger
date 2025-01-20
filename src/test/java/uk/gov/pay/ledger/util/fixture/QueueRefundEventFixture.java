@@ -79,7 +79,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
             case "REFUND_CREATED_BY_USER":
                 eventData = new GsonBuilder().create()
                         .toJson(ImmutableMap.builder()
-                                .put("gateway_account_id", gatewayAccountId)
+                                .put("gateway_account_id", "1")
                                 .put("amount", amount)
                                 .put("refunded_by", refundedBy)
                                 .put("user_email", userEmail)

@@ -82,7 +82,11 @@ public class QueueEventFixtureUtil {
                             } else if (value.isBoolean()) {
                                 dslJsonBody.booleanType(e.getKey(), value.getAsBoolean());
                             } else {
-                                dslJsonBody.stringType(e.getKey(), value.getAsString());
+                                if (e.getKey().contains("id") || e.getKey().contains("date")) {
+                                    dslJsonBody.stringType(e.getKey(), value.getAsString());
+                                } else {
+                                    dslJsonBody.stringValue(e.getKey(), value.getAsString());
+                                }
                             }
                         } else if (e.getValue().isJsonArray()) {
                             // We're currently only adding a single example from an array to the pact, and then in the

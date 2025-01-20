@@ -43,7 +43,7 @@ public class CancelledByUserEventQueueConsumerIT {
     private String externalId = "externalId";
     private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
     private String gatewayAccountId = "gateway_account_id";
-    private String gatewayTransactionId = "validGatewayTransactionId";
+    private String gatewayTransactionId = "gateway_transaction_id";
 
     @Pact(provider = "connector", consumer = "ledger")
     public MessagePact createCancelledByUserEventPact(MessagePactBuilder builder) {

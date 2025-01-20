@@ -38,7 +38,7 @@ public class PayoutPaidEventQueueConsumerIT {
 
     private byte[] currentMessage;
     private String gatewayPayoutId = "po_paid_1234567890";
-    private ZonedDateTime eventDate = parse("2020-05-13T18:50:00Z");
+    private ZonedDateTime eventDate = parse("2020-05-13T18:45:33.000000Z");
     private String eventType = "PAYOUT_PAID";
 
     @Pact(provider = "connector", consumer = "ledger")
@@ -72,7 +72,7 @@ public class PayoutPaidEventQueueConsumerIT {
         Optional<PayoutEntity> payoutEntity = payoutDao.findByGatewayPayoutId(gatewayPayoutId);
         assertThat(payoutEntity.isPresent(), is(true));
         assertThat(payoutEntity.get().getGatewayPayoutId(), is(gatewayPayoutId));
-        assertThat(payoutEntity.get().getPaidOutDate().toString(), is("2020-05-13T18:50Z"));
+        assertThat(payoutEntity.get().getPaidOutDate().toString(), is("2020-05-13T18:45:33Z"));
         assertThat(payoutEntity.get().getState(), is(PAID_OUT));
 
         Map<String, Object> payoutDetails = new Gson().fromJson(payoutEntity.get().getPayoutDetails(), Map.class);

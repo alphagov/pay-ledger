@@ -42,7 +42,7 @@ public class RefundIncludedInPayoutEventQueueConsumerIT {
 
     private byte[] currentMessage;
     private String refundExternalId = "refund-external-id";
-    private String payoutId = "po_12345";
+    private String payoutId = "po_1234567890";
     private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
     private QueueRefundEventFixture refundFixture;
 

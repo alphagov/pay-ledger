@@ -40,7 +40,7 @@ public class PaymentIncludedInPayoutEventQueueConsumerIT {
 
     private byte[] currentMessage;
     private String paymentExternalId = "payment-external-id";
-    private String payoutId = "po_12345";
+    private String payoutId = "po_1234567890";
     private ZonedDateTime eventDate = ZonedDateTime.parse("2018-03-12T16:25:01.123456Z");
 
     @Pact(provider = "connector", consumer = "ledger")
