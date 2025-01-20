@@ -108,7 +108,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AgreementSearchResponse'
+                $ref: "#/components/schemas/AgreementSearchResponse"
           description: OK
         "404":
           description: Not found
@@ -156,7 +156,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Agreement'
+                $ref: "#/components/schemas/Agreement"
           description: OK
         "404":
           description: Not found
@@ -188,7 +188,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AgreementEventsResponse'
+                $ref: "#/components/schemas/AgreementEventsResponse"
           description: OK
         "404":
           description: Not found
@@ -204,7 +204,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/EventMessageDto'
+                $ref: "#/components/schemas/EventMessageDto"
       responses:
         "200":
           content:
@@ -212,13 +212,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/EventTicker'
+                  $ref: "#/components/schemas/EventTicker"
           description: OK
         "422":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing query parameters
         "500":
           description: Invalid parameters or Downstream system error
@@ -258,13 +258,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/EventTicker'
+                  $ref: "#/components/schemas/EventTicker"
           description: OK
         "422":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing query parameters
         "500":
           description: Invalid parameters or Downstream system error
@@ -311,7 +311,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PayoutSearchResponse'
+                $ref: "#/components/schemas/PayoutSearchResponse"
           description: OK
         "404":
           description: Not found
@@ -344,13 +344,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GatewayAccountMonthlyPerformanceReportEntity'
+                  $ref: "#/components/schemas/GatewayAccountMonthlyPerformanceReportEntity"
           description: OK
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing required query parameters (from_date or to_date)
         "500":
           description: Internal Server Error for invalid query parameter values
@@ -414,7 +414,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing required or invalid query parameters (from_date or
             to_date)
       summary: Get number of payments by transaction (payment) state
@@ -465,13 +465,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PerformanceReportEntity'
+                $ref: "#/components/schemas/PerformanceReportEntity"
           description: OK
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: For missing query params or invalid state).
         "500":
           description: Internal Server Error for invalid query params (from_date/to_date)
@@ -524,7 +524,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PerformanceReportEntity'
+                $ref: "#/components/schemas/PerformanceReportEntity"
           description: OK
         "500":
           description: Internal Server Error for invalid query parameter values
@@ -559,19 +559,19 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TimeseriesReportSlice'
+                  $ref: "#/components/schemas/TimeseriesReportSlice"
           description: OK
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing required query parameters
         "500":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Invalid query parameters (from_date or to_date)
       summary: Get transaction summary by hour
       tags:
@@ -621,19 +621,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionSummaryResult'
+                $ref: "#/components/schemas/TransactionSummaryResult"
           description: OK
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing required query parameter (from_date)
         "422":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing required or invalid query parameters (from_date or
             to_date)
       summary: Get transaction summary for query params
@@ -699,7 +699,7 @@ paths:
         in: query
         name: payment_states
         schema:
-          $ref: '#/components/schemas/CommaDelimitedSetParameter'
+          $ref: "#/components/schemas/CommaDelimitedSetParameter"
       - example: success
         in: query
         name: state
@@ -710,13 +710,13 @@ paths:
         in: query
         name: refund_states
         schema:
-          $ref: '#/components/schemas/CommaDelimitedSetParameter'
+          $ref: "#/components/schemas/CommaDelimitedSetParameter"
       - description: Comma delimited card brands.
         example: "visa,mastercard"
         in: query
         name: card_brands
         schema:
-          $ref: '#/components/schemas/CommaDelimitedSetParameter'
+          $ref: "#/components/schemas/CommaDelimitedSetParameter"
       - description: From date of transactions to be searched (this date is inclusive).
         example: 2015-08-14T12:35:00Z
         in: query
@@ -805,7 +805,7 @@ paths:
         in: query
         name: dispute_states
         schema:
-          $ref: '#/components/schemas/CommaDelimitedSetParameter'
+          $ref: "#/components/schemas/CommaDelimitedSetParameter"
       - description: Set to true to list transactions for all accounts.
         in: query
         name: override_account_id_restriction
@@ -824,13 +824,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TransactionSearchResponse'
+                  $ref: "#/components/schemas/TransactionSearchResponse"
           description: OK
         "400":
           content:
             application/json; qs=1:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing required query parameters
         "504":
           description: Search query cancelled due to query timeout
@@ -860,7 +860,7 @@ paths:
           content:
             application/json; qs=1:
               schema:
-                $ref: '#/components/schemas/TransactionView'
+                $ref: "#/components/schemas/TransactionView"
           description: OK
         "404":
           description: Not found
@@ -868,7 +868,7 @@ paths:
           content:
             application/json; qs=1:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: If payment_provider query parameter is missing
       summary: Get transaction for a gateway transaction ID
       tags:
@@ -922,7 +922,7 @@ paths:
           content:
             application/json; qs=1:
               schema:
-                $ref: '#/components/schemas/TransactionsForTransactionResponse'
+                $ref: "#/components/schemas/TransactionsForTransactionResponse"
           description: OK
         "404":
           description: Not found
@@ -930,7 +930,7 @@ paths:
           content:
             application/json; qs=1:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing required query parameter (gateway_account_id)
       summary: "Get transactions (ex: refunds) related to parent transaction (payment)"
       tags:
@@ -977,13 +977,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TransactionView'
+                  $ref: "#/components/schemas/TransactionView"
           description: OK
         "400":
           content:
             application/json; qs=1:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing required query parameters
         "500":
           description: Internal Server Error for invalid query parameter values
@@ -1029,7 +1029,7 @@ paths:
           content:
             application/json; qs=1:
               schema:
-                $ref: '#/components/schemas/TransactionEventResponse'
+                $ref: "#/components/schemas/TransactionEventResponse"
           description: OK
         "404":
           description: Not found
@@ -1037,7 +1037,7 @@ paths:
           content:
             application/json; qs=1:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
           description: Missing required query parameters
       summary: Get events for transaction external ID
       tags:
@@ -1083,7 +1083,7 @@ components:
         live:
           type: boolean
         payment_instrument:
-          $ref: '#/components/schemas/PaymentInstrument'
+          $ref: "#/components/schemas/PaymentInstrument"
         reference:
           type: string
         service_id:
@@ -1103,12 +1103,12 @@ components:
         events:
           type: array
           items:
-            $ref: '#/components/schemas/Event'
+            $ref: "#/components/schemas/Event"
     AgreementSearchResponse:
       type: object
       properties:
         _links:
-          $ref: '#/components/schemas/PaginationBuilder'
+          $ref: "#/components/schemas/PaginationBuilder"
         count:
           type: integer
           format: int64
@@ -1118,7 +1118,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Agreement'
+            $ref: "#/components/schemas/Agreement"
         total:
           type: integer
           format: int64
@@ -1126,12 +1126,12 @@ components:
       type: object
       properties:
         three_d_secure:
-          $ref: '#/components/schemas/ThreeDSecure'
+          $ref: "#/components/schemas/ThreeDSecure"
     CardDetails:
       type: object
       properties:
         billing_address:
-          $ref: '#/components/schemas/Address'
+          $ref: "#/components/schemas/Address"
         card_brand:
           type: string
           example: Visa
@@ -1341,7 +1341,7 @@ components:
       type: object
       properties:
         outcome:
-          $ref: '#/components/schemas/Outcome'
+          $ref: "#/components/schemas/Outcome"
         requested:
           type: boolean
           description: Flag indicating whether 3ds exemption was requested for the
@@ -1418,15 +1418,15 @@ components:
       type: object
       properties:
         first_page:
-          $ref: '#/components/schemas/PaginationLink'
+          $ref: "#/components/schemas/PaginationLink"
         last_page:
-          $ref: '#/components/schemas/PaginationLink'
+          $ref: "#/components/schemas/PaginationLink"
         next_page:
-          $ref: '#/components/schemas/PaginationLink'
+          $ref: "#/components/schemas/PaginationLink"
         prev_page:
-          $ref: '#/components/schemas/PaginationLink'
+          $ref: "#/components/schemas/PaginationLink"
         self:
-          $ref: '#/components/schemas/PaginationLink'
+          $ref: "#/components/schemas/PaginationLink"
     PaginationLink:
       type: object
       properties:
@@ -1439,7 +1439,7 @@ components:
         agreement_external_id:
           type: string
         card_details:
-          $ref: '#/components/schemas/CardDetails'
+          $ref: "#/components/schemas/CardDetails"
         created_date:
           type: string
           format: date-time
@@ -1453,7 +1453,7 @@ components:
       type: object
       properties:
         _links:
-          $ref: '#/components/schemas/PaginationBuilder'
+          $ref: "#/components/schemas/PaginationBuilder"
         count:
           type: integer
           format: int64
@@ -1465,7 +1465,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/PayoutView'
+            $ref: "#/components/schemas/PayoutView"
         total:
           type: integer
           format: int64
@@ -1599,7 +1599,7 @@ components:
           type: string
           example: PAYMENT
         state:
-          $ref: '#/components/schemas/ExternalTransactionState'
+          $ref: "#/components/schemas/ExternalTransactionState"
         timestamp:
           type: string
           format: date-time
@@ -1609,7 +1609,7 @@ components:
         events:
           type: array
           items:
-            $ref: '#/components/schemas/TransactionEvent'
+            $ref: "#/components/schemas/TransactionEvent"
         transaction_id:
           type: string
           example: 9np5pocnotgkpp029d5kdfau5f
@@ -1617,7 +1617,7 @@ components:
       type: object
       properties:
         _links:
-          $ref: '#/components/schemas/PaginationBuilder'
+          $ref: "#/components/schemas/PaginationBuilder"
         count:
           type: integer
           format: int64
@@ -1627,7 +1627,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/TransactionView'
+            $ref: "#/components/schemas/TransactionView"
         total:
           type: integer
           format: int64
@@ -1635,15 +1635,15 @@ components:
       type: object
       properties:
         moto_payments:
-          $ref: '#/components/schemas/TransactionsStatisticsResult'
+          $ref: "#/components/schemas/TransactionsStatisticsResult"
         net_income:
           type: integer
           format: int64
           example: 6000
         payments:
-          $ref: '#/components/schemas/TransactionsStatisticsResult'
+          $ref: "#/components/schemas/TransactionsStatisticsResult"
         refunds:
-          $ref: '#/components/schemas/TransactionsStatisticsResult'
+          $ref: "#/components/schemas/TransactionsStatisticsResult"
     TransactionView:
       type: object
       properties:
@@ -1662,9 +1662,9 @@ components:
           - external
           example: web
         authorisation_summary:
-          $ref: '#/components/schemas/AuthorisationSummary'
+          $ref: "#/components/schemas/AuthorisationSummary"
         card_details:
-          $ref: '#/components/schemas/CardDetails'
+          $ref: "#/components/schemas/CardDetails"
         corporate_card_surcharge:
           type: integer
           format: int64
@@ -1689,7 +1689,7 @@ components:
           type: string
           format: date-time
         exemption:
-          $ref: '#/components/schemas/Exemption'
+          $ref: "#/components/schemas/Exemption"
         fee:
           type: integer
           format: int64
@@ -1723,7 +1723,7 @@ components:
           description: Parent transaction external ID. Available for refunds
           example: 4dfdhapsdgftgkpp029d5kdfau5f
         payment_details:
-          $ref: '#/components/schemas/TransactionView'
+          $ref: "#/components/schemas/TransactionView"
         payment_provider:
           type: string
           example: sandbox
@@ -1734,7 +1734,7 @@ components:
           type: string
           example: payment reference
         refund_summary:
-          $ref: '#/components/schemas/RefundSummary'
+          $ref: "#/components/schemas/RefundSummary"
         refunded_by:
           type: string
           description: External ID of the service user that refunded payment. Only
@@ -1752,7 +1752,7 @@ components:
           type: string
           example: baea0585e30d4acbb438524fca82b51e
         settlement_summary:
-          $ref: '#/components/schemas/SettlementSummary'
+          $ref: "#/components/schemas/SettlementSummary"
         source:
           type: string
           enum:
@@ -1762,7 +1762,7 @@ components:
           - CARD_EXTERNAL_TELEPHONE
           example: CARD_API
         state:
-          $ref: '#/components/schemas/ExternalTransactionState'
+          $ref: "#/components/schemas/ExternalTransactionState"
         total_amount:
           type: integer
           format: int64
@@ -1789,7 +1789,7 @@ components:
         transactions:
           type: array
           items:
-            $ref: '#/components/schemas/TransactionView'
+            $ref: "#/components/schemas/TransactionView"
     TransactionsStatisticsResult:
       type: object
       properties:
