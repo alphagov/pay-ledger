@@ -76,7 +76,7 @@ public class Gateway3dsExemptionResultObtainedEventQueueConsumerIT {
 
         assertThat(transaction.isPresent(), is(true));
         assertThat(transaction.get().getExternalId(), is(externalId));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"exemption3ds\": \"HONOURED\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"exemption3ds\": \"EXEMPTION_HONOURED\""));
     }
 
     public void setMessage(byte[] messageContents) {

@@ -48,7 +48,7 @@ public class PaymentDetailsEnteredEventQueueConsumerIT {
                 .withResourceExternalId(externalId)
                 .withEventDate(eventDate)
                 .withEventType(paymentDetailsEnteredEventName)
-                .withGatewayAccountId("I0YI1")
+                .withGatewayAccountId("gateway_transaction_id")
                 .withDefaultEventDataForEventType(paymentDetailsEnteredEventName)
                 .withLive(true);
 
@@ -82,11 +82,11 @@ public class PaymentDetailsEnteredEventQueueConsumerIT {
         assertThat(transaction.get().getCardBrand(), is("visa"));
         assertThat(transaction.get().getFirstDigitsCardNumber(), is("424242"));
         assertThat(transaction.get().getLastDigitsCardNumber(), is("4242"));
-        assertThat(transaction.get().getCardholderName(), is("J citizen"));
+        assertThat(transaction.get().getCardholderName(), is("Mr Test"));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"corporate_surcharge\": 5"));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"11/21\""));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_line1\": \"12 Rouge Avenue\""));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_postcode\": \"N1 3QU\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"12/99\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_line1\": \"125 Kingsway\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"address_postcode\": \"WC2B 6NH\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"address_city\": \"London\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"address_country\": \"GB\""));
         assertThat(transaction.get().getTotalAmount(), is(1005L));

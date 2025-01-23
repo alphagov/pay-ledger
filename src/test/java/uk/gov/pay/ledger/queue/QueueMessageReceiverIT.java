@@ -218,18 +218,18 @@ public class QueueMessageReceiverIT {
 
         Optional<TransactionEntity> mayBeRefund = transactionDao.findTransactionByExternalId(resourceExternalId);
         TransactionEntity refund = mayBeRefund.get();
-        assertThat(refund.getCardholderName(), is("J citizen"));
-        assertThat(refund.getEmail(), is("j.doe@example.org"));
+        assertThat(refund.getCardholderName(), is("Mr Test"));
+        assertThat(refund.getEmail(), is("test@email.invalid"));
         assertThat(refund.getCardBrand(), is("visa"));
-        assertThat(refund.getDescription(), is("a description"));
+        assertThat(refund.getDescription(), is("This is a description"));
         assertThat(refund.getLastDigitsCardNumber(), is("4242"));
         assertThat(refund.getFirstDigitsCardNumber(), is("424242"));
-        assertThat(refund.getReference(), is("aref"));
+        assertThat(refund.getReference(), is("This is a reference"));
         Map<String, Object> transactionDetails = new Gson().fromJson(refund.getTransactionDetails(), Map.class);
         Map<String, String> paymentDetails = (Map<String, String>) transactionDetails.get("payment_details");
 
         assertThat(paymentDetails.get("card_brand_label"), is("Visa"));
-        assertThat(paymentDetails.get("expiry_date"), is("11/21"));
+        assertThat(paymentDetails.get("expiry_date"), is("12/99"));
         assertThat(paymentDetails.get("card_type"), is("DEBIT"));
     }
 
@@ -416,13 +416,13 @@ public class QueueMessageReceiverIT {
         assertThat(dispute, hasEntry("fee", null));
         assertThat(dispute, hasEntry("net_amount", null));
 
-        assertThat(dispute, hasEntry("cardholder_name", "J citizen"));
-        assertThat(dispute, hasEntry("email", "j.doe@example.org"));
+        assertThat(dispute, hasEntry("cardholder_name", "Mr Test"));
+        assertThat(dispute, hasEntry("email", "test@email.invalid"));
         assertThat(dispute, hasEntry("card_brand", "visa"));
-        assertThat(dispute, hasEntry("description", "a description"));
+        assertThat(dispute, hasEntry("description", "This is a description"));
         assertThat(dispute, hasEntry("last_digits_card_number", "4242"));
         assertThat(dispute, hasEntry("first_digits_card_number", "424242"));
-        assertThat(dispute, hasEntry("reference", "aref"));
+        assertThat(dispute, hasEntry("reference", "This is a reference"));
     }
 
     @Test

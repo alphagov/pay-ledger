@@ -122,25 +122,25 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 eventData = gsonBuilder.create()
                         .toJson(ImmutableMap.builder()
                                 .put("amount", 1000)
-                                .put("description", "a description")
+                                .put("description", "This is a description")
                                 .put("language", "en")
-                                .put("reference", "aref")
-                                .put("return_url", "https://example.org")
+                                .put("reference", "This is a reference")
+                                .put("return_url", "http://return.invalid")
                                 .put("gateway_account_id", gatewayAccountId)
                                 .put("credential_external_id", credentialExternalId)
                                 .put("payment_provider", "sandbox")
                                 .put("delayed_capture", false)
                                 .put("moto", false)
                                 .put("external_metadata", metadata)
-                                .put("email", "j.doe@example.org")
-                                .put("cardholder_name", "J citizen")
-                                .put("address_line1", "12 Rouge Avenue")
-                                .put("address_postcode", "N1 3QU")
+                                .put("email", "test@email.invalid")
+                                .put("cardholder_name", "Mr Test")
+                                .put("address_line1", "125 Kingsway")
+                                .put("address_postcode", "WC2B 6NH")
                                 .put("address_city", "London")
                                 .put("source", CARD_API)
                                 .put("address_country", "GB")
                                 .put("authorisation_mode", "web")
-                                .put("agreement_id", "an-agreement-id")
+                                .put("agreement_id", "an-agreement-external-id")
                                 .build());
                 break;
             case "PAYMENT_DETAILS_ENTERED":
@@ -148,10 +148,10 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                         .toJson(ImmutableMap.builder()
                                 .put("last_digits_card_number", "4242")
                                 .put("first_digits_card_number", "424242")
-                                .put("cardholder_name", "J citizen")
-                                .put("expiry_date", "11/21")
-                                .put("address_line1", "12 Rouge Avenue")
-                                .put("address_postcode", "N1 3QU")
+                                .put("cardholder_name", "Mr Test")
+                                .put("expiry_date", "12/99")
+                                .put("address_line1", "125 Kingsway")
+                                .put("address_postcode", "WC2B 6NH")
                                 .put("address_city", "London")
                                 .put("address_country", "GB")
                                 .put("card_type", "DEBIT")
@@ -167,8 +167,8 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                         .toJson(ImmutableMap.builder()
                                 .put("last_digits_card_number", "4242")
                                 .put("first_digits_card_number", "424242")
-                                .put("cardholder_name", "J citizen")
-                                .put("expiry_date", "11/21")
+                                .put("cardholder_name", "Mr Test")
+                                .put("expiry_date", "12/99")
                                 .put("card_type", "DEBIT")
                                 .put("card_brand", "visa")
                                 .put("card_brand_label", "Visa")
@@ -192,20 +192,20 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 externalMetadata.addProperty("processor_id", "processorId");
                 externalMetadata.addProperty("authorised_date", "2018-02-21T16:05:33Z");
                 externalMetadata.addProperty("created_date", "2018-02-21T15:05:13Z");
-                externalMetadata.addProperty("auth_code", "authCode");
+                externalMetadata.addProperty("auth_code", "012345");
                 externalMetadata.addProperty("status", "success");
                 eventData = gsonBuilder.create()
                     .toJson(ImmutableMap.builder()
                             .put("credential_external_id", credentialExternalId)
                             .put("amount", 1000)
-                            .put("description", "New passport application")
-                            .put("reference", "MRPC12345")
+                            .put("description", "This is a description")
+                            .put("reference", "This is a reference")
                             .put("email", "j.doe@example.org")
                             .put("external_metadata", externalMetadata)
                             .put("last_digits_card_number", "4242")
                             .put("first_digits_card_number", "424242")
-                            .put("cardholder_name", "J citizen")
-                            .put("expiry_date", "11/21")
+                            .put("cardholder_name", "Mr Test")
+                            .put("expiry_date", "12/99")
                             .put("card_brand", "visa")
                             .put("card_brand_label", "Visa")
                             .put("payment_provider", "sandbox")
@@ -213,7 +213,7 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                             .build());
                 break;
             case "CANCELLED_BY_USER":
-                eventData = gsonBuilder.create().toJson(Map.of("gateway_transaction_id", "validGatewayTransactionId"));
+                eventData = gsonBuilder.create().toJson(Map.of("gateway_transaction_id", "gateway_transaction_id"));
                 break;
             case "USER_EMAIL_COLLECTED":
                 eventData = gsonBuilder.create().toJson(Map.of("email", "test@example.org"));
@@ -222,13 +222,13 @@ public class QueuePaymentEventFixture implements QueueFixture<QueuePaymentEventF
                 eventData = gsonBuilder.create().toJson(Map.of("exemption_3ds_requested", "OPTIMISED"));
                 break;
             case "GATEWAY_3DS_EXEMPTION_RESULT_OBTAINED":
-                eventData = gsonBuilder.create().toJson(Map.of("exemption3ds", "HONOURED"));
+                eventData = gsonBuilder.create().toJson(Map.of("exemption3ds", "EXEMPTION_HONOURED"));
                 break;
             case "GATEWAY_3DS_INFO_OBTAINED":
                 eventData = gsonBuilder.create().toJson(Map.of("version_3ds", "2.1.0"));
                 break;
             case "GATEWAY_REQUIRES_3DS_AUTHORISATION":
-                eventData = gsonBuilder.create().toJson(Map.of("version_3ds", "1.2.1", "requires_3ds", true));
+                eventData = gsonBuilder.create().toJson(Map.of("version_3ds", "2.1.0", "requires_3ds", true));
                 break;
             case "GATEWAY_DOES_NOT_REQUIRE_3DS_AUTHORISATION":
                 eventData = gsonBuilder.create().toJson(Map.of("requires_3ds", false));

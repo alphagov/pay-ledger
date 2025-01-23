@@ -77,7 +77,7 @@ public class GatewayRequires3dsAuthorisationEventQueueConsumerIT {
 
         assertThat(transaction.isPresent(), is(true));
         assertThat(transaction.get().getExternalId(), is(externalId));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"version_3ds\": \"1.2.1\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"version_3ds\": \"2.1.0\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"requires_3ds\": true"));
     }
 

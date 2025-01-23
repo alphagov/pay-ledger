@@ -81,17 +81,17 @@ public class TransactionEntityFactoryTest {
         assertThat(transactionEntity.getSource(), is(notNullValue()));
         assertThat(transactionEntity.isLive(), is(true));
         assertThat(transactionEntity.getGatewayPayoutId(), is("payout-id"));
-        assertThat(transactionEntity.getAgreementId(), is("an-agreement-id"));
+        assertThat(transactionEntity.getAgreementId(), is("an-agreement-external-id"));
 
         JsonObject transactionDetails = JsonParser.parseString(transactionEntity.getTransactionDetails()).getAsJsonObject();
         assertThat(transactionDetails.get("language").getAsString(), is("en"));
         assertThat(transactionDetails.get("payment_provider").getAsString(), is("sandbox"));
-        assertThat(transactionDetails.get("expiry_date").getAsString(), is("11/21"));
-        assertThat(transactionDetails.get("address_line1").getAsString(), is("12 Rouge Avenue"));
-        assertThat(transactionDetails.get("address_postcode").getAsString(), is("N1 3QU"));
+        assertThat(transactionDetails.get("expiry_date").getAsString(), is("12/99"));
+        assertThat(transactionDetails.get("address_line1").getAsString(), is("125 Kingsway"));
+        assertThat(transactionDetails.get("address_postcode").getAsString(), is("WC2B 6NH"));
         assertThat(transactionDetails.get("address_country").getAsString(), is("GB"));
         assertThat(transactionDetails.get("delayed_capture").getAsBoolean(), is(false));
-        assertThat(transactionDetails.get("return_url").getAsString(), is("https://example.org"));
+        assertThat(transactionDetails.get("return_url").getAsString(), is("http://return.invalid"));
         assertThat(transactionDetails.get("corporate_surcharge").getAsInt(), is(5));
         assertThat(transactionDetails.get("gateway_transaction_id").getAsString(), is(eventDigest.getEventAggregate().get("gateway_transaction_id")));
         assertThat(transactionDetails.get("external_metadata").getAsJsonObject().get("key").getAsString(), is("value"));

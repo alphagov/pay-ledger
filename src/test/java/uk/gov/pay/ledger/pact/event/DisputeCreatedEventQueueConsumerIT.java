@@ -115,7 +115,7 @@ public class DisputeCreatedEventQueueConsumerIT {
         assertThat(eventData.get("amount").asLong(), is(amount));
         assertThat(eventData.get("gateway_account_id").asText(), is(gatewayAccountId));
         assertThat(eventData.get("reason").asText(), is(reason));
-        assertThat(eventData.get("evidence_due_date").asText(), is("2022-02-14T23:59:59.000Z"));
+        assertThat(eventData.get("evidence_due_date").asText(), is("2022-02-14T23:59:59.000000Z"));
 
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
 
@@ -129,7 +129,7 @@ public class DisputeCreatedEventQueueConsumerIT {
 
         Map<String, String> transactionDetails = gson.fromJson(transaction.get().getTransactionDetails(), Map.class);
         assertThat(transactionDetails.get("reason"), is("duplicate"));
-        assertThat(transactionDetails.get("evidence_due_date"), is("2022-02-14T23:59:59.000Z"));
+        assertThat(transactionDetails.get("evidence_due_date"), is("2022-02-14T23:59:59.000000Z"));
     }
 
     public void setMessage(byte[] messageContents) {

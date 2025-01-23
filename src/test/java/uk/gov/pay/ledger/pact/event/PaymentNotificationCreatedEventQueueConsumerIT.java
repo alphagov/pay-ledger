@@ -84,22 +84,22 @@ public class PaymentNotificationCreatedEventQueueConsumerIT {
         assertThat(transaction.get().getCardBrand(), is("visa"));
         assertThat(transaction.get().getFirstDigitsCardNumber(), is("424242"));
         assertThat(transaction.get().getLastDigitsCardNumber(), is("4242"));
-        assertThat(transaction.get().getCardholderName(), is("J citizen"));
-        assertThat(transaction.get().getReference(), is("MRPC12345"));
+        assertThat(transaction.get().getCardholderName(), is("Mr Test"));
+        assertThat(transaction.get().getReference(), is("This is a reference"));
         assertThat(transaction.get().getCardBrand(), is("visa"));
-        assertThat(transaction.get().getDescription(), is("New passport application"));
+        assertThat(transaction.get().getDescription(), is("This is a description"));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"gateway_transaction_id\": \"providerId\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"amount\": 1000"));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"11/21\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"12/99\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"status\": \"success\""));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"auth_code\": \"authCode\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"auth_code\": \"012345\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"processor_id\": \"processorId\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"telephone_number\": \"+447700900796\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"authorised_date\": \"2018-02-21T16:05:33Z\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"created_date\": \"2018-02-21T15:05:13Z\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"card_brand_label\": \"Visa\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"payment_provider\": \"sandbox\""));
-        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"11/21\""));
+        assertThat(transaction.get().getTransactionDetails(), containsString("\"expiry_date\": \"12/99\""));
         assertThat(transaction.get().getTransactionDetails(), containsString("\"credential_external_id\": \"" + credentialExternalId + "\""));
     }
 
