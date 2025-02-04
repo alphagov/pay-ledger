@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>uk.gov.pay.ledger.app.LedgerApp</mainClass>
-        <pay-java-commons.version>1.0.20250120102448</pay-java-commons.version>
+        <pay-java-commons.version>1.0.20250203100445</pay-java-commons.version>
         <prometheus.version>0.16.0</prometheus.version>
         <surefire.version>3.5.2</surefire.version>
         <swagger.version>2.2.28</swagger.version>
