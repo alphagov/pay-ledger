@@ -84,7 +84,7 @@ public class TransactionFactory {
                     entity.getPayoutEntity().map(payoutEntity -> payoutEntity.getPaidOutDate()).orElse(null)
             );
 
-            String exemption3ds = safeGetAsString(transactionDetails, "exemption_3ds");
+            String exemption3ds = safeGetAsString(transactionDetails, "exemption3ds");
             String exemption3dsRequested = safeGetAsString(transactionDetails, "exemption_3ds_requested");
 
             Exemption exemption = createExemption(exemption3ds, exemption3dsRequested);
