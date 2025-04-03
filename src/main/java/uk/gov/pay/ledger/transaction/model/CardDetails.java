@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import uk.gov.pay.ledger.util.serialiser.ToLowerCaseStringSerializer;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

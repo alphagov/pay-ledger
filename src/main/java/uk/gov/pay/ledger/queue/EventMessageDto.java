@@ -11,7 +11,7 @@ import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeDeserializer;
 import uk.gov.service.payments.commons.api.json.MicrosecondPrecisionDateTimeSerializer;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

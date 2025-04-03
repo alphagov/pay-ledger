@@ -13,8 +13,8 @@ import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.queue.EventMessageHandler;
 import uk.gov.pay.ledger.util.fixture.EventFixture;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.Response;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;

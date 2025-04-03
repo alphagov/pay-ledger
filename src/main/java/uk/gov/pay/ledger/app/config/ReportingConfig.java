@@ -3,7 +3,7 @@ package uk.gov.pay.ledger.app.config;
 
 import io.dropwizard.core.Configuration;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 public class ReportingConfig extends Configuration {
 

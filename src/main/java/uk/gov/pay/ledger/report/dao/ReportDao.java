@@ -12,7 +12,7 @@ import uk.gov.pay.ledger.report.mapper.ReportMapper;
 import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.ZonedDateTime;
 import java.util.List;
 

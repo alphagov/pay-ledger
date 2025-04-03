@@ -9,8 +9,8 @@ import uk.gov.pay.ledger.app.config.ReportingConfig;
 import uk.gov.pay.ledger.app.config.SnsConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.Optional;
 

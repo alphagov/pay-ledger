@@ -11,9 +11,9 @@ import uk.gov.pay.ledger.payout.model.PayoutEntityFactory;
 import uk.gov.pay.ledger.payout.model.PayoutSearchResponse;
 import uk.gov.pay.ledger.payout.search.PayoutSearchParams;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;

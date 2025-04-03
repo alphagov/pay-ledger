@@ -26,7 +26,7 @@ import static uk.gov.service.payments.commons.model.CommonDateTimeFormatters.ISO
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;

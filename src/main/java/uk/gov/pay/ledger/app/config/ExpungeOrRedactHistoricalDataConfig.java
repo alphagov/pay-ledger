@@ -2,8 +2,8 @@ package uk.gov.pay.ledger.app.config;
 
 
 import io.dropwizard.core.Configuration;
+import jakarta.validation.constraints.NotNull;
 
-import javax.validation.constraints.NotNull;
 
 public class ExpungeOrRedactHistoricalDataConfig extends Configuration {
 

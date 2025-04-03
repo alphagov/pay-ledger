@@ -2,9 +2,9 @@ package uk.gov.pay.ledger.filters;
 
 import org.slf4j.MDC;
 
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
 import java.util.List;
 
 import static uk.gov.pay.ledger.filters.LoggingMDCRequestFilter.PARENT_TRANSACTION_EXTERNAL_ID;
