@@ -236,6 +236,7 @@ paths:
         required: true
         schema:
           type: string
+          minLength: 1
       - description: to date of events to be searched (this date is exclusive)
         example: 2015-08-14T12:35:00Z
         in: query
@@ -243,6 +244,7 @@ paths:
         required: true
         schema:
           type: string
+          minLength: 1
       - description: event types to find
         example: PAYMENT_CREATED
         in: query
@@ -855,6 +857,7 @@ paths:
         required: true
         schema:
           type: string
+          minLength: 1
       responses:
         "200":
           content:
@@ -907,6 +910,7 @@ paths:
         required: true
         schema:
           type: string
+          minLength: 1
       - description: The type of transactions to return
         example: REFUND
         in: query
@@ -1007,6 +1011,7 @@ paths:
         required: true
         schema:
           type: string
+          minLength: 1
       - description: Set to 'true' to return all events. By default events that do
           not map to an external state are removed and duplicate events mapping to
           same external state are reduced to one event.
