@@ -31,6 +31,7 @@ import static org.apache.commons.lang3.StringUtils.replaceChars;
 import static org.apache.commons.text.WordUtils.capitalizeFully;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.DISPUTE;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.REFUND;
+import static uk.gov.pay.ledger.transaction.state.TransactionState.WON;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsBoolean;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
@@ -154,7 +155,11 @@ public class CsvTransactionFactory {
                         getPaymentTransactionAttributes(transactionEntity, transactionDetails.get("payment_details"))
                 );
                 result.put(FIELD_GOVUK_PAYMENT_ID, transactionEntity.getParentExternalId());
-                result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount() * -1));
+                if (transactionEntity.getState() == WON) {
+                    result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount()));
+                } else {
+                    result.put(FIELD_AMOUNT, penceToCurrency(transactionEntity.getAmount() * -1));
+                }
             }
 
             result.put(FIELD_PROVIDER_ID, sanitiseAgainstSpreadsheetFormulaInjection(transactionEntity.getGatewayTransactionId()));
