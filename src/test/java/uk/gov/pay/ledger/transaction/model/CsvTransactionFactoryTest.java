@@ -146,6 +146,35 @@ class CsvTransactionFactoryTest {
     }
 
     @Test
+    void toMapShouldNotNegateAmountForWonDisputeTransaction() {
+        TransactionEntity transactionEntity = transactionFixture
+                .withTransactionType(TransactionType.DISPUTE.name())
+                .withState(TransactionState.WON)
+                .withAmount(2000L)
+                .withFee(0L)
+                .withNetAmount(2000L)
+                .withParentExternalId("parent-external-id")
+                .withReference("ref-1")
+                .withDescription("test description")
+                .withDefaultPaymentDetails()
+                .withDefaultTransactionDetails()
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertPaymentDetails(csvDataMap, transactionEntity);
+        assertThat(csvDataMap.get("Amount"), is("20.00"));
+        assertThat(csvDataMap.get("Net"), is("20.00"));
+        assertThat(csvDataMap.get("Fee"), is("0.00"));
+        assertThat(csvDataMap.get("Provider ID"), is(transactionFixture.getGatewayTransactionId()));
+        assertThat(csvDataMap.get("GOV.UK Payment ID"), is(transactionFixture.getParentExternalId()));
+        assertThat(csvDataMap.get("State"), is("Dispute won in your favour"));
+        assertThat(csvDataMap.get("Finished"), is(true));
+        assertThat(csvDataMap.get("Date Created"), is("12 Mar 2018"));
+        assertThat(csvDataMap.get("Time Created"), is("16:25:01"));
+    }
+
+    @Test
     void toMapShouldUseAmountForTotalAmountForSuccessfulPayment() {
         TransactionEntity transactionEntity = transactionFixture
                 .withState(TransactionState.SUCCESS)
