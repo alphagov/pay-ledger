@@ -1,11 +1,11 @@
 package uk.gov.pay.ledger.queue.sqs;
 
-import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import software.amazon.awssdk.services.sqs.SqsClient;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
@@ -30,7 +30,7 @@ public class EventQueueIT {
 
     @RegisterExtension
     public static AppWithPostgresAndSqsExtension rule = new AppWithPostgresAndSqsExtension();
-    private AmazonSQS client;
+    private SqsClient client;
 
     @BeforeEach
     public void setUp() {

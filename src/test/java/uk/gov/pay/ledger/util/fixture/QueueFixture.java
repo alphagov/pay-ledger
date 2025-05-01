@@ -1,9 +1,9 @@
 package uk.gov.pay.ledger.util.fixture;
 
-import com.amazonaws.services.sqs.AmazonSQS;
+import software.amazon.awssdk.services.sqs.SqsClient;
 
 public interface QueueFixture<F, E> {
-    F insert(AmazonSQS sqsClient);
+    F insert(SqsClient sqsClient);
 
     E toEntity();
 }

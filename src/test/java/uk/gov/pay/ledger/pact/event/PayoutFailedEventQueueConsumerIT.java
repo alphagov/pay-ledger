@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.messaging.MessagePact;
 import com.google.gson.Gson;
 import org.junit.Rule;
 import org.junit.Test;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import uk.gov.pay.ledger.payout.dao.PayoutDao;
 import uk.gov.pay.ledger.payout.entity.PayoutEntity;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
@@ -62,7 +63,11 @@ public class PayoutFailedEventQueueConsumerIT {
     @Test
     @PactVerification({"connector"})
     public void test() {
-        appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
+        SendMessageRequest messageRequest = SendMessageRequest.builder()
+                .queueUrl(SqsTestDocker.getQueueUrl("event-queue"))
+                .messageBody(new String(currentMessage))
+                .build();
+        appRule.getSqsClient().sendMessage(messageRequest);
         PayoutDao payoutDao = new PayoutDao(appRule.getJdbi());
 
         await().atMost(1, TimeUnit.SECONDS).until(

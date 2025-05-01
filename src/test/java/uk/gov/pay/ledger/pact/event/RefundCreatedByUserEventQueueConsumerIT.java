@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
@@ -75,8 +76,11 @@ public class RefundCreatedByUserEventQueueConsumerIT {
                 .withExternalId(refundFixture.getParentResourceExternalId())
                 .withTransactionType("PAYMENT")
                 .insert(appRule.getJdbi());
-
-        appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
+        SendMessageRequest messageRequest = SendMessageRequest.builder()
+                .queueUrl(SqsTestDocker.getQueueUrl("event-queue"))
+                .messageBody(new String(currentMessage))
+                .build();
+        appRule.getSqsClient().sendMessage(messageRequest);
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
 
         await().atMost(1, TimeUnit.SECONDS).until(
