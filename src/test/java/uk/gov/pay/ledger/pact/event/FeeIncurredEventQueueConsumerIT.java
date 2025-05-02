@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
@@ -86,7 +87,11 @@ public class FeeIncurredEventQueueConsumerIT {
     @Test
     @PactVerification({"connector"})
     public void test() {
-        appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
+        SendMessageRequest messageRequest = SendMessageRequest.builder()
+                .queueUrl(SqsTestDocker.getQueueUrl("event-queue"))
+                .messageBody(new String(currentMessage))
+                .build();
+        appRule.getSqsClient().sendMessage(messageRequest);
 
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
 

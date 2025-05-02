@@ -1,10 +1,5 @@
 package uk.gov.pay.ledger.app;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -16,6 +11,8 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.SnsClientBuilder;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.SqsClientBuilder;
 import uk.gov.pay.ledger.agreement.dao.AgreementDao;
 import uk.gov.pay.ledger.agreement.dao.PaymentInstrumentDao;
 import uk.gov.pay.ledger.event.dao.EventDao;
@@ -31,6 +28,7 @@ import uk.gov.pay.ledger.transactionmetadata.dao.TransactionMetadataDao;
 import uk.gov.pay.ledger.transactionsummary.dao.TransactionSummaryDao;
 import uk.gov.service.payments.commons.queue.sqs.SqsQueueService;
 
+import java.net.URI;
 import java.time.InstantSource;
 
 public class LedgerModule extends AbstractModule {
@@ -144,26 +142,22 @@ public class LedgerModule extends AbstractModule {
     }
 
     @Provides
-    public AmazonSQS sqsClient(LedgerConfig ledgerConfig) {
-        AmazonSQSClientBuilder clientBuilder = AmazonSQSClientBuilder
-                .standard();
+    public SqsClient sqsClient(LedgerConfig ledgerConfig) {
+        SqsClientBuilder clientBuilder = SqsClient.builder();
 
         if (ledgerConfig.getSqsConfig().isNonStandardServiceEndpoint()) {
 
-            BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(
-                    ledgerConfig.getSqsConfig().getAccessKey(),
-                    ledgerConfig.getSqsConfig().getSecretKey());
+            AwsBasicCredentials basicAWSCredentials = AwsBasicCredentials
+                    .create(ledgerConfig.getSqsConfig().getAccessKey(),
+                            ledgerConfig.getSqsConfig().getSecretKey());
 
             clientBuilder
-                    .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials))
-                    .withEndpointConfiguration(
-                            new AwsClientBuilder.EndpointConfiguration(
-                                    ledgerConfig.getSqsConfig().getEndpoint(),
-                                    ledgerConfig.getSqsConfig().getRegion())
-                    );
+                    .credentialsProvider(StaticCredentialsProvider.create(basicAWSCredentials))
+                    .endpointOverride(URI.create(ledgerConfig.getSqsConfig().getEndpoint()))
+                    .region(Region.of(ledgerConfig.getSqsConfig().getRegion()));
         } else {
             // uses AWS SDK's DefaultAWSCredentialsProviderChain to obtain credentials
-            clientBuilder.withRegion(ledgerConfig.getSqsConfig().getRegion());
+            clientBuilder.region(Region.of(ledgerConfig.getSqsConfig().getRegion()));
         }
 
         return clientBuilder.build();
@@ -192,7 +186,7 @@ public class LedgerModule extends AbstractModule {
     }
 
     @Provides
-    public SqsQueueService provideSqsQueueService(AmazonSQS amazonSQS, LedgerConfig ledgerConfig) {
+    public SqsQueueService provideSqsQueueService(SqsClient amazonSQS, LedgerConfig ledgerConfig) {
         return new SqsQueueService(
                 amazonSQS,
                 ledgerConfig.getSqsConfig().getMessageMaximumWaitTimeInSeconds(),

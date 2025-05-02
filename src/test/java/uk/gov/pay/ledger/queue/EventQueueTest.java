@@ -1,12 +1,12 @@
 package uk.gov.pay.ledger.queue;
 
-import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.app.config.QueueMessageReceiverConfig;
 import uk.gov.pay.ledger.app.config.SqsConfig;
@@ -50,7 +50,7 @@ class EventQueueTest {
                 "\"example_event_details_field\": \"and its value\"" +
                 "}" +
         "}";
-        SendMessageResult messageResult = mock(SendMessageResult.class);
+        SendMessageResponse messageResult = mock(SendMessageResponse.class);
 
         List<QueueMessage> messages = List.of(
                 QueueMessage.of(messageResult, validJsonMessage)

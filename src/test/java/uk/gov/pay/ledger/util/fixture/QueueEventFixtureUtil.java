@@ -1,22 +1,24 @@
 package uk.gov.pay.ledger.util.fixture;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang3.NotImplementedException;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
+import uk.gov.service.payments.commons.queue.model.QueueMessage;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class QueueEventFixtureUtil {
 
-    public static String insert(AmazonSQS sqsClient, String eventType, ZonedDateTime eventDate, String serviceId, Boolean live, String resourceExternalId,
+    public static String insert(SqsClient sqsClient, String eventType, ZonedDateTime eventDate, String serviceId, Boolean live, String resourceExternalId,
                                 String parentResourceExternalId, ResourceType resourceType, String eventData) {
         String messageBody = String.format("{" +
                         "\"timestamp\": \"%s\"," +
@@ -38,8 +40,12 @@ public class QueueEventFixtureUtil {
                 eventData
         );
 
-        SendMessageResult result = sqsClient.sendMessage(SqsTestDocker.getQueueUrl("event-queue"), messageBody);
-        return result.getMessageId();
+        SendMessageRequest messageRequest = SendMessageRequest.builder()
+                .queueUrl(SqsTestDocker.getQueueUrl("event-queue"))
+                .messageBody(messageBody)
+                .build();
+        SendMessageResponse result = sqsClient.sendMessage(messageRequest);
+        return QueueMessage.of(result, messageRequest.messageBody()).getMessageId();
     }
 
     public static PactDslJsonBody getAsPact(String serviceId, Boolean live, String eventType, ZonedDateTime eventDate, String resourceExternalId,

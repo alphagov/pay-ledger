@@ -7,8 +7,8 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import uk.gov.pay.ledger.app.LedgerConfig;
-import uk.gov.pay.ledger.event.dao.EventDao;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
 import uk.gov.pay.ledger.transaction.dao.TransactionDao;
@@ -66,10 +66,13 @@ public class PaymentCreatedEventQueueConsumerIT {
     @Test
     @PactVerification({"connector"})
     public void test() {
-        appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
+        SendMessageRequest messageRequest = SendMessageRequest.builder()
+                .queueUrl(SqsTestDocker.getQueueUrl("event-queue"))
+                .messageBody(new String(currentMessage))
+                .build();
+        appRule.getSqsClient().sendMessage(messageRequest);
 
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
-        EventDao eventDao = appRule.getJdbi().onDemand(EventDao.class);
 
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> transactionDao.findTransactionByExternalIdAndGatewayAccountId(externalId, gatewayAccountId).isPresent()

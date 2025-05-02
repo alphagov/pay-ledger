@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.event.model.ResourceType;
 import uk.gov.pay.ledger.rule.AppWithPostgresAndSqsRule;
@@ -70,8 +71,11 @@ public class PaymentDetailsTakenFromPaymentInstrumentEventQueueConsumerIT {
     public void test() {
         TransactionDao transactionDao = new TransactionDao(appRule.getJdbi(), mock(LedgerConfig.class));
         setupTransaction(transactionDao);
-
-        appRule.getSqsClient().sendMessage(SqsTestDocker.getQueueUrl("event-queue"), new String(currentMessage));
+        SendMessageRequest messageRequest = SendMessageRequest.builder()
+                .queueUrl(SqsTestDocker.getQueueUrl("event-queue"))
+                .messageBody(new String(currentMessage))
+                .build();
+        appRule.getSqsClient().sendMessage(messageRequest);
 
         await().atMost(1, TimeUnit.SECONDS).until(
                 () -> transactionDao.findTransactionByExternalId(externalId).isPresent()

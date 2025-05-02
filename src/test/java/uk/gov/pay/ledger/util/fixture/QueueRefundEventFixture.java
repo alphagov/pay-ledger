@@ -1,9 +1,9 @@
 package uk.gov.pay.ledger.util.fixture;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
-import com.amazonaws.services.sqs.AmazonSQS;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
+import software.amazon.awssdk.services.sqs.SqsClient;
 import uk.gov.pay.ledger.event.entity.EventEntity;
 import uk.gov.pay.ledger.event.model.ResourceType;
 
@@ -139,7 +139,7 @@ public class QueueRefundEventFixture implements QueueFixture<QueueRefundEventFix
     }
 
     @Override
-    public QueueRefundEventFixture insert(AmazonSQS sqsClient) {
+    public QueueRefundEventFixture insert(SqsClient sqsClient) {
         this.sqsMessageId = QueueEventFixtureUtil.insert(sqsClient, eventType, eventDate, null, true, resourceExternalId,
                 parentResourceExternalId, resourceType, eventData);
         return this;

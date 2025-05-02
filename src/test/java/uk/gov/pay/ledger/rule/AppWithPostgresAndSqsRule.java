@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.rule;
 
-import com.amazonaws.services.sqs.AmazonSQS;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.jdbi.v3.core.Jdbi;
@@ -9,6 +8,7 @@ import org.junit.rules.ExternalResource;
 import org.junit.rules.RuleChain;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import software.amazon.awssdk.services.sqs.SqsClient;
 import uk.gov.pay.ledger.app.LedgerApp;
 import uk.gov.pay.ledger.app.LedgerConfig;
 
@@ -25,13 +25,13 @@ import static uk.gov.pay.ledger.rule.PostgresTestDocker.getOrCreate;
 public class AppWithPostgresAndSqsRule extends ExternalResource {
     private static String CONFIG_PATH = resourceFilePath("config/test-config.yaml");
     private final Jdbi jdbi;
-    private AmazonSQS sqsClient;
+    private SqsClient sqsClient;
     private DropwizardAppRule<LedgerConfig> appRule;
 
     public AppWithPostgresAndSqsRule(ConfigOverride... configOverrides) {
         getOrCreate();
 
-        sqsClient = SqsTestDocker.initialise("event-queue");
+        sqsClient = SqsTestDocker.initialise(List.of("event-queue"));
 
         ConfigOverride[] newConfigOverrides = overrideDatabaseConfig(configOverrides);
         newConfigOverrides = overrideSqsConfig(newConfigOverrides);
@@ -82,7 +82,7 @@ public class AppWithPostgresAndSqsRule extends ExternalResource {
         return jdbi;
     }
 
-    public AmazonSQS getSqsClient() {
+    public SqsClient getSqsClient() {
         return sqsClient;
     }
 }

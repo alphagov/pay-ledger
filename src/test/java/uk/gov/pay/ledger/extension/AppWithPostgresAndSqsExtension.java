@@ -1,6 +1,5 @@
 package uk.gov.pay.ledger.extension;
 
-import com.amazonaws.services.sqs.AmazonSQS;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import org.jdbi.v3.core.Jdbi;
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.sqs.SqsClient;
 import uk.gov.pay.ledger.app.LedgerApp;
 import uk.gov.pay.ledger.app.LedgerConfig;
 import uk.gov.pay.ledger.rule.SqsTestDocker;
@@ -30,7 +30,7 @@ public class AppWithPostgresAndSqsExtension implements BeforeAllCallback, AfterA
 
     private static String CONFIG_PATH = resourceFilePath("config/test-config.yaml");
     private final Jdbi jdbi;
-    private AmazonSQS sqsClient;
+    private SqsClient sqsClient;
     private DropwizardAppExtension<LedgerConfig> dropwizardAppExtension;
 
     public AppWithPostgresAndSqsExtension() {
@@ -40,7 +40,7 @@ public class AppWithPostgresAndSqsExtension implements BeforeAllCallback, AfterA
     public AppWithPostgresAndSqsExtension(ConfigOverride... configOverrides) {
         getOrCreate();
 
-        sqsClient = SqsTestDocker.initialise("event-queue");
+        sqsClient = SqsTestDocker.initialise(List.of("event-queue"));
 
         ConfigOverride[] newConfigOverrides = overrideDatabaseConfig(configOverrides);
         newConfigOverrides = overrideSqsConfig(newConfigOverrides);
@@ -94,7 +94,7 @@ public class AppWithPostgresAndSqsExtension implements BeforeAllCallback, AfterA
         return jdbi;
     }
 
-    public AmazonSQS getSqsClient() {
+    public SqsClient getSqsClient() {
         return sqsClient;
     }
 }
