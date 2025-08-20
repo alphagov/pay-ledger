@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>uk.gov.pay.ledger.app.LedgerApp</mainClass>
-        <pay-java-commons.version>1.0.20250818082133</pay-java-commons.version>
+        <pay-java-commons.version>1.0.20250819140056</pay-java-commons.version>
         <prometheus.version>0.16.0</prometheus.version>
         <surefire.version>3.5.3</surefire.version>
         <swagger.version>2.2.36</swagger.version>
@@ -173,7 +173,7 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.service.payments</groupId>
-            <artifactId>queue-dropwizard-4-aws-sdk-v2</artifactId>
+            <artifactId>queue-dropwizard-4</artifactId>
             <version>${pay-java-commons.version}</version>
         </dependency>
         <dependency>
