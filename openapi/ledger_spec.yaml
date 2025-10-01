@@ -1654,6 +1654,9 @@ components:
       properties:
         agreement_id:
           type: string
+        agreement_payment_type:
+          type: string
+          example: recurring
         amount:
           type: integer
           format: int64

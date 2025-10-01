@@ -52,6 +52,7 @@ public class Payment extends Transaction {
     private String agreementId;
     private Boolean disputed;
     private Boolean canRetry;
+    private String agreementPaymentType;
 
     public Payment() {
 
@@ -89,6 +90,7 @@ public class Payment extends Transaction {
         this.agreementId = builder.agreementId;
         this.disputed = builder.disputed;
         this.canRetry = builder.canRetry;
+        this.agreementPaymentType = builder.agreementPaymentType;
     }
 
     @Override
@@ -222,6 +224,10 @@ public class Payment extends Transaction {
         return canRetry;
     }
 
+    public String getAgreementPaymentType() {
+        return agreementPaymentType;
+    }
+
     public static class Builder {
         public String serviceId;
         private Long id;
@@ -259,6 +265,7 @@ public class Payment extends Transaction {
         private String agreementId;
         private Boolean disputed;
         public Boolean canRetry;
+        public  String agreementPaymentType;
 
         public Builder() {
         }
@@ -444,6 +451,11 @@ public class Payment extends Transaction {
 
         public Builder withCanRetry(Boolean canRetry) {
             this.canRetry = canRetry;
+            return this;
+        }
+
+        public Builder withAgreementPaymentType(String agreementPaymentType) {
+            this.agreementPaymentType = agreementPaymentType;
             return this;
         }
     }

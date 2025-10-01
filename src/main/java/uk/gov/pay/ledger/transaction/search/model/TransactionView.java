@@ -99,6 +99,8 @@ public class TransactionView {
     private String reason;
     private String agreementId;
     private Boolean disputed;
+    @Schema(example = "recurring")
+    private String agreementPaymentType;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -142,6 +144,7 @@ public class TransactionView {
         this.reason = builder.reason;
         this.agreementId = builder.agreementId;
         this.disputed = builder.disputed;
+        this.agreementPaymentType = builder.agreementPaymentType;
     }
 
     public TransactionView() {
@@ -186,10 +189,12 @@ public class TransactionView {
                     .withGatewayPayoutId(payment.getGatewayPayoutId())
                     .withAuthorisationMode(payment.getAuthorisationMode())
                     .withAgreementId(payment.getAgreementId())
-                    .withDisputed(payment.getDisputed());
+                    .withDisputed(payment.getDisputed())
+                    .withAgreementPaymentType(payment.getAgreementPaymentType());
             if (payment.getState() != null) {
                 paymentBuilder = paymentBuilder.withState(ExternalTransactionState.from(payment.getState(), statusVersion, payment.getCanRetry()));
             }
+            
             return paymentBuilder.build();
         }
 
@@ -438,6 +443,10 @@ public class TransactionView {
         return disputed;
     }
 
+    public String getAgreementPaymentType() {
+        return agreementPaymentType;
+    }
+
     public static class Builder {
         private Long id;
         private String gatewayAccountId;
@@ -481,6 +490,7 @@ public class TransactionView {
         private String reason;
         private String agreementId;
         private Boolean disputed;
+        private String agreementPaymentType;
 
         public Builder() {
         }
@@ -691,6 +701,11 @@ public class TransactionView {
 
         public Builder withDisputed(Boolean disputed) {
             this.disputed = disputed;
+            return this;
+        }
+        
+        public Builder withAgreementPaymentType(String agreementPaymentType) {
+            this.agreementPaymentType = agreementPaymentType;
             return this;
         }
     }

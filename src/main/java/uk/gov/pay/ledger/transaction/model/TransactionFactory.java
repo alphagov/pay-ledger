@@ -140,6 +140,7 @@ public class TransactionFactory {
                     .withAgreementId(entity.getAgreementId())
                     .withDisputed(safeGetAsBoolean(transactionDetails, "disputed", false))
                     .withCanRetry(safeGetAsBoolean(transactionDetails, "can_retry", null))
+                    .withAgreementPaymentType(safeGetAsString(transactionDetails, "agreement_payment_type"))
                     .build();
         } catch (IOException e) {
             LOGGER.error("Error during the parsing transaction entity data [{}] [errorMessage={}]", entity.getExternalId(), e.getMessage());
