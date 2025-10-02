@@ -935,4 +935,65 @@ public class TransactionResourceSearchIT {
                 .body("results[0].parent_transaction_id", is(parentTransactionEntity.getExternalId()))
                 .body("results[0].transaction_id", is(disputeLost.getExternalId()));
     }
+
+    @Test
+    public void shouldGetTransactionWithRecurringPaymentReason() {
+        String gatewayAccountId = "1";
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.CREATED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withCreatedDate(now())
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+        
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.CREATED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withAgreementPaymentType("instalment")
+                .withDefaultTransactionDetails()
+                .withCreatedDate(now())
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.CREATED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withAgreementPaymentType("recurring")
+                .withDefaultTransactionDetails()
+                .withCreatedDate(now())
+                .insert(rule.getJdbi());
+
+        aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withState(TransactionState.CREATED)
+                .withDefaultCardDetails()
+                .withGatewayAccountId(gatewayAccountId)
+                .withAgreementPaymentType("unscheduled")
+                .withDefaultTransactionDetails()
+                .withCreatedDate(now())
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(4))
+                .body("results[0].agreement_payment_type", is("unscheduled"))
+                .body("results[1].agreement_payment_type", is("recurring"))
+                .body("results[2].agreement_payment_type", is("instalment"))
+                .body("results[4].agreement_payment_type", is(nullValue()));
+    }
 }

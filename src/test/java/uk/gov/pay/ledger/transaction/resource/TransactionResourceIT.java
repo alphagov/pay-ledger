@@ -940,7 +940,7 @@ public class TransactionResourceIT {
                 .body("exemption.outcome.result", is(EXEMPTION_HONOURED.toString()));
     }
 
-        @Test
+    @Test
     public void shouldGetTransactionWithCorporateExemptionRejected() {
         transactionFixture = createTransactionFixtureWithExemption(Exemption3ds.EXEMPTION_REJECTED, Exemption3dsRequested.CORPORATE);
         transactionFixture.insert(rule.getJdbi());
@@ -970,5 +970,23 @@ public class TransactionResourceIT {
                 .body("exemption.requested", is(Boolean.TRUE))
                 .body("exemption.type", is(Exemption3dsRequested.CORPORATE.toString()))
                 .body("exemption.outcome.result", is(EXEMPTION_OUT_OF_SCOPE.toString()));
+    }
+
+    @Test
+    public void shouldGetTransactionWithRecurringPaymentReason() {
+        TransactionFixture transactionFixture = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withAgreementPaymentType("instalment")
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("agreement_payment_type", is("instalment"));
     }
 }

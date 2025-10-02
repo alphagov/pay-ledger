@@ -87,6 +87,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Boolean disputed;
     private AuthorisationMode authorisationMode = AuthorisationMode.WEB;
     private Boolean canRetry;
+    private String agreementPaymentType;
 
     private TransactionFixture() {
     }
@@ -385,6 +386,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withAgreementPaymentType(String agreementPaymentType) {
+        this.agreementPaymentType = agreementPaymentType;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -542,6 +548,9 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         );
         Optional.ofNullable(canRetry).ifPresent(
                 canRetry -> transactionDetails.addProperty("can_retry", canRetry)
+        );
+        Optional.ofNullable(agreementPaymentType).ifPresent(
+                agreementPaymentType -> transactionDetails.addProperty("agreement_payment_type", agreementPaymentType)
         );
         return transactionDetails;
     }
