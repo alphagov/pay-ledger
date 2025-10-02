@@ -687,6 +687,7 @@ public abstract class ContractTest {
                 .withGatewayAccountId(accountId)
                 .withAgreementId(agreementId)
                 .withAuthorisationMode(AuthorisationMode.AGREEMENT)
+                .withAgreementPaymentType("recurring")
                 .withDefaultTransactionDetails()
                 .insert(app.getJdbi());
         TransactionFixture.aTransactionFixture()
