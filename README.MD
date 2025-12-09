@@ -1,6 +1,6 @@
 # pay-ledger
 
-This is a bare bones Dropwizard App for the Pay Ledger microservice.
+This is a Dropwizard app for the Pay Ledger microservice.
 
 ## API Specification
 
@@ -10,13 +10,13 @@ The [API Specification](/openapi/ledger_spec.yaml) provides more detail on the p
 
 ## Environment variables
 
-There are several environment variables used for the app configuration. They're grouped in categories: database, SQS
-and background processing.
+There are several environment variables used for the app configuration.
 
-| Variable    | Default     | Purpose                                       |
-|-------------|-------------|-----------------------------------------------|
-| `BIND_HOST` | `127.0.0.1` | The IP address for the application to bind to |
-| `PORT`      | -           | Port on which application listens             |
+| Variable     | Default     | Purpose                                                     |
+|--------------|-------------|-------------------------------------------------------------|
+| `BIND_HOST`  | `127.0.0.1` | The IP address for the application to bind to               |
+| `PORT`       | -           | Port on which application listens                           |
+| `ADMIN_PORT` | `0`         | The port number to listen for Dropwizard admin requests on. |
 
 ### Database configuration
 
@@ -28,7 +28,7 @@ and background processing.
 | `DB_NAME`       | `ledger` | Name of the database                                                                         |
 | `DB_SSL_OPTION` | -        | Indicates whether the connection to the database should be secured with SSL (eg. `ssl=true`) |
 
-### AWS Credentials Configuration
+### AWS credentials configuration
 
 | Variable         | Default | Purpose                                                                                                                     |
 |------------------|---------|-----------------------------------------------------------------------------------------------------------------------------|
@@ -46,18 +46,18 @@ and background processing.
 | `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT`        | `false` | Set to true to use a non standard (eg: `http://my-own-sqs-endpoint`) SQS endpoint                          |
 | `AWS_SQS_ENDPOINT`                             | -       | URL that is the API endpoint for SQS. Only required when `AWS_SQS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
 
-### SNS Configuration
+### SNS configuration
 
-| Variable                                     | Default | Purpose                                                                                                    |
-|----------------------------------------------|---------|------------------------------------------------------------------------------------------------------------|
-| `SNS_ENABLED`                                | `false` | Set to true to send events to SNS                                                                          |
-| `AWS_SNS_REGION`                             | -       | SNS region                                                                                                 |
-| `AWS_SNS_NON_STANDARD_SERVICE_ENDPOINT`      | `false` | Set to true to use a non standard (eg: `http://my-own-sns-endpoint`) SNS endpoint                          |
-| `AWS_SNS_ENDPOINT`                           | -       | URL that is the API endpoint for SNS. Only required when `AWS_SNS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
-| `PUBLISH_CARD_PAYMENT_EVENTS_TO_SNS`         | `false` | Set to true to publish card payment events to the card payment events SNS topic                            |
-| `PUBLISH_CARD_PAYMENT_DISPUTE_EVENTS_TO_SNS` | `false` | Set to true to publish card payment dispute events to the card payment dispute events SNS topic            |
-| `SNS_TOPIC_CARD_PAYMENT_EVENTS_ARN`          | -       | ARN of the SNS topic for card payment events                                                               |
-| `SNS_TOPIC_CARD_PAYMENT_DISPUTE_EVENTS_ARN`  | -       | ARN of the SNS topic for card payment dispute events                                                       |
+| Variable                                     | Default     | Purpose                                                                                                    |
+|----------------------------------------------|-------------|------------------------------------------------------------------------------------------------------------|
+| `SNS_ENABLED`                                | `false`     | Set to true to send events to SNS                                                                          |
+| `AWS_SNS_REGION`                             | `eu-west-1` | SNS region                                                                                                 |
+| `AWS_SNS_NON_STANDARD_SERVICE_ENDPOINT`      | `false`     | Set to true to use a non standard (eg: `http://my-own-sns-endpoint`) SNS endpoint                          |
+| `AWS_SNS_ENDPOINT`                           | -           | URL that is the API endpoint for SNS. Only required when `AWS_SNS_NON_STANDARD_SERVICE_ENDPOINT` is `true` |
+| `PUBLISH_CARD_PAYMENT_EVENTS_TO_SNS`         | `false`     | Set to true to publish card payment events to the card payment events SNS topic                            |
+| `PUBLISH_CARD_PAYMENT_DISPUTE_EVENTS_TO_SNS` | `false`     | Set to true to publish card payment dispute events to the card payment dispute events SNS topic            |
+| `SNS_TOPIC_CARD_PAYMENT_EVENTS_ARN`          | -           | ARN of the SNS topic for card payment events                                                               |
+| `SNS_TOPIC_CARD_PAYMENT_DISPUTE_EVENTS_ARN`  | -           | ARN of the SNS topic for card payment dispute events                                                       |
 
 ### Expunge/Redact historic data configuration
 
@@ -69,8 +69,8 @@ and background processing.
 
 ### Background processing configuration
 
-The background receiver will process all events that have been published to the SQS
-queue&nbsp;(`AWS_SQS_PAYMENT_EVENT_QUEUE_URL`).
+The background receiver will process all events that have been published to the SQS 
+queue (`AWS_SQS_PAYMENT_EVENT_QUEUE_URL`).
 
 A background thread managed by Dropwizard runs on all connector nodes. It polls the SQS payment event queue to retrieve
 the list of events.
@@ -87,11 +87,11 @@ found [here](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDevelop
 
 The following variables control the background process:
 
-| Variable                                              | Default | Purpose                                                                                 |
-|-------------------------------------------------------|---------|-----------------------------------------------------------------------------------------|
-| `QUEUE_MESSAGE_RECEIVER_THREAD_DELAY_IN_MILLISECONDS` | `1`     | Duration in seconds that the queue message receiver should wait between running threads |
-| `QUEUE_MESSAGE_RECEIVER_NUMBER_OF_THREADS`            | `1`     | The number of polling threads started by the queue message scheduler                    |
-| `QUEUE_MESSAGE_RETRY_DELAY_IN_SECONDS`                | `900`   | The duration in seconds that a message should be deferred before it should be retried   |
+| Variable                                              | Default | Purpose                                                                                      |
+|-------------------------------------------------------|---------|----------------------------------------------------------------------------------------------|
+| `QUEUE_MESSAGE_RECEIVER_THREAD_DELAY_IN_MILLISECONDS` | `1`     | Duration in milliseconds that the queue message receiver should wait between running threads |
+| `QUEUE_MESSAGE_RECEIVER_NUMBER_OF_THREADS`            | `1`     | The number of polling threads started by the queue message scheduler                         |
+| `QUEUE_MESSAGE_RETRY_DELAY_IN_SECONDS`                | `900`   | The duration in seconds that a message should be deferred before it should be retried        |
 
 ## Licence
 
