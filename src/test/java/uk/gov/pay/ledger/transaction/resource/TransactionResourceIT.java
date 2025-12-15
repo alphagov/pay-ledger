@@ -989,4 +989,21 @@ public class TransactionResourceIT {
                 .contentType(JSON)
                 .body("agreement_payment_type", is("instalment"));
     }
+
+    @Test
+    public void shouldNotReturnBadRequestWhenSearchingWithUrlEncodedQueryParam() {
+        String urlEncodedQueryParam = "AD001043%2F22"; // AD001043/22
+        TransactionFixture transactionFixture = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withAgreementPaymentType("instalment")
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+        
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + urlEncodedQueryParam)
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
 }
