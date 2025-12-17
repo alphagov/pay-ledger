@@ -8,6 +8,8 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -95,151 +97,162 @@ class EventMessageHandlerTest {
         when(snsConfig.isSnsEnabled()).thenReturn(false);
     }
 
-    @Test
-    void shouldMarkMessageAsProcessed_WhenEventIsProcessedSuccessfully() throws QueueException {
-        EventEntity event = aQueuePaymentEventFixture().toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
-        when(eventMessage.getQueueMessageReceiptHandle()).thenReturn(Optional.of("a-valid-recipient-handle"));
-        when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
-        when(createEventResponse.isSuccessful()).thenReturn(true);
-        when(metricRegistry.histogram((any()))).thenReturn(histogram);
+    @Nested
+    @DisplayName("EventMessageHandlerProcessingEvents")
+    class TestEventMessageHandlerEventProcessing {
+        @Test
+        void shouldMarkMessageAsProcessed_WhenEventIsProcessedSuccessfully() throws QueueException {
+            EventEntity event = aQueuePaymentEventFixture().toEntity();
+            when(eventMessage.getEvent()).thenReturn(event);
+            when(eventMessage.getQueueMessageReceiptHandle()).thenReturn(Optional.of("a-valid-recipient-handle"));
+            when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
+            when(createEventResponse.isSuccessful()).thenReturn(true);
+            when(metricRegistry.histogram((any()))).thenReturn(histogram);
 
-        eventMessageHandler.handle();
+            eventMessageHandler.handle();
 
-        verify(eventDigestHandler).processEvent(event, false);
-        verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
+            verify(eventDigestHandler).processEvent(event, false);
+            verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
+        }
+
+        @Test
+        void shouldMarkMessageAsProcessedAndNotInsert_WhenReprojectDomainObjectEvent() throws QueueException {
+            Logger root = (Logger) LoggerFactory.getLogger(EventMessageHandler.class);
+            root.setLevel(INFO);
+            root.addAppender(mockAppender);
+
+            String eventType = "AN_EVENT_TYPE";
+            EventEntity event = aQueuePaymentEventFixture()
+                    .withIsReprojectDomainObject(true)
+                    .withEventType(eventType)
+                    .toEntity();
+            when(eventMessage.getEvent()).thenReturn(event);
+            when(eventMessage.getQueueMessageReceiptHandle()).thenReturn(Optional.of("a-valid-recipient-handle"));
+            when(metricRegistry.histogram((any()))).thenReturn(histogram);
+
+            eventMessageHandler.handle();
+            verify(eventDigestHandler).processEvent(event, false);
+            verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
+            verify(eventService, never()).createIfDoesNotExist(any());
+
+            verify(mockAppender, times(1)).doAppend(loggingEventArgumentCaptor.capture());
+            assertThat(loggingEventArgumentCaptor.getValue().getArgumentArray(), hasItemInArray(kv("reproject_domain_object_event", true)));
+            assertThat(loggingEventArgumentCaptor.getValue().getArgumentArray(), hasItemInArray(kv(LEDGER_EVENT_TYPE, eventType)));
+        }
+
+        @Test
+        void shouldScheduleMessageForRetry_WhenEventIsNotProcessedSuccessfully() throws QueueException {
+            EventEntity event = aQueuePaymentEventFixture().toEntity();
+            when(eventMessage.getEvent()).thenReturn(event);
+            when(eventMessage.getQueueMessageId()).thenReturn(Optional.of("a-valid-queue-message-id"));
+            when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
+            when(createEventResponse.isSuccessful()).thenReturn(false);
+
+            eventMessageHandler.handle();
+
+            verify(eventQueue).scheduleMessageForRetry(any());
+        }
+
+        @Test
+        void shouldNotScheduleMessageForRetryGivenNoSQSQueueMessage_WhenEventIsNotProcessedSuccessfully() throws QueueException {
+            EventEntity event = aQueuePaymentEventFixture().toEntity();
+            when(eventMessage.getEvent()).thenReturn(event);
+            when(eventMessage.getQueueMessageId()).thenReturn(null);
+            when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
+            when(createEventResponse.isSuccessful()).thenReturn(false);
+
+            eventMessageHandler.handle();
+
+            verifyNoMoreInteractions(eventQueue);
+        }
     }
 
-    @Test
-    void shouldMarkMessageAsProcessedAndNotInsert_WhenReprojectDomainObjectEvent() throws QueueException {
-        Logger root = (Logger) LoggerFactory.getLogger(EventMessageHandler.class);
-        root.setLevel(INFO);
-        root.addAppender(mockAppender);
+    @Nested
+    @DisplayName("EventMessageHandlerPublishingToSNS")
+    class TestEventMessageHandlerPublishingToSns {
 
-        String eventType = "AN_EVENT_TYPE";
-        EventEntity event = aQueuePaymentEventFixture()
-                .withIsReprojectDomainObject(true)
-                .withEventType(eventType)
-                .toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
-        when(eventMessage.getQueueMessageReceiptHandle()).thenReturn(Optional.of("a-valid-recipient-handle"));
-        when(metricRegistry.histogram((any()))).thenReturn(histogram);
+        @Test
+        void shouldPublishCardPaymentMessageWhenSnsEnabled() throws Exception {
+            String messageBody = "{ \"foo\": \"bar\"}";
 
-        eventMessageHandler.handle();
-        verify(eventDigestHandler).processEvent(event, false);
-        verify(eventQueue).markMessageAsProcessed(any(EventMessage.class));
-        verify(eventService, never()).createIfDoesNotExist(any());
+            EventEntity event = aQueuePaymentEventFixture().toEntity();
+            when(eventMessage.getEvent()).thenReturn(event);
+            when(eventMessage.getRawMessageBody()).thenReturn(messageBody);
+            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+            when(snsConfig.isSnsEnabled()).thenReturn(true);
+            when(snsConfig.isPublishCardPaymentEventsToSns()).thenReturn(true);
 
-        verify(mockAppender, times(1)).doAppend(loggingEventArgumentCaptor.capture());
-        assertThat(loggingEventArgumentCaptor.getValue().getArgumentArray(), hasItemInArray(kv("reproject_domain_object_event", true)));
-        assertThat(loggingEventArgumentCaptor.getValue().getArgumentArray(), hasItemInArray(kv(LEDGER_EVENT_TYPE, eventType)));
-    }
+            eventMessageHandler.handle();
 
-    @Test
-    void shouldScheduleMessageForRetry_WhenEventIsNotProcessedSuccessfully() throws QueueException {
-        EventEntity event = aQueuePaymentEventFixture().toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
-        when(eventMessage.getQueueMessageId()).thenReturn(Optional.of("a-valid-queue-message-id"));
-        when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
-        when(createEventResponse.isSuccessful()).thenReturn(false);
+            verify(eventPublisher).publishMessageToTopic(messageBody, TopicName.CARD_PAYMENT_EVENTS);
+        }
 
-        eventMessageHandler.handle();
+        @Test
+        void shouldNotPublishAgreementEventsToSNS() throws Exception {
+            EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.AGREEMENT).toEntity();
+            when(eventMessage.getEvent()).thenReturn(event);
+            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+            when(snsConfig.isSnsEnabled()).thenReturn(true);
 
-        verify(eventQueue).scheduleMessageForRetry(any());
-    }
+            eventMessageHandler.handle();
 
-    @Test
-    void shouldNotScheduleMessageForRetryGivenNoSQSQueueMessage_WhenEventIsNotProcessedSuccessfully() throws QueueException {
-        EventEntity event = aQueuePaymentEventFixture().toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
-        when(eventMessage.getQueueMessageId()).thenReturn(null);
-        when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
-        when(createEventResponse.isSuccessful()).thenReturn(false);
+            verifyNoInteractions(eventPublisher);
+        }
 
-        eventMessageHandler.handle();
+        @Test
+        void shouldNotTryToPublishMessagesWhenSnsNotEnabled() throws QueueException {
+            EventEntity event = aQueuePaymentEventFixture().toEntity();
+            when(eventMessage.getEvent()).thenReturn(event);
+            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+            when(snsConfig.isSnsEnabled()).thenReturn(false);
 
-        verifyNoMoreInteractions(eventQueue);
-    }
+            eventMessageHandler.handle();
 
-    @Test
-    void shouldPublishCardPaymentMessageWhenSnsEnabled() throws Exception {
-        String messageBody = "{ \"foo\": \"bar\"}";
+            verifyNoInteractions(eventPublisher);
+        }
 
-        EventEntity event = aQueuePaymentEventFixture().toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
-        when(eventMessage.getRawMessageBody()).thenReturn(messageBody);
-        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-        when(snsConfig.isSnsEnabled()).thenReturn(true);
-        when(snsConfig.isPublishCardPaymentEventsToSns()).thenReturn(true);
+        @Test
+        void shouldNotTryToPublishWhenPublishCardPaymentEventsToSnsDisabled() throws QueueException {
+            EventEntity event = aQueuePaymentEventFixture().toEntity();
+            when(eventMessage.getEvent()).thenReturn(event);
+            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+            when(snsConfig.isSnsEnabled()).thenReturn(true);
+            when(snsConfig.isPublishCardPaymentEventsToSns()).thenReturn(false);
 
-        eventMessageHandler.handle();
+            eventMessageHandler.handle();
 
-        verify(eventPublisher).publishMessageToTopic(messageBody, TopicName.CARD_PAYMENT_EVENTS);
-    }
+            verifyNoInteractions(eventPublisher);
+        }
 
-    @Test
-    void shouldPublishDisputeMessageWhenSnsEnabled() throws Exception {
-        String messageBody = "{ \"foo\": \"bar\"}";
+        @Test
+        void shouldNotTryToPublishWhenPublishCardPaymentDisputeEventsToSnsDisabled() throws QueueException {
+            EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
+            when(createEventResponse.isSuccessful()).thenReturn(true);
+            when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
+            when(eventMessage.getEvent()).thenReturn(event);
+            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+            when(snsConfig.isSnsEnabled()).thenReturn(true);
+            when(snsConfig.isPublishCardPaymentDisputeEventsToSns()).thenReturn(false);
 
-        EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
-        when(eventMessage.getRawMessageBody()).thenReturn(messageBody);
-        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-        when(snsConfig.isSnsEnabled()).thenReturn(true);
-        when(snsConfig.isPublishCardPaymentDisputeEventsToSns()).thenReturn(true);
+            eventMessageHandler.handle();
 
-        eventMessageHandler.handle();
+            verifyNoInteractions(eventPublisher);
+        }
 
-        verify(eventPublisher).publishMessageToTopic(messageBody, TopicName.CARD_PAYMENT_DISPUTE_EVENTS);
-    }
+        @Test
+        void shouldPublishDisputeMessageWhenSnsEnabled() throws Exception {
+            String messageBody = "{ \"foo\": \"bar\"}";
 
-    @Test
-    void shouldNotPublishAgreementEventsToSNS() throws Exception {
-        EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.AGREEMENT).toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
-        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-        when(snsConfig.isSnsEnabled()).thenReturn(true);
+            EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
+            when(eventMessage.getEvent()).thenReturn(event);
+            when(eventMessage.getRawMessageBody()).thenReturn(messageBody);
+            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+            when(snsConfig.isSnsEnabled()).thenReturn(true);
+            when(snsConfig.isPublishCardPaymentDisputeEventsToSns()).thenReturn(true);
 
-        eventMessageHandler.handle();
+            eventMessageHandler.handle();
 
-        verifyNoInteractions(eventPublisher);
-    }
-
-    @Test
-    void shouldNotTryToPublishMessagesWhenSnsNotEnabled() throws QueueException {
-        EventEntity event = aQueuePaymentEventFixture().toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
-        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-        when(snsConfig.isSnsEnabled()).thenReturn(false);
-
-        eventMessageHandler.handle();
-
-        verifyNoInteractions(eventPublisher);
-    }
-
-    @Test
-    void shouldNotTryToPublishWhenPublishCardPaymentEventsToSnsDisabled() throws QueueException {
-        EventEntity event = aQueuePaymentEventFixture().toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
-        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-        when(snsConfig.isSnsEnabled()).thenReturn(true);
-        when(snsConfig.isPublishCardPaymentEventsToSns()).thenReturn(false);
-
-        eventMessageHandler.handle();
-
-        verifyNoInteractions(eventPublisher);
-    }
-
-    @Test
-    void shouldNotTryToPublishWhenPublishCardPaymentDisputeEventsToSnsDisabled() throws QueueException {
-        EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
-        when(eventMessage.getEvent()).thenReturn(event);
-        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-        when(snsConfig.isSnsEnabled()).thenReturn(true);
-        when(snsConfig.isPublishCardPaymentDisputeEventsToSns()).thenReturn(false);
-
-        eventMessageHandler.handle();
-
-        verifyNoInteractions(eventPublisher);
+            verify(eventPublisher).publishMessageToTopic(messageBody, TopicName.CARD_PAYMENT_DISPUTE_EVENTS);
+        }
     }
 }
