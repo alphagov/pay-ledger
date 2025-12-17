@@ -101,8 +101,6 @@ public class EventMessageHandler {
             response = eventService.createIfDoesNotExist(event);
         }
 
-        publishEventToSNS(message, event);
-
         final long ingestLag = event.getEventDate().until(ZonedDateTime.now(), ChronoUnit.MICROS);
 
         if (response.isSuccessful()) {
@@ -139,6 +137,8 @@ public class EventMessageHandler {
                         kv("error", response.getErrorMessage()));
             }
         }
+
+        publishEventToSNS(message, event);
     }
 
     private void publishEventToSNS(EventMessage message, EventEntity event) {
