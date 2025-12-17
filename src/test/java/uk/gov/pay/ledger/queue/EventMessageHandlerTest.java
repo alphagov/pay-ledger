@@ -93,8 +93,6 @@ class EventMessageHandlerTest {
     @BeforeEach
     void setUp() throws QueueException {
         when(eventQueue.retrieveEvents()).thenReturn(List.of(eventMessage));
-        when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-        when(snsConfig.isSnsEnabled()).thenReturn(false);
     }
 
     @Nested
@@ -129,6 +127,7 @@ class EventMessageHandlerTest {
             when(eventMessage.getEvent()).thenReturn(event);
             when(eventMessage.getQueueMessageReceiptHandle()).thenReturn(Optional.of("a-valid-recipient-handle"));
             when(metricRegistry.histogram((any()))).thenReturn(histogram);
+            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
 
             eventMessageHandler.handle();
             verify(eventDigestHandler).processEvent(event, false);
@@ -171,6 +170,15 @@ class EventMessageHandlerTest {
     @DisplayName("EventMessageHandlerPublishingToSNS")
     class TestEventMessageHandlerPublishingToSns {
 
+        @BeforeEach
+        void setup() {
+            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
+            when(snsConfig.isSnsEnabled()).thenReturn(true);
+            when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
+            when(createEventResponse.isSuccessful()).thenReturn(true);
+            when(metricRegistry.histogram((any()))).thenReturn(histogram);
+        }
+
         @Test
         void shouldPublishCardPaymentMessageWhenSnsEnabled() throws Exception {
             String messageBody = "{ \"foo\": \"bar\"}";
@@ -178,8 +186,6 @@ class EventMessageHandlerTest {
             EventEntity event = aQueuePaymentEventFixture().toEntity();
             when(eventMessage.getEvent()).thenReturn(event);
             when(eventMessage.getRawMessageBody()).thenReturn(messageBody);
-            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-            when(snsConfig.isSnsEnabled()).thenReturn(true);
             when(snsConfig.isPublishCardPaymentEventsToSns()).thenReturn(true);
 
             eventMessageHandler.handle();
@@ -191,8 +197,6 @@ class EventMessageHandlerTest {
         void shouldNotPublishAgreementEventsToSNS() throws Exception {
             EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.AGREEMENT).toEntity();
             when(eventMessage.getEvent()).thenReturn(event);
-            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-            when(snsConfig.isSnsEnabled()).thenReturn(true);
 
             eventMessageHandler.handle();
 
@@ -203,7 +207,6 @@ class EventMessageHandlerTest {
         void shouldNotTryToPublishMessagesWhenSnsNotEnabled() throws QueueException {
             EventEntity event = aQueuePaymentEventFixture().toEntity();
             when(eventMessage.getEvent()).thenReturn(event);
-            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
             when(snsConfig.isSnsEnabled()).thenReturn(false);
 
             eventMessageHandler.handle();
@@ -215,8 +218,6 @@ class EventMessageHandlerTest {
         void shouldNotTryToPublishWhenPublishCardPaymentEventsToSnsDisabled() throws QueueException {
             EventEntity event = aQueuePaymentEventFixture().toEntity();
             when(eventMessage.getEvent()).thenReturn(event);
-            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-            when(snsConfig.isSnsEnabled()).thenReturn(true);
             when(snsConfig.isPublishCardPaymentEventsToSns()).thenReturn(false);
 
             eventMessageHandler.handle();
@@ -230,8 +231,6 @@ class EventMessageHandlerTest {
             when(createEventResponse.isSuccessful()).thenReturn(true);
             when(eventService.createIfDoesNotExist(any())).thenReturn(createEventResponse);
             when(eventMessage.getEvent()).thenReturn(event);
-            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-            when(snsConfig.isSnsEnabled()).thenReturn(true);
             when(snsConfig.isPublishCardPaymentDisputeEventsToSns()).thenReturn(false);
 
             eventMessageHandler.handle();
@@ -246,8 +245,6 @@ class EventMessageHandlerTest {
             EventEntity event = aQueuePaymentEventFixture().withResourceType(ResourceType.DISPUTE).toEntity();
             when(eventMessage.getEvent()).thenReturn(event);
             when(eventMessage.getRawMessageBody()).thenReturn(messageBody);
-            when(ledgerConfig.getSnsConfig()).thenReturn(snsConfig);
-            when(snsConfig.isSnsEnabled()).thenReturn(true);
             when(snsConfig.isPublishCardPaymentDisputeEventsToSns()).thenReturn(true);
 
             eventMessageHandler.handle();
