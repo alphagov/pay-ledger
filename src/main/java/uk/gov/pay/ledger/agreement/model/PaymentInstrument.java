@@ -1,6 +1,6 @@
 package uk.gov.pay.ledger.agreement.model;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.ledger.agreement.entity.PaymentInstrumentEntity;
@@ -11,7 +11,7 @@ import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
 import java.time.ZonedDateTime;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class PaymentInstrument {
     private String externalId;
     private String agreementExternalId;
