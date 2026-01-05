@@ -556,7 +556,7 @@ public class TransactionResourceIT {
     }
 
     @Test
-    public void getByGatewayTransactionId_shouldReturnCorrectTransaction() {
+    public void getByGatewayTransactionIdLegacy_shouldReturnCorrectTransaction() {
 
         String gatewayTransactionIdParam = RandomStringUtils.randomAlphanumeric(20);
         String gatewayAccountId = RandomStringUtils.randomNumeric(5);
@@ -583,6 +583,43 @@ public class TransactionResourceIT {
                 .accept(JSON)
                 .get("/v1/transaction/gateway-transaction/" + gatewayTransactionIdParam +
                         "?payment_provider=sandbox"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("gateway_account_id", is(transaction.getGatewayAccountId()))
+                .body("gateway_transaction_id", is(transaction.getGatewayTransactionId()))
+                .body("payment_provider", is("sandbox"));
+    }
+
+    @Test
+    public void getByGatewayTransactionId_shouldReturnCorrectTransaction() {
+
+        String gatewayTransactionIdParam = RandomStringUtils.randomAlphanumeric(20);
+        String gatewayAccountId = RandomStringUtils.randomNumeric(5);
+
+        TransactionFixture shouldExcludeThisTransaction = aTransactionFixture()
+                .withGatewayAccountId(RandomStringUtils.randomNumeric(5))
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+        TransactionFixture shouldExcludeThisTransactionToo = aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayTransactionId("random-gateway-transaction-id")
+                .withPaymentProvider("random-provider")
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+        TransactionFixture transaction = aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withGatewayTransactionId(gatewayTransactionIdParam)
+                .withPaymentProvider("sandbox")
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction/gateway-transaction?gateway_transaction_id=" + gatewayTransactionIdParam +
+                        "&payment_provider=sandbox"
                 )
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())

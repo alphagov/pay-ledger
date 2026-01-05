@@ -838,9 +838,46 @@ paths:
         CSV (with  Accept header="text/csv"). Refer to code for details
       tags:
       - Transactions
-  /v1/transaction/gateway-transaction/{gatewayTransactionId}:
+  /v1/transaction/gateway-transaction:
     get:
       operationId: findByGatewayTransactionId
+      parameters:
+      - description: Transaction ID from payment provider
+        example: a14f0926-b44d-4160-8184-1b1f66e576ab
+        in: query
+        name: gateway_transaction_id
+        required: true
+        schema:
+          type: string
+      - example: sandbox
+        in: query
+        name: payment_provider
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json; qs=1:
+              schema:
+                $ref: "#/components/schemas/TransactionView"
+          description: OK
+        "404":
+          description: Not found
+        "422":
+          content:
+            application/json; qs=1:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: If payment_provider and/or gateway_transaction_id query parameter
+            is missing
+      summary: Get transaction for a gateway transaction ID
+      tags:
+      - Transactions
+  /v1/transaction/gateway-transaction/{gatewayTransactionId}:
+    get:
+      deprecated: true
+      operationId: findByGatewayTransactionIdLegacy
       parameters:
       - description: Transaction ID from payment provider
         example: a14f0926-b44d-4160-8184-1b1f66e576ab
