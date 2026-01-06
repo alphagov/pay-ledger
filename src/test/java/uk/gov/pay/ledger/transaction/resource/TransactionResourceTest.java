@@ -131,20 +131,6 @@ public class TransactionResourceTest {
     }
 
     @Test
-    public void findByGatewayTransactionIdLegacy_ShouldReturn404IfTransactionNotFound() {
-        when(mockTransactionService.findByGatewayTransactionId(anyString(), anyString()))
-                .thenReturn(Optional.empty());
-
-        Response response = resources
-                .target("/v1/transaction/gateway-transaction/example-gateway-transaction-id")
-                .queryParam("payment_provider", "sandbox")
-                .request()
-                .get();
-
-        assertThat(response.getStatus(), is(404));
-    }
-
-    @Test
     public void findByGatewayTransactionId_ShouldReturn404IfTransactionNotFound() {
         when(mockTransactionService.findByGatewayTransactionId(anyString(), anyString()))
                 .thenReturn(Optional.empty());
@@ -157,22 +143,6 @@ public class TransactionResourceTest {
                 .get();
 
         assertThat(response.getStatus(), is(404));
-    }
-    
-    @Test
-    public void findByGatewayTransactionIdLegacy_ShouldReturn400IfPaymentProviderQueryParamIsEmpty() {
-        Response response = resources
-                .target("/v1/transaction/gateway-transaction/exampleGatewayTransactionId")
-                .queryParam("transaction_type", "PAYMENT")
-                .request()
-                .get();
-
-        Map responseMessage = response.readEntity(new GenericType<HashMap>() {
-        });
-        List errors = (List) responseMessage.get("errors");
-
-        assertThat(response.getStatus(), is(400));
-        assertThat(errors.get(0), is("query param payment_provider must not be empty"));
     }
 
     @Test
