@@ -257,27 +257,7 @@ public class TransactionResource {
     ) {
         return transactionService.getTransactions(parentTransactionExternalId, gatewayAccountId, transactionType);
     }
-
-    @Path("/gateway-transaction/{gatewayTransactionId}")
-    @GET
-    @Timed
-    @Operation(
-            summary = "Get transaction for a gateway transaction ID",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TransactionView.class))),
-                    @ApiResponse(responseCode = "422", description = "If payment_provider query parameter is missing", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "Not found")
-            }
-    )
-    @Deprecated
-    public TransactionView findByGatewayTransactionIdLegacy(@Parameter(example = "a14f0926-b44d-4160-8184-1b1f66e576ab", description = "Transaction ID from payment provider")
-                                                      @PathParam("gatewayTransactionId") String gatewayTransactionId,
-                                                      @Parameter(example = "sandbox", required = true) @QueryParam("payment_provider") @NotEmpty String paymentProvider
-    ) {
-        return transactionService.findByGatewayTransactionId(gatewayTransactionId, paymentProvider)
-                .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
-    }
-
+    
     @Path("/gateway-transaction")
     @GET
     @Timed
