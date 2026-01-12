@@ -1,5 +1,6 @@
 package uk.gov.pay.ledger.agreement.resource;
 
+import jakarta.ws.rs.core.Response;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,14 +15,12 @@ import uk.gov.pay.ledger.util.fixture.PaymentInstrumentFixture;
 import uk.gov.service.payments.commons.model.agreement.AgreementStatus;
 import uk.gov.service.payments.commons.model.agreement.PaymentInstrumentType;
 
-import jakarta.ws.rs.core.Response;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.pay.ledger.agreement.resource.AgreementSearchParams.DEFAULT_DISPLAY_SIZE;
@@ -483,11 +482,12 @@ class AgreementResourceIT {
     @Test
     void shouldGetCancelledByUserAgreementWithEmailAndDate() {
         var serviceId = "a-valid-service-id";
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         var fixture = AgreementFixture.anAgreementFixture()
                 .withExternalId("a-valid-agreement-id")
                 .withServiceId(serviceId)
                 .withUserIdentifier("a-valid-user-identifier")
-                .withCancelledDate(ZonedDateTime.now(ZoneOffset.UTC))
+                .withCancelledDate(ZonedDateTime.parse("2026-01-12T16:12:34.123456789Z"))
                 .withCancelledByUserEmail("jdoe@example.org")
                 .withStatus(AgreementStatus.CANCELLED)
                 .insert(rule.getJdbi());
@@ -502,7 +502,7 @@ class AgreementResourceIT {
                 .body("external_id", is(fixture.getExternalId()))
                 .body("user_identifier", is("a-valid-user-identifier"))
                 .body("cancelled_by_user_email", is("jdoe@example.org"))
-                .body("cancelled_date", is(notNullValue()));
+                .body("cancelled_date", is("2026-01-12T16:12:34.123Z"));
     }
 
     private void prepareAgreementsForService(String serviceId, int numberOfAgreements) {
