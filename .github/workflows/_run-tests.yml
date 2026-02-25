@@ -25,7 +25,7 @@ jobs:
     uses: alphagov/pay-ci/.github/workflows/_run-java-tests-and-publish-pacts.yml@master
     with:
       publish_pacts: true
-      java_version: 21
+      java_version: 25
     secrets:
       pact_broker_username: ${{ secrets.pact_broker_username }}
       pact_broker_password: ${{ secrets.pact_broker_password }}
@@ -40,7 +40,7 @@ jobs:
     with:
       consumer: "ledger"
       provider: ${{ matrix.provider }}
-      java_version: 21
+      java_version: 25
     secrets:
       pact_broker_username: ${{ secrets.pact_broker_username }}
       pact_broker_password: ${{ secrets.pact_broker_password }}
@@ -50,7 +50,7 @@ jobs:
     name: "App as provider tests"
     uses: alphagov/pay-ci/.github/workflows/_run-app-as-provider-contract-tests.yml@master
     with:
-      java_version: 21
+      java_version: 25
     secrets:
       pact_broker_username: ${{ secrets.pact_broker_username }}
       pact_broker_password: ${{ secrets.pact_broker_password }}
