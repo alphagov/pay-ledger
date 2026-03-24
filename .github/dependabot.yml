@@ -11,6 +11,11 @@ updates:
       - dependencies
       - govuk-pay
       - java
+    ignore:
+      - dependency-name: "org.eclipse.persistence:org.eclipse.persistence.jpa"
+        # org.eclipse.persistence.jpa 5 is incompatible with Guice 7, needs a lot of work on our end
+        versions:
+          - ">= 5"
   - package-ecosystem: docker
     directory: "/"
     schedule:
