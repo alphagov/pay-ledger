@@ -523,4 +523,50 @@ public class QueueMessageReceiverIT {
                 .body("payment_instrument.card_details.last_digits_card_number", is("4242"))
                 .body("payment_instrument.card_details.cardholder_name", is("A paying user name"));
     }
+
+    @Test
+    public void shouldHandleAuthorisationRejectedEvent() throws InterruptedException {
+        final String resourceExternalId = "rexid";
+        final String gatewayAccountId = "test_accountId";
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT.minusSeconds(1L))
+                .withEventType("PAYMENT_CREATED")
+                .withLive(false)
+                .withDefaultEventDataForEventType("PAYMENT_CREATED")
+                .insert(rule.getSqsClient());
+
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT)
+                .withEventType("PAYMENT_DETAILS_ENTERED")
+                .withLive(false)
+                .withDefaultEventDataForEventType("PAYMENT_DETAILS_ENTERED")
+                .insert(rule.getSqsClient());
+        
+        aQueuePaymentEventFixture()
+                .withResourceExternalId(resourceExternalId)
+                .withEventDate(CREATED_AT.plusSeconds(1L))
+                .withEventType("AUTHORISATION_REJECTED")
+                .withEventData(
+                        gsonBuilder.create()
+                                .toJson(Map.of(
+                                        "gateway_rejection_reason", "42 fraudulent",
+                                        "gateway_account_id", gatewayAccountId
+                                ))
+                )
+                .insert(rule.getSqsClient());
+
+        Thread.sleep(500);
+
+        given().port(rule.getAppRule().getLocalPort())
+                .contentType(JSON)
+                .get("/v1/transaction/" + resourceExternalId + "?account_id=" + gatewayAccountId)
+                .then()
+                .statusCode(200)
+                .body("transaction_id", is(resourceExternalId))
+                .body("gateway_rejection_reason", is("42 fraudulent"))
+                .body("state.status", is("declined"));
+    }
 }

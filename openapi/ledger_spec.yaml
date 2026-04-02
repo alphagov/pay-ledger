@@ -1710,6 +1710,8 @@ components:
         gateway_payout_id:
           type: string
           example: po_mdoiu23jkdj1kj23sd
+        gateway_rejection_reason:
+          type: string
         gateway_transaction_id:
           type: string
           example: fd21-1mdknkls1-2121-csdf

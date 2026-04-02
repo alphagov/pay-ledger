@@ -101,6 +101,7 @@ public class TransactionView {
     private Boolean disputed;
     @Schema(example = "recurring")
     private String agreementPaymentType;
+    private String gatewayRejectionReason;
 
     public TransactionView(Builder builder) {
         this.id = builder.id;
@@ -145,6 +146,7 @@ public class TransactionView {
         this.agreementId = builder.agreementId;
         this.disputed = builder.disputed;
         this.agreementPaymentType = builder.agreementPaymentType;
+        this.gatewayRejectionReason = builder.gatewayRejectionReason;
     }
 
     public TransactionView() {
@@ -190,7 +192,8 @@ public class TransactionView {
                     .withAuthorisationMode(payment.getAuthorisationMode())
                     .withAgreementId(payment.getAgreementId())
                     .withDisputed(payment.getDisputed())
-                    .withAgreementPaymentType(payment.getAgreementPaymentType());
+                    .withAgreementPaymentType(payment.getAgreementPaymentType())
+                    .withGatewayRejectionReason(payment.getGatewayRejectionReason());
             if (payment.getState() != null) {
                 paymentBuilder = paymentBuilder.withState(ExternalTransactionState.from(payment.getState(), statusVersion, payment.getCanRetry()));
             }
@@ -447,6 +450,10 @@ public class TransactionView {
         return agreementPaymentType;
     }
 
+    public String getGatewayRejectionReason() {
+        return gatewayRejectionReason;
+    }
+
     public static class Builder {
         private Long id;
         private String gatewayAccountId;
@@ -491,6 +498,7 @@ public class TransactionView {
         private String agreementId;
         private Boolean disputed;
         private String agreementPaymentType;
+        private String gatewayRejectionReason;
 
         public Builder() {
         }
@@ -706,6 +714,11 @@ public class TransactionView {
         
         public Builder withAgreementPaymentType(String agreementPaymentType) {
             this.agreementPaymentType = agreementPaymentType;
+            return this;
+        }
+
+        public Builder withGatewayRejectionReason(String gatewayRejectionReason) {
+            this.gatewayRejectionReason = gatewayRejectionReason;
             return this;
         }
     }
