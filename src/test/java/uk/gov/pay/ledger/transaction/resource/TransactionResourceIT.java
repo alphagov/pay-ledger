@@ -20,6 +20,7 @@ import static uk.gov.pay.ledger.transaction.service.TransactionService.REDACTED_
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
 import static uk.gov.pay.ledger.util.fixture.EventFixture.anEventFixture;
 import static uk.gov.pay.ledger.util.fixture.PayoutFixture.PayoutFixtureBuilder.aPayoutFixture;
+import static uk.gov.pay.ledger.util.fixture.QueuePaymentEventFixture.aQueuePaymentEventFixture;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 import static uk.gov.service.payments.commons.model.CommonDateTimeFormatters.ISO_INSTANT_MILLISECOND_PRECISION;
 
@@ -1005,5 +1006,23 @@ public class TransactionResourceIT {
                 .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + urlEncodedQueryParam)
                 .then()
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
+    public void shouldHandleAuthorisationRejectedEvent() throws InterruptedException {
+        TransactionFixture transactionFixture = aTransactionFixture()
+                .withTransactionType("PAYMENT")
+                .withGatewayRejectionReason("42 fraudulent")
+                .withDefaultTransactionDetails()
+                .insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("gateway_rejection_reason", is("42 fraudulent"));
     }
 }

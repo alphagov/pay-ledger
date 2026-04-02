@@ -88,6 +88,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private AuthorisationMode authorisationMode = AuthorisationMode.WEB;
     private Boolean canRetry;
     private String agreementPaymentType;
+    private String gatewayRejectionReason;
 
     private TransactionFixture() {
     }
@@ -391,6 +392,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withGatewayRejectionReason(String gatewayRejectionReason) {
+        this.gatewayRejectionReason = gatewayRejectionReason;
+        return this;
+    }
+
     @Override
     public TransactionFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -551,6 +557,9 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         );
         Optional.ofNullable(agreementPaymentType).ifPresent(
                 agreementPaymentType -> transactionDetails.addProperty("agreement_payment_type", agreementPaymentType)
+        );
+        Optional.ofNullable(gatewayRejectionReason).ifPresent(
+                gatewayRejectionReason -> transactionDetails.addProperty("gateway_rejection_reason", gatewayRejectionReason)
         );
         return transactionDetails;
     }

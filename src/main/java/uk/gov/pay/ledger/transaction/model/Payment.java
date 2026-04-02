@@ -53,6 +53,7 @@ public class Payment extends Transaction {
     private Boolean disputed;
     private Boolean canRetry;
     private String agreementPaymentType;
+    private String gatewayRejectionReason;
 
     public Payment() {
 
@@ -91,6 +92,7 @@ public class Payment extends Transaction {
         this.disputed = builder.disputed;
         this.canRetry = builder.canRetry;
         this.agreementPaymentType = builder.agreementPaymentType;
+        this.gatewayRejectionReason = builder.gatewayRejectionReason;
     }
 
     @Override
@@ -227,6 +229,10 @@ public class Payment extends Transaction {
     public String getAgreementPaymentType() {
         return agreementPaymentType;
     }
+    
+    public String getGatewayRejectionReason() {
+        return gatewayRejectionReason;
+    }
 
     public static class Builder {
         public String serviceId;
@@ -266,6 +272,7 @@ public class Payment extends Transaction {
         private Boolean disputed;
         public Boolean canRetry;
         public  String agreementPaymentType;
+        private String gatewayRejectionReason;
 
         public Builder() {
         }
@@ -456,6 +463,11 @@ public class Payment extends Transaction {
 
         public Builder withAgreementPaymentType(String agreementPaymentType) {
             this.agreementPaymentType = agreementPaymentType;
+            return this;
+        }
+
+        public Builder withGatewayRejectionReason(String gatewayRejectionReason) {
+            this.gatewayRejectionReason = gatewayRejectionReason;
             return this;
         }
     }
