@@ -14,6 +14,7 @@
         <prometheus.version>0.16.0</prometheus.version>
         <surefire.version>3.6.0</surefire.version>
         <swagger.version>2.2.55</swagger.version>
+        <pact.version>4.7.5</pact.version>
         <PACT_BROKER_URL/>
         <PACT_BROKER_USERNAME/>
         <PACT_BROKER_PASSWORD/>
@@ -268,6 +269,28 @@
             <artifactId>testing-dropwizard-5</artifactId>
             <version>${pay-java-commons.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>au.com.dius</groupId>
+                    <artifactId>pact-jvm-provider-junit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>au.com.dius</groupId>
+                    <artifactId>pact-jvm-consumer-junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>au.com.dius.pact.provider</groupId>
+            <artifactId>junit</artifactId>
+            <version>${pact.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>au.com.dius.pact.consumer</groupId>
+            <artifactId>junit</artifactId>
+            <version>${pact.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -288,7 +311,7 @@
             <plugin>
                 <groupId>au.com.dius.pact.provider</groupId>
                 <artifactId>maven</artifactId>
-                <version>4.7.5</version>
+                <version>${pact.version}</version>
                 <configuration>
                     <pactDirectory>target/pacts</pactDirectory>
                     <pactBrokerUrl>${PACT_BROKER_URL}</pactBrokerUrl>
