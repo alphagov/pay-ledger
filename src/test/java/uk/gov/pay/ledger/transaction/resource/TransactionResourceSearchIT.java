@@ -2,6 +2,7 @@ package uk.gov.pay.ledger.transaction.resource;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -13,7 +14,6 @@ import uk.gov.pay.ledger.transaction.model.TransactionType;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
-import jakarta.ws.rs.core.Response;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +27,8 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.pay.ledger.util.DatabaseTestHelper.aDatabaseTestHelper;
@@ -209,6 +211,78 @@ public class TransactionResourceSearchIT {
                 .body("count", is(2))
                 .body("results[0].transaction_id", is(createdTransaction.getExternalId()))
                 .body("results[1].transaction_id", is(submittedTransaction.getExternalId()));
+    }
+
+    @Test
+    public void shouldIncludeNetAmountAndFeeForRefundInSearchWhenAvailable() {
+        String gatewayAccountId = "2";
+        TransactionFixture refundTransaction = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUCCESS)
+                .withGatewayAccountId(gatewayAccountId)
+                .withAmount(1000L)
+                .withNetAmount(-950L)
+                .withFee(50L)
+                .withDefaultCardDetails()
+                .withDefaultPaymentDetails()
+                .withDefaultTransactionDetails()
+                .withCreatedDate(now())
+                .insert(rule.getJdbi());
+
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5" +
+                        "&transaction_type=REFUND"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].transaction_id", is(refundTransaction.getExternalId()))
+                .body("results[0].transaction_type", is("REFUND"))
+                .body("results[0].net_amount", is(-950))
+                .body("results[0].fee", is(50));
+
+    }
+
+    @Test
+    public void shouldNotIncludeNetAmountAndFeeForRefundInSearchWhenNotAvailable() {
+        String gatewayAccountId = "2";
+        TransactionFixture refundTransaction = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUCCESS)
+                .withGatewayAccountId(gatewayAccountId)
+                .withAmount(1000L)
+                .withDefaultCardDetails()
+                .withDefaultPaymentDetails()
+                .withDefaultTransactionDetails()
+                .withCreatedDate(now())
+                .insert(rule.getJdbi());
+
+
+        given().port(port)
+                .contentType(JSON)
+                .accept(JSON)
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&page=1" +
+                        "&display_size=5" +
+                        "&transaction_type=REFUND"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(1))
+                .body("results[0].transaction_id", is(refundTransaction.getExternalId()))
+                .body("results[0].transaction_type", is("REFUND"))
+                .body("results[0].net_amount", not(hasKey("net_amount")))
+                .body("results[0].fee", not(hasKey("fee")));
+
     }
 
     @Test
@@ -948,7 +1022,7 @@ public class TransactionResourceSearchIT {
                 .withCreatedDate(now())
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
-        
+
         aTransactionFixture()
                 .withTransactionType("PAYMENT")
                 .withState(TransactionState.CREATED)

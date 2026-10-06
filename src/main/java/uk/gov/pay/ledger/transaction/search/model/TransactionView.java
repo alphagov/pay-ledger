@@ -194,7 +194,7 @@ public class TransactionView {
             if (payment.getState() != null) {
                 paymentBuilder = paymentBuilder.withState(ExternalTransactionState.from(payment.getState(), statusVersion, payment.getCanRetry()));
             }
-            
+
             return paymentBuilder.build();
         }
 
@@ -245,6 +245,8 @@ public class TransactionView {
                 .withLive(refund.getLive())
                 .withGatewayAccountId(refund.getGatewayAccountId())
                 .withAmount(refund.getAmount())
+                .withNetAmount(refund.getNetAmount())
+                .withFee(refund.getFee())
                 .withState(ExternalTransactionState.from(refund.getState(), statusVersion))
                 .withGatewayTransactionId(refund.getGatewayTransactionId())
                 .withExternalId(refund.getExternalId())
@@ -703,7 +705,7 @@ public class TransactionView {
             this.disputed = disputed;
             return this;
         }
-        
+
         public Builder withAgreementPaymentType(String agreementPaymentType) {
             this.agreementPaymentType = agreementPaymentType;
             return this;

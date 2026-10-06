@@ -9,6 +9,8 @@ public class Refund extends Transaction {
     private final TransactionState state;
     private final ZonedDateTime createdDate;
     private final Integer eventCount;
+    private final Long netAmount;
+    private final Long fee;
     private final String refundedBy;
     private final String refundedByUserEmail;
     private final String parentExternalId;
@@ -21,6 +23,8 @@ public class Refund extends Transaction {
         this.state = builder.state;
         this.createdDate = builder.createdDate;
         this.eventCount = builder.eventCount;
+        this.netAmount = builder.netAmount;
+        this.fee = builder.fee;
         this.refundedBy = builder.refundedBy;
         this.refundedByUserEmail = builder.refundedByUserEmail;
         this.parentExternalId = builder.parentExternalId;
@@ -39,6 +43,14 @@ public class Refund extends Transaction {
 
     public Integer getEventCount() {
         return eventCount;
+    }
+
+    public Long getNetAmount() {
+        return netAmount;
+    }
+
+    public Long getFee() {
+        return fee;
     }
 
     public String getRefundedBy() {
@@ -76,6 +88,8 @@ public class Refund extends Transaction {
         private TransactionState state;
         private ZonedDateTime createdDate;
         private Integer eventCount;
+        private Long netAmount;
+        private Long fee;
         private String refundedBy;
         private String refundedByUserEmail;
         private Long id;
@@ -127,6 +141,16 @@ public class Refund extends Transaction {
 
         public Builder withEventCount(Integer eventCount) {
             this.eventCount = eventCount;
+            return this;
+        }
+
+        public Builder withNetAmount(Long netAmount) {
+            this.netAmount = netAmount;
+            return this;
+        }
+
+        public Builder withFee(Long fee) {
+            this.fee = fee;
             return this;
         }
 
