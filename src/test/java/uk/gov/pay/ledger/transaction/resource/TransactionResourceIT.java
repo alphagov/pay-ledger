@@ -217,7 +217,7 @@ public class TransactionResourceIT {
         transactionFixture = aTransactionFixture()
                 .withReference(rawValue);
         transactionFixture.insert(rule.getJdbi());
-        
+
         given().port(port)
                 .contentType(JSON)
                 .accept(JSON)
@@ -232,7 +232,7 @@ public class TransactionResourceIT {
                 .contentType(JSON)
                 .body("results[0].reference", is(rawValue));
     }
-    
+
     @Test
     public void shouldReturnATransactionSearchResponseObjectBetweenTwoDates() {
         var fromDate = ZonedDateTime.parse("2023-11-01T00:00:00.000Z");
@@ -247,10 +247,10 @@ public class TransactionResourceIT {
         given().port(port)
                 .contentType(JSON)
                 .accept(JSON)
-                .get("/v1/transaction?account_id=1&from_date=" + 
-                        fromDate + 
-                        "&to_date=" + 
-                        toDate + 
+                .get("/v1/transaction?account_id=1&from_date=" +
+                        fromDate +
+                        "&to_date=" +
+                        toDate +
                         "&page=1&display_size=100"
                 )
                 .then()
@@ -258,7 +258,7 @@ public class TransactionResourceIT {
                 .contentType(JSON)
                 .body("results[0].created_date", is(dateBetween.toString()));
     }
-    
+
     @Test
     public void shouldReturnAllTransactionSearchResponseObjectsForMultipleAccountIds() {
         for (int i = 1; i <= 3; i++) {
@@ -320,6 +320,8 @@ public class TransactionResourceIT {
                 .withTransactionType("REFUND")
                 .withState(TransactionState.SUCCESS)
                 .withCreatedDate(now)
+                .withNetAmount(-550L)
+                .withFee(50L)
                 .withRefundedById(refundedBy)
                 .withRefundedByUserEmail(refundedByUserEmail)
                 .withGatewayTransactionId("gateway-transaction-id")
@@ -348,6 +350,8 @@ public class TransactionResourceIT {
                 .body("live", is(transactionFixture.isLive()))
                 .body("state.status", is(transactionFixture.getState().getStatus()))
                 .body("amount", is(transactionFixture.getAmount().intValue()))
+                .body("net_amount", is(-550))
+                .body("fee", is(50))
                 .body("gateway_transaction_id", is(transactionFixture.getGatewayTransactionId()))
                 .body("created_date", is(now.toString()))
                 .body("refunded_by", is(refundedBy))
@@ -367,6 +371,33 @@ public class TransactionResourceIT {
                 .body("$", not(hasKey("captured_date")))
                 .body("settlement_summary.settled_date", is(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
     }
+
+    @Test
+    public void shouldNotReturnNetAmountAndFeeForRefundWhenNotAvailable() {
+        var now = ZonedDateTime.parse("2019-07-31T14:52:07.073Z");
+
+        transactionFixture = aTransactionFixture()
+                .withTransactionType("REFUND")
+                .withState(TransactionState.SUCCESS)
+                .withCreatedDate(now)
+                .withRefundedById("Refunded-id")
+                .withRefundedByUserEmail("refund_email")
+                .withGatewayTransactionId("gateway-transaction-id")
+                .withDefaultTransactionDetails()
+                .withDefaultPaymentDetails();
+        transactionFixture.insert(rule.getJdbi());
+
+        given().port(port)
+                .contentType(JSON)
+                .get("/v1/transaction/" + transactionFixture.getExternalId() + "?account_id=" + transactionFixture.getGatewayAccountId())
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("transaction_id", is(transactionFixture.getExternalId()))
+                .body("transaction_type", is("REFUND"))
+                .body("$", not(hasKey("fee")));
+    }
+
 
     @Test
     public void shouldReturnTransactionEventsCorrectly() {
@@ -998,7 +1029,7 @@ public class TransactionResourceIT {
                 .withAgreementPaymentType("instalment")
                 .withDefaultTransactionDetails()
                 .insert(rule.getJdbi());
-        
+
         given().port(port)
                 .contentType(JSON)
                 .accept(JSON)

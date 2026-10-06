@@ -97,7 +97,7 @@ public class TransactionFactoryTest {
 
     private TransactionEntity.Builder getTransactionEntityBuilder(JsonObject txDetails) {
         var payoutObject = aPayoutEntity().withPaidOutDate(paidOutDate).build();
-        
+
         return new TransactionEntity.Builder()
                 .withTransactionType("PAYMENT")
                 .withId(id)
@@ -163,9 +163,9 @@ public class TransactionFactoryTest {
         Payment payment = (Payment) transactionFactory.createTransactionEntity(fullDataObject);
         assertCorrectPaymentTransactionWithFullData(payment);
     }
-    
+
     @ParameterizedTest
-    @ValueSource(strings = {"epdq","smartpay"})
+    @ValueSource(strings = {"epdq", "smartpay"})
     public void refundStatusShouldBeUnavailable(String paymentProvider) {
         fullTransactionDetails.addProperty("payment_provider", paymentProvider);
         TransactionEntity transactionEntity = getTransactionEntityBuilder(fullTransactionDetails).build();
@@ -233,6 +233,8 @@ public class TransactionFactoryTest {
                 .withState(state)
                 .withCreatedDate(createdDate)
                 .withEventCount(eventCount)
+                .withNetAmount(null)
+                .withFee(null)
                 .withTransactionDetails("{\"refunded_by\": \"some_user_id\", \"user_email\": \"test@example.com\"}")
                 .build();
         Refund refundEntity = (Refund) transactionFactory.createTransactionEntity(refund);
@@ -249,6 +251,8 @@ public class TransactionFactoryTest {
         assertThat(refundEntity.getState(), is(state));
         assertThat(refundEntity.getCreatedDate(), is(createdDate));
         assertThat(refundEntity.getEventCount(), is(eventCount));
+        assertThat(refundEntity.getNetAmount(), is(nullValue()));
+        assertThat(refundEntity.getFee(), is(nullValue()));
     }
 
     @Test
@@ -264,6 +268,8 @@ public class TransactionFactoryTest {
                 .withState(state)
                 .withCreatedDate(createdDate)
                 .withEventCount(eventCount)
+                .withNetAmount(netAmount)
+                .withFee(fee)
                 .withTransactionDetails("{\"refunded_by\": \"some_user_id\", \"user_email\": \"test@example.com\", \"payment_details\": {\"expiry_date\": \"10/27\", \"card_type\": \"credit\", \"wallet\": \"APPLE_PAY\", \"card_brand_label\": \"Visa\"}}")
                 .withCardholderName("a-cardholder-name")
                 .withFirstDigitsCardNumber("1234")
@@ -284,6 +290,8 @@ public class TransactionFactoryTest {
         assertThat(refundEntity.getState(), is(state));
         assertThat(refundEntity.getCreatedDate(), is(createdDate));
         assertThat(refundEntity.getEventCount(), is(eventCount));
+        assertThat(refundEntity.getNetAmount(), is(netAmount));
+        assertThat(refundEntity.getFee(), is(fee));
 
         assertThat(refundEntity.getPaymentDetails().getCardDetails().getCardHolderName(), is("a-cardholder-name"));
         assertThat(refundEntity.getPaymentDetails().getEmail(), is("a-email"));

@@ -151,24 +151,24 @@ public class TransactionFactory {
 
     private Exemption createExemption(String exemption3ds, String exemption3dsRequested) {
         Exemption exemption = null;
-        if(exemption3ds != null) {
+        if (exemption3ds != null) {
             boolean requested = Exemption3ds.from(exemption3ds) != EXEMPTION_NOT_REQUESTED;
             String type = null;
-           if (exemption3dsRequested != null && Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE && requested) {
+            if (exemption3dsRequested != null && Exemption3dsRequested.from(exemption3dsRequested) == CORPORATE && requested) {
                 type = CORPORATE.toString();
             }
             Outcome outcome = createOutcome(exemption3ds);
             exemption = new Exemption(requested, type, outcome);
         } else if (exemption3dsRequested != null) {
-                exemption = switch (Exemption3dsRequested.from(exemption3dsRequested)) {
-                    case CORPORATE -> new Exemption(true, "corporate", null);
-                    case OPTIMISED -> new Exemption(true, null, null);
-                };
+            exemption = switch (Exemption3dsRequested.from(exemption3dsRequested)) {
+                case CORPORATE -> new Exemption(true, "corporate", null);
+                case OPTIMISED -> new Exemption(true, null, null);
+            };
         }
         return exemption;
     }
 
-    private Outcome createOutcome(String exemption3ds){
+    private Outcome createOutcome(String exemption3ds) {
         if (exemption3ds == null) {
             return null;
         }
@@ -214,6 +214,8 @@ public class TransactionFactory {
                     .withExternalId(entity.getExternalId())
                     .withCreatedDate(entity.getCreatedDate())
                     .withEventCount(entity.getEventCount())
+                    .withNetAmount(entity.getNetAmount())
+                    .withFee(entity.getFee())
                     .withRefundedBy(safeGetAsString(transactionDetails, "refunded_by"))
                     .withRefundedByUserEmail(safeGetAsString(transactionDetails, "user_email"))
                     .withParentExternalId(entity.getParentExternalId())
