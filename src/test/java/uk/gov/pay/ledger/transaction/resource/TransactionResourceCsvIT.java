@@ -345,6 +345,45 @@ public class TransactionResourceCsvIT {
     }
 
     @Test
+    public void shouldGetAllTransactionsAsCSVWithAcceptTypeWithIncludeAdditionalFeeHeaders() throws IOException {
+        String gatewayAccountId = "123";
+
+        JSONObject gatewayFee = new JSONObject()
+                .put("fee_type", "gateway")
+                .put("amount", 10);
+
+        JSONObject feeBreadownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+                .put(gatewayFee));
+        
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType("PAYMENT")
+                .withTransactionDetails(feeBreadownJsonObject.toString())
+                .insert(rule.getJdbi());
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction/?" +
+                        "account_id=" + gatewayAccountId +
+                        "&include_additional_fee_headers=true" +
+                        "&page=1" +
+                        "&display_size=5"
+                )
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(1));
+
+        CSVRecord paymentRecord = csvRecords.getFirst();
+        assertThat(paymentRecord.size(), is(24));
+        assertThat(paymentRecord.get("Fee (gateway)"), is("0.10"));
+    }
+
+    @Test
     public void shouldReturnMultipleAccountTransactions_whenRequestedAsCsv() throws IOException {
         String gatewayAccountId = "123";
         String gatewayAccountId2 = "456";
