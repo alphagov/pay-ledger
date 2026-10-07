@@ -322,13 +322,14 @@ class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Fee (fraud protection)"), is("0.03"));
         assertThat(csvDataMap.get("Fee (transaction)"), is(nullValue()));
         assertThat(csvDataMap.get("Fee (3DS)"), is(nullValue()));
+        assertThat(csvDataMap.get("Fee (gateway)"), is(nullValue()));
     }
 
     @Test
     void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithoutOptionalColumns() {
         var keys = List.of("test-key-1", "test-key-2");
 
-        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, false);
+        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, false, false);
 
         assertThat(csvHeaders.get("Reference"), is(notNullValue()));
         assertThat(csvHeaders.get("Description"), is(notNullValue()));
@@ -362,13 +363,14 @@ class CsvTransactionFactoryTest {
         assertThat(csvHeaders.get("Fee (fraud protection)"), is(nullValue()));
         assertThat(csvHeaders.get("Fee (3DS)"), is(nullValue()));
         assertThat(csvHeaders.get("MOTO"), is(nullValue()));
+        assertThat(csvHeaders.get("Fee (gateway)"), is(nullValue()));
     }
 
     @Test
     void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithFeeBreakdownColumns() {
         var keys = List.of("test-key-1", "test-key-2");
 
-        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, true, false);
+        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, true, false, false);
 
         assertThat(csvHeaders.get("Net"), is(notNullValue()));
         assertThat(csvHeaders.get("Fee"), is(notNullValue()));
@@ -381,9 +383,17 @@ class CsvTransactionFactoryTest {
     void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithMotoColumn() {
         var keys = List.of("test-key-1", "test-key-2");
 
-        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, true);
+        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, true, false);
 
         assertThat(csvHeaders.get("MOTO"), is(notNullValue()));
+    }
+
+    @Test
+    void getCsvHeadersWithMedataKeysShouldReturnMapWithCorrectCsvHeaders_WithAdditionalFeeGatewayColumn() {
+        var keys = List.of("test-key-1", "test-key-2");
+
+        Map<String, Object> csvHeaders = csvTransactionFactory.getCsvHeadersWithMedataKeys(keys, false, true, true);
+        assertThat(csvHeaders.get("Fee (gateway)"), is(notNullValue()));
     }
 
     @Test

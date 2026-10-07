@@ -43,9 +43,10 @@ public class CsvService {
 
     public Map<String, Object> csvHeaderFrom(TransactionSearchParams searchParams,
                                              boolean includeFeeHeaders,
-                                             boolean includeMotoHeader) {
+                                             boolean includeMotoHeader,
+                                             boolean includeAdditionalFeeHeaders) {
         List<String> metadataKeys = gatewayAccountMetadataService.getKeysForGatewayAccounts(searchParams.getAccountIds());
-        return csvTransactionFactory.getCsvHeadersWithMedataKeys(metadataKeys, includeFeeHeaders, includeMotoHeader);
+        return csvTransactionFactory.getCsvHeadersWithMedataKeys(metadataKeys, includeFeeHeaders, includeMotoHeader, includeAdditionalFeeHeaders);
     }
 
     public String csvStringFrom(Map<String, Object> headers, ObjectWriter writer) throws JsonProcessingException {

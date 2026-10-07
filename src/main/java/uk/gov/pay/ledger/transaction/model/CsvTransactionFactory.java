@@ -65,6 +65,7 @@ public class CsvTransactionFactory {
     private static final String FIELD_FEE_BREAKDOWN_TRANSACTION = "Fee (transaction)";
     private static final String FIELD_FEE_BREAKDOWN_3DS = "Fee (3DS)";
     private static final String FIELD_FEE_BREAKDOWN_RADAR = "Fee (fraud protection)";
+    private static final String FIELD_FEE_BREAKDOWN_GATEWAY = "Fee (gateway)";
     private static final String FIELD_NET = "Net";
     private static final String FIELD_MOTO = "MOTO";
     private static final String FIELD_PAYMENT_PROVIDER = "Payment Provider";
@@ -198,6 +199,8 @@ public class CsvTransactionFactory {
                     case "three_ds":
                         result.put(FIELD_FEE_BREAKDOWN_3DS, amount);
                         break;
+                    case "gateway":
+                        result.put(FIELD_FEE_BREAKDOWN_GATEWAY, amount);
                     default:
                         LOGGER.warn("Unknown fee type for transaction",
                                 kv(PAYMENT_EXTERNAL_ID, transactionEntity.getExternalId()),
@@ -232,7 +235,8 @@ public class CsvTransactionFactory {
 
     public Map<String, Object> getCsvHeadersWithMedataKeys(List<String> metadataKeys,
                                                            boolean includeFeeHeaders,
-                                                           boolean includeMotoHeader) {
+                                                           boolean includeMotoHeader,
+                                                           boolean includeAdditionalFeeHeaders) {
         LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 
         headers.put(FIELD_REFERENCE, FIELD_REFERENCE);
@@ -268,6 +272,10 @@ public class CsvTransactionFactory {
 
         if (includeMotoHeader) {
             headers.put(FIELD_MOTO, FIELD_MOTO);
+        }
+        
+        if(includeAdditionalFeeHeaders){
+            headers.put(FIELD_FEE_BREAKDOWN_GATEWAY, FIELD_FEE_BREAKDOWN_GATEWAY);
         }
 
         headers.put(FIELD_PAYMENT_PROVIDER, FIELD_PAYMENT_PROVIDER);
