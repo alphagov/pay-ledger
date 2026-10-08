@@ -1,6 +1,7 @@
 package uk.gov.pay.ledger.transaction.resource;
 
 import com.google.common.collect.ImmutableMap;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.json.JSONArray;
@@ -14,7 +15,6 @@ import uk.gov.pay.ledger.transaction.state.TransactionState;
 import uk.gov.pay.ledger.transactionmetadata.dao.TransactionMetadataDao;
 import uk.gov.pay.ledger.util.fixture.TransactionFixture;
 
-import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
@@ -28,8 +28,8 @@ import static org.apache.commons.csv.CSVFormat.RFC4180;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.json.JSONObject.NULL;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.LOST;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.SUCCESS;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.UNDER_REVIEW;
@@ -272,7 +272,7 @@ public class TransactionResourceCsvIT {
                 .put("fee_type", "three_ds")
                 .put("amount", 8);
 
-        JSONObject feeBreadownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+        JSONObject feeBreakdownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
                 .put(feeTransaction)
                 .put(feeRadar)
                 .put(fee3ds));
@@ -283,7 +283,7 @@ public class TransactionResourceCsvIT {
                 .withTransactionType("PAYMENT")
                 .withFee(100L)
                 .withNetAmount(1100)
-                .withTransactionDetails(feeBreadownJsonObject.toString())
+                .withTransactionDetails(feeBreakdownJsonObject.toString())
                 .insert(rule.getJdbi());
 
         InputStream csvResponseStream = given().port(port)
@@ -352,13 +352,13 @@ public class TransactionResourceCsvIT {
                 .put("fee_type", "gateway")
                 .put("amount", 10);
 
-        JSONObject feeBreadownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+        JSONObject feeBreakdownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
                 .put(gatewayFee));
-        
+
         aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId)
                 .withTransactionType("PAYMENT")
-                .withTransactionDetails(feeBreadownJsonObject.toString())
+                .withTransactionDetails(feeBreakdownJsonObject.toString())
                 .insert(rule.getJdbi());
 
         InputStream csvResponseStream = given().port(port)
@@ -433,6 +433,73 @@ public class TransactionResourceCsvIT {
         assertThat(paymentRecord2.size(), is(28));
         assertThat(paymentRecord2.get("Net"), is("11.00"));
         assertThat(paymentRecord2.get("Fee"), is("1.00"));
+    }
+
+    @Test
+    public void shouldAggregateFeeBreakdownByFeeTypeForCSV() throws IOException {
+        String gatewayAccountId = "123";
+
+        JSONObject transactionFeeVariable = new JSONObject()
+                .put("fee_type", "transaction")
+                .put("fee_sub_type", "variable")
+                .put("amount", 2);
+        JSONObject transactionFeeInterchange = new JSONObject()
+                .put("fee_type", "transaction")
+                .put("fee_sub_type", "interchange")
+                .put("amount", 2);
+        JSONObject transactionFeeWithoutSubType = new JSONObject()
+                .put("fee_type", "transaction")
+                .put("amount", 4);
+        JSONObject transactionFeeWithNullSubType = new JSONObject()
+                .put("fee_type", "transaction")
+                .put("fee_sub_type", NULL)
+                .put("fee_sub_type", NULL)
+                .put("amount", 6);
+        JSONObject radarFee = new JSONObject()
+                .put("fee_type", "radar")
+                .put("amount", 5);
+        JSONObject threeDsFee = new JSONObject()
+                .put("fee_type", "three_ds")
+                .put("amount", 8);
+
+        JSONObject feeBreakdownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+                .put(transactionFeeVariable)
+                .put(transactionFeeInterchange)
+                .put(transactionFeeWithoutSubType)
+                .put(transactionFeeWithNullSubType)
+                .put(threeDsFee)
+                .put(radarFee)
+        );
+
+        aTransactionFixture()
+                .withGatewayAccountId(gatewayAccountId)
+                .withTransactionType("PAYMENT")
+                .withFee(190L)
+                .withNetAmount(1000L)
+                .withTransactionDetails(feeBreakdownJsonObject.toString())
+                .insert(rule.getJdbi());
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction?" +
+                        "account_id=" + gatewayAccountId +
+                        "&fee_headers=true" +
+                        "&page=1" +
+                        "&display_size=5")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(csvResponseStream, UTF_8, RFC4180.withFirstRecordAsHeader()).getRecords();
+
+        assertThat(csvRecords.size(), is(1));
+
+        CSVRecord paymentRecord = csvRecords.getFirst();
+
+        assertThat(paymentRecord.get("Fee (transaction)"), is("0.14"));
+        assertThat(paymentRecord.get("Fee (fraud protection)"), is("0.05"));
+        assertThat(paymentRecord.get("Fee (3DS)"), is("0.08"));
     }
 
     @Test
