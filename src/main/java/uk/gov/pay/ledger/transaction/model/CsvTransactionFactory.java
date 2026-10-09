@@ -24,18 +24,17 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.math.BigDecimal.valueOf;
-import static net.logstash.logback.argument.StructuredArguments.kv;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.replaceChars;
 import static org.apache.commons.text.WordUtils.capitalizeFully;
+import static uk.gov.pay.ledger.filters.LoggingMDCRequestFilter.TRANSACTION_EXTERNAL_ID;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.DISPUTE;
 import static uk.gov.pay.ledger.transaction.model.TransactionType.REFUND;
 import static uk.gov.pay.ledger.transaction.state.TransactionState.WON;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsBoolean;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsLong;
 import static uk.gov.pay.ledger.util.JsonParser.safeGetAsString;
-import static uk.gov.service.payments.logging.LoggingKeys.PAYMENT_EXTERNAL_ID;
 
 public class CsvTransactionFactory {
 
@@ -183,31 +182,41 @@ public class CsvTransactionFactory {
 
     private Map<String, Object> getFeeBreakdown(TransactionEntity transactionEntity, JsonNode feeBreakdown) {
         Map<String, Object> result = new HashMap<>();
+        Map<FeeType, Long> aggregatedAmountByFeeType = new HashMap<>();
 
         feeBreakdown.forEach((JsonNode jsonNode) -> {
             String feeType = safeGetAsString(jsonNode, "fee_type");
 
-            if (feeType != null) {
-                String amount = penceToCurrency(safeGetAsLong(jsonNode, "amount"));
-                switch (feeType) {
-                    case "transaction":
-                        result.put(FIELD_FEE_BREAKDOWN_TRANSACTION, amount);
-                        break;
-                    case "radar":
-                        result.put(FIELD_FEE_BREAKDOWN_RADAR, amount);
-                        break;
-                    case "three_ds":
-                        result.put(FIELD_FEE_BREAKDOWN_3DS, amount);
-                        break;
-                    case "gateway":
-                        result.put(FIELD_FEE_BREAKDOWN_GATEWAY, amount);
-                    default:
-                        LOGGER.warn("Unknown fee type for transaction",
-                                kv(PAYMENT_EXTERNAL_ID, transactionEntity.getExternalId()),
-                                kv("fee_type", feeType));
-                }
+            if (feeType == null) {
+                return;
             }
+
+            Optional<FeeType> feeTypeOptional = FeeType.fromName(feeType);
+            if (feeTypeOptional.isEmpty()) {
+                LOGGER.atWarn()
+                        .setMessage("Unknown fee type for transaction")
+                        .addKeyValue(TRANSACTION_EXTERNAL_ID, transactionEntity.getExternalId())
+                        .addKeyValue("fee_type", feeType)
+                        .log();
+                return;
+            }
+
+            Long amount = safeGetAsLong(jsonNode, "amount");
+            if (amount == null) {
+                LOGGER.atWarn()
+                        .setMessage("Missing fee amount for known fee type for transaction")
+                        .addKeyValue(TRANSACTION_EXTERNAL_ID, transactionEntity.getExternalId())
+                        .addKeyValue("fee_type", feeType)
+                        .log();
+                return;
+            }
+
+            aggregatedAmountByFeeType.merge(feeTypeOptional.get(), amount, Long::sum);
         });
+
+        aggregatedAmountByFeeType.forEach((feeType, amount) ->
+                result.put(feeType.getCsvFieldName(), penceToCurrency(amount)));
+        
         return result;
     }
 
