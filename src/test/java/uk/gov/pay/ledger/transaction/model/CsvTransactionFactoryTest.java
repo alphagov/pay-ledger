@@ -19,6 +19,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.json.JSONObject.NULL;
+import static uk.gov.pay.ledger.transaction.model.TransactionType.PAYMENT;
 import static uk.gov.pay.ledger.util.fixture.TransactionFixture.aTransactionFixture;
 
 class CsvTransactionFactoryTest {
@@ -33,7 +35,7 @@ class CsvTransactionFactoryTest {
 
         transactionFixture = aTransactionFixture()
                 .withState(TransactionState.FAILED_REJECTED)
-                .withTransactionType(TransactionType.PAYMENT.name())
+                .withTransactionType(PAYMENT.name())
                 .withAmount(100L)
                 .withGatewayTransactionId("gateway-transaction-id")
                 .withCreatedDate(ZonedDateTime.parse("2018-03-12T16:25:01.123456Z"))
@@ -293,7 +295,7 @@ class CsvTransactionFactoryTest {
     void toMapShouldIncludeFeeAndNetAmountForStripePayments() {
         TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
                 .withPaymentProvider("stripe")
-                .withTransactionType(TransactionType.PAYMENT.name())
+                .withTransactionType(PAYMENT.name())
                 .withFee(6L).toEntity();
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
@@ -308,14 +310,86 @@ class CsvTransactionFactoryTest {
                 .put("fee_type", "radar")
                 .put("amount", 3);
 
-        JSONObject feeBreadownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+        JSONObject feeBreakdownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
                 .put(feeRadar));
 
         TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
                 .withPaymentProvider("stripe")
-                .withTransactionType(TransactionType.PAYMENT.name())
-                .withTransactionDetails(feeBreadownJsonObject.toString())
+                .withTransactionType(PAYMENT.name())
+                .withTransactionDetails(feeBreakdownJsonObject.toString())
                 .withFee(6L).toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertThat(csvDataMap.get("Fee (fraud protection)"), is("0.03"));
+        assertThat(csvDataMap.get("Fee (transaction)"), is(nullValue()));
+        assertThat(csvDataMap.get("Fee (3DS)"), is(nullValue()));
+        assertThat(csvDataMap.get("Fee (gateway)"), is(nullValue()));
+    }
+
+    @Test
+    void toMapShouldAggregateFeeBreakdownByFeeTypeWhenDifferentFeeSubTypeArePresent() {
+        JSONObject transactionFeeVariable = new JSONObject()
+                .put("fee_type", "transaction")
+                .put("fee_sub_type", "variable")
+                .put("amount", 2);
+        JSONObject transactionFeeInterchange = new JSONObject()
+                .put("fee_type", "transaction")
+                .put("fee_sub_type", "interchange")
+                .put("amount", 2);
+        JSONObject transactionFeeWithoutSubType = new JSONObject()
+                .put("fee_type", "transaction")
+                .put("amount", 4);
+        JSONObject transactionFeeWithNullSubType = new JSONObject()
+                .put("fee_type", "transaction")
+                .put("fee_sub_type", NULL)
+                .put("amount", 6);
+        JSONObject radarFee = new JSONObject()
+                .put("fee_type", "radar")
+                .put("amount", 5);
+
+        JSONObject feeBreakdownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+                .put(transactionFeeVariable)
+                .put(transactionFeeInterchange)
+                .put(transactionFeeWithoutSubType)
+                .put(transactionFeeWithNullSubType)
+                .put(radarFee)
+        );
+
+        TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
+                .withPaymentProvider("adyen")
+                .withTransactionType(PAYMENT.name())
+                .withTransactionDetails(feeBreakdownJsonObject.toString())
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertThat(csvDataMap.get("Fee (fraud protection)"), is("0.05"));
+        assertThat(csvDataMap.get("Fee (transaction)"), is("0.14"));
+        assertThat(csvDataMap.get("Fee (3DS)"), is(nullValue()));
+        assertThat(csvDataMap.get("Fee (gateway)"), is(nullValue()));
+    }
+
+    @Test
+    void toMapShouldIgnoreUnknownFeeTypeAndProcessKnownFeeTypes() {
+        JSONObject unknownFeeType = new JSONObject()
+                .put("fee_type", "Unknown_fee_type")
+                .put("amount", 2);
+
+        JSONObject radarFee = new JSONObject()
+                .put("fee_type", "radar")
+                .put("amount", 3);
+
+        JSONObject feeBreakdownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+                .put(unknownFeeType)
+                .put(radarFee)
+        );
+
+        TransactionEntity transactionEntity = transactionFixture.withNetAmount(594)
+                .withPaymentProvider("adyen")
+                .withTransactionType(PAYMENT.name())
+                .withTransactionDetails(feeBreakdownJsonObject.toString())
+                .toEntity();
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
 
@@ -403,7 +477,7 @@ class CsvTransactionFactoryTest {
                 .withDescription("+desc-1")
                 .withEmail("@email.com")
                 .withCardholderName("-J Doe")
-                .withTransactionType(TransactionType.PAYMENT.name())
+                .withTransactionType(PAYMENT.name())
                 .withFee(6L).toEntity();
 
         Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
