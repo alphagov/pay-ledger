@@ -57,7 +57,9 @@ public class QueueEventFixtureUtil {
         eventDetails.stringType("event_type", eventType);
         eventDetails.stringType("timestamp", eventDate.format(formatToMicroseconds));
         eventDetails.stringType("resource_external_id", resourceExternalId);
-        eventDetails.booleanType("live", live);
+        if (live != null) {
+            eventDetails.booleanType("live", live);
+        }
         eventDetails.stringType("resource_type", resourceType.toString().toLowerCase());
         if (parentResourceExternalId != null && !parentResourceExternalId.isEmpty()) {
             eventDetails.stringType("parent_resource_external_id", parentResourceExternalId);
