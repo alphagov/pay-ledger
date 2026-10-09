@@ -273,14 +273,14 @@ public class CsvTransactionFactory {
         if (includeMotoHeader) {
             headers.put(FIELD_MOTO, FIELD_MOTO);
         }
-        
-        if(includeAdditionalFeeHeaders){
-            headers.put(FIELD_FEE_BREAKDOWN_GATEWAY, FIELD_FEE_BREAKDOWN_GATEWAY);
-        }
 
         headers.put(FIELD_PAYMENT_PROVIDER, FIELD_PAYMENT_PROVIDER);
 
         headers.put(FIELD_3D_SECURE_REQUIRED, FIELD_3D_SECURE_REQUIRED);
+
+        if(includeAdditionalFeeHeaders){
+            headers.put(FIELD_FEE_BREAKDOWN_GATEWAY, FIELD_FEE_BREAKDOWN_GATEWAY);
+        }
 
         if (metadataKeys != null) {
             metadataKeys.stream().sorted()
